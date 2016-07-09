@@ -26,64 +26,61 @@ import org.oscim.renderer.bucket.BitmapBucket;
  */
 public class BitmapRenderer extends BucketRenderer {
 
-	private Bitmap mBitmap;
-	private int mWidth;
-	private int mHeight;
-	private boolean initialized;
-	private boolean mUpdateBitmap;
+    private Bitmap mBitmap;
+    private int mWidth;
+    private int mHeight;
+    private boolean initialized;
+    private boolean mUpdateBitmap;
 
-	/**
-	 * @param bitmap
-	 *            with dimension being power of two
-	 * @param srcWidth
-	 *            TODO width used
-	 * @param srcHeight
-	 *            TODO height used
-	 */
-	public synchronized void setBitmap(Bitmap bitmap,
-	        int srcWidth, int srcHeight,
-	        int targetWidth, int targetHeight) {
-		mWidth = targetWidth;
-		mHeight = targetHeight;
-		mBitmap = bitmap;
-		initialized = false;
-	}
+    /**
+     * @param bitmap    with dimension being power of two
+     * @param srcWidth  TODO width used
+     * @param srcHeight TODO height used
+     */
+    public synchronized void setBitmap(Bitmap bitmap,
+                                       int srcWidth, int srcHeight,
+                                       int targetWidth, int targetHeight) {
+        mWidth = targetWidth;
+        mHeight = targetHeight;
+        mBitmap = bitmap;
+        initialized = false;
+    }
 
-	public synchronized void updateBitmap() {
-		mUpdateBitmap = true;
-	}
+    public synchronized void updateBitmap() {
+        mUpdateBitmap = true;
+    }
 
-	@Override
-	public synchronized void update(GLViewport v) {
-		if (!initialized) {
-			buckets.clear();
+    @Override
+    public synchronized void update(GLViewport v) {
+        if (!initialized) {
+            buckets.clear();
 
-			BitmapBucket l = new BitmapBucket(true);
-			l.setBitmap(mBitmap, mWidth, mHeight);
-			buckets.set(l);
+            BitmapBucket l = new BitmapBucket(true);
+            l.setBitmap(mBitmap, mWidth, mHeight);
+            buckets.set(l);
 
-			mUpdateBitmap = true;
-		}
+            mUpdateBitmap = true;
+        }
 
-		if (mUpdateBitmap) {
-			mUpdateBitmap = false;
-			compile();
-		}
-	}
+        if (mUpdateBitmap) {
+            mUpdateBitmap = false;
+            compile();
+        }
+    }
 
-	@Override
-	protected synchronized void compile() {
-		if (mBitmap == null)
-			return;
+    @Override
+    protected synchronized void compile() {
+        if (mBitmap == null)
+            return;
 
-		synchronized (mBitmap) {
-			super.compile();
-		}
-	}
+        synchronized (mBitmap) {
+            super.compile();
+        }
+    }
 
-	@Override
-	public synchronized void render(GLViewport v) {
-		v.useScreenCoordinates(false, 8);
-		BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
-	}
+    @Override
+    public synchronized void render(GLViewport v) {
+        v.useScreenCoordinates(false, 8);
+        BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
+    }
 }

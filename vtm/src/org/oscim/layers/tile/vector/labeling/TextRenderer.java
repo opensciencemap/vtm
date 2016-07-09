@@ -40,51 +40,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class TextRenderer extends BucketRenderer {
-	static final Logger log = LoggerFactory.getLogger(TextRenderer.class);
-	static final boolean dbg = false;
+    static final Logger log = LoggerFactory.getLogger(TextRenderer.class);
+    static final boolean dbg = false;
 
-	private final Worker mWorker;
+    private final Worker mWorker;
 
-	public TextRenderer(Worker worker) {
-		mWorker = worker;
-	}
+    public TextRenderer(Worker worker) {
+        mWorker = worker;
+    }
 
-	long lastDraw = 0;
+    long lastDraw = 0;
 
-	@Override
-	public synchronized void update(GLViewport v) {
+    @Override
+    public synchronized void update(GLViewport v) {
 
-		LabelTask t;
-		synchronized (mWorker) {
-			t = mWorker.poll();
-			if (t == null) {
-				if (!mWorker.isRunning()) {
-					mWorker.submit(50);
-				}
-				return;
-			}
-			buckets.clear();
-		}
+        LabelTask t;
+        synchronized (mWorker) {
+            t = mWorker.poll();
+            if (t == null) {
+                if (!mWorker.isRunning()) {
+                    mWorker.submit(50);
+                }
+                return;
+            }
+            buckets.clear();
+        }
 
-		// set new TextLayer to be uploaded and rendered
-		buckets.set(t.layers);
-		mMapPosition = t.pos;
-		compile();
-	}
+        // set new TextLayer to be uploaded and rendered
+        buckets.set(t.layers);
+        mMapPosition = t.pos;
+        compile();
+    }
 
-	@Override
-	public synchronized void render(GLViewport v) {
-		GLState.test(false, false);
-		//Debug.draw(pos, layers);
+    @Override
+    public synchronized void render(GLViewport v) {
+        GLState.test(false, false);
+        //Debug.draw(pos, layers);
 
-		buckets.vbo.bind();
+        buckets.vbo.bind();
 
-		float scale = (float) (v.pos.scale / mMapPosition.scale);
+        float scale = (float) (v.pos.scale / mMapPosition.scale);
 
-		setMatrix(v, false);
+        setMatrix(v, false);
 
-		for (RenderBucket l = buckets.get(); l != null;)
-			l = TextureBucket.Renderer.draw(l, v, scale);
-	}
+        for (RenderBucket l = buckets.get(); l != null; )
+            l = TextureBucket.Renderer.draw(l, v, scale);
+    }
 
 }

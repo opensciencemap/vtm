@@ -16,6 +16,9 @@
  */
 package org.oscim.web.client;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.gwt.GwtApplication;
+
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
@@ -30,47 +33,44 @@ import org.oscim.web.js.JsMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.gwt.GwtApplication;
-
 public class GwtMap extends GdxMap {
-	static final Logger log = LoggerFactory.getLogger(GwtMap.class);
+    static final Logger log = LoggerFactory.getLogger(GwtMap.class);
 
-	@Override
-	public void create() {
+    @Override
+    public void create() {
 
-		GwtGdxGraphics.init();
-		GdxAssets.init("");
-		CanvasAdapter.textScale = 0.7f;
-		GLAdapter.init((GL) Gdx.graphics.getGL20());
-		GLAdapter.GDX_WEBGL_QUIRKS = true;
-		MapRenderer.setBackgroundColor(0xffffff);
+        GwtGdxGraphics.init();
+        GdxAssets.init("");
+        CanvasAdapter.textScale = 0.7f;
+        GLAdapter.init((GL) Gdx.graphics.getGL20());
+        GLAdapter.GDX_WEBGL_QUIRKS = true;
+        MapRenderer.setBackgroundColor(0xffffff);
 
-		JsMap.init(mMap);
+        JsMap.init(mMap);
 
-		if (GwtApplication.agentInfo().isLinux() &&
-		        GwtApplication.agentInfo().isFirefox())
-			GwtGdxGraphics.NO_STROKE_TEXT = true;
+        if (GwtApplication.agentInfo().isLinux() &&
+                GwtApplication.agentInfo().isFirefox())
+            GwtGdxGraphics.NO_STROKE_TEXT = true;
 
-		MapConfig c = MapConfig.get();
-		super.create();
+        MapConfig c = MapConfig.get();
+        super.create();
 
-		MapPosition p = new MapPosition();
-		p.setZoomLevel(c.getZoom());
-		p.setPosition(c.getLatitude(), c.getLongitude());
+        MapPosition p = new MapPosition();
+        p.setZoomLevel(c.getZoom());
+        p.setPosition(c.getLatitude(), c.getLongitude());
 
-		MapUrl mapUrl = new MapUrl(mMap);
-		mapUrl.parseUrl(p);
-		mapUrl.scheduleRepeating(5000);
-	}
+        MapUrl mapUrl = new MapUrl(mMap);
+        mapUrl.parseUrl(p);
+        mapUrl.scheduleRepeating(5000);
+    }
 
-	private final native void createLayersN()/*-{
-		$wnd.createLayers();
+    private final native void createLayersN()/*-{
+        $wnd.createLayers();
 	}-*/;
 
-	@Override
-	protected void createLayers() {
-		log.debug("<<< create layers >>>");
-		createLayersN();
-	}
+    @Override
+    protected void createLayers() {
+        log.debug("<<< create layers >>>");
+        createLayersN();
+    }
 }

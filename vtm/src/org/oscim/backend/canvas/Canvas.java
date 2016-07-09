@@ -22,31 +22,31 @@ package org.oscim.backend.canvas;
  */
 public interface Canvas {
 
-	/**
-	 * Sets the backing {@link Bitmap}.
-	 * 
-	 * @param bitmap the new bitmap
-	 */
-	void setBitmap(Bitmap bitmap);
+    /**
+     * Sets the backing {@link Bitmap}.
+     *
+     * @param bitmap the new bitmap
+     */
+    void setBitmap(Bitmap bitmap);
 
-	/**
-	 * Draw text to Canvas.
-	 * 
-	 * @param string the String
-	 * @param x
-	 * @param y
-	 * @param stroke the stroke
-	 * @param
-	 */
-	void drawText(String string, float x, float y, Paint fill, Paint stroke);
+    /**
+     * Draw text to Canvas.
+     *
+     * @param string the String
+     * @param x
+     * @param y
+     * @param stroke the stroke
+     * @param
+     */
+    void drawText(String string, float x, float y, Paint fill, Paint stroke);
 
-	/**
-	 * Draw Bitmap to Canvas.
-	 * 
-	 * @param bitmap the Bitmap
-	 * @param x
-	 * @param y
-	 */
-	void drawBitmap(Bitmap bitmap, float x, float y);
+    /**
+     * Draw Bitmap to Canvas.
+     *
+     * @param bitmap the Bitmap
+     * @param x
+     * @param y
+     */
+    void drawBitmap(Bitmap bitmap, float x, float y);
 
 }

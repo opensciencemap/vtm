@@ -26,40 +26,42 @@ import java.io.InputStreamReader;
  */
 public abstract class AssetAdapter {
 
-	/** The instance provided by backend */
-	static AssetAdapter g;
+    /**
+     * The instance provided by backend
+     */
+    static AssetAdapter g;
 
-	/**
-	 * Open file from asset path as stream.
-	 */
-	protected abstract InputStream openFileAsStream(String file);
+    /**
+     * Open file from asset path as stream.
+     */
+    protected abstract InputStream openFileAsStream(String file);
 
-	public static InputStream readFileAsStream(String file) {
-		return g.openFileAsStream(file);
-	}
+    public static InputStream readFileAsStream(String file) {
+        return g.openFileAsStream(file);
+    }
 
-	public static String readTextFile(String file) {
-		StringBuilder sb = new StringBuilder();
+    public static String readTextFile(String file) {
+        StringBuilder sb = new StringBuilder();
 
-		InputStream is = g.openFileAsStream(file);
-		if (is == null)
-			return null;
+        InputStream is = g.openFileAsStream(file);
+        if (is == null)
+            return null;
 
-		BufferedReader r = new BufferedReader(new InputStreamReader(is));
-		String line;
-		try {
-			while ((line = r.readLine()) != null) {
-				sb.append(line).append('\n');
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+        String line;
+        try {
+            while ((line = r.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		return sb.toString();
+        return sb.toString();
 
-	}
+    }
 
-	public static void init(AssetAdapter adapter) {
-		g = adapter;
-	}
+    public static void init(AssetAdapter adapter) {
+        g = adapter;
+    }
 }

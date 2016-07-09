@@ -16,8 +16,6 @@
  */
 package org.oscim.theme.rule;
 
-import java.util.ArrayList;
-
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule.Element;
 import org.oscim.theme.rule.Rule.NegativeRule;
@@ -30,192 +28,194 @@ import org.oscim.theme.styles.RenderStyle.StyleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 public class RuleBuilder {
-	final static Logger log = LoggerFactory.getLogger(RuleBuilder.class);
+    final static Logger log = LoggerFactory.getLogger(RuleBuilder.class);
 
-	private final static String[] EMPTY_KV = {};
+    private final static String[] EMPTY_KV = {};
 
-	public enum RuleType {
-		POSITIVE,
-		NEGATIVE,
-		EXCLUDE
-	}
+    public enum RuleType {
+        POSITIVE,
+        NEGATIVE,
+        EXCLUDE
+    }
 
-	int zoom;
-	int element;
-	int selector;
-	RuleType type;
+    int zoom;
+    int element;
+    int selector;
+    RuleType type;
 
-	String keys[];
-	String values[];
+    String keys[];
+    String values[];
 
-	ArrayList<RenderStyle> renderStyles = new ArrayList<RenderStyle>(4);
-	ArrayList<RuleBuilder> subRules = new ArrayList<RuleBuilder>(4);
-	StyleBuilder<?>[] styleBuilder;
+    ArrayList<RenderStyle> renderStyles = new ArrayList<RenderStyle>(4);
+    ArrayList<RuleBuilder> subRules = new ArrayList<RuleBuilder>(4);
+    StyleBuilder<?>[] styleBuilder;
 
-	private static final String STRING_NEGATION = "~";
-	private static final String STRING_EXCLUSIVE = "-";
-	private static final String SEPARATOR = "\\|";
+    private static final String STRING_NEGATION = "~";
+    private static final String STRING_EXCLUSIVE = "-";
+    private static final String SEPARATOR = "\\|";
 
-	//private static final String STRING_WILDCARD = "*";
+    //private static final String STRING_WILDCARD = "*";
 
-	public RuleBuilder(RuleType type, int element, int zoom, int selector,
-	        String[] keys, String[] values) {
-		this.type = type;
-		this.element = element;
-		this.zoom = zoom;
-		this.selector = selector;
-		this.keys = keys;
-		this.values = values;
-	}
+    public RuleBuilder(RuleType type, int element, int zoom, int selector,
+                       String[] keys, String[] values) {
+        this.type = type;
+        this.element = element;
+        this.zoom = zoom;
+        this.selector = selector;
+        this.keys = keys;
+        this.values = values;
+    }
 
-	public RuleBuilder(RuleType type, String[] keys, String[] values) {
-		this.element = Element.ANY;
-		this.zoom = ~0;
-		this.type = type;
-		this.keys = keys;
-		this.values = values;
-	}
+    public RuleBuilder(RuleType type, String[] keys, String[] values) {
+        this.element = Element.ANY;
+        this.zoom = ~0;
+        this.type = type;
+        this.keys = keys;
+        this.values = values;
+    }
 
-	public RuleBuilder() {
-		this.type = RuleType.POSITIVE;
-		this.element = Element.ANY;
-		this.zoom = ~0;
-		this.keys = EMPTY_KV;
-		this.values = EMPTY_KV;
-	}
+    public RuleBuilder() {
+        this.type = RuleType.POSITIVE;
+        this.element = Element.ANY;
+        this.zoom = ~0;
+        this.keys = EMPTY_KV;
+        this.values = EMPTY_KV;
+    }
 
-	public static RuleBuilder create(String keys, String values) {
+    public static RuleBuilder create(String keys, String values) {
 
-		String[] keyList = EMPTY_KV;
-		String[] valueList = EMPTY_KV;
-		RuleType type = RuleType.POSITIVE;
+        String[] keyList = EMPTY_KV;
+        String[] valueList = EMPTY_KV;
+        RuleType type = RuleType.POSITIVE;
 
-		if (values != null) {
-			if (values.startsWith(STRING_NEGATION)) {
-				type = RuleType.NEGATIVE;
-				if (values.length() > 2)
-					valueList = values.substring(2)
-					    .split(SEPARATOR);
-			} else if (values.startsWith(STRING_EXCLUSIVE)) {
-				type = RuleType.EXCLUDE;
-				if (values.length() > 2)
-					valueList = values.substring(2)
-					    .split(SEPARATOR);
-			} else {
-				valueList = values.split(SEPARATOR);
-			}
-		}
+        if (values != null) {
+            if (values.startsWith(STRING_NEGATION)) {
+                type = RuleType.NEGATIVE;
+                if (values.length() > 2)
+                    valueList = values.substring(2)
+                            .split(SEPARATOR);
+            } else if (values.startsWith(STRING_EXCLUSIVE)) {
+                type = RuleType.EXCLUDE;
+                if (values.length() > 2)
+                    valueList = values.substring(2)
+                            .split(SEPARATOR);
+            } else {
+                valueList = values.split(SEPARATOR);
+            }
+        }
 
-		if (keys != null) {
-			keyList = keys.split(SEPARATOR);
-		}
+        if (keys != null) {
+            keyList = keys.split(SEPARATOR);
+        }
 
-		if (type != RuleType.POSITIVE) {
-			if (keyList == null || keyList.length == 0)
-				throw new ThemeException("negative rule requires key");
-		}
+        if (type != RuleType.POSITIVE) {
+            if (keyList == null || keyList.length == 0)
+                throw new ThemeException("negative rule requires key");
+        }
 
-		return new RuleBuilder(type, keyList, valueList);
-	}
+        return new RuleBuilder(type, keyList, valueList);
+    }
 
-	public RuleBuilder setZoom(byte zoomMin, byte zoomMax) {
-		// zoom-level bitmask
-		zoom = 0;
-		for (int z = zoomMin; z <= zoomMax && z < 32; z++)
-			zoom |= (1 << z);
+    public RuleBuilder setZoom(byte zoomMin, byte zoomMax) {
+        // zoom-level bitmask
+        zoom = 0;
+        for (int z = zoomMin; z <= zoomMax && z < 32; z++)
+            zoom |= (1 << z);
 
-		return this;
-	}
+        return this;
+    }
 
-	public Rule onComplete(int[] level) {
+    public Rule onComplete(int[] level) {
 
-		RenderStyle[] styles = null;
-		Rule[] rules = null;
+        RenderStyle[] styles = null;
+        Rule[] rules = null;
 
-		if (styleBuilder != null)
-			for (StyleBuilder<?> style : styleBuilder) {
-				renderStyles.add(style.level(level[0]).build());
-				level[0] += 2;
-			}
+        if (styleBuilder != null)
+            for (StyleBuilder<?> style : styleBuilder) {
+                renderStyles.add(style.level(level[0]).build());
+                level[0] += 2;
+            }
 
-		if (renderStyles.size() > 0) {
-			styles = new RenderStyle[renderStyles.size()];
-			renderStyles.toArray(styles);
-		}
+        if (renderStyles.size() > 0) {
+            styles = new RenderStyle[renderStyles.size()];
+            renderStyles.toArray(styles);
+        }
 
-		if (subRules.size() > 0) {
-			rules = new Rule[subRules.size()];
-			for (int i = 0; i < rules.length; i++)
-				rules[i] = subRules.get(i).onComplete(level);
-		}
+        if (subRules.size() > 0) {
+            rules = new Rule[subRules.size()];
+            for (int i = 0; i < rules.length; i++)
+                rules[i] = subRules.get(i).onComplete(level);
+        }
 
-		int numKeys = keys.length;
-		int numVals = values.length;
+        int numKeys = keys.length;
+        int numVals = values.length;
 
-		if (numKeys == 0 && numVals == 0)
-			return new Rule(element, zoom, selector, rules, styles);
+        if (numKeys == 0 && numVals == 0)
+            return new Rule(element, zoom, selector, rules, styles);
 
-		for (int i = 0; i < numVals; i++)
-			values[i] = values[i].intern();
+        for (int i = 0; i < numVals; i++)
+            values[i] = values[i].intern();
 
-		for (int i = 0; i < numKeys; i++)
-			keys[i] = keys[i].intern();
+        for (int i = 0; i < numKeys; i++)
+            keys[i] = keys[i].intern();
 
-		if (type != RuleType.POSITIVE)
-			return new NegativeRule(type, element, zoom, selector,
-			                        keys, values, rules, styles);
+        if (type != RuleType.POSITIVE)
+            return new NegativeRule(type, element, zoom, selector,
+                    keys, values, rules, styles);
 
-		if (numKeys == 1 && numKeys == 0)
-			return new PositiveRuleK(element, zoom, selector, keys[0],
-			                         rules, styles);
+        if (numKeys == 1 && numKeys == 0)
+            return new PositiveRuleK(element, zoom, selector, keys[0],
+                    rules, styles);
 
-		if (numKeys == 0 && numVals == 1)
-			return new PositiveRuleV(element, zoom, selector, values[0],
-			                         rules, styles);
+        if (numKeys == 0 && numVals == 1)
+            return new PositiveRuleV(element, zoom, selector, values[0],
+                    rules, styles);
 
-		if (numKeys == 1 && numVals == 1)
-			return new PositiveRuleKV(element, zoom, selector,
-			                          keys[0], values[0], rules, styles);
+        if (numKeys == 1 && numVals == 1)
+            return new PositiveRuleKV(element, zoom, selector,
+                    keys[0], values[0], rules, styles);
 
-		return new PositiveRuleMultiKV(element, zoom, selector,
-		                               keys, values, rules, styles);
+        return new PositiveRuleMultiKV(element, zoom, selector,
+                keys, values, rules, styles);
 
-	}
+    }
 
-	public RuleBuilder addStyle(RenderStyle style) {
-		renderStyles.add(style);
-		return this;
-	}
+    public RuleBuilder addStyle(RenderStyle style) {
+        renderStyles.add(style);
+        return this;
+    }
 
-	public RuleBuilder addSubRule(RuleBuilder rule) {
-		subRules.add(rule);
-		return this;
-	}
+    public RuleBuilder addSubRule(RuleBuilder rule) {
+        subRules.add(rule);
+        return this;
+    }
 
-	public RuleBuilder style(StyleBuilder<?>... styles) {
-		styleBuilder = styles;
-		return this;
-	}
+    public RuleBuilder style(StyleBuilder<?>... styles) {
+        styleBuilder = styles;
+        return this;
+    }
 
-	public RuleBuilder rules(RuleBuilder... rules) {
-		for (RuleBuilder rule : rules)
-			subRules.add(rule);
-		return this;
-	}
+    public RuleBuilder rules(RuleBuilder... rules) {
+        for (RuleBuilder rule : rules)
+            subRules.add(rule);
+        return this;
+    }
 
-	public RuleBuilder select(int selector) {
-		this.selector = selector;
-		return this;
-	}
+    public RuleBuilder select(int selector) {
+        this.selector = selector;
+        return this;
+    }
 
-	public RuleBuilder zoom(int zoom) {
-		this.zoom = zoom;
-		return this;
-	}
+    public RuleBuilder zoom(int zoom) {
+        this.zoom = zoom;
+        return this;
+    }
 
-	public RuleBuilder element(int element) {
-		this.element = element;
-		return this;
-	}
+    public RuleBuilder element(int element) {
+        this.element = element;
+        return this;
+    }
 }

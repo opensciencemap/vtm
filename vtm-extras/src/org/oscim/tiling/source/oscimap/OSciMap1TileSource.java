@@ -22,16 +22,15 @@ import org.oscim.tiling.source.UrlTileSource;
 
 /**
  * Deprecated
- * 
  */
 public class OSciMap1TileSource extends UrlTileSource {
 
-	public OSciMap1TileSource(String url) {
-		super(url, "/{Z}/{X}/{Y}.osmtile");
-	}
+    public OSciMap1TileSource(String url) {
+        super(url, "/{Z}/{X}/{Y}.osmtile");
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
-	}
+    @Override
+    public ITileDataSource getDataSource() {
+        return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
+    }
 }

@@ -92,4 +92,4 @@
     <rect name="water" pos="443 27 24 24" />
     <rect name="wetland" pos="469 53 24 24" />
     <rect name="zoo" pos="443 1 24 24" />
-  </atlas>
+</atlas>

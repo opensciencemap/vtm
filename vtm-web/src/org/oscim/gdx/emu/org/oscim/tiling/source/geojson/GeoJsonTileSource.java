@@ -16,8 +16,6 @@
  */
 package org.oscim.tiling.source.geojson;
 
-import java.util.Map;
-
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.tiling.ITileDataSource;
@@ -26,37 +24,43 @@ import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public abstract class GeoJsonTileSource extends UrlTileSource {
-	static final Logger log = LoggerFactory.getLogger(GeoJsonTileSource.class);
+    static final Logger log = LoggerFactory.getLogger(GeoJsonTileSource.class);
 
-	public GeoJsonTileSource(String url) {
-		super(url, "/{Z}/{X}/{Y}.json");
-	}
+    public GeoJsonTileSource(String url) {
+        super(url, "/{Z}/{X}/{Y}.json");
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new JsonTileDataSource(this);
-	}
+    @Override
+    public ITileDataSource getDataSource() {
+        return new JsonTileDataSource(this);
+    }
 
-	public Tag getFeatureTag() {
-		return null;
-	}
+    public Tag getFeatureTag() {
+        return null;
+    }
 
-	/** allow overriding tag handling */
-	public abstract void decodeTags(MapElement mapElement, Map<String, Object> properties);
+    /**
+     * allow overriding tag handling
+     */
+    public abstract void decodeTags(MapElement mapElement, Map<String, Object> properties);
 
-	public Tag rewriteTag(String key, Object value) {
+    public Tag rewriteTag(String key, Object value) {
 
-		if (value == null)
-			return null;
+        if (value == null)
+            return null;
 
-		String val = (value instanceof String) ? (String) value : String.valueOf(value);
+        String val = (value instanceof String) ? (String) value : String.valueOf(value);
 
-		return new Tag(key, val);
-	}
+        return new Tag(key, val);
+    }
 
-	/** modify mapElement before process() */
-	public void postGeomHook(MapElement mapElement) {
+    /**
+     * modify mapElement before process()
+     */
+    public void postGeomHook(MapElement mapElement) {
 
-	}
+    }
 }

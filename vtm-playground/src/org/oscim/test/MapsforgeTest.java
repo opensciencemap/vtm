@@ -31,46 +31,46 @@ import java.io.File;
 
 public class MapsforgeTest extends GdxMap {
 
-	private static File mapFile;
+    private static File mapFile;
 
-	@Override
-	public void createLayers() {
-		MapFileTileSource tileSource = new MapFileTileSource();
-		tileSource.setMapFile(mapFile.getAbsolutePath());
-		tileSource.setPreferredLanguage("en");
+    @Override
+    public void createLayers() {
+        MapFileTileSource tileSource = new MapFileTileSource();
+        tileSource.setMapFile(mapFile.getAbsolutePath());
+        tileSource.setPreferredLanguage("en");
 
-		VectorTileLayer l = mMap.setBaseMap(tileSource);
-		mMap.setTheme(VtmThemes.DEFAULT);
+        VectorTileLayer l = mMap.setBaseMap(tileSource);
+        mMap.setTheme(VtmThemes.DEFAULT);
 
-		mMap.layers().add(new BuildingLayer(mMap, l));
-		mMap.layers().add(new LabelLayer(mMap, l));
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        mMap.layers().add(new LabelLayer(mMap, l));
 
-		MapInfo info = tileSource.getMapInfo();
-		MapPosition pos = new MapPosition();
-		pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
-		mMap.setMapPosition(pos);
-	}
+        MapInfo info = tileSource.getMapInfo();
+        MapPosition pos = new MapPosition();
+        pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+        mMap.setMapPosition(pos);
+    }
 
-	private static File getMapFile(String[] args) {
-		if (args.length == 0) {
-			throw new IllegalArgumentException("missing argument: <mapFile>");
-		}
+    private static File getMapFile(String[] args) {
+        if (args.length == 0) {
+            throw new IllegalArgumentException("missing argument: <mapFile>");
+        }
 
-		File file = new File(args[0]);
-		if (!file.exists()) {
-			throw new IllegalArgumentException("file does not exist: " + file);
-		} else if (!file.isFile()) {
-			throw new IllegalArgumentException("not a file: " + file);
-		} else if (!file.canRead()) {
-			throw new IllegalArgumentException("cannot read file: " + file);
-		}
-		return file;
-	}
+        File file = new File(args[0]);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("file does not exist: " + file);
+        } else if (!file.isFile()) {
+            throw new IllegalArgumentException("not a file: " + file);
+        } else if (!file.canRead()) {
+            throw new IllegalArgumentException("cannot read file: " + file);
+        }
+        return file;
+    }
 
-	public static void main(String[] args) {
-		mapFile = getMapFile(args);
+    public static void main(String[] args) {
+        mapFile = getMapFile(args);
 
-		GdxMapApp.init();
-		GdxMapApp.run(new MapsforgeTest(), null, 400);
-	}
+        GdxMapApp.init();
+        GdxMapApp.run(new MapsforgeTest(), null, 400);
+    }
 }

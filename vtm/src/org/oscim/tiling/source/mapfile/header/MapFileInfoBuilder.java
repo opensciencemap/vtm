@@ -20,19 +20,19 @@ import org.oscim.core.BoundingBox;
 import org.oscim.core.Tag;
 
 class MapFileInfoBuilder {
-	BoundingBox boundingBox;
-	long fileSize;
-	int fileVersion;
-	long mapDate;
-	byte numberOfSubFiles;
-	OptionalFields optionalFields;
-	Tag[] poiTags;
-	String projectionName;
-	int tilePixelSize;
-	Tag[] wayTags;
-	int[] zoomLevel;
+    BoundingBox boundingBox;
+    long fileSize;
+    int fileVersion;
+    long mapDate;
+    byte numberOfSubFiles;
+    OptionalFields optionalFields;
+    Tag[] poiTags;
+    String projectionName;
+    int tilePixelSize;
+    Tag[] wayTags;
+    int[] zoomLevel;
 
-	MapFileInfo build() {
-		return new MapFileInfo(this);
-	}
+    MapFileInfo build() {
+        return new MapFileInfo(this);
+    }
 }

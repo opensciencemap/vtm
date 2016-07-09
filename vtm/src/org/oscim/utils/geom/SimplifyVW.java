@@ -23,222 +23,224 @@ import org.oscim.utils.pool.Pool;
 
 /**
  * Visvalingam-Wyatt simplification
- * 
+ * <p/>
  * based on:
  * https://github.com/mbloch/mapshaper/blob/master/src/mapshaper-visvalingam.js
- * */
+ */
 public class SimplifyVW {
 
-	class Item extends Inlist<Item> {
-		int index;
-		int id;
-		float area;
+    class Item extends Inlist<Item> {
+        int index;
+        int id;
+        float area;
 
-		Item prev;
-	}
+        Item prev;
+    }
 
-	Pool<Item> pool = new Pool<Item>() {
-		@Override
-		protected Item createItem() {
-			return new Item();
-		}
-	};
+    Pool<Item> pool = new Pool<Item>() {
+        @Override
+        protected Item createItem() {
+            return new Item();
+        }
+    };
 
-	private Item[] heap = new Item[100];
-	private int size = 0;
+    private Item[] heap = new Item[100];
+    private int size = 0;
 
-	public void simplify(GeometryBuffer geom, float minArea) {
-		Item prev = null;
-		Item first = null;
-		Item it;
+    public void simplify(GeometryBuffer geom, float minArea) {
+        Item prev = null;
+        Item first = null;
+        Item it;
 
-		size = 0;
+        size = 0;
 
-		if (heap.length < geom.pointPos >> 1)
-			heap = new Item[geom.pointPos >> 1];
+        if (heap.length < geom.pointPos >> 1)
+            heap = new Item[geom.pointPos >> 1];
 
-		first = prev = push(0, Float.MAX_VALUE);
+        first = prev = push(0, Float.MAX_VALUE);
 
-		for (int i = 2; i < geom.pointPos - 2; i += 2) {
-			it = push(i, area(geom.points, i - 2, i, i + 2));
-			prev.next = it;
-			it.prev = prev;
+        for (int i = 2; i < geom.pointPos - 2; i += 2) {
+            it = push(i, area(geom.points, i - 2, i, i + 2));
+            prev.next = it;
+            it.prev = prev;
 
-			prev = it;
-		}
+            prev = it;
+        }
 
-		Item last = push(geom.pointPos - 2, Float.MAX_VALUE);
+        Item last = push(geom.pointPos - 2, Float.MAX_VALUE);
 
-		//		sorter.doSort(heap, DistanceComparator, 0, size);
-		//		for (int i = 0; i < size; i++)
-		//			heap[i].index = i;
+        //		sorter.doSort(heap, DistanceComparator, 0, size);
+        //		for (int i = 0; i < size; i++)
+        //			heap[i].index = i;
 
-		last.prev = prev;
-		prev.next = last;
+        last.prev = prev;
+        prev.next = last;
 
-		last.next = first;
-		first.prev = last;
+        last.next = first;
+        first.prev = last;
 
-		while ((it = pop()) != null) {
-			if (it.area > minArea)
-				break;
+        while ((it = pop()) != null) {
+            if (it.area > minArea)
+                break;
 
-			if (it.prev == it.next)
-				break;
+            if (it.prev == it.next)
+                break;
 
-			it.prev.next = it.next;
-			it.next.prev = it.prev;
+            it.prev.next = it.next;
+            it.next.prev = it.prev;
 
-			if (it.prev != first)
-				update(geom, it.prev);
+            if (it.prev != first)
+                update(geom, it.prev);
 
-			if (it.next != first)
-				update(geom, it.next);
+            if (it.next != first)
+                update(geom, it.next);
 
-			it = pool.release(it);
-		}
+            it = pool.release(it);
+        }
 
-		first.prev.next = null;
-		first.prev = null;
-		it = first;
+        first.prev.next = null;
+        first.prev = null;
+        it = first;
 
-		float[] points = new float[geom.pointPos];
-		System.arraycopy(geom.points, 0, points, 0, geom.pointPos);
+        float[] points = new float[geom.pointPos];
+        System.arraycopy(geom.points, 0, points, 0, geom.pointPos);
 
-		geom.clear();
-		geom.startPolygon();
+        geom.clear();
+        geom.startPolygon();
 
-		while (it != null) {
-			float x = points[it.id];
-			float y = points[it.id + 1];
-			geom.addPoint(x, y);
-			it = it.next;
-		}
+        while (it != null) {
+            float x = points[it.id];
+            float y = points[it.id + 1];
+            geom.addPoint(x, y);
+            it = it.next;
+        }
 
-		first = pool.release(first);
-	}
+        first = pool.release(first);
+    }
 
-	public static float area(float[] a, int p1, int p2, int p3) {
+    public static float area(float[] a, int p1, int p2, int p3) {
 
-		float area = GeometryUtils.area(a, p1, p2, p3);
-		double dotp = GeometryUtils.dotProduct(a, p1, p2, p3);
-		//return (float) (area * (0.5 + 0.5 * (1 - dotp * dotp)));
+        float area = GeometryUtils.area(a, p1, p2, p3);
+        double dotp = GeometryUtils.dotProduct(a, p1, p2, p3);
+        //return (float) (area * (0.5 + 0.5 * (1 - dotp * dotp)));
 
-		dotp = Math.abs(dotp);
-		double weight = dotp < 0.5 ? 0.1 : dotp < 1 ? 0.3 : 1;
-		return (float) (area * weight);
-	}
+        dotp = Math.abs(dotp);
+        double weight = dotp < 0.5 ? 0.1 : dotp < 1 ? 0.3 : 1;
+        return (float) (area * weight);
+    }
 
-	private void update(GeometryBuffer geom, Item it) {
-		float area = area(geom.points, it.prev.id, it.id, it.next.id);
-		update(it, area);
-		//remove(it);
-		//it.area = area(geom.points, it.prev.id, it.id, it.next.id);
-		//push(it);
-	}
+    private void update(GeometryBuffer geom, Item it) {
+        float area = area(geom.points, it.prev.id, it.id, it.next.id);
+        update(it, area);
+        //remove(it);
+        //it.area = area(geom.points, it.prev.id, it.id, it.next.id);
+        //push(it);
+    }
 
-	public void push(Item it) {
-		heap[size] = it;
-		it.index = size;
-		up(size++);
-	}
+    public void push(Item it) {
+        heap[size] = it;
+        it.index = size;
+        up(size++);
+    }
 
-	public Item push(int id, float area) {
-		Item it = pool.get();
-		heap[size] = it;
-		it.index = size;
-		it.area = area;
-		it.id = id;
-		up(size++);
-		return it;
-	}
+    public Item push(int id, float area) {
+        Item it = pool.get();
+        heap[size] = it;
+        it.index = size;
+        it.area = area;
+        it.id = id;
+        up(size++);
+        return it;
+    }
 
-	public Item pop() {
-		if (size == 0)
-			return null;
+    public Item pop() {
+        if (size == 0)
+            return null;
 
-		Item removed = heap[0];
-		Item obj = heap[--size];
-		heap[size] = null;
+        Item removed = heap[0];
+        Item obj = heap[--size];
+        heap[size] = null;
 
-		if (size > 0) {
-			heap[obj.index = 0] = obj;
-			down(0);
-		}
-		return removed;
-	}
+        if (size > 0) {
+            heap[obj.index = 0] = obj;
+            down(0);
+        }
+        return removed;
+    }
 
-	public void update(Item it, float area) {
-		if (area < it.area) {
-			it.area = area;
-			up(it.index);
-		} else {
-			it.area = area;
-			down(it.index);
-		}
-	}
+    public void update(Item it, float area) {
+        if (area < it.area) {
+            it.area = area;
+            up(it.index);
+        } else {
+            it.area = area;
+            down(it.index);
+        }
+    }
 
-	public int remove(Item removed) {
-		if (size == 0)
-			throw new IllegalStateException("size == 0");
+    public int remove(Item removed) {
+        if (size == 0)
+            throw new IllegalStateException("size == 0");
 
-		int i = removed.index;
-		Item obj = heap[--size];
-		heap[size] = null;
+        int i = removed.index;
+        Item obj = heap[--size];
+        heap[size] = null;
 
 		/* if min obj was popped */
-		if (i == size)
-			return i;
+        if (i == size)
+            return i;
 
 		/* else put min obj in place of the removed item */
-		obj.index = i;
-		heap[i] = obj;
+        obj.index = i;
+        heap[i] = obj;
 
-		if (obj.area < removed.area) {
-			up(i);
-		} else
-			down(i);
+        if (obj.area < removed.area) {
+            up(i);
+        } else
+            down(i);
 
-		return i;
-	};
+        return i;
+    }
 
-	private void up(int i) {
-		Item it = heap[i];
-		while (i > 0) {
-			int up = ((i + 1) >> 1) - 1;
-			Item parent = heap[up];
+    ;
 
-			if (it.area >= parent.area)
-				break;
+    private void up(int i) {
+        Item it = heap[i];
+        while (i > 0) {
+            int up = ((i + 1) >> 1) - 1;
+            Item parent = heap[up];
 
-			parent.index = i;
-			heap[i] = parent;
+            if (it.area >= parent.area)
+                break;
 
-			it.index = i = up;
-			heap[i] = it;
-		}
-	}
+            parent.index = i;
+            heap[i] = parent;
 
-	private void down(int i) {
-		Item it = heap[i];
-		while (true) {
-			int right = (i + 1) << 1;
-			int left = right - 1;
-			int down = i;
+            it.index = i = up;
+            heap[i] = it;
+        }
+    }
 
-			Item child = heap[down];
+    private void down(int i) {
+        Item it = heap[i];
+        while (true) {
+            int right = (i + 1) << 1;
+            int left = right - 1;
+            int down = i;
 
-			if (left < size && heap[left].area < child.area)
-				child = heap[down = left];
+            Item child = heap[down];
 
-			if (right < size && heap[right].area < child.area)
-				child = heap[down = right];
+            if (left < size && heap[left].area < child.area)
+                child = heap[down = left];
 
-			if (down == i)
-				break;
+            if (right < size && heap[right].area < child.area)
+                child = heap[down = right];
 
-			heap[child.index = i] = child;
-			heap[it.index = i = down] = it;
-		}
-	}
+            if (down == i)
+                break;
+
+            heap[child.index = i] = child;
+            heap[it.index = i = down] = it;
+        }
+    }
 }

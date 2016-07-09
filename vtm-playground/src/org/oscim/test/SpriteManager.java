@@ -26,79 +26,79 @@ import org.oscim.utils.pool.Inlist;
 
 /**
  * UNUSED
- * */
+ */
 public abstract class SpriteManager<T> {
-	TexturePool pool;
+    TexturePool pool;
 
-	public class Sprite extends Inlist<Sprite> {
+    public class Sprite extends Inlist<Sprite> {
 
-		public Sprite(T i, TextureAtlas a, Rect r) {
-			atlas = a;
-			rect = r;
-			item = i;
-		}
+        public Sprite(T i, TextureAtlas a, Rect r) {
+            atlas = a;
+            rect = r;
+            item = i;
+        }
 
-		T item;
-		TextureAtlas atlas;
-		Rect rect;
-	}
+        T item;
+        TextureAtlas atlas;
+        Rect rect;
+    }
 
-	TextureAtlas mAtlas;
-	TextureAtlas curAtlas;
+    TextureAtlas mAtlas;
+    TextureAtlas curAtlas;
 
-	Sprite items;
+    Sprite items;
 
-	protected final Canvas mCanvas = CanvasAdapter.newCanvas();
-	protected TextureItem mTexture;
+    protected final Canvas mCanvas = CanvasAdapter.newCanvas();
+    protected TextureItem mTexture;
 
-	public SpriteManager() {
-		//mTexture = pool.get();
+    public SpriteManager() {
+        //mTexture = pool.get();
 
-		//mTexture.ownBitmap = true;
+        //mTexture.ownBitmap = true;
 
-		//mAtlas = new TextureAtlas(mTexture.bitmap);
+        //mAtlas = new TextureAtlas(mTexture.bitmap);
 
-		//mCanvas.setBitmap(mTexture.bitmap);
-	}
+        //mCanvas.setBitmap(mTexture.bitmap);
+    }
 
-	public Sprite getRegion(T item) {
-		//return items.get(item);
-		for (Sprite t = items; t != null; t = t.next)
-			if (t.item == item)
-				return t;
+    public Sprite getRegion(T item) {
+        //return items.get(item);
+        for (Sprite t = items; t != null; t = t.next)
+            if (t.item == item)
+                return t;
 
-		return null;
-	}
+        return null;
+    }
 
-	public void clear() {
-		for (TextureItem t = mTexture; t != null; t = t.dispose());
-		mAtlas.clear();
-		items = null;
+    public void clear() {
+        for (TextureItem t = mTexture; t != null; t = t.dispose()) ;
+        mAtlas.clear();
+        items = null;
 
-		//mTexture.bitmap.eraseColor(Color.TRANSPARENT);
-		mTexture = pool.get();
-		mCanvas.setBitmap(mTexture.bitmap);
-	}
+        //mTexture.bitmap.eraseColor(Color.TRANSPARENT);
+        mTexture = pool.get();
+        mCanvas.setBitmap(mTexture.bitmap);
+    }
 
-	public TextureItem getTextures() {
-		return mTexture;
-	}
+    public TextureItem getTextures() {
+        return mTexture;
+    }
 
-	public Sprite addItem(T item, int width, int height) {
-		Rect r = mAtlas.getRegion(width, height);
-		if (r == null) {
-			//create new atlas
-			return null;
-		}
-		Sprite sprite = new Sprite(item, mAtlas, r);
+    public Sprite addItem(T item, int width, int height) {
+        Rect r = mAtlas.getRegion(width, height);
+        if (r == null) {
+            //create new atlas
+            return null;
+        }
+        Sprite sprite = new Sprite(item, mAtlas, r);
 
-		items = Inlist.appendItem(items, sprite);
+        items = Inlist.appendItem(items, sprite);
 
-		draw(item, r);
+        draw(item, r);
 
-		return sprite;
-	}
+        return sprite;
+    }
 
-	abstract void draw(T item, Rect r);
+    abstract void draw(T item, Rect r);
 
 }

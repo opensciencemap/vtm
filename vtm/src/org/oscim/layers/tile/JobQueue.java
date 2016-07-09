@@ -16,82 +16,81 @@
  */
 package org.oscim.layers.tile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.oscim.layers.tile.MapTile.State.CANCEL;
 import static org.oscim.layers.tile.MapTile.State.LOADING;
 import static org.oscim.layers.tile.MapTile.State.NONE;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A JobQueue keeps the list of pending jobs for a MapView and prioritizes them.
  */
 public class JobQueue {
 
-	static final Logger log = LoggerFactory.getLogger(JobQueue.class);
+    static final Logger log = LoggerFactory.getLogger(JobQueue.class);
 
-	private int mCurrentJob = 0;
-	private MapTile[] mJobs;
+    private int mCurrentJob = 0;
+    private MapTile[] mJobs;
 
-	/**
-	 * @param tiles
-	 *            the jobs to be added to this queue.
-	 */
-	public synchronized void setJobs(MapTile[] tiles) {
-		mJobs = tiles;
-		mCurrentJob = 0;
-	}
+    /**
+     * @param tiles the jobs to be added to this queue.
+     */
+    public synchronized void setJobs(MapTile[] tiles) {
+        mJobs = tiles;
+        mCurrentJob = 0;
+    }
 
-	/**
-	 * Removes all jobs from this queue.
-	 */
-	public synchronized void clear() {
-		if (mJobs == null) {
-			mCurrentJob = 0;
-			return;
-		}
-		MapTile[] tiles = mJobs;
+    /**
+     * Removes all jobs from this queue.
+     */
+    public synchronized void clear() {
+        if (mJobs == null) {
+            mCurrentJob = 0;
+            return;
+        }
+        MapTile[] tiles = mJobs;
 
-		for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
-			MapTile t = tiles[i];
-			if (t.state(LOADING | CANCEL)) {
-				t.setState(NONE);
-			} else {
-				log.error("Wrong tile in queue {} {}", t, t.state());
-			}
-			tiles[i] = null;
-		}
-		mCurrentJob = 0;
-		mJobs = null;
-	}
+        for (int i = mCurrentJob, n = mJobs.length; i < n; i++) {
+            MapTile t = tiles[i];
+            if (t.state(LOADING | CANCEL)) {
+                t.setState(NONE);
+            } else {
+                log.error("Wrong tile in queue {} {}", t, t.state());
+            }
+            tiles[i] = null;
+        }
+        mCurrentJob = 0;
+        mJobs = null;
+    }
 
-	/**
-	 * @return true if this queue contains no jobs, false otherwise.
-	 */
-	public synchronized boolean isEmpty() {
-		return (mJobs == null);
-	}
+    /**
+     * @return true if this queue contains no jobs, false otherwise.
+     */
+    public synchronized boolean isEmpty() {
+        return (mJobs == null);
+    }
 
-	/**
-	 * @return the most important job from this queue or null, if empty.
-	 */
-	public synchronized MapTile poll() {
-		if (mJobs == null)
-			return null;
+    /**
+     * @return the most important job from this queue or null, if empty.
+     */
+    public synchronized MapTile poll() {
+        if (mJobs == null)
+            return null;
 
-		if (mCurrentJob == 0) {
-			int len = mJobs.length;
-			if (len > 1)
-				TileDistanceSort.sort(mJobs, 0, len);
-		}
+        if (mCurrentJob == 0) {
+            int len = mJobs.length;
+            if (len > 1)
+                TileDistanceSort.sort(mJobs, 0, len);
+        }
 
-		MapTile t = mJobs[mCurrentJob];
-		mJobs[mCurrentJob] = null;
+        MapTile t = mJobs[mCurrentJob];
+        mJobs[mCurrentJob] = null;
 
-		if (++mCurrentJob == mJobs.length)
-			mJobs = null;
+        if (++mCurrentJob == mJobs.length)
+            mJobs = null;
 
-		return t;
+        return t;
 
-	}
+    }
 }

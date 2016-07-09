@@ -26,194 +26,194 @@ import org.oscim.renderer.atlas.TextureRegion;
 
 public final class TextStyle extends RenderStyle {
 
-	public static class TextBuilder<T extends TextBuilder<T>> extends StyleBuilder<T> {
+    public static class TextBuilder<T extends TextBuilder<T>> extends StyleBuilder<T> {
 
-		public float fontSize;
+        public float fontSize;
 
-		public String textKey;
-		public boolean caption;
-		public float dy;
-		public int priority;
-		public TextureRegion texture;
-		public FontFamily fontFamily;
-		public FontStyle fontStyle;
+        public String textKey;
+        public boolean caption;
+        public float dy;
+        public int priority;
+        public TextureRegion texture;
+        public FontFamily fontFamily;
+        public FontStyle fontStyle;
 
-		public T reset() {
-			fontFamily = FontFamily.DEFAULT;
-			fontStyle = FontStyle.NORMAL;
-			style = null;
-			textKey = null;
-			fontSize = 0;
-			caption = false;
-			priority = Integer.MAX_VALUE;
-			texture = null;
-			fillColor = Color.BLACK;
-			strokeColor = Color.BLACK;
-			strokeWidth = 0;
-			dy = 0;
-			return self();
-		}
+        public T reset() {
+            fontFamily = FontFamily.DEFAULT;
+            fontStyle = FontStyle.NORMAL;
+            style = null;
+            textKey = null;
+            fontSize = 0;
+            caption = false;
+            priority = Integer.MAX_VALUE;
+            texture = null;
+            fillColor = Color.BLACK;
+            strokeColor = Color.BLACK;
+            strokeWidth = 0;
+            dy = 0;
+            return self();
+        }
 
-		public TextBuilder() {
-			reset();
-		}
+        public TextBuilder() {
+            reset();
+        }
 
-		public TextStyle build() {
-			TextStyle t = new TextStyle(this);
-			t.fontHeight = t.paint.getFontHeight();
-			t.fontDescent = t.paint.getFontDescent();
-			return t;
-		}
+        public TextStyle build() {
+            TextStyle t = new TextStyle(this);
+            t.fontHeight = t.paint.getFontHeight();
+            t.fontDescent = t.paint.getFontDescent();
+            return t;
+        }
 
-		public TextStyle buildInternal() {
-			return new TextStyle(this);
-		}
+        public TextStyle buildInternal() {
+            return new TextStyle(this);
+        }
 
-		public T fontSize(float fontSize) {
-			this.fontSize = fontSize;
-			return self();
-		}
+        public T fontSize(float fontSize) {
+            this.fontSize = fontSize;
+            return self();
+        }
 
-		public T textKey(String textKey) {
-			this.textKey = textKey;
-			return self();
-		}
+        public T textKey(String textKey) {
+            this.textKey = textKey;
+            return self();
+        }
 
-		public T isCaption(boolean caption) {
-			this.caption = caption;
-			return self();
-		}
+        public T isCaption(boolean caption) {
+            this.caption = caption;
+            return self();
+        }
 
-		public T offsetY(float dy) {
-			this.dy = dy;
-			return self();
-		}
+        public T offsetY(float dy) {
+            this.dy = dy;
+            return self();
+        }
 
-		public T priority(int priority) {
-			this.priority = priority;
-			return self();
-		}
+        public T priority(int priority) {
+            this.priority = priority;
+            return self();
+        }
 
-		public T texture(TextureRegion texture) {
-			this.texture = texture;
-			return self();
-		}
+        public T texture(TextureRegion texture) {
+            this.texture = texture;
+            return self();
+        }
 
-		public T fontFamily(FontFamily fontFamily) {
-			this.fontFamily = fontFamily;
-			return self();
-		}
+        public T fontFamily(FontFamily fontFamily) {
+            this.fontFamily = fontFamily;
+            return self();
+        }
 
-		public T fontStyle(FontStyle fontStyle) {
-			this.fontStyle = fontStyle;
-			return self();
-		}
+        public T fontStyle(FontStyle fontStyle) {
+            this.fontStyle = fontStyle;
+            return self();
+        }
 
-		public T from(TextBuilder<?> other) {
-			fontFamily = other.fontFamily;
-			fontStyle = other.fontStyle;
-			style = other.style;
-			textKey = other.textKey;
-			fontSize = other.fontSize;
-			caption = other.caption;
-			priority = other.priority;
-			texture = other.texture;
-			fillColor = other.fillColor;
-			strokeColor = other.strokeColor;
-			strokeWidth = other.strokeWidth;
-			dy = other.dy;
-			return self();
-		}
+        public T from(TextBuilder<?> other) {
+            fontFamily = other.fontFamily;
+            fontStyle = other.fontStyle;
+            style = other.style;
+            textKey = other.textKey;
+            fontSize = other.fontSize;
+            caption = other.caption;
+            priority = other.priority;
+            texture = other.texture;
+            fillColor = other.fillColor;
+            strokeColor = other.strokeColor;
+            strokeWidth = other.strokeWidth;
+            dy = other.dy;
+            return self();
+        }
 
-		public TextBuilder<?> from(TextStyle style) {
-			this.style = style.style;
-			this.textKey = style.textKey;
-			this.caption = style.caption;
-			this.dy = style.dy;
-			this.priority = style.priority;
-			this.texture = style.texture;
-			this.fillColor = style.paint.getColor();
-			this.fontFamily = FontFamily.DEFAULT;
-			this.fontStyle = FontStyle.NORMAL;
-			this.strokeColor = style.stroke.getColor();
-			this.strokeWidth = 2;
-			this.fontSize = style.fontSize;
-			return self();
-		}
-	}
+        public TextBuilder<?> from(TextStyle style) {
+            this.style = style.style;
+            this.textKey = style.textKey;
+            this.caption = style.caption;
+            this.dy = style.dy;
+            this.priority = style.priority;
+            this.texture = style.texture;
+            this.fillColor = style.paint.getColor();
+            this.fontFamily = FontFamily.DEFAULT;
+            this.fontStyle = FontStyle.NORMAL;
+            this.strokeColor = style.stroke.getColor();
+            this.strokeWidth = 2;
+            this.fontSize = style.fontSize;
+            return self();
+        }
+    }
 
-	TextStyle(TextBuilder<?> tb) {
-		this.style = tb.style;
-		this.textKey = tb.textKey;
-		this.caption = tb.caption;
-		this.dy = tb.dy;
-		this.priority = tb.priority;
-		this.texture = tb.texture;
+    TextStyle(TextBuilder<?> tb) {
+        this.style = tb.style;
+        this.textKey = tb.textKey;
+        this.caption = tb.caption;
+        this.dy = tb.dy;
+        this.priority = tb.priority;
+        this.texture = tb.texture;
 
-		paint = CanvasAdapter.newPaint();
-		paint.setTextAlign(Align.CENTER);
-		paint.setTypeface(tb.fontFamily, tb.fontStyle);
+        paint = CanvasAdapter.newPaint();
+        paint.setTextAlign(Align.CENTER);
+        paint.setTypeface(tb.fontFamily, tb.fontStyle);
 
-		paint.setColor(tb.fillColor);
-		paint.setTextSize(tb.fontSize);
+        paint.setColor(tb.fillColor);
+        paint.setTextSize(tb.fontSize);
 
-		if (tb.strokeWidth > 0) {
-			stroke = CanvasAdapter.newPaint();
-			stroke.setStyle(Paint.Style.STROKE);
-			stroke.setTextAlign(Align.CENTER);
-			stroke.setTypeface(tb.fontFamily, tb.fontStyle);
-			stroke.setColor(tb.strokeColor);
-			stroke.setStrokeWidth(tb.strokeWidth);
-			stroke.setTextSize(tb.fontSize);
-		} else
-			stroke = null;
+        if (tb.strokeWidth > 0) {
+            stroke = CanvasAdapter.newPaint();
+            stroke.setStyle(Paint.Style.STROKE);
+            stroke.setTextAlign(Align.CENTER);
+            stroke.setTypeface(tb.fontFamily, tb.fontStyle);
+            stroke.setColor(tb.strokeColor);
+            stroke.setStrokeWidth(tb.strokeWidth);
+            stroke.setTextSize(tb.fontSize);
+        } else
+            stroke = null;
 
-		this.fontSize = tb.fontSize;
-	}
+        this.fontSize = tb.fontSize;
+    }
 
-	public final String style;
+    public final String style;
 
-	public final float fontSize;
-	public final Paint paint;
-	public final Paint stroke;
-	public final String textKey;
+    public final float fontSize;
+    public final Paint paint;
+    public final Paint stroke;
+    public final String textKey;
 
-	public final boolean caption;
-	public final float dy;
-	public final int priority;
+    public final boolean caption;
+    public final float dy;
+    public final int priority;
 
-	public float fontHeight;
-	public float fontDescent;
+    public float fontHeight;
+    public float fontDescent;
 
-	public final TextureRegion texture;
+    public final TextureRegion texture;
 
-	@Override
-	public void renderNode(Callback cb) {
-		cb.renderText(this);
-	}
+    @Override
+    public void renderNode(Callback cb) {
+        cb.renderText(this);
+    }
 
-	@Override
-	public void renderWay(Callback cb) {
-		cb.renderText(this);
-	}
+    @Override
+    public void renderWay(Callback cb) {
+        cb.renderText(this);
+    }
 
-	@Override
-	public TextStyle current() {
-		return (TextStyle) mCurrent;
-	}
+    @Override
+    public TextStyle current() {
+        return (TextStyle) mCurrent;
+    }
 
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-		paint.setTextSize(fontSize * scaleFactor);
-		if (stroke != null)
-			stroke.setTextSize(fontSize * scaleFactor);
+    @Override
+    public void scaleTextSize(float scaleFactor) {
+        paint.setTextSize(fontSize * scaleFactor);
+        if (stroke != null)
+            stroke.setTextSize(fontSize * scaleFactor);
 
-		fontHeight = paint.getFontHeight();
-		fontDescent = paint.getFontDescent();
-	}
+        fontHeight = paint.getFontHeight();
+        fontDescent = paint.getFontDescent();
+    }
 
-	@SuppressWarnings("rawtypes")
-	public static TextBuilder<?> builder() {
-		return new TextBuilder();
-	}
+    @SuppressWarnings("rawtypes")
+    public static TextBuilder<?> builder() {
+        return new TextBuilder();
+    }
 }

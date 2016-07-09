@@ -31,44 +31,44 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MapzenTest extends GdxMap {
 
-	@Override
-	protected boolean onKeyDown(int keycode) {
-		if (keycode == Input.Keys.A) {
-			loadTheme();
-		}
+    @Override
+    protected boolean onKeyDown(int keycode) {
+        if (keycode == Input.Keys.A) {
+            loadTheme();
+        }
 
-		return super.onKeyDown(keycode);
-	}
+        return super.onKeyDown(keycode);
+    }
 
-	@Override
-	public void createLayers() {
-		UrlTileSource tileSource = OSciMap4TileSource.builder()
-			.url("https://vector.mapzen.com/osm/v0.8/all")
-		    .apiKey("vector-tiles-xxxxxxx") // Put a proper API key
-		    .zoomMax(18)
-		    .httpFactory(new OkHttpEngine.OkHttpFactory())
-		    .build();
+    @Override
+    public void createLayers() {
+        UrlTileSource tileSource = OSciMap4TileSource.builder()
+                .url("https://vector.mapzen.com/osm/v0.8/all")
+                .apiKey("vector-tiles-xxxxxxx") // Put a proper API key
+                .zoomMax(18)
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
 
-		VectorTileLayer l = mMap.setBaseMap(tileSource);
+        VectorTileLayer l = mMap.setBaseMap(tileSource);
 
-		loadTheme();
+        loadTheme();
 
-		mMap.layers().add(new BuildingLayer(mMap, l));
-		mMap.layers().add(new LabelLayer(mMap, l));
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        mMap.layers().add(new LabelLayer(mMap, l));
 
-		mMap.setMapPosition(53.08, 8.82, 1 << 17);
-	}
+        mMap.setMapPosition(53.08, 8.82, 1 << 17);
+    }
 
-	private void loadTheme() {
-		try {
-			mMap.setTheme(ThemeLoader.load(getClass().getResourceAsStream("/assets/styles/mapzen.xml")));
-		} catch (ThemeException e) {
-			e.printStackTrace();
-		}
-	}
+    private void loadTheme() {
+        try {
+            mMap.setTheme(ThemeLoader.load(getClass().getResourceAsStream("/assets/styles/mapzen.xml")));
+        } catch (ThemeException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new MapzenTest(), null, 400);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new MapzenTest(), null, 400);
+    }
 }

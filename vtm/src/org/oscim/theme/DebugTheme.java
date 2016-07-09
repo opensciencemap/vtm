@@ -9,40 +9,40 @@ import org.oscim.theme.styles.RenderStyle;
 
 public class DebugTheme implements IRenderTheme {
 
-	private final static LineStyle[] line = { new LineStyle(1, Color.MAGENTA, 2) };
-	private final static AreaStyle[] area = { new AreaStyle(0, Color.CYAN) };
+    private final static LineStyle[] line = {new LineStyle(1, Color.MAGENTA, 2)};
+    private final static AreaStyle[] area = {new AreaStyle(0, Color.CYAN)};
 
-	@Override
-	public RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel) {
-		if (type == GeometryType.LINE)
-			return line;
-		if (type == GeometryType.POLY)
-			return area;
+    @Override
+    public RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel) {
+        if (type == GeometryType.LINE)
+            return line;
+        if (type == GeometryType.POLY)
+            return area;
 
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public int getLevels() {
-		return 0;
-	}
+    @Override
+    public int getLevels() {
+        return 0;
+    }
 
-	@Override
-	public int getMapBackground() {
-		return 0;
-	}
+    @Override
+    public int getMapBackground() {
+        return 0;
+    }
 
-	@Override
-	public void scaleTextSize(float scaleFactor) {
-	}
+    @Override
+    public void scaleTextSize(float scaleFactor) {
+    }
 
-	@Override
-	public void updateStyles() {
+    @Override
+    public void updateStyles() {
 
-	}
+    }
 
 }

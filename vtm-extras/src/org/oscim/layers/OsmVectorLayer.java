@@ -7,13 +7,13 @@ import org.oscim.map.Map;
 
 public class OsmVectorLayer extends AbstractVectorLayer<OsmElement> {
 
-	public OsmVectorLayer(Map map) {
-		super(map);
-	}
+    public OsmVectorLayer(Map map) {
+        super(map);
+    }
 
-	@Override
-	protected void processFeatures(Task t, Box b) {
+    @Override
+    protected void processFeatures(Task t, Box b) {
 
-	}
+    }
 
 }

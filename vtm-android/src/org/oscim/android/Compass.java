@@ -16,56 +16,56 @@
  */
 package org.oscim.android;
 
-import org.oscim.map.Map;
-
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import org.oscim.map.Map;
+
 public class Compass {
 
-	private final SensorEventListener mListener = new SensorEventListener() {
-		@Override
-		public void onSensorChanged(SensorEvent event) {
-			if (Math.abs(event.values[0] - mAngle) > 0.25) {
-				mAngle = event.values[0];
+    private final SensorEventListener mListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (Math.abs(event.values[0] - mAngle) > 0.25) {
+                mAngle = event.values[0];
 
-				if (mMap != null) {
-					mMap.viewport().setRotation(-mAngle);
-					mMap.updateMap(true);
-				}
-			}
-		}
+                if (mMap != null) {
+                    mMap.viewport().setRotation(-mAngle);
+                    mMap.updateMap(true);
+                }
+            }
+        }
 
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		}
-	};
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
 
-	/* package */float mAngle = 0;
-	/* package */Map mMap;
+    /* package */ float mAngle = 0;
+    /* package */ Map mMap;
 
-	private final SensorManager mSensorManager;
-	private final Sensor mSensor;
+    private final SensorManager mSensorManager;
+    private final Sensor mSensor;
 
-	@SuppressWarnings("deprecation")
-	public Compass(Context context, Map map) {
-		mMap = map;
-		mSensorManager = (SensorManager) context
-		    .getSystemService(Context.SENSOR_SERVICE);
+    @SuppressWarnings("deprecation")
+    public Compass(Context context, Map map) {
+        mMap = map;
+        mSensorManager = (SensorManager) context
+                .getSystemService(Context.SENSOR_SERVICE);
 
-		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-	}
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+    }
 
-	public void enable() {
-		mSensorManager.registerListener(mListener, mSensor,
-		                                SensorManager.SENSOR_DELAY_UI);
-	}
+    public void enable() {
+        mSensorManager.registerListener(mListener, mSensor,
+                SensorManager.SENSOR_DELAY_UI);
+    }
 
-	public void disable() {
-		mSensorManager.unregisterListener(mListener);
-		mMap.viewport().setRotation(0);
-	}
+    public void disable() {
+        mSensorManager.unregisterListener(mListener);
+        mMap.viewport().setRotation(0);
+    }
 }

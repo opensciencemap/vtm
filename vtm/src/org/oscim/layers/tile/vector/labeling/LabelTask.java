@@ -7,20 +7,20 @@ import org.oscim.renderer.bucket.TextureBucket;
 
 final class LabelTask {
 
-	final TextureBucket layers;
-	final TextBucket textLayer;
-	final SymbolBucket symbolLayer;
+    final TextureBucket layers;
+    final TextBucket textLayer;
+    final SymbolBucket symbolLayer;
 
-	final MapPosition pos;
+    final MapPosition pos;
 
-	LabelTask() {
-		pos = new MapPosition();
+    LabelTask() {
+        pos = new MapPosition();
 
-		symbolLayer = new SymbolBucket();
-		textLayer = new TextBucket();
+        symbolLayer = new SymbolBucket();
+        textLayer = new TextBucket();
 
-		layers = symbolLayer;
-		symbolLayer.next = textLayer;
-	}
+        layers = symbolLayer;
+        symbolLayer.next = textLayer;
+    }
 
 }

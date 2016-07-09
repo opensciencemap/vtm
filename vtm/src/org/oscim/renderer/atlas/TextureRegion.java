@@ -21,11 +21,11 @@ import org.oscim.renderer.bucket.TextureItem;
 
 public class TextureRegion {
 
-	public TextureRegion(TextureItem texture, Rect r) {
-		this.texture = texture;
-		this.rect = r;
-	}
+    public TextureRegion(TextureItem texture, Rect r) {
+        this.texture = texture;
+        this.rect = r;
+    }
 
-	public final Rect rect;
-	public final TextureItem texture;
+    public final Rect rect;
+    public final TextureItem texture;
 }

@@ -25,34 +25,33 @@ import java.util.logging.Level;
  */
 public final class IOUtils {
 
-	/**
-	 * Invokes the {@link Closeable#close()} method on the given object. If an
-	 * {@link IOException} occurs during the
-	 * method call, it will be caught and logged on level {@link Level#WARNING}.
-	 * 
-	 * @param closeable
-	 *            the data source which should be closed (may be null).
-	 */
-	public static void closeQuietly(OutputStream closeable) {
-		try {
-			if (closeable != null) {
-				closeable.close();
-			}
-		} catch (IOException e) {
-			//log.debug(e.getMessage() + " " + e);
-		}
-	}
+    /**
+     * Invokes the {@link Closeable#close()} method on the given object. If an
+     * {@link IOException} occurs during the
+     * method call, it will be caught and logged on level {@link Level#WARNING}.
+     *
+     * @param closeable the data source which should be closed (may be null).
+     */
+    public static void closeQuietly(OutputStream closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException e) {
+            //log.debug(e.getMessage() + " " + e);
+        }
+    }
 
-	public static void closeQuietly(InputStream closeable) {
-		try {
-			if (closeable != null) {
-				closeable.close();
-			}
-		} catch (IOException e) {
-			//log.debug(e.getMessage() + " " + e);
-		}
-	}
+    public static void closeQuietly(InputStream closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException e) {
+            //log.debug(e.getMessage() + " " + e);
+        }
+    }
 
-	private IOUtils() {
-	}
+    private IOUtils() {
+    }
 }

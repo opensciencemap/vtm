@@ -17,24 +17,24 @@
 package org.oscim.core.osm;
 
 public class OsmMember {
-	public enum MemberType {
-		NODE,
-		WAY,
-		RELATIOM
-	}
+    public enum MemberType {
+        NODE,
+        WAY,
+        RELATIOM
+    }
 
-	public final String role;
-	public final OsmElement member;
+    public final String role;
+    public final OsmElement member;
 
-	public OsmMember(String role, OsmElement member) {
-		assert role != null && member != null;
-		this.role = role;
-		this.member = member;
-	}
+    public OsmMember(String role, OsmElement member) {
+        assert role != null && member != null;
+        this.role = role;
+        this.member = member;
+    }
 
-	@Override
-	public String toString() {
-		return role + ":" + member;
-	}
+    @Override
+    public String toString() {
+        return role + ":" + member;
+    }
 
 }

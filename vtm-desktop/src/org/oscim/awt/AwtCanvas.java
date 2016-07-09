@@ -17,6 +17,10 @@
  */
 package org.oscim.awt;
 
+import org.oscim.backend.canvas.Bitmap;
+import org.oscim.backend.canvas.Canvas;
+import org.oscim.backend.canvas.Paint;
+
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -24,73 +28,69 @@ import java.awt.Shape;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 
-import org.oscim.backend.canvas.Bitmap;
-import org.oscim.backend.canvas.Canvas;
-import org.oscim.backend.canvas.Paint;
-
 public class AwtCanvas implements Canvas {
 
-	Graphics2D canvas;
+    Graphics2D canvas;
 
-	public AwtCanvas() {
+    public AwtCanvas() {
 
-	}
+    }
 
-	@Override
-	public void setBitmap(Bitmap bitmap) {
-		if (canvas != null)
-			canvas.dispose();
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        if (canvas != null)
+            canvas.dispose();
 
-		AwtBitmap awtBitamp = (AwtBitmap) bitmap;
+        AwtBitmap awtBitamp = (AwtBitmap) bitmap;
 
-		canvas = awtBitamp.bitmap.createGraphics();
+        canvas = awtBitamp.bitmap.createGraphics();
 
-		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0));
-		canvas.fillRect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0));
+        canvas.fillRect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-		canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+        canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
-		//canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-		//                        RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		canvas.setRenderingHint(RenderingHints.KEY_RENDERING,
-		                        RenderingHints.VALUE_RENDER_QUALITY);
-		canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-		                        RenderingHints.VALUE_ANTIALIAS_ON);
+        //canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+        //                        RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        canvas.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
 
-	}
+    }
 
-	private final AffineTransform tx = new AffineTransform();
+    private final AffineTransform tx = new AffineTransform();
 
-	@Override
-	public void drawText(String text, float x, float y, Paint fill, Paint stroke) {
+    @Override
+    public void drawText(String text, float x, float y, Paint fill, Paint stroke) {
 
-		AwtPaint fillPaint = (AwtPaint) fill;
+        AwtPaint fillPaint = (AwtPaint) fill;
 
-		if (stroke == null) {
-			canvas.setColor(fillPaint.color);
-			canvas.setFont(fillPaint.font);
-			canvas.drawString(text, x + AwtPaint.TEXT_OFFSET, y);
-		} else {
-			AwtPaint strokePaint = (AwtPaint) stroke;
+        if (stroke == null) {
+            canvas.setColor(fillPaint.color);
+            canvas.setFont(fillPaint.font);
+            canvas.drawString(text, x + AwtPaint.TEXT_OFFSET, y);
+        } else {
+            AwtPaint strokePaint = (AwtPaint) stroke;
 
-			canvas.setColor(strokePaint.color);
-			canvas.setStroke(strokePaint.stroke);
+            canvas.setColor(strokePaint.color);
+            canvas.setStroke(strokePaint.stroke);
 
-			TextLayout tl = new TextLayout(text, fillPaint.font,
-			                               canvas.getFontRenderContext());
-			tx.setToIdentity();
-			tx.translate(x, y);
+            TextLayout tl = new TextLayout(text, fillPaint.font,
+                    canvas.getFontRenderContext());
+            tx.setToIdentity();
+            tx.translate(x, y);
 
-			Shape s = tl.getOutline(tx);
+            Shape s = tl.getOutline(tx);
 
-			canvas.draw(s);
-			canvas.setColor(fillPaint.color);
-			canvas.fill(s);
-		}
-	}
+            canvas.draw(s);
+            canvas.setColor(fillPaint.color);
+            canvas.fill(s);
+        }
+    }
 
-	@Override
-	public void drawBitmap(Bitmap bitmap, float x, float y) {
-		throw new UnknownError("not implemented");
-	}
+    @Override
+    public void drawBitmap(Bitmap bitmap, float x, float y) {
+        throw new UnknownError("not implemented");
+    }
 }

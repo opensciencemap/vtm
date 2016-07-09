@@ -17,6 +17,14 @@
  */
 package org.oscim.tiling.source;
 
+import com.squareup.okhttp.HttpResponseCache;
+import com.squareup.okhttp.OkHttpClient;
+
+import org.oscim.core.Tile;
+import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,94 +33,86 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map.Entry;
 
-import org.oscim.core.Tile;
-import org.oscim.utils.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.squareup.okhttp.HttpResponseCache;
-import com.squareup.okhttp.OkHttpClient;
-
 public class OkHttpEngine implements HttpEngine {
-	static final Logger log = LoggerFactory.getLogger(OkHttpEngine.class);
+    static final Logger log = LoggerFactory.getLogger(OkHttpEngine.class);
 
-	private final OkHttpClient mClient;
-	private final UrlTileSource mTileSource;
+    private final OkHttpClient mClient;
+    private final UrlTileSource mTileSource;
 
-	public static class OkHttpFactory implements HttpEngine.Factory {
-		private final OkHttpClient mClient;
+    public static class OkHttpFactory implements HttpEngine.Factory {
+        private final OkHttpClient mClient;
 
-		public OkHttpFactory() {
-			mClient = new OkHttpClient();
-		}
+        public OkHttpFactory() {
+            mClient = new OkHttpClient();
+        }
 
-		public OkHttpFactory(HttpResponseCache responseCache) {
-			mClient = new OkHttpClient();
-			mClient.setResponseCache(responseCache);
-		}
+        public OkHttpFactory(HttpResponseCache responseCache) {
+            mClient = new OkHttpClient();
+            mClient.setResponseCache(responseCache);
+        }
 
-		@Override
-		public HttpEngine create(UrlTileSource tileSource) {
-			return new OkHttpEngine(mClient, tileSource);
-		}
-	}
+        @Override
+        public HttpEngine create(UrlTileSource tileSource) {
+            return new OkHttpEngine(mClient, tileSource);
+        }
+    }
 
-	private InputStream inputStream;
+    private InputStream inputStream;
 
-	public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource) {
-		mClient = client;
-		mTileSource = tileSource;
-	}
+    public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource) {
+        mClient = client;
+        mTileSource = tileSource;
+    }
 
-	@Override
-	public InputStream read() throws IOException {
-		return inputStream;
-	}
+    @Override
+    public InputStream read() throws IOException {
+        return inputStream;
+    }
 
-	@Override
-	public void sendRequest(Tile tile) throws IOException {
-		if (tile == null) {
-			throw new IllegalArgumentException("Tile cannot be null.");
-		}
-		URL url = new URL(mTileSource.getTileUrl(tile));
-		HttpURLConnection conn = mClient.open(url);
+    @Override
+    public void sendRequest(Tile tile) throws IOException {
+        if (tile == null) {
+            throw new IllegalArgumentException("Tile cannot be null.");
+        }
+        URL url = new URL(mTileSource.getTileUrl(tile));
+        HttpURLConnection conn = mClient.open(url);
 
-		for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
-			conn.addRequestProperty(opt.getKey(), opt.getValue());
+        for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
+            conn.addRequestProperty(opt.getKey(), opt.getValue());
 
-		try {
-			inputStream = conn.getInputStream();
-		} catch (FileNotFoundException e) {
-			throw new IOException("ERROR " + conn.getResponseCode()
-			        + ": " + conn.getResponseMessage());
-		}
-	}
+        try {
+            inputStream = conn.getInputStream();
+        } catch (FileNotFoundException e) {
+            throw new IOException("ERROR " + conn.getResponseCode()
+                    + ": " + conn.getResponseMessage());
+        }
+    }
 
-	@Override
-	public void close() {
-		if (inputStream == null)
-			return;
+    @Override
+    public void close() {
+        if (inputStream == null)
+            return;
 
-		final InputStream is = inputStream;
-		inputStream = null;
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				IOUtils.closeQuietly(is);
-			}
-		}).start();
-	}
+        final InputStream is = inputStream;
+        inputStream = null;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                IOUtils.closeQuietly(is);
+            }
+        }).start();
+    }
 
-	@Override
-	public void setCache(OutputStream os) {
-		// OkHttp cache implented through tileSource setResponseCache
-	}
+    @Override
+    public void setCache(OutputStream os) {
+        // OkHttp cache implented through tileSource setResponseCache
+    }
 
-	@Override
-	public boolean requestCompleted(boolean success) {
-		IOUtils.closeQuietly(inputStream);
-		inputStream = null;
+    @Override
+    public boolean requestCompleted(boolean success) {
+        IOUtils.closeQuietly(inputStream);
+        inputStream = null;
 
-		return success;
-	}
+        return success;
+    }
 }

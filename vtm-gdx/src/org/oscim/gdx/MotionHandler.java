@@ -16,184 +16,184 @@
  */
 package org.oscim.gdx;
 
-import org.oscim.event.MotionEvent;
-import org.oscim.map.Map;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.InputProcessor;
 
+import org.oscim.event.MotionEvent;
+import org.oscim.map.Map;
+
 public class MotionHandler extends MotionEvent implements InputProcessor {
-	private final Map mMap;
+    private final Map mMap;
 
-	public MotionHandler(Map map) {
-		mMap = map;
-	}
+    public MotionHandler(Map map) {
+        mMap = map;
+    }
 
-	int mPointerDown;
-	long mDownTime;
+    int mPointerDown;
+    long mDownTime;
 
-	int mType;
+    int mType;
 
-	int mPointer;
-	int mCurX;
-	int mCurY;
-	int mPointerX[] = new int[10];
-	int mPointerY[] = new int[10];
+    int mPointer;
+    int mCurX;
+    int mCurY;
+    int mPointerX[] = new int[10];
+    int mPointerY[] = new int[10];
 
-	@Override
-	public int getAction() {
-		return mType;
-	}
+    @Override
+    public int getAction() {
+        return mType;
+    }
 
-	@Override
-	public float getX() {
-		return mCurX;
-	}
+    @Override
+    public float getX() {
+        return mCurX;
+    }
 
-	@Override
-	public float getY() {
-		return mCurY;
-	}
+    @Override
+    public float getY() {
+        return mCurY;
+    }
 
-	@Override
-	public float getX(int idx) {
-		if (idx >= 10)
-			return 0;
+    @Override
+    public float getX(int idx) {
+        if (idx >= 10)
+            return 0;
 
-		return mPointerX[idx];
-	}
+        return mPointerX[idx];
+    }
 
-	@Override
-	public float getY(int idx) {
-		if (idx >= 10)
-			return 0;
+    @Override
+    public float getY(int idx) {
+        if (idx >= 10)
+            return 0;
 
-		return mPointerY[idx];
-	}
+        return mPointerY[idx];
+    }
 
-	@Override
-	public int getPointerCount() {
-		return mPointerDown;
-	}
+    @Override
+    public int getPointerCount() {
+        return mPointerDown;
+    }
 
-	@Override
-	public long getTime() {
-		return (long) (mTime / 1000000d);
-	}
+    @Override
+    public long getTime() {
+        return (long) (mTime / 1000000d);
+    }
 
-	// -------- InputProcessor ----------
-	@Override
-	public boolean keyDown(int keycode) {
-		return false;
-	}
+    // -------- InputProcessor ----------
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
 
-	@Override
-	public boolean keyUp(int keycode) {
-		return false;
-	}
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
 
-	@Override
-	public boolean keyTyped(char character) {
-		return false;
-	}
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
 
-	long mTime = System.currentTimeMillis();
+    long mTime = System.currentTimeMillis();
 
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		if (pointer >= 10)
-			return true;
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (pointer >= 10)
+            return true;
 
-		if (button != Buttons.LEFT)
-			return false;
+        if (button != Buttons.LEFT)
+            return false;
 
-		mTime = Gdx.input.getCurrentEventTime();
-		if (mPointerDown++ == 0) {
-			mDownTime = getTime();
-			mType = MotionEvent.ACTION_DOWN;
-		} else {
-			mType = MotionEvent.ACTION_POINTER_DOWN;
-		}
+        mTime = Gdx.input.getCurrentEventTime();
+        if (mPointerDown++ == 0) {
+            mDownTime = getTime();
+            mType = MotionEvent.ACTION_DOWN;
+        } else {
+            mType = MotionEvent.ACTION_POINTER_DOWN;
+        }
 
-		mPointerX[pointer] = mCurX = screenX;
-		mPointerY[pointer] = mCurY = screenY;
-		mPointer = pointer;
-		//GdxMap.log.debug("down " + screenX + ":" + screenY
-		//        + " / " + pointer + " " + mPointerDown
-		//        + "  " + (getTime() - mDownTime));
+        mPointerX[pointer] = mCurX = screenX;
+        mPointerY[pointer] = mCurY = screenY;
+        mPointer = pointer;
+        //GdxMap.log.debug("down " + screenX + ":" + screenY
+        //        + " / " + pointer + " " + mPointerDown
+        //        + "  " + (getTime() - mDownTime));
 
-		mMap.input.fire(null, this);
-		return true;
-	}
+        mMap.input.fire(null, this);
+        return true;
+    }
 
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		if (pointer >= 10)
-			return true;
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (pointer >= 10)
+            return true;
 
-		if (button != Buttons.LEFT)
-			return false;
+        if (button != Buttons.LEFT)
+            return false;
 
-		if (mPointerDown == 0)
-			return true;
+        if (mPointerDown == 0)
+            return true;
 
-		mTime = Gdx.input.getCurrentEventTime();
-		mType = (--mPointerDown == 0) ?
-		        MotionEvent.ACTION_UP :
-		        MotionEvent.ACTION_POINTER_UP;
+        mTime = Gdx.input.getCurrentEventTime();
+        mType = (--mPointerDown == 0) ?
+                MotionEvent.ACTION_UP :
+                MotionEvent.ACTION_POINTER_UP;
 
-		mPointerX[pointer] = mCurX = screenX;
-		mPointerY[pointer] = mCurY = screenY;
-		mPointer = pointer;
+        mPointerX[pointer] = mCurX = screenX;
+        mPointerY[pointer] = mCurY = screenY;
+        mPointer = pointer;
 
-		//GdxMap.log.debug("up  " + screenX + ":" + screenY
-		//        + " / " + pointer + " " + mPointerDown
-		//        + "  " + (getTime() - mDownTime));
+        //GdxMap.log.debug("up  " + screenX + ":" + screenY
+        //        + " / " + pointer + " " + mPointerDown
+        //        + "  " + (getTime() - mDownTime));
 
-		mMap.input.fire(null, this);
-		return true;
-	}
+        mMap.input.fire(null, this);
+        return true;
+    }
 
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		if (pointer >= 10)
-			return true;
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if (pointer >= 10)
+            return true;
 
-		mTime = Gdx.input.getCurrentEventTime();
-		mType = MotionEvent.ACTION_MOVE;
+        mTime = Gdx.input.getCurrentEventTime();
+        mType = MotionEvent.ACTION_MOVE;
 
-		mPointerX[pointer] = mCurX = screenX;
-		mPointerY[pointer] = mCurY = screenY;
-		mPointer = pointer;
+        mPointerX[pointer] = mCurX = screenX;
+        mPointerY[pointer] = mCurY = screenY;
+        mPointer = pointer;
 
-		//GdxMap.log.debug("dragged  " + screenX + ":" + screenY
-		//        + " / " + pointer + "  " + (getTime() - mDownTime));
+        //GdxMap.log.debug("dragged  " + screenX + ":" + screenY
+        //        + " / " + pointer + "  " + (getTime() - mDownTime));
 
-		mMap.input.fire(null, this);
-		return true;
-	}
+        mMap.input.fire(null, this);
+        return true;
+    }
 
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		mTime = Gdx.input.getCurrentEventTime();
-		mType = MotionEvent.ACTION_MOVE;
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        mTime = Gdx.input.getCurrentEventTime();
+        mType = MotionEvent.ACTION_MOVE;
 
-		mPointerX[Buttons.LEFT] = mCurX = screenX;
-		mPointerY[Buttons.LEFT] = mCurY = screenY;
-		mPointer = Buttons.LEFT;
+        mPointerX[Buttons.LEFT] = mCurX = screenX;
+        mPointerY[Buttons.LEFT] = mCurY = screenY;
+        mPointer = Buttons.LEFT;
 
-		//GdxMap.log.debug("moved " + screenX + ":" + screenY);
+        //GdxMap.log.debug("moved " + screenX + ":" + screenY);
 
-		mMap.input.fire(null, this);
-		return true;
-	}
+        mMap.input.fire(null, this);
+        return true;
+    }
 
-	@Override
-	public boolean scrolled(int amount) {
-		mTime = Gdx.input.getCurrentEventTime();
+    @Override
+    public boolean scrolled(int amount) {
+        mTime = Gdx.input.getCurrentEventTime();
 
-		return false;
-	}
+        return false;
+    }
 
 }

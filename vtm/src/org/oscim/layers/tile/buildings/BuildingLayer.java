@@ -37,118 +37,120 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
-	static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
+    static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
 
-	private final static int MIN_ZOOM = 17;
-	private final static int MAX_ZOOM = 17;
+    private final static int MIN_ZOOM = 17;
+    private final static int MAX_ZOOM = 17;
 
-	private final static boolean POST_AA = false;
-	public static boolean TRANSLUCENT = true;
+    private final static boolean POST_AA = false;
+    public static boolean TRANSLUCENT = true;
 
-	private static final Object BUILDING_DATA = BuildingLayer.class.getName();
+    private static final Object BUILDING_DATA = BuildingLayer.class.getName();
 
-	public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-		this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
-	}
+    public BuildingLayer(Map map, VectorTileLayer tileLayer) {
+        this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
+    }
 
-	public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
+    public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
 
-		super(map);
+        super(map);
 
-		tileLayer.addHook(this);
+        tileLayer.addHook(this);
 
-		mRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
-		                                 zoomMin, zoomMax,
-		                                 false, TRANSLUCENT);
-		if (POST_AA)
-			mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
-	}
+        mRenderer = new BuildingRenderer(tileLayer.tileRenderer(),
+                zoomMin, zoomMax,
+                false, TRANSLUCENT);
+        if (POST_AA)
+            mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
+    }
 
-	/** TileLoaderThemeHook */
-	@Override
-	public boolean process(MapTile tile, RenderBuckets buckets, MapElement element,
-	        RenderStyle style, int level) {
+    /**
+     * TileLoaderThemeHook
+     */
+    @Override
+    public boolean process(MapTile tile, RenderBuckets buckets, MapElement element,
+                           RenderStyle style, int level) {
 
-		if (!(style instanceof ExtrusionStyle))
-			return false;
+        if (!(style instanceof ExtrusionStyle))
+            return false;
 
-		ExtrusionStyle extrusion = (ExtrusionStyle) style;
+        ExtrusionStyle extrusion = (ExtrusionStyle) style;
 
-		int height = 0;
-		int minHeight = 0;
+        int height = 0;
+        int minHeight = 0;
 
-		String v = element.tags.getValue(Tag.KEY_HEIGHT);
-		if (v != null)
-			height = Integer.parseInt(v);
+        String v = element.tags.getValue(Tag.KEY_HEIGHT);
+        if (v != null)
+            height = Integer.parseInt(v);
 
-		v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
-		if (v != null)
-			minHeight = Integer.parseInt(v);
+        v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
+        if (v != null)
+            minHeight = Integer.parseInt(v);
 
 		/* 12m default */
-		if (height == 0)
-			height = 12 * 100;
+        if (height == 0)
+            height = 12 * 100;
 
-		ExtrusionBuckets ebs = get(tile);
+        ExtrusionBuckets ebs = get(tile);
 
-		for (ExtrusionBucket b = ebs.buckets; b != null; b = b.next()) {
-			if (b.colors == extrusion.colors) {
-				b.add(element, height, minHeight);
-				return true;
-			}
-		}
+        for (ExtrusionBucket b = ebs.buckets; b != null; b = b.next()) {
+            if (b.colors == extrusion.colors) {
+                b.add(element, height, minHeight);
+                return true;
+            }
+        }
 
-		double lat = MercatorProjection.toLatitude(tile.y);
-		float groundScale = (float) MercatorProjection
-		    .groundResolution(lat, 1 << tile.zoomLevel);
+        double lat = MercatorProjection.toLatitude(tile.y);
+        float groundScale = (float) MercatorProjection
+                .groundResolution(lat, 1 << tile.zoomLevel);
 
-		ebs.buckets = Inlist.push(ebs.buckets,
-		                          new ExtrusionBucket(0, groundScale,
-		                                              extrusion.colors));
+        ebs.buckets = Inlist.push(ebs.buckets,
+                new ExtrusionBucket(0, groundScale,
+                        extrusion.colors));
 
-		ebs.buckets.add(element, height, minHeight);
+        ebs.buckets.add(element, height, minHeight);
 
-		return true;
-	}
+        return true;
+    }
 
-	public static ExtrusionBuckets get(MapTile tile) {
-		ExtrusionBuckets eb = (ExtrusionBuckets) tile.getData(BUILDING_DATA);
-		if (eb == null) {
-			eb = new ExtrusionBuckets(tile);
-			tile.addData(BUILDING_DATA, eb);
-		}
-		return eb;
-	}
+    public static ExtrusionBuckets get(MapTile tile) {
+        ExtrusionBuckets eb = (ExtrusionBuckets) tile.getData(BUILDING_DATA);
+        if (eb == null) {
+            eb = new ExtrusionBuckets(tile);
+            tile.addData(BUILDING_DATA, eb);
+        }
+        return eb;
+    }
 
-	@Override
-	public void complete(MapTile tile, boolean success) {
-		if (success)
-			get(tile).prepare();
-		else
-			get(tile).setBuckets(null);
-	}
+    @Override
+    public void complete(MapTile tile, boolean success) {
+        if (success)
+            get(tile).prepare();
+        else
+            get(tile).setBuckets(null);
+    }
 
-	//	private int multi;
-	//	@Override
-	//	public void onInputEvent(Event event, MotionEvent e) {
-	//		int action = e.getAction() & MotionEvent.ACTION_MASK;
-	//		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-	//			multi++;
-	//		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-	//			multi--;
-	//			if (!mActive && mAlpha > 0) {
-	//				// finish hiding
-	//				//log.debug("add multi hide timer " + mAlpha);
-	//				addShowTimer(mFadeTime * mAlpha, false);
-	//			}
-	//		} else if (action == MotionEvent.ACTION_CANCEL) {
-	//			multi = 0;
-	//			log.debug("cancel " + multi);
-	//			if (mTimer != null) {
-	//				mTimer.cancel();
-	//				mTimer = null;
-	//			}
-	//		}
-	//	}
+    //	private int multi;
+    //	@Override
+    //	public void onInputEvent(Event event, MotionEvent e) {
+    //		int action = e.getAction() & MotionEvent.ACTION_MASK;
+    //		if (action == MotionEvent.ACTION_POINTER_DOWN) {
+    //			multi++;
+    //		} else if (action == MotionEvent.ACTION_POINTER_UP) {
+    //			multi--;
+    //			if (!mActive && mAlpha > 0) {
+    //				// finish hiding
+    //				//log.debug("add multi hide timer " + mAlpha);
+    //				addShowTimer(mFadeTime * mAlpha, false);
+    //			}
+    //		} else if (action == MotionEvent.ACTION_CANCEL) {
+    //			multi = 0;
+    //			log.debug("cancel " + multi);
+    //			if (mTimer != null) {
+    //				mTimer.cancel();
+    //				mTimer = null;
+    //			}
+    //		}
+    //	}
 
 }

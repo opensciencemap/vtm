@@ -22,27 +22,26 @@ import java.io.FileFilter;
  * extension.
  */
 public class FilterByFileExtension implements FileFilter {
-	private final String mExtension;
+    private final String mExtension;
 
-	/**
-	 * @param extension
-	 *            the allowed file name extension.
-	 */
-	public FilterByFileExtension(String extension) {
-		mExtension = extension;
-	}
+    /**
+     * @param extension the allowed file name extension.
+     */
+    public FilterByFileExtension(String extension) {
+        mExtension = extension;
+    }
 
-	@Override
-	public boolean accept(File file) {
-		// accept only readable files
-		if (file.canRead()) {
-			if (file.isDirectory()) {
-				// accept all directories
-				return true;
-			} else if (file.isFile() && file.getName().endsWith(mExtension)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean accept(File file) {
+        // accept only readable files
+        if (file.canRead()) {
+            if (file.isDirectory()) {
+                // accept all directories
+                return true;
+            } else if (file.isFile() && file.getName().endsWith(mExtension)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

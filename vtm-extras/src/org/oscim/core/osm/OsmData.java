@@ -23,35 +23,35 @@ import java.util.Collection;
  */
 public class OsmData {
 
-	private final Collection<Bound> bounds;
-	private final Collection<OsmNode> nodes;
-	private final Collection<OsmWay> ways;
-	private final Collection<OsmRelation> relations;
+    private final Collection<Bound> bounds;
+    private final Collection<OsmNode> nodes;
+    private final Collection<OsmWay> ways;
+    private final Collection<OsmRelation> relations;
 
-	public OsmData(Collection<Bound> bounds, Collection<OsmNode> nodes,
-	        Collection<OsmWay> ways, Collection<OsmRelation> relations) {
+    public OsmData(Collection<Bound> bounds, Collection<OsmNode> nodes,
+                   Collection<OsmWay> ways, Collection<OsmRelation> relations) {
 
-		this.bounds = bounds;
-		this.nodes = nodes;
-		this.ways = ways;
-		this.relations = relations;
+        this.bounds = bounds;
+        this.nodes = nodes;
+        this.ways = ways;
+        this.relations = relations;
 
-	}
+    }
 
-	public Collection<OsmNode> getNodes() {
-		return nodes;
-	}
+    public Collection<OsmNode> getNodes() {
+        return nodes;
+    }
 
-	public Collection<OsmWay> getWays() {
-		return ways;
-	}
+    public Collection<OsmWay> getWays() {
+        return ways;
+    }
 
-	public Collection<OsmRelation> getRelations() {
-		return relations;
-	}
+    public Collection<OsmRelation> getRelations() {
+        return relations;
+    }
 
-	public Collection<Bound> getBounds() {
-		return bounds;
-	}
+    public Collection<Bound> getBounds() {
+        return bounds;
+    }
 
 }

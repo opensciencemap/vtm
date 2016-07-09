@@ -21,15 +21,15 @@ import com.google.gwt.core.client.JsArray;
 
 public abstract class Geometry<T extends JavaScriptObject> extends JsArray<T> {
 
-	protected Geometry() {
+    protected Geometry() {
 
-	}
+    }
 
-	public final native String type()/*-{
-		return this.type
+    public final native String type()/*-{
+        return this.type
 	}-*/;
 
-	public final native JsArray<T> getCoordinates() /*-{
-		return this.coordinates;
+    public final native JsArray<T> getCoordinates() /*-{
+        return this.coordinates;
 	}-*/;
 }

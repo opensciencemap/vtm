@@ -27,45 +27,45 @@ import org.slf4j.LoggerFactory;
 
 public class CustomRenderLayer extends Layer implements UpdateListener {
 
-	static final Logger log = LoggerFactory.getLogger(CustomRenderLayer.class);
+    static final Logger log = LoggerFactory.getLogger(CustomRenderLayer.class);
 
-	class CustomRenderer extends LayerRenderer {
+    class CustomRenderer extends LayerRenderer {
 
-		// functions running on MapRender Thread
-		@Override
-		public void update(GLViewport v) {
-			int currentState;
+        // functions running on MapRender Thread
+        @Override
+        public void update(GLViewport v) {
+            int currentState;
 
-			synchronized (this) {
-				currentState = someConccurentVariable;
-				compile();
-			}
-			log.debug("state " + currentState);
+            synchronized (this) {
+                currentState = someConccurentVariable;
+                compile();
+            }
+            log.debug("state " + currentState);
 
-		}
+        }
 
-		protected void compile() {
-			setReady(true);
-		}
+        protected void compile() {
+            setReady(true);
+        }
 
-		@Override
-		public void render(GLViewport v) {
-		}
-	}
+        @Override
+        public void render(GLViewport v) {
+        }
+    }
 
-	public CustomRenderLayer(Map map, LayerRenderer renderer) {
+    public CustomRenderLayer(Map map, LayerRenderer renderer) {
 
-		super(map);
-		mRenderer = new CustomRenderer();
-	}
+        super(map);
+        mRenderer = new CustomRenderer();
+    }
 
-	private int someConccurentVariable;
+    private int someConccurentVariable;
 
-	@Override
-	public void onMapEvent(Event e, MapPosition mapPosition) {
+    @Override
+    public void onMapEvent(Event e, MapPosition mapPosition) {
 
-		synchronized (mRenderer) {
-			someConccurentVariable++;
-		}
-	}
+        synchronized (mRenderer) {
+            someConccurentVariable++;
+        }
+    }
 }

@@ -16,50 +16,50 @@
  */
 package org.oscim.core.osm;
 
-import org.oscim.core.TagSet;
-
 import com.vividsolutions.jts.geom.Geometry;
+
+import org.oscim.core.TagSet;
 
 public abstract class OsmElement {
 
-	public final TagSet tags;
-	public final long id;
+    public final TagSet tags;
+    public final long id;
 
-	public OsmElement(TagSet tags, long id) {
-		assert tags != null;
-		this.tags = tags;
-		this.id = id;
-	}
+    public OsmElement(TagSet tags, long id) {
+        assert tags != null;
+        this.tags = tags;
+        this.id = id;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (id ^ (id >>> 32));
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (id ^ (id >>> 32));
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		OsmElement other = (OsmElement) obj;
-		if (id != other.id)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        OsmElement other = (OsmElement) obj;
+        if (id != other.id)
+            return false;
+        return true;
+    }
 
-	/**
-	 * returns the id, plus an one-letter prefix for the element type
-	 */
-	@Override
-	public String toString() {
-		return "?" + id;
-	}
+    /**
+     * returns the id, plus an one-letter prefix for the element type
+     */
+    @Override
+    public String toString() {
+        return "?" + id;
+    }
 
-	public abstract Geometry toJts();
+    public abstract Geometry toJts();
 }

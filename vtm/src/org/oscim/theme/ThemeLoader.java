@@ -17,50 +17,50 @@
 
 package org.oscim.theme;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 public class ThemeLoader {
-	static final Logger log = LoggerFactory.getLogger(ThemeLoader.class);
+    static final Logger log = LoggerFactory.getLogger(ThemeLoader.class);
 
-	/**
-	 * Load theme from XML file.
-	 * 
-	 * @throws FileNotFoundException
-	 * @throws ThemeException
-	 */
-	public static IRenderTheme load(String renderThemePath) throws ThemeException,
-	        FileNotFoundException {
-		return load(new ExternalRenderTheme(renderThemePath));
-	}
+    /**
+     * Load theme from XML file.
+     *
+     * @throws FileNotFoundException
+     * @throws ThemeException
+     */
+    public static IRenderTheme load(String renderThemePath) throws ThemeException,
+            FileNotFoundException {
+        return load(new ExternalRenderTheme(renderThemePath));
+    }
 
-	public static IRenderTheme load(ThemeFile theme) throws ThemeException {
+    public static IRenderTheme load(ThemeFile theme) throws ThemeException {
 
-		try {
-			InputStream is = theme.getRenderThemeAsStream();
-			return load(is);
-		} catch (FileNotFoundException e) {
-			log.error(e.getMessage());
-		}
+        try {
+            InputStream is = theme.getRenderThemeAsStream();
+            return load(is);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public static IRenderTheme load(InputStream inputStream) throws ThemeException {
+    public static IRenderTheme load(InputStream inputStream) throws ThemeException {
 
-		try {
-			IRenderTheme t = XmlThemeBuilder.read(inputStream);
-			if (t != null)
-				t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
-			return t;
-		} finally {
-			IOUtils.closeQuietly(inputStream);
-		}
-	}
+        try {
+            IRenderTheme t = XmlThemeBuilder.read(inputStream);
+            if (t != null)
+                t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
+            return t;
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
 }

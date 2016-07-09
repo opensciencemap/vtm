@@ -24,25 +24,25 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class S3DBLayerTest extends GdxMapApp {
 
-	@Override
-	public void createLayers() {
-		mMap.setBaseMap(new OSciMap4TileSource());
-		mMap.setTheme(VtmThemes.DEFAULT);
+    @Override
+    public void createLayers() {
+        mMap.setBaseMap(new OSciMap4TileSource());
+        mMap.setTheme(VtmThemes.DEFAULT);
 
-		TileSource ts = OSciMap4TileSource
-		    .builder()
-		    .url("http://opensciencemap.org/tiles/s3db")
-		    .build();
+        TileSource ts = OSciMap4TileSource
+                .builder()
+                .url("http://opensciencemap.org/tiles/s3db")
+                .build();
 
-		S3DBLayer tl = new S3DBLayer(mMap, ts);
-		mMap.layers().add(tl);
+        S3DBLayer tl = new S3DBLayer(mMap, ts);
+        mMap.layers().add(tl);
 
-		mMap.setMapPosition(53.08, 8.82, 1 << 17);
+        mMap.setMapPosition(53.08, 8.82, 1 << 17);
 
-	}
+    }
 
-	public static void main(String[] args) {
-		init();
-		run(new S3DBLayerTest(), null, 400);
-	}
+    public static void main(String[] args) {
+        init();
+        run(new S3DBLayerTest(), null, 400);
+    }
 }

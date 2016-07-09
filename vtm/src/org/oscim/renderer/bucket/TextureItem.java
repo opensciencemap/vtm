@@ -16,12 +16,6 @@
  */
 package org.oscim.renderer.bucket;
 
-import static org.oscim.backend.GLAdapter.gl;
-
-import java.util.ArrayList;
-
-import javax.annotation.CheckReturnValue;
-
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
@@ -33,301 +27,321 @@ import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
+import javax.annotation.CheckReturnValue;
+
+import static org.oscim.backend.GLAdapter.gl;
+
 public class TextureItem extends Inlist<TextureItem> {
-	static final Logger log = LoggerFactory.getLogger(TextureItem.class);
+    static final Logger log = LoggerFactory.getLogger(TextureItem.class);
 
-	static final boolean dbg = false;
+    static final boolean dbg = false;
 
-	/** texture ID */
-	private int id;
+    /**
+     * texture ID
+     */
+    private int id;
 
-	/** current settings */
-	public final int width;
-	public final int height;
-	public final boolean repeat;
+    /**
+     * current settings
+     */
+    public final int width;
+    public final int height;
+    public final boolean repeat;
 
-	/** vertex offset from which this texture is referenced */
-	/* FIXME dont put this here! */
-	public int offset;
-	public int indices;
+    /**
+     * vertex offset from which this texture is referenced
+     */
+    /* FIXME dont put this here! */
+    public int offset;
+    public int indices;
 
-	/** temporary Bitmap */
-	public Bitmap bitmap;
+    /**
+     * temporary Bitmap
+     */
+    public Bitmap bitmap;
 
-	/** do not release the texture when TextureItem is released. */
-	private TextureItem ref;
-	private int used = 0;
+    /**
+     * do not release the texture when TextureItem is released.
+     */
+    private TextureItem ref;
+    private int used = 0;
 
-	/** texture data is ready */
-	boolean loaded;
+    /**
+     * texture data is ready
+     */
+    boolean loaded;
 
-	final TexturePool pool;
+    final TexturePool pool;
 
-	private TextureItem(TexturePool pool, int id) {
-		this(pool, id, pool.mWidth, pool.mHeight, false);
-	}
+    private TextureItem(TexturePool pool, int id) {
+        this(pool, id, pool.mWidth, pool.mHeight, false);
+    }
 
-	public TextureItem(Bitmap bitmap) {
-		this(bitmap, false);
-	}
+    public TextureItem(Bitmap bitmap) {
+        this(bitmap, false);
+    }
 
-	public TextureItem(Bitmap bitmap, boolean repeat) {
-		this(NOPOOL, -1, bitmap.getWidth(), bitmap.getHeight(), repeat);
-		this.bitmap = bitmap;
-	}
+    public TextureItem(Bitmap bitmap, boolean repeat) {
+        this(NOPOOL, -1, bitmap.getWidth(), bitmap.getHeight(), repeat);
+        this.bitmap = bitmap;
+    }
 
-	private TextureItem(TexturePool pool, int id, int width, int height, boolean repeat) {
-		this.id = id;
-		this.width = width;
-		this.height = height;
-		this.pool = pool;
-		this.repeat = repeat;
-	}
+    private TextureItem(TexturePool pool, int id, int width, int height, boolean repeat) {
+        this.id = id;
+        this.width = width;
+        this.height = height;
+        this.pool = pool;
+        this.repeat = repeat;
+    }
 
-	public static TextureItem clone(TextureItem ti) {
+    public static TextureItem clone(TextureItem ti) {
 
-		TextureItem clone = new TextureItem(NOPOOL, ti.id, ti.width, ti.height, ti.repeat);
-		clone.id = ti.id;
-		clone.ref = (ti.ref == null) ? ti : ti.ref;
-		clone.loaded = ti.loaded;
+        TextureItem clone = new TextureItem(NOPOOL, ti.id, ti.width, ti.height, ti.repeat);
+        clone.id = ti.id;
+        clone.ref = (ti.ref == null) ? ti : ti.ref;
+        clone.loaded = ti.loaded;
 
-		clone.ref.used++;
+        clone.ref.used++;
 
-		return clone;
-	}
+        return clone;
+    }
 
-	/**
-	 * Upload Image to Texture
-	 * [on GL-Thread]
-	 */
-	public void upload() {
-		if (loaded)
-			return;
+    /**
+     * Upload Image to Texture
+     * [on GL-Thread]
+     */
+    public void upload() {
+        if (loaded)
+            return;
 
-		if (ref == null) {
-			pool.uploadTexture(this);
+        if (ref == null) {
+            pool.uploadTexture(this);
 
-		} else {
-			/* load referenced texture */
-			ref.upload();
-			id = ref.id;
+        } else {
+            /* load referenced texture */
+            ref.upload();
+            id = ref.id;
 
-		}
-		loaded = true;
-	}
+        }
+        loaded = true;
+    }
 
-	/**
-	 * Bind Texture for rendering
-	 * [on GL-Thread]
-	 */
-	public void bind() {
-		if (loaded)
-			GLState.bindTex2D(id);
-		else
-			upload();
-	}
+    /**
+     * Bind Texture for rendering
+     * [on GL-Thread]
+     */
+    public void bind() {
+        if (loaded)
+            GLState.bindTex2D(id);
+        else
+            upload();
+    }
 
-	/**
-	 * Dispose TextureItem
-	 * [Threadsafe]
-	 * 
-	 * @return this.next
-	 */
-	@CheckReturnValue
-	public TextureItem dispose() {
-		TextureItem n = this.next;
-		this.next = null;
-		pool.release(this);
-		return n;
-	}
+    /**
+     * Dispose TextureItem
+     * [Threadsafe]
+     *
+     * @return this.next
+     */
+    @CheckReturnValue
+    public TextureItem dispose() {
+        TextureItem n = this.next;
+        this.next = null;
+        pool.release(this);
+        return n;
+    }
 
-	public static class TexturePool extends SyncPool<TextureItem> {
-		private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
+    public static class TexturePool extends SyncPool<TextureItem> {
+        private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
 
-		private final int mHeight;
-		private final int mWidth;
-		private final boolean mUseBitmapPool;
+        private final int mHeight;
+        private final int mWidth;
+        private final boolean mUseBitmapPool;
 
-		//private final int mBitmapFormat;
-		//private final int mBitmapType;
+        //private final int mBitmapFormat;
+        //private final int mBitmapType;
 
-		protected int mTexCnt = 0;
+        protected int mTexCnt = 0;
 
-		public TexturePool(int maxFill, int width, int height) {
-			super(maxFill);
-			mWidth = width;
-			mHeight = height;
-			mUseBitmapPool = true;
-		}
+        public TexturePool(int maxFill, int width, int height) {
+            super(maxFill);
+            mWidth = width;
+            mHeight = height;
+            mUseBitmapPool = true;
+        }
 
-		public TexturePool(int maxFill) {
-			super(maxFill);
-			mWidth = 0;
-			mHeight = 0;
-			mUseBitmapPool = false;
-		}
+        public TexturePool(int maxFill) {
+            super(maxFill);
+            mWidth = 0;
+            mHeight = 0;
+            mUseBitmapPool = false;
+        }
 
-		@Override
-		public TextureItem releaseAll(TextureItem t) {
-			throw new RuntimeException("use TextureItem.dispose()");
-		}
+        @Override
+        public TextureItem releaseAll(TextureItem t) {
+            throw new RuntimeException("use TextureItem.dispose()");
+        }
 
-		/**
-		 * Retrieve a TextureItem from pool.
-		 */
-		public synchronized TextureItem get() {
-			TextureItem t = super.get();
+        /**
+         * Retrieve a TextureItem from pool.
+         */
+        public synchronized TextureItem get() {
+            TextureItem t = super.get();
 
-			if (!mUseBitmapPool)
-				return t;
+            if (!mUseBitmapPool)
+                return t;
 
-			synchronized (mBitmaps) {
-				int size = mBitmaps.size();
-				if (size == 0)
-					t.bitmap = CanvasAdapter.newBitmap(mWidth, mHeight, 0);
-				else {
-					t.bitmap = mBitmaps.remove(size - 1);
-					t.bitmap.eraseColor(Color.TRANSPARENT);
-				}
-			}
+            synchronized (mBitmaps) {
+                int size = mBitmaps.size();
+                if (size == 0)
+                    t.bitmap = CanvasAdapter.newBitmap(mWidth, mHeight, 0);
+                else {
+                    t.bitmap = mBitmaps.remove(size - 1);
+                    t.bitmap.eraseColor(Color.TRANSPARENT);
+                }
+            }
 
-			return t;
-		}
+            return t;
+        }
 
-		public synchronized TextureItem get(Bitmap bitmap) {
-			TextureItem t = super.get();
-			t.bitmap = bitmap;
+        public synchronized TextureItem get(Bitmap bitmap) {
+            TextureItem t = super.get();
+            t.bitmap = bitmap;
 
-			return t;
-		}
+            return t;
+        }
 
-		@Override
-		protected TextureItem createItem() {
-			return new TextureItem(this, -1);
-		}
+        @Override
+        protected TextureItem createItem() {
+            return new TextureItem(this, -1);
+        }
 
-		@Override
-		protected boolean clearItem(TextureItem t) {
+        @Override
+        protected boolean clearItem(TextureItem t) {
 
-			if (t.used > 0)
-				return false;
+            if (t.used > 0)
+                return false;
 
-			if (t.ref != null) {
+            if (t.ref != null) {
 				/* dispose texture if this clone holds the last handle */
-				if (t.ref.used == 0) {
-					t.ref.dispose();
-					return false;
-				}
-				t.ref.used--;
-				return false;
-			}
+                if (t.ref.used == 0) {
+                    t.ref.dispose();
+                    return false;
+                }
+                t.ref.used--;
+                return false;
+            }
 
-			t.loaded = false;
+            t.loaded = false;
 
-			if (mUseBitmapPool)
-				releaseBitmap(t);
+            if (mUseBitmapPool)
+                releaseBitmap(t);
 
-			return t.id >= 0;
-		}
+            return t.id >= 0;
+        }
 
-		@Override
-		protected void freeItem(TextureItem t) {
+        @Override
+        protected void freeItem(TextureItem t) {
 
-			if (t.ref == null && t.used == 0 && t.id >= 0) {
-				mTexCnt--;
-				synchronized (disposedTextures) {
-					disposedTextures.add(Integer.valueOf(t.id));
-					t.id = -1;
-				}
-			}
-		}
+            if (t.ref == null && t.used == 0 && t.id >= 0) {
+                mTexCnt--;
+                synchronized (disposedTextures) {
+                    disposedTextures.add(Integer.valueOf(t.id));
+                    t.id = -1;
+                }
+            }
+        }
 
-		protected void releaseBitmap(TextureItem t) {
+        protected void releaseBitmap(TextureItem t) {
 
-			if (t.bitmap == null)
-				return;
+            if (t.bitmap == null)
+                return;
 
-			synchronized (mBitmaps) {
-				mBitmaps.add(t.bitmap);
-				t.bitmap = null;
-			}
-		}
+            synchronized (mBitmaps) {
+                mBitmaps.add(t.bitmap);
+                t.bitmap = null;
+            }
+        }
 
-		private void uploadTexture(TextureItem t) {
+        private void uploadTexture(TextureItem t) {
 
-			if (t.bitmap == null)
-				throw new RuntimeException("Missing bitmap for texture");
+            if (t.bitmap == null)
+                throw new RuntimeException("Missing bitmap for texture");
 
-			if (t.id < 0) {
-				int[] textureIds = GLUtils.glGenTextures(1);
-				t.id = textureIds[0];
+            if (t.id < 0) {
+                int[] textureIds = GLUtils.glGenTextures(1);
+                t.id = textureIds[0];
 
-				initTexture(t);
+                initTexture(t);
 
-				if (dbg)
-					log.debug("fill:" + getFill()
-					        + " count:" + mTexCnt
-					        + " new texture " + t.id);
+                if (dbg)
+                    log.debug("fill:" + getFill()
+                            + " count:" + mTexCnt
+                            + " new texture " + t.id);
 
-				mTexCnt++;
+                mTexCnt++;
 
-				t.bitmap.uploadToTexture(false);
-			} else {
-				GLState.bindTex2D(t.id);
+                t.bitmap.uploadToTexture(false);
+            } else {
+                GLState.bindTex2D(t.id);
 
 				/* use faster subimage upload */
-				t.bitmap.uploadToTexture(true);
-			}
+                t.bitmap.uploadToTexture(true);
+            }
 
-			if (dbg)
-				GLUtils.checkGlError(TextureItem.class.getName());
+            if (dbg)
+                GLUtils.checkGlError(TextureItem.class.getName());
 
-			if (mUseBitmapPool)
-				releaseBitmap(t);
-		}
+            if (mUseBitmapPool)
+                releaseBitmap(t);
+        }
 
-		protected void initTexture(TextureItem t) {
-			GLState.bindTex2D(t.id);
+        protected void initTexture(TextureItem t) {
+            GLState.bindTex2D(t.id);
 
-			gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER,
-			                 GL.LINEAR);
-			gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER,
-			                 GL.LINEAR);
+            gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER,
+                    GL.LINEAR);
+            gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER,
+                    GL.LINEAR);
 
-			if (t.repeat) {
-				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
-				                 GL.REPEAT);
-				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
-				                 GL.REPEAT);
-			} else {
-				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
-				                 GL.CLAMP_TO_EDGE);
-				gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
-				                 GL.CLAMP_TO_EDGE);
-			}
-		}
-	};
+            if (t.repeat) {
+                gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
+                        GL.REPEAT);
+                gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
+                        GL.REPEAT);
+            } else {
+                gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S,
+                        GL.CLAMP_TO_EDGE);
+                gl.texParameterf(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T,
+                        GL.CLAMP_TO_EDGE);
+            }
+        }
+    }
 
-	/* Pool for not-pooled textures. Disposed items will only be released
-	 * on the GL-Thread and will not be put back in any pool. */
-	final static TexturePool NOPOOL = new TexturePool(0);
-	final static ArrayList<Integer> disposedTextures = new ArrayList<Integer>();
+    ;
 
-	/**
-	 * Disposed textures are released by MapRenderer after each frame
-	 */
-	public static void disposeTextures() {
-		synchronized (disposedTextures) {
+    /* Pool for not-pooled textures. Disposed items will only be released
+     * on the GL-Thread and will not be put back in any pool. */
+    final static TexturePool NOPOOL = new TexturePool(0);
+    final static ArrayList<Integer> disposedTextures = new ArrayList<Integer>();
 
-			int size = disposedTextures.size();
-			if (size > 0) {
-				int[] tmp = new int[size];
-				for (int i = 0; i < size; i++)
-					tmp[i] = disposedTextures.get(i).intValue();
+    /**
+     * Disposed textures are released by MapRenderer after each frame
+     */
+    public static void disposeTextures() {
+        synchronized (disposedTextures) {
 
-				disposedTextures.clear();
-				GLUtils.glDeleteTextures(size, tmp);
-			}
-		}
-	}
+            int size = disposedTextures.size();
+            if (size > 0) {
+                int[] tmp = new int[size];
+                for (int i = 0; i < size; i++)
+                    tmp[i] = disposedTextures.get(i).intValue();
+
+                disposedTextures.clear();
+                GLUtils.glDeleteTextures(size, tmp);
+            }
+        }
+    }
 }

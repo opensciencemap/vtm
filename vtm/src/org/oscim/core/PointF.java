@@ -21,39 +21,43 @@ package org.oscim.core;
  */
 public class PointF {
 
-	/** The x ordinate */
-	public float x;
+    /**
+     * The x ordinate
+     */
+    public float x;
 
-	/** The y ordinate */
-	public float y;
+    /**
+     * The y ordinate
+     */
+    public float y;
 
-	/**
-	 * Instantiates a new Point.
-	 */
-	public PointF() {
-	}
+    /**
+     * Instantiates a new Point.
+     */
+    public PointF() {
+    }
 
-	/**
-	 * Instantiates a new Point with coordinates x and y.
-	 * 
-	 * @param x the x
-	 * @param y the y
-	 */
-	public PointF(float x, float y) {
-		this.x = x;
-		this.y = y;
-	}
+    /**
+     * Instantiates a new Point with coordinates x and y.
+     *
+     * @param x the x
+     * @param y the y
+     */
+    public PointF(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
 
-	public float getX() {
-		return x;
-	}
+    public float getX() {
+        return x;
+    }
 
-	public float getY() {
-		return y;
-	}
+    public float getY() {
+        return y;
+    }
 
-	@Override
-	public String toString() {
-		return x + " " + y;
-	}
+    @Override
+    public String toString() {
+        return x + " " + y;
+    }
 }

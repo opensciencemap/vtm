@@ -1,6 +1,6 @@
 package org.oscim.test;
 
-import java.io.FileNotFoundException;
+import com.badlogic.gdx.Input;
 
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
@@ -11,72 +11,72 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
-import com.badlogic.gdx.Input;
+import java.io.FileNotFoundException;
 
 public class ExternalRenderThemeTest extends GdxMap {
 
-	VectorTileLayer mapLayer;
+    VectorTileLayer mapLayer;
 
-	@Override
-	protected boolean onKeyDown(int keycode) {
-		String name = null;
-		if (keycode == Input.Keys.NUM_1)
-			name = "themes/freizeitkarte/theme.xml";
-		if (keycode == Input.Keys.NUM_2)
-			name = "themes/elevate/theme.xml";
-		if (keycode == Input.Keys.NUM_3)
-			name = "themes/vmap/theme.xml";
+    @Override
+    protected boolean onKeyDown(int keycode) {
+        String name = null;
+        if (keycode == Input.Keys.NUM_1)
+            name = "themes/freizeitkarte/theme.xml";
+        if (keycode == Input.Keys.NUM_2)
+            name = "themes/elevate/theme.xml";
+        if (keycode == Input.Keys.NUM_3)
+            name = "themes/vmap/theme.xml";
 
-		if (name == null)
-			return false;
+        if (name == null)
+            return false;
 
-		try {
-			IRenderTheme theme = ThemeLoader.load(name);
-			mapLayer.setRenderTheme(theme);
-			MapRenderer.setBackgroundColor(theme.getMapBackground());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+        try {
+            IRenderTheme theme = ThemeLoader.load(name);
+            mapLayer.setRenderTheme(theme);
+            MapRenderer.setBackgroundColor(theme.getMapBackground());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-		mMap.clearMap();
-		mMap.updateMap(true);
-		return true;
-	}
+        mMap.clearMap();
+        mMap.updateMap(true);
+        return true;
+    }
 
-	@Override
-	public void createLayers() {
-		mMap.setMapPosition(53.08, 8.83, 1 << 14);
+    @Override
+    public void createLayers() {
+        mMap.setMapPosition(53.08, 8.83, 1 << 14);
 
-		// TileSource tileSource = new OSciMap4TileSource();
+        // TileSource tileSource = new OSciMap4TileSource();
 
-		MapFileTileSource tileSource = new MapFileTileSource();
-		// tileSource.setMapFile("/home/jeff/src/vtm/Freizeitkarte_DEU_NW.map");
-		tileSource.setMapFile("/home/jeff/germany.map");
+        MapFileTileSource tileSource = new MapFileTileSource();
+        // tileSource.setMapFile("/home/jeff/src/vtm/Freizeitkarte_DEU_NW.map");
+        tileSource.setMapFile("/home/jeff/germany.map");
 
-		VectorTileLayer l = mMap.setBaseMap(tileSource);
-		mapLayer = l;
+        VectorTileLayer l = mMap.setBaseMap(tileSource);
+        mapLayer = l;
 
-		// mMap.getLayers().add(new BuildingLayer(mMap, l.getTileLayer()));
-		mMap.layers().add(new LabelLayer(mMap, l));
+        // mMap.getLayers().add(new BuildingLayer(mMap, l.getTileLayer()));
+        mMap.layers().add(new LabelLayer(mMap, l));
 
-		try {
-			IRenderTheme theme = ThemeLoader
-			    .load("themes/freizeitkarte/theme.xml");
-			// IRenderTheme theme =
-			// ThemeLoader.load("themes/elevate/theme.xml");
-			// IRenderTheme theme = ThemeLoader.load("themes/vmap/theme.xml");
-			l.setRenderTheme(theme);
-			MapRenderer.setBackgroundColor(theme.getMapBackground());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+        try {
+            IRenderTheme theme = ThemeLoader
+                    .load("themes/freizeitkarte/theme.xml");
+            // IRenderTheme theme =
+            // ThemeLoader.load("themes/elevate/theme.xml");
+            // IRenderTheme theme = ThemeLoader.load("themes/vmap/theme.xml");
+            l.setRenderTheme(theme);
+            MapRenderer.setBackgroundColor(theme.getMapBackground());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-		// mMap.getLayers().add(new GenericLayer(mMap, new MeshRenderer()));
-		// mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
-	}
+        // mMap.getLayers().add(new GenericLayer(mMap, new MeshRenderer()));
+        // mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
+    }
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new ExternalRenderThemeTest(), null, 256);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new ExternalRenderThemeTest(), null, 256);
+    }
 }

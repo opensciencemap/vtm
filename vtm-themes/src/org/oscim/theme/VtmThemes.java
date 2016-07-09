@@ -17,28 +17,28 @@
  */
 package org.oscim.theme;
 
-import java.io.InputStream;
-
 import org.oscim.backend.AssetAdapter;
+
+import java.io.InputStream;
 
 /**
  * Enumeration of all internal rendering themes.
  */
 public enum VtmThemes implements ThemeFile {
 
-	DEFAULT("styles/default.xml"),
-	TRONRENDER("styles/tronrender.xml"),
-	NEWTRON("styles/newtron.xml"),
-	OSMARENDER("styles/osmarender.xml");
+    DEFAULT("styles/default.xml"),
+    TRONRENDER("styles/tronrender.xml"),
+    NEWTRON("styles/newtron.xml"),
+    OSMARENDER("styles/osmarender.xml");
 
-	private final String mPath;
+    private final String mPath;
 
-	private VtmThemes(String path) {
-		mPath = path;
-	}
+    private VtmThemes(String path) {
+        mPath = path;
+    }
 
-	@Override
-	public InputStream getRenderThemeAsStream() {
-		return AssetAdapter.readFileAsStream(mPath);
-	}
+    @Override
+    public InputStream getRenderThemeAsStream() {
+        return AssetAdapter.readFileAsStream(mPath);
+    }
 }

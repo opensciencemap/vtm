@@ -16,23 +16,23 @@
  */
 package org.oscim.tiling.source.geojson;
 
-import java.util.Map;
-
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 
+import java.util.Map;
+
 public class OsmBuildingJsonTileSource extends GeoJsonTileSource {
 
-	public OsmBuildingJsonTileSource() {
-		super("http://tile.openstreetmap.us/vectiles-buildings");
-	}
+    public OsmBuildingJsonTileSource() {
+        super("http://tile.openstreetmap.us/vectiles-buildings");
+    }
 
-	Tag mTagBuilding = new Tag("building", "yes");
+    Tag mTagBuilding = new Tag("building", "yes");
 
-	@Override
-	public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
+    @Override
+    public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
 
-		mapElement.tags.add(mTagBuilding);
+        mapElement.tags.add(mTagBuilding);
 
-	}
+    }
 }

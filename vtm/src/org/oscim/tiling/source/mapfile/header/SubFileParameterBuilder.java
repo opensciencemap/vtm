@@ -19,15 +19,15 @@ package org.oscim.tiling.source.mapfile.header;
 import org.oscim.core.BoundingBox;
 
 class SubFileParameterBuilder {
-	byte baseZoomLevel;
-	BoundingBox boundingBox;
-	long indexStartAddress;
-	long startAddress;
-	long subFileSize;
-	byte zoomLevelMax;
-	byte zoomLevelMin;
+    byte baseZoomLevel;
+    BoundingBox boundingBox;
+    long indexStartAddress;
+    long startAddress;
+    long subFileSize;
+    byte zoomLevelMax;
+    byte zoomLevelMin;
 
-	SubFileParameter build() {
-		return new SubFileParameter(this);
-	}
+    SubFileParameter build() {
+        return new SubFileParameter(this);
+    }
 }

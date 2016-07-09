@@ -19,30 +19,30 @@ package org.oscim.gdx.client;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class MapConfig extends JavaScriptObject {
-	protected MapConfig() {
-	}
+    protected MapConfig() {
+    }
 
-	public static native MapConfig get()/*-{
-		return $wnd.mapconfig;
+    public static native MapConfig get()/*-{
+        return $wnd.mapconfig;
 	}-*/;
 
-	public final native double getLatitude() /*-{
-		return this.latitude || 0;
+    public final native double getLatitude() /*-{
+        return this.latitude || 0;
 	}-*/;
 
-	public final native double getLongitude() /*-{
+    public final native double getLongitude() /*-{
 		return this.longitude || 0;
 	}-*/;
 
-	public final native int getZoom() /*-{
+    public final native int getZoom() /*-{
 		return this.zoom || 2;
 	}-*/;
 
-	public final native String getTileSource() /*-{
+    public final native String getTileSource() /*-{
 		return this.tilesource;
 	}-*/;
 
-	public final native int getTileSize() /*-{
+    public final native int getTileSize() /*-{
 		return this.tileSize || 256;
 	}-*/;
 

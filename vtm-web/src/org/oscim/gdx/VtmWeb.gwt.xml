@@ -1,75 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <module>
-  <!-- <entry-point class="org.oscim.gdx.client.GwtLauncher" /> -->
+    <!-- <entry-point class="org.oscim.gdx.client.GwtLauncher" /> -->
 
-  <inherits name="com.google.gwt.xml.XML" />
-  <inherits name="ru.finam.slf4jgwt.logging.gwt.Logging" />
+    <inherits name="com.google.gwt.xml.XML" />
+    <inherits name="ru.finam.slf4jgwt.logging.gwt.Logging" />
 
-<!--   <set-property name='gwt.logging.enabled' value='TRUE' />
-  <set-property name='gwt.logging.consoleHandler' value='ENABLED' />
-  <set-property name='gwt.logging.firebugHandler' value='DISABLED' />
-  <set-property name='gwt.logging.popupHandler' value='DISABLED' />
-  <set-property name="gwt.logging.logLevel" value="FINE"/> 
- -->
-  <inherits name="VtmGdx" />
-   <!-- <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt" /> -->
-  <inherits name="com.badlogic.gdx.backends.Gdx" />
-  <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
+    <!--   <set-property name='gwt.logging.enabled' value='TRUE' />
+      <set-property name='gwt.logging.consoleHandler' value='ENABLED' />
+      <set-property name='gwt.logging.firebugHandler' value='DISABLED' />
+      <set-property name='gwt.logging.popupHandler' value='DISABLED' />
+      <set-property name="gwt.logging.logLevel" value="FINE"/>
+     -->
+    <inherits name="VtmGdx" />
+    <!-- <inherits name="com.badlogic.gdx.backends.gdx_backends_gwt" /> -->
+    <inherits name="com.badlogic.gdx.backends.Gdx" />
+    <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
 
 
-<!--   <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.scenes.scene2d" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.math" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.TextureRegion" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.BitmapFont" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.NinePatch" />
-  <extend-configuration-property name="gdx.reflect.include"
-       value="com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.Color" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.Texture" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.Array" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.ObjectMap" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.OrderedMap" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.Disposable" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.VertexAttribute" />
-  <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g3d.model" />
- -->
-  <clear-configuration-property name="gdx.reflect.include" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.util.List" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.util.ArrayList" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.util.Map" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.util.HashMap" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.String" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Boolean" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Byte" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Short" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Character" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Integer" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Float" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Double" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.CharSequence" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Enum" />
-  <extend-configuration-property name="gdx.reflect.include" value="java.lang.Object" />
-  
-  <!-- super dev mode -->
-  <!-- 
-  <add-linker name="xsiframe"/>
-  <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
-  <set-configuration-property name="devModeRedirectEnabled" value="true"/>
-   -->
+    <!--   <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.scenes.scene2d" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.math" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.TextureRegion" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.BitmapFont" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.NinePatch" />
+      <extend-configuration-property name="gdx.reflect.include"
+           value="com.badlogic.gdx.graphics.g3d.materials.MaterialAttribute" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.Color" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.Texture" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.Array" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.ObjectMap" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.OrderedMap" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.Disposable" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.VertexAttribute" />
+      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g3d.model" />
+     -->
+    <clear-configuration-property name="gdx.reflect.include" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.util.List" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.util.ArrayList" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.util.Map" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.util.HashMap" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.String" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Boolean" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Byte" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Short" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Character" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Integer" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Float" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Double" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.CharSequence" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Enum" />
+    <extend-configuration-property name="gdx.reflect.include" value="java.lang.Object" />
 
-  <!-- does not work with super dev mode, include directly in page -->
-  <!--  
-  <script src="_tessellate.js"/>
-  <script src="tessellate.js"/> 
-  -->
+    <!-- super dev mode -->
+    <!--
+    <add-linker name="xsiframe"/>
+    <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+    <set-configuration-property name="devModeRedirectEnabled" value="true"/>
+     -->
 
-  <public path="resources" />
+    <!-- does not work with super dev mode, include directly in page -->
+    <!--
+    <script src="_tessellate.js"/>
+    <script src="tessellate.js"/>
+    -->
 
-  <super-source path="emu" />
+    <public path="resources" />
 
-  <!-- <set-configuration-property name="gdx.assetpath" value="./assets" /> -->
-  <!-- for gradle build, commend out for eclipse build/devmode -->
-  <!-- <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" /> -->
-  
-  <!-- <set-property name="user.agent" value="safari"/> -->
+    <super-source path="emu" />
+
+    <!-- <set-configuration-property name="gdx.assetpath" value="./assets" /> -->
+    <!-- for gradle build, commend out for eclipse build/devmode -->
+    <!-- <set-configuration-property name="gdx.assetoutputpath" value="build/gwt/draftOut" /> -->
+
+    <!-- <set-property name="user.agent" value="safari"/> -->
 </module>

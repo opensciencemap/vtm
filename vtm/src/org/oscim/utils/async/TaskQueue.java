@@ -18,13 +18,13 @@
 package org.oscim.utils.async;
 
 public interface TaskQueue {
-	/**
-	 * Add task to run on a main thread.
-	 */
-	boolean post(Runnable task);
+    /**
+     * Add task to run on a main thread.
+     */
+    boolean post(Runnable task);
 
-	/**
-	 * Add task to run on a worker thread.
-	 */
-	void addTask(Runnable task);
+    /**
+     * Add task to run on a worker thread.
+     */
+    void addTask(Runnable task);
 }

@@ -17,9 +17,6 @@
  */
 package org.oscim.android.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,47 +25,50 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A simple start screen for the sample activities.
  */
 public class Samples extends Activity {
-	public static Logger log = LoggerFactory.getLogger(Samples.class);
+    public static Logger log = LoggerFactory.getLogger(Samples.class);
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_samples);
-		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
-		linearLayout.addView(createButton(SimpleMapActivity.class));
-		linearLayout.addView(createButton(BitmapTileMapActivity.class));
-		linearLayout.addView(createButton(MapsforgeMapActivity.class));
-		linearLayout.addView(createButton(PathOverlayActivity.class));
-		linearLayout.addView(createButton(MarkerOverlayActivity.class));
-		linearLayout.addView(createButton(ThemeStylerActivity.class));
-		linearLayout.addView(createButton(S3DBMapActivity.class));
-		linearLayout.addView(createButton(JeoIndoorMapActivity.class));
-		linearLayout.addView(createButton(OsmJsonMapActivity.class));
-		linearLayout.addView(createButton(VectorLayerMapActivity.class));
-	}
+        setContentView(R.layout.activity_samples);
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
+        linearLayout.addView(createButton(SimpleMapActivity.class));
+        linearLayout.addView(createButton(BitmapTileMapActivity.class));
+        linearLayout.addView(createButton(MapsforgeMapActivity.class));
+        linearLayout.addView(createButton(PathOverlayActivity.class));
+        linearLayout.addView(createButton(MarkerOverlayActivity.class));
+        linearLayout.addView(createButton(ThemeStylerActivity.class));
+        linearLayout.addView(createButton(S3DBMapActivity.class));
+        linearLayout.addView(createButton(JeoIndoorMapActivity.class));
+        linearLayout.addView(createButton(OsmJsonMapActivity.class));
+        linearLayout.addView(createButton(VectorLayerMapActivity.class));
+    }
 
-	private Button createButton(final Class<?> clazz) {
-		return this.createButton(clazz, null);
-	}
+    private Button createButton(final Class<?> clazz) {
+        return this.createButton(clazz, null);
+    }
 
-	private Button createButton(final Class<?> clazz, String text) {
-		Button button = new Button(this);
-		if (text == null) {
-			button.setText(clazz.getSimpleName());
-		} else {
-			button.setText(text);
-		}
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				startActivity(new Intent(Samples.this, clazz));
-			}
-		});
-		return button;
-	}
+    private Button createButton(final Class<?> clazz, String text) {
+        Button button = new Button(this);
+        if (text == null) {
+            button.setText(clazz.getSimpleName());
+        } else {
+            button.setText(text);
+        }
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Samples.this, clazz));
+            }
+        });
+        return button;
+    }
 }

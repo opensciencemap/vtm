@@ -17,37 +17,37 @@
 package org.oscim.utils.pool;
 
 public class LList<T> extends Inlist<LList<T>> {
-	public LList(T l) {
-		data = l;
-	}
+    public LList(T l) {
+        data = l;
+    }
 
-	public final T data;
+    public final T data;
 
-	public static <E extends LList<T>, T> LList<T> find(LList<T> list, T item) {
-		for (LList<T> l = list; l != null; l = l.next)
-			if (l.data == item)
-				return l;
+    public static <E extends LList<T>, T> LList<T> find(LList<T> list, T item) {
+        for (LList<T> l = list; l != null; l = l.next)
+            if (l.data == item)
+                return l;
 
-		return null;
-	}
+        return null;
+    }
 
-	public static <E extends LList<T>, T> LList<T> remove(LList<T> list, T item) {
-		if (list.data == item)
-			return list.next;
+    public static <E extends LList<T>, T> LList<T> remove(LList<T> list, T item) {
+        if (list.data == item)
+            return list.next;
 
-		LList<T> prev = list;
-		for (LList<T> l = list.next; l != null; l = l.next)
-			if (l.data == item) {
-				prev.next = l.next;
-				break;
-			}
+        LList<T> prev = list;
+        for (LList<T> l = list.next; l != null; l = l.next)
+            if (l.data == item) {
+                prev.next = l.next;
+                break;
+            }
 
-		return list;
-	}
+        return list;
+    }
 
-	public static <T extends LList<T>> LList<T> push(LList<T> list, T item) {
-		item.next = list;
-		return item;
-	}
+    public static <T extends LList<T>> LList<T> push(LList<T> list, T item) {
+        item.next = list;
+        return item;
+    }
 
 }

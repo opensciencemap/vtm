@@ -24,177 +24,177 @@ import org.slf4j.LoggerFactory;
  * An abstract base class for threads which support pausing and resuming.
  */
 public abstract class PausableThread extends Thread {
-	private final static Logger log = LoggerFactory.getLogger(PausableThread.class);
-	private final static boolean dbg = false;
+    private final static Logger log = LoggerFactory.getLogger(PausableThread.class);
+    private final static boolean dbg = false;
 
-	private boolean mPausing = true;
-	private boolean mRunning = true;
-	private boolean mShouldPause = false;
-	private boolean mShouldStop = false;
+    private boolean mPausing = true;
+    private boolean mRunning = true;
+    private boolean mShouldPause = false;
+    private boolean mShouldStop = false;
 
-	/**
-	 * Causes the current thread to wait until this thread is pausing.
-	 */
-	public final void awaitPausing() {
-		synchronized (this) {
+    /**
+     * Causes the current thread to wait until this thread is pausing.
+     */
+    public final void awaitPausing() {
+        synchronized (this) {
 
-			while (!isPausing()) {
+            while (!isPausing()) {
 
-				if (dbg)
-					log.debug("Await Pause {}", getThreadName());
+                if (dbg)
+                    log.debug("Await Pause {}", getThreadName());
 
-				try {
-					wait(100);
-				} catch (InterruptedException e) {
-					/* restore the interrupted status */
-					this.interrupt();
-				}
-			}
-		}
-	}
+                try {
+                    wait(100);
+                } catch (InterruptedException e) {
+                    /* restore the interrupted status */
+                    this.interrupt();
+                }
+            }
+        }
+    }
 
-	public synchronized void finish() {
-		if (!mRunning)
-			return;
+    public synchronized void finish() {
+        if (!mRunning)
+            return;
 
-		log.debug("Finish {}", getThreadName());
+        log.debug("Finish {}", getThreadName());
 
-		mShouldStop = true;
-		this.interrupt();
-	}
+        mShouldStop = true;
+        this.interrupt();
+    }
 
-	/**
-	 * @return true if this thread is currently pausing, false otherwise.
-	 */
-	public final synchronized boolean isPausing() {
-		return mPausing;
-	}
+    /**
+     * @return true if this thread is currently pausing, false otherwise.
+     */
+    public final synchronized boolean isPausing() {
+        return mPausing;
+    }
 
-	/**
-	 * The thread should stop its work temporarily.
-	 */
-	public final synchronized void pause() {
-		if (!mShouldPause) {
-			mShouldPause = true;
-			this.interrupt();
-		}
-	}
+    /**
+     * The thread should stop its work temporarily.
+     */
+    public final synchronized void pause() {
+        if (!mShouldPause) {
+            mShouldPause = true;
+            this.interrupt();
+        }
+    }
 
-	/**
-	 * The paused thread should continue with its work.
-	 */
-	public final synchronized void proceed() {
-		if (mShouldPause) {
-			mShouldPause = false;
-			notify();
-		}
-	}
+    /**
+     * The paused thread should continue with its work.
+     */
+    public final synchronized void proceed() {
+        if (mShouldPause) {
+            mShouldPause = false;
+            notify();
+        }
+    }
 
-	public final synchronized boolean isCanceled() {
-		return mShouldPause;
-	}
+    public final synchronized boolean isCanceled() {
+        return mShouldPause;
+    }
 
-	@Override
-	public final void run() {
-		mRunning = true;
-		setName(getThreadName());
-		setPriority(getThreadPriority());
+    @Override
+    public final void run() {
+        mRunning = true;
+        setName(getThreadName());
+        setPriority(getThreadPriority());
 
-		O: while (!mShouldStop) {
+        O:
+        while (!mShouldStop) {
 
-			synchronized (this) {
-				if (mShouldStop)
-					break;
+            synchronized (this) {
+                if (mShouldStop)
+                    break;
 
-				while ((mShouldPause || !hasWork())) {
-					try {
-						if (mShouldPause) {
-							mPausing = true;
+                while ((mShouldPause || !hasWork())) {
+                    try {
+                        if (mShouldPause) {
+                            mPausing = true;
 
-							if (dbg)
-								log.debug("Pausing: {}",
-								          getThreadName());
-						}
+                            if (dbg)
+                                log.debug("Pausing: {}",
+                                        getThreadName());
+                        }
 
-						wait();
+                        wait();
 
-					} catch (InterruptedException e) {
-						if (dbg)
-							log.debug("Interrupted {} {}:{}",
-							          getThreadName(),
-							          mShouldPause,
-							          mShouldStop);
+                    } catch (InterruptedException e) {
+                        if (dbg)
+                            log.debug("Interrupted {} {}:{}",
+                                    getThreadName(),
+                                    mShouldPause,
+                                    mShouldStop);
 
-						if (mShouldStop)
-							break O;
-					}
-				}
+                        if (mShouldStop)
+                            break O;
+                    }
+                }
 
-				if (mPausing) {
-					mPausing = false;
-					afterPause();
-				}
-			}
+                if (mPausing) {
+                    mPausing = false;
+                    afterPause();
+                }
+            }
 
-			try {
-				doWork();
-			} catch (InterruptedException e) {
-				if (dbg)
-					log.debug("Interrupted {} {}:{}",
-					          getThreadName(),
-					          mShouldPause,
-					          mShouldStop);
+            try {
+                doWork();
+            } catch (InterruptedException e) {
+                if (dbg)
+                    log.debug("Interrupted {} {}:{}",
+                            getThreadName(),
+                            mShouldPause,
+                            mShouldStop);
 
-			}
-		}
+            }
+        }
 
-		log.debug("Done {}", getThreadName());
+        log.debug("Done {}", getThreadName());
 
-		mPausing = true;
-		mRunning = false;
+        mPausing = true;
+        mRunning = false;
 
-		afterRun();
-	}
+        afterRun();
+    }
 
-	/**
-	 * Called once when this thread continues to work after a pause. The default
-	 * implementation is empty.
-	 */
-	protected void afterPause() {
-		// do nothing
-	}
+    /**
+     * Called once when this thread continues to work after a pause. The default
+     * implementation is empty.
+     */
+    protected void afterPause() {
+        // do nothing
+    }
 
-	/**
-	 * Called once at the end of the {@link #run()} method. The default
-	 * implementation is empty.
-	 */
-	protected void afterRun() {
-		// do nothing
-	}
+    /**
+     * Called once at the end of the {@link #run()} method. The default
+     * implementation is empty.
+     */
+    protected void afterRun() {
+        // do nothing
+    }
 
-	/**
-	 * Called when this thread is not paused and should do its work.
-	 * 
-	 * @throws InterruptedException
-	 *             if the thread has been interrupted.
-	 */
-	protected abstract void doWork() throws InterruptedException;
+    /**
+     * Called when this thread is not paused and should do its work.
+     *
+     * @throws InterruptedException if the thread has been interrupted.
+     */
+    protected abstract void doWork() throws InterruptedException;
 
-	/**
-	 * @return the name of this thread.
-	 */
-	protected abstract String getThreadName();
+    /**
+     * @return the name of this thread.
+     */
+    protected abstract String getThreadName();
 
-	/**
-	 * @return the priority of this thread. The default value is
-	 *         {@link Thread#NORM_PRIORITY}.
-	 */
-	protected int getThreadPriority() {
-		return Thread.NORM_PRIORITY;
-	}
+    /**
+     * @return the priority of this thread. The default value is
+     * {@link Thread#NORM_PRIORITY}.
+     */
+    protected int getThreadPriority() {
+        return Thread.NORM_PRIORITY;
+    }
 
-	/**
-	 * @return true if this thread has some work to do, false otherwise.
-	 */
-	protected abstract boolean hasWork();
+    /**
+     * @return true if this thread has some work to do, false otherwise.
+     */
+    protected abstract boolean hasWork();
 }

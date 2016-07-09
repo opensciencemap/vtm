@@ -25,35 +25,34 @@ import java.util.Map;
 
 public class OsmRoadLabelJsonTileSource extends GeoJsonTileSource {
 
-	static final Logger log = LoggerFactory.getLogger(OsmRoadLabelJsonTileSource.class);
+    static final Logger log = LoggerFactory.getLogger(OsmRoadLabelJsonTileSource.class);
 
-	public OsmRoadLabelJsonTileSource() {
-		super("http://tile.openstreetmap.us/vectiles-skeletron");
-	}
+    public OsmRoadLabelJsonTileSource() {
+        super("http://tile.openstreetmap.us/vectiles-skeletron");
+    }
 
-	@Override
-	public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
-		String highway = null;
+    @Override
+    public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
+        String highway = null;
 
-		for (Map.Entry<String, Object> entry : properties.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-			//log.debug(key + " : " + String.valueOf(value));
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            //log.debug(key + " : " + String.valueOf(value));
 
-			if (value == null)
-				continue;
+            if (value == null)
+                continue;
 
-			if ("highway".equals(key) && value instanceof String) {
-				highway = (String) entry.getValue();
-			}
-			else if ("name".equals(key) && value instanceof String) {
-				mapElement.tags.add(new Tag("name", (String) value));
-			}
-		}
+            if ("highway".equals(key) && value instanceof String) {
+                highway = (String) entry.getValue();
+            } else if ("name".equals(key) && value instanceof String) {
+                mapElement.tags.add(new Tag("name", (String) value));
+            }
+        }
 
-		if (highway == null)
-			return;
+        if (highway == null)
+            return;
 
-		mapElement.tags.add(new Tag("highway", highway));
-	}
+        mapElement.tags.add(new Tag("highway", highway));
+    }
 }

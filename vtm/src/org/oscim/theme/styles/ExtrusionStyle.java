@@ -20,52 +20,52 @@ import org.oscim.backend.canvas.Color;
 
 public class ExtrusionStyle extends RenderStyle {
 
-	public ExtrusionStyle(int level, int colorSides, int colorTop, int colorLine, int defaultHeight) {
+    public ExtrusionStyle(int level, int colorSides, int colorTop, int colorLine, int defaultHeight) {
 
-		this.colors = new float[16];
-		fillColors(colorSides, colorTop, colorLine, colors);
+        this.colors = new float[16];
+        fillColors(colorSides, colorTop, colorLine, colors);
 
-		this.defaultHeight = defaultHeight;
-		this.level = level;
-	}
+        this.defaultHeight = defaultHeight;
+        this.level = level;
+    }
 
-	public static void fillColors(int sides, int top, int lines, float[] colors) {
-		float a = Color.aToFloat(top);
-		colors[0] = a * Color.rToFloat(top);
-		colors[1] = a * Color.gToFloat(top);
-		colors[2] = a * Color.bToFloat(top);
-		colors[3] = a;
+    public static void fillColors(int sides, int top, int lines, float[] colors) {
+        float a = Color.aToFloat(top);
+        colors[0] = a * Color.rToFloat(top);
+        colors[1] = a * Color.gToFloat(top);
+        colors[2] = a * Color.bToFloat(top);
+        colors[3] = a;
 
-		a = Color.aToFloat(sides);
-		colors[4] = a * Color.rToFloat(sides);
-		colors[5] = a * Color.gToFloat(sides);
-		colors[6] = a * Color.bToFloat(sides);
-		colors[7] = a;
+        a = Color.aToFloat(sides);
+        colors[4] = a * Color.rToFloat(sides);
+        colors[5] = a * Color.gToFloat(sides);
+        colors[6] = a * Color.bToFloat(sides);
+        colors[7] = a;
 
-		a = Color.aToFloat(sides);
-		colors[8] = a * Color.rToFloat(sides);
-		colors[9] = a * Color.gToFloat(sides);
-		colors[10] = a * Color.bToFloat(sides);
-		colors[11] = a;
+        a = Color.aToFloat(sides);
+        colors[8] = a * Color.rToFloat(sides);
+        colors[9] = a * Color.gToFloat(sides);
+        colors[10] = a * Color.bToFloat(sides);
+        colors[11] = a;
 
-		a = Color.aToFloat(lines);
-		colors[12] = a * Color.rToFloat(lines);
-		colors[13] = a * Color.gToFloat(lines);
-		colors[14] = a * Color.bToFloat(lines);
-		colors[15] = a;
-	}
+        a = Color.aToFloat(lines);
+        colors[12] = a * Color.rToFloat(lines);
+        colors[13] = a * Color.gToFloat(lines);
+        colors[14] = a * Color.bToFloat(lines);
+        colors[15] = a;
+    }
 
-	@Override
-	public void renderWay(Callback cb) {
-		cb.renderExtrusion(this, this.level);
-	}
+    @Override
+    public void renderWay(Callback cb) {
+        cb.renderExtrusion(this, this.level);
+    }
 
-	@Override
-	public ExtrusionStyle current() {
-		return (ExtrusionStyle) mCurrent;
-	}
+    @Override
+    public ExtrusionStyle current() {
+        return (ExtrusionStyle) mCurrent;
+    }
 
-	private final int level;
-	public final float[] colors;
-	public final int defaultHeight;
+    private final int level;
+    public final float[] colors;
+    public final int defaultHeight;
 }

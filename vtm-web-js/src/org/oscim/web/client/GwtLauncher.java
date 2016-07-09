@@ -16,69 +16,69 @@
  */
 package org.oscim.web.client;
 
-import org.oscim.core.Tile;
-import org.oscim.gdx.client.MapConfig;
-import org.timepedia.exporter.client.ExporterUtil;
-
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderCallback;
 import com.badlogic.gdx.backends.gwt.preloader.Preloader.PreloaderState;
 
+import org.oscim.core.Tile;
+import org.oscim.gdx.client.MapConfig;
+import org.timepedia.exporter.client.ExporterUtil;
+
 public class GwtLauncher extends GwtApplication {
 
-	@Override
-	public void onModuleLoad() {
-		//GWT.create(GwtGdxMap.class);
-		//JsOverlays.init();
-		ExporterUtil.exportAll();
+    @Override
+    public void onModuleLoad() {
+        //GWT.create(GwtGdxMap.class);
+        //JsOverlays.init();
+        ExporterUtil.exportAll();
 
-		super.onModuleLoad();
-	}
+        super.onModuleLoad();
+    }
 
-	@Override
-	public GwtApplicationConfiguration getConfig() {
+    @Override
+    public GwtApplicationConfiguration getConfig() {
 
-		GwtApplicationConfiguration cfg =
-		        new GwtApplicationConfiguration(getWindowWidth(),
-		                                        getWindowHeight());
+        GwtApplicationConfiguration cfg =
+                new GwtApplicationConfiguration(getWindowWidth(),
+                        getWindowHeight());
 
-		cfg.canvasId = "map-canvas";
-		cfg.stencil = true;
-		cfg.fps = 120;
+        cfg.canvasId = "map-canvas";
+        cfg.stencil = true;
+        cfg.fps = 120;
 
-		return cfg;
-	}
+        return cfg;
+    }
 
-	@Override
-	public ApplicationListener getApplicationListener() {
-		Tile.SIZE = MapConfig.get().getTileSize();
+    @Override
+    public ApplicationListener getApplicationListener() {
+        Tile.SIZE = MapConfig.get().getTileSize();
 
-		return new GwtMap();
-	}
+        return new GwtMap();
+    }
 
-	@Override
-	public PreloaderCallback getPreloaderCallback() {
-		return new PreloaderCallback() {
+    @Override
+    public PreloaderCallback getPreloaderCallback() {
+        return new PreloaderCallback() {
 
-			@Override
-			public void update(PreloaderState state) {
-			}
+            @Override
+            public void update(PreloaderState state) {
+            }
 
-			@Override
-			public void error(String file) {
-				//log.debug("error loading " + file);
-			}
-		};
-	}
+            @Override
+            public void error(String file) {
+                //log.debug("error loading " + file);
+            }
+        };
+    }
 
-	private static native int getWindowWidth() /*-{
-		return $wnd.innerWidth;
+    private static native int getWindowWidth() /*-{
+        return $wnd.innerWidth;
 	}-*/;
 
-	private static native int getWindowHeight() /*-{
-		return $wnd.innerHeight;
+    private static native int getWindowHeight() /*-{
+        return $wnd.innerHeight;
 	}-*/;
 
 }

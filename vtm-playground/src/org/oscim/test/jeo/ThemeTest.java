@@ -10,25 +10,25 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class ThemeTest extends GdxMapApp {
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new ThemeTest(), null, 256);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new ThemeTest(), null, 256);
+    }
 
-	@Override
-	public void createLayers() {
-		UrlTileSource ts = new OSciMap4TileSource();
+    @Override
+    public void createLayers() {
+        UrlTileSource ts = new OSciMap4TileSource();
 
-		VectorTileLayer l = mMap.setBaseMap(ts);
+        VectorTileLayer l = mMap.setBaseMap(ts);
 
-		l.setRenderTheme(new RenderTheme());
+        l.setRenderTheme(new RenderTheme());
 
-		MapRenderer.setBackgroundColor(0xffcccccc);
+        MapRenderer.setBackgroundColor(0xffcccccc);
 
-		// mMap.getLayers().add(new LabelLayer(mMap,
-		// mMapLayer.getTileLayer()));
-		// mMap.getLayers().add(new JeoMapLayer(mMap));
+        // mMap.getLayers().add(new LabelLayer(mMap,
+        // mMapLayer.getTileLayer()));
+        // mMap.getLayers().add(new JeoMapLayer(mMap));
 
-		mMap.layers().add(new TileGridLayer(mMap));
-	}
+        mMap.layers().add(new TileGridLayer(mMap));
+    }
 }

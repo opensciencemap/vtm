@@ -23,47 +23,45 @@ import org.oscim.theme.styles.RenderStyle;
 
 public interface IRenderTheme {
 
-	/**
-	 * Matches a MapElement with the given parameters against this RenderTheme.
-	 * 
-	 * @param zoomLevel
-	 *            the zoom level at which the way should be matched.
-	 * @return matching render instructions
-	 */
-	public abstract RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
+    /**
+     * Matches a MapElement with the given parameters against this RenderTheme.
+     *
+     * @param zoomLevel the zoom level at which the way should be matched.
+     * @return matching render instructions
+     */
+    public abstract RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
 
-	/**
-	 * Must be called when this RenderTheme gets destroyed to clean up and free
-	 * resources.
-	 */
-	public abstract void dispose();
+    /**
+     * Must be called when this RenderTheme gets destroyed to clean up and free
+     * resources.
+     */
+    public abstract void dispose();
 
-	/**
-	 * @return the number of distinct drawing levels required by this
-	 *         RenderTheme.
-	 */
-	public abstract int getLevels();
+    /**
+     * @return the number of distinct drawing levels required by this
+     * RenderTheme.
+     */
+    public abstract int getLevels();
 
-	/**
-	 * @return the map background color of this RenderTheme.
-	 */
-	public abstract int getMapBackground();
+    /**
+     * @return the map background color of this RenderTheme.
+     */
+    public abstract int getMapBackground();
 
-	public void updateStyles();
+    public void updateStyles();
 
-	/**
-	 * Scales the text size of this RenderTheme by the given factor.
-	 * 
-	 * @param scaleFactor
-	 *            the factor by which the text size should be scaled.
-	 */
-	public abstract void scaleTextSize(float scaleFactor);
+    /**
+     * Scales the text size of this RenderTheme by the given factor.
+     *
+     * @param scaleFactor the factor by which the text size should be scaled.
+     */
+    public abstract void scaleTextSize(float scaleFactor);
 
-	public static class ThemeException extends IllegalArgumentException {
-		public ThemeException(String string) {
-			super(string);
-		}
+    public static class ThemeException extends IllegalArgumentException {
+        public ThemeException(String string) {
+            super(string);
+        }
 
-		private static final long serialVersionUID = 1L;
-	}
+        private static final long serialVersionUID = 1L;
+    }
 }

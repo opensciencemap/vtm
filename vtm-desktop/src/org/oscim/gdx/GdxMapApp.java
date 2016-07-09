@@ -17,6 +17,10 @@
  */
 package org.oscim.gdx;
 
+import com.badlogic.gdx.backends.jglfw.JglfwApplication;
+import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
+import com.badlogic.gdx.utils.SharedLibraryLoader;
+
 import org.oscim.awt.AwtGraphics;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
@@ -26,65 +30,61 @@ import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.badlogic.gdx.backends.jglfw.JglfwApplication;
-import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
-
 public class GdxMapApp extends GdxMap {
 
-	public static final Logger log = LoggerFactory.getLogger(GdxMapApp.class);
+    public static final Logger log = LoggerFactory.getLogger(GdxMapApp.class);
 
-	public static void init() {
-		// load native library
-		new SharedLibraryLoader().load("vtm-jni");
-		// init globals
-		AwtGraphics.init();
-		GdxAssets.init("assets/");
-		GLAdapter.init(new GdxGL());
-		GLAdapter.GDX_DESKTOP_QUIRKS = true;
-	}
+    public static void init() {
+        // load native library
+        new SharedLibraryLoader().load("vtm-jni");
+        // init globals
+        AwtGraphics.init();
+        GdxAssets.init("assets/");
+        GLAdapter.init(new GdxGL());
+        GLAdapter.GDX_DESKTOP_QUIRKS = true;
+    }
 
-	public static void main(String[] args) {
-		Tile.SIZE = 360;
-		init();
-		new JglfwApplication(new GdxMapApp(), getConfig());
-	}
+    public static void main(String[] args) {
+        Tile.SIZE = 360;
+        init();
+        new JglfwApplication(new GdxMapApp(), getConfig());
+    }
 
-	public static void run(GdxMap map, JglfwApplicationConfiguration config, int tileSize) {
-		Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
+    public static void run(GdxMap map, JglfwApplicationConfiguration config, int tileSize) {
+        Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
 
-		new JglfwApplication(map, (config == null ? getConfig() : config));
-	}
+        new JglfwApplication(map, (config == null ? getConfig() : config));
+    }
 
-	public static void run(JglfwApplicationConfiguration config, int tileSize, GdxMap map) {
-		run(map, config, tileSize);
-	}
+    public static void run(JglfwApplicationConfiguration config, int tileSize, GdxMap map) {
+        run(map, config, tileSize);
+    }
 
-	static protected JglfwApplicationConfiguration getConfig() {
-		JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
-		cfg.title = "vtm-gdx";
-		cfg.width = 800;
-		cfg.height = 600;
-		cfg.stencil = 8;
-		//cfg.samples = 2;
-		cfg.foregroundFPS = 30;
-		cfg.backgroundFPS = 10;
-		return cfg;
-	}
+    static protected JglfwApplicationConfiguration getConfig() {
+        JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
+        cfg.title = "vtm-gdx";
+        cfg.width = 800;
+        cfg.height = 600;
+        cfg.stencil = 8;
+        //cfg.samples = 2;
+        cfg.foregroundFPS = 30;
+        cfg.backgroundFPS = 10;
+        return cfg;
+    }
 
-	@Override
-	public void createLayers() {
-		TileSource tileSource = new OSciMap4TileSource();
+    @Override
+    public void createLayers() {
+        TileSource tileSource = new OSciMap4TileSource();
 
-		// TileSource tileSource = new MapFileTileSource();
-		// tileSource.setOption("file", "/home/jeff/germany.map");
+        // TileSource tileSource = new MapFileTileSource();
+        // tileSource.setOption("file", "/home/jeff/germany.map");
 
-		initDefaultLayers(tileSource, false, true, true);
+        initDefaultLayers(tileSource, false, true, true);
 
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ImagicoLandcover(), 20));
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new OSMTileSource(), 20));
-		//mMap.getLayers().add(new BitmapTileLayer(mMap, new ArcGISWorldShaded(), 20));
+        //mMap.getLayers().add(new BitmapTileLayer(mMap, new ImagicoLandcover(), 20));
+        //mMap.getLayers().add(new BitmapTileLayer(mMap, new OSMTileSource(), 20));
+        //mMap.getLayers().add(new BitmapTileLayer(mMap, new ArcGISWorldShaded(), 20));
 
-		mMap.setMapPosition(0, 0, 1 << 2);
-	}
+        mMap.setMapPosition(0, 0, 1 << 2);
+    }
 }

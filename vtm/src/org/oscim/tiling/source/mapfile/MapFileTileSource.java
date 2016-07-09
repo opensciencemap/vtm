@@ -18,10 +18,6 @@
  */
 package org.oscim.tiling.source.mapfile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.mapfile.header.MapFileHeader;
@@ -30,147 +26,151 @@ import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 public class MapFileTileSource extends TileSource {
-	static final Logger log = LoggerFactory.getLogger(MapFileTileSource.class);
+    static final Logger log = LoggerFactory.getLogger(MapFileTileSource.class);
 
-	/**
-	 * Amount of cache blocks that the index cache should store.
-	 */
-	private static final int INDEX_CACHE_SIZE = 64;
-	private static final String READ_ONLY_MODE = "r";
+    /**
+     * Amount of cache blocks that the index cache should store.
+     */
+    private static final int INDEX_CACHE_SIZE = 64;
+    private static final String READ_ONLY_MODE = "r";
 
-	MapFileHeader fileHeader;
-	MapFileInfo fileInfo;
-	IndexCache databaseIndexCache;
-	boolean experimental;
-	File mapFile;
-	RandomAccessFile mInputFile;
+    MapFileHeader fileHeader;
+    MapFileInfo fileInfo;
+    IndexCache databaseIndexCache;
+    boolean experimental;
+    File mapFile;
+    RandomAccessFile mInputFile;
 
-	/**
-	 * The preferred language when extracting labels from this tile source.
-	 */
-	private String preferredLanguage;
-	private Callback callback;
+    /**
+     * The preferred language when extracting labels from this tile source.
+     */
+    private String preferredLanguage;
+    private Callback callback;
 
-	public MapFileTileSource() {
-		super(0, 17);
-	}
+    public MapFileTileSource() {
+        super(0, 17);
+    }
 
-	/**
-	 * Extracts substring of preferred language from multilingual string using
-	 * the preferredLanguage setting.
-	 */
-	String extractLocalized(String s) {
-		if (callback != null)
-			return callback.extractLocalized(s);
-		return MapFileUtils.extract(s, preferredLanguage);
-	}
+    /**
+     * Extracts substring of preferred language from multilingual string using
+     * the preferredLanguage setting.
+     */
+    String extractLocalized(String s) {
+        if (callback != null)
+            return callback.extractLocalized(s);
+        return MapFileUtils.extract(s, preferredLanguage);
+    }
 
-	public void setCallback(Callback callback) {
-		this.callback = callback;
-	}
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
 
-	public boolean setMapFile(String filename) {
-		setOption("file", filename);
+    public boolean setMapFile(String filename) {
+        setOption("file", filename);
 
-		File file = new File(filename);
+        File file = new File(filename);
 
-		if (!file.exists()) {
-			return false;
-		} else if (!file.isFile()) {
-			return false;
-		} else if (!file.canRead()) {
-			return false;
-		}
+        if (!file.exists()) {
+            return false;
+        } else if (!file.isFile()) {
+            return false;
+        } else if (!file.canRead()) {
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public void setPreferredLanguage(String preferredLanguage) {
-		this.preferredLanguage = preferredLanguage;
-	}
+    public void setPreferredLanguage(String preferredLanguage) {
+        this.preferredLanguage = preferredLanguage;
+    }
 
-	@Override
-	public OpenResult open() {
-		if (!options.containsKey("file"))
-			return new OpenResult("no map file set");
+    @Override
+    public OpenResult open() {
+        if (!options.containsKey("file"))
+            return new OpenResult("no map file set");
 
-		try {
-			// make sure to close any previously opened file first
-			//close();
+        try {
+            // make sure to close any previously opened file first
+            //close();
 
-			File file = new File(options.get("file"));
+            File file = new File(options.get("file"));
 
-			// check if the file exists and is readable
-			if (!file.exists()) {
-				return new OpenResult("file does not exist: " + file);
-			} else if (!file.isFile()) {
-				return new OpenResult("not a file: " + file);
-			} else if (!file.canRead()) {
-				return new OpenResult("cannot read file: " + file);
-			}
+            // check if the file exists and is readable
+            if (!file.exists()) {
+                return new OpenResult("file does not exist: " + file);
+            } else if (!file.isFile()) {
+                return new OpenResult("not a file: " + file);
+            } else if (!file.canRead()) {
+                return new OpenResult("cannot read file: " + file);
+            }
 
-			// open the file in read only mode
-			mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
-			long mFileSize = mInputFile.length();
-			ReadBuffer mReadBuffer = new ReadBuffer(mInputFile);
+            // open the file in read only mode
+            mInputFile = new RandomAccessFile(file, READ_ONLY_MODE);
+            long mFileSize = mInputFile.length();
+            ReadBuffer mReadBuffer = new ReadBuffer(mInputFile);
 
-			fileHeader = new MapFileHeader();
-			OpenResult openResult = fileHeader.readHeader(mReadBuffer, mFileSize);
+            fileHeader = new MapFileHeader();
+            OpenResult openResult = fileHeader.readHeader(mReadBuffer, mFileSize);
 
-			if (!openResult.isSuccess()) {
-				close();
-				return openResult;
-			}
-			fileInfo = fileHeader.getMapFileInfo();
-			mapFile = file;
-			databaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
+            if (!openResult.isSuccess()) {
+                close();
+                return openResult;
+            }
+            fileInfo = fileHeader.getMapFileInfo();
+            mapFile = file;
+            databaseIndexCache = new IndexCache(mInputFile, INDEX_CACHE_SIZE);
 
-			// Experimental?
-			//experimental = fileInfo.fileVersion == 4;
+            // Experimental?
+            //experimental = fileInfo.fileVersion == 4;
 
-			log.debug("File version: " + fileInfo.fileVersion);
-			return OpenResult.SUCCESS;
-		} catch (IOException e) {
-			log.error(e.getMessage());
-			// make sure that the file is closed
-			close();
-			return new OpenResult(e.getMessage());
-		}
-	}
+            log.debug("File version: " + fileInfo.fileVersion);
+            return OpenResult.SUCCESS;
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            // make sure that the file is closed
+            close();
+            return new OpenResult(e.getMessage());
+        }
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		try {
-			return new MapDatabase(this);
-		} catch (IOException e) {
-			log.debug(e.getMessage());
-		}
-		return null;
-	}
+    @Override
+    public ITileDataSource getDataSource() {
+        try {
+            return new MapDatabase(this);
+        } catch (IOException e) {
+            log.debug(e.getMessage());
+        }
+        return null;
+    }
 
-	@Override
-	public void close() {
-		IOUtils.closeQuietly(mInputFile);
-		mInputFile = null;
-		fileHeader = null;
-		fileInfo = null;
-		mapFile = null;
+    @Override
+    public void close() {
+        IOUtils.closeQuietly(mInputFile);
+        mInputFile = null;
+        fileHeader = null;
+        fileInfo = null;
+        mapFile = null;
 
-		if (databaseIndexCache != null) {
-			databaseIndexCache.destroy();
-			databaseIndexCache = null;
-		}
-	}
+        if (databaseIndexCache != null) {
+            databaseIndexCache.destroy();
+            databaseIndexCache = null;
+        }
+    }
 
-	public MapInfo getMapInfo() {
-		return fileInfo;
-	}
+    public MapInfo getMapInfo() {
+        return fileInfo;
+    }
 
-	public interface Callback {
-		/**
-		 * Extracts substring of preferred language from multilingual string.
-		 */
-		String extractLocalized(String s);
-	}
+    public interface Callback {
+        /**
+         * Extracts substring of preferred language from multilingual string.
+         */
+        String extractLocalized(String s);
+    }
 }

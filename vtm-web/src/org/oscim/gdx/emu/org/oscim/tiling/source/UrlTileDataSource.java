@@ -14,12 +14,6 @@
  */
 package org.oscim.tiling.source;
 
-import static org.oscim.tiling.QueryResult.FAILED;
-import static org.oscim.tiling.QueryResult.SUCCESS;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.oscim.layers.tile.LoadDelayTask;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
@@ -28,69 +22,75 @@ import org.oscim.tiling.ITileDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
+
 public class UrlTileDataSource implements ITileDataSource {
-	static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
+    static final Logger log = LoggerFactory.getLogger(UrlTileDataSource.class);
 
-	protected final LwHttp mConn;
-	protected final ITileDecoder mTileDecoder;
-	protected final UrlTileSource mTileSource;
+    protected final LwHttp mConn;
+    protected final ITileDecoder mTileDecoder;
+    protected final UrlTileSource mTileSource;
 
-	private ITileDataSink mSink;
-	private MapTile mTile;
+    private ITileDataSink mSink;
+    private MapTile mTile;
 
-	public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
-		mTileSource = tileSource;
-		mTileDecoder = tileDecoder;
-		mConn = (LwHttp) conn;
-	}
+    public UrlTileDataSource(UrlTileSource tileSource, ITileDecoder tileDecoder, HttpEngine conn) {
+        mTileSource = tileSource;
+        mTileDecoder = tileDecoder;
+        mConn = (LwHttp) conn;
+    }
 
-	@Override
-	public void query(MapTile tile, ITileDataSink sink) {
-		mTile = tile;
-		mSink = sink;
-		mConn.sendRequest(tile, this);
-	}
+    @Override
+    public void query(MapTile tile, ITileDataSink sink) {
+        mTile = tile;
+        mSink = sink;
+        mConn.sendRequest(tile, this);
+    }
 
-	public void process(final InputStream is) {
-		if (is == null) {
-			log.debug("{} no inputstream", mTile);
-			mSink.completed(FAILED);
-			mTile = null;
-			mSink = null;
-			return;
-		}
+    public void process(final InputStream is) {
+        if (is == null) {
+            log.debug("{} no inputstream", mTile);
+            mSink.completed(FAILED);
+            mTile = null;
+            mSink = null;
+            return;
+        }
 
-		TileLoader.postLoadDelay(new LoadDelayTask<InputStream>(mTile, mSink, is) {
-			@Override
-			public void continueLoading() {
-				boolean win = false;
-				if (tile.state(MapTile.State.LOADING)) {
-					try {
-						win = mTileDecoder.decode(tile, sink, data);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if (win) {
-					sink.completed(SUCCESS);
-				} else {
-					sink.completed(FAILED);
-					log.debug("{} decode failed", tile);
-				}
-			}
-		});
-		mTile = null;
-		mSink = null;
-	}
+        TileLoader.postLoadDelay(new LoadDelayTask<InputStream>(mTile, mSink, is) {
+            @Override
+            public void continueLoading() {
+                boolean win = false;
+                if (tile.state(MapTile.State.LOADING)) {
+                    try {
+                        win = mTileDecoder.decode(tile, sink, data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (win) {
+                    sink.completed(SUCCESS);
+                } else {
+                    sink.completed(FAILED);
+                    log.debug("{} decode failed", tile);
+                }
+            }
+        });
+        mTile = null;
+        mSink = null;
+    }
 
-	@Override
-	public void dispose() {
-		mConn.close();
-	}
+    @Override
+    public void dispose() {
+        mConn.close();
+    }
 
-	@Override
-	public void cancel() {
-		mConn.close();
-	}
+    @Override
+    public void cancel() {
+        mConn.close();
+    }
 
 }

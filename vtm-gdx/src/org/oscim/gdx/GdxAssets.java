@@ -16,36 +16,36 @@
  */
 package org.oscim.gdx;
 
-import java.io.InputStream;
-
-import org.oscim.backend.AssetAdapter;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+import org.oscim.backend.AssetAdapter;
+
+import java.io.InputStream;
+
 public class GdxAssets extends AssetAdapter {
-	static String pathPrefix = "";
+    static String pathPrefix = "";
 
-	private GdxAssets(String path) {
-		pathPrefix = path;
-	}
+    private GdxAssets(String path) {
+        pathPrefix = path;
+    }
 
-	@Override
-	public InputStream openFileAsStream(String fileName) {
-		FileHandle file = Gdx.files.internal(pathPrefix + fileName);
-		if (file == null)
-			throw new IllegalArgumentException("missing file " + fileName);
+    @Override
+    public InputStream openFileAsStream(String fileName) {
+        FileHandle file = Gdx.files.internal(pathPrefix + fileName);
+        if (file == null)
+            throw new IllegalArgumentException("missing file " + fileName);
 
-		try {
-			return file.read();
-		} catch (GdxRuntimeException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+        try {
+            return file.read();
+        } catch (GdxRuntimeException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	public static void init(String path) {
-		AssetAdapter.init(new GdxAssets(path));
-	}
+    public static void init(String path) {
+        AssetAdapter.init(new GdxAssets(path));
+    }
 }

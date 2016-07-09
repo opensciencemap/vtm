@@ -16,8 +16,6 @@
  */
 package org.oscim.renderer.bucket;
 
-import java.nio.ShortBuffer;
-
 import org.oscim.renderer.bucket.VertexData.Chunk;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.pool.Inlist;
@@ -25,228 +23,234 @@ import org.oscim.utils.pool.SyncPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ShortBuffer;
+
 /**
  * A linked list of array chunks to hold temporary vertex data.
- * 
+ * <p/>
  * TODO override append() etc to update internal (cur) state.
  */
 public class VertexData extends Inlist.List<Chunk> {
-	static final Logger log = LoggerFactory.getLogger(VertexData.class);
+    static final Logger log = LoggerFactory.getLogger(VertexData.class);
 
-	/**
-	 * Size of array chunks. Must be multiple of:
-	 * 4 (LineLayer/PolygonLayer),
-	 * 24 (TexLineLayer - one block, i.e. two segments)
-	 * 24 (TextureLayer)
-	 */
-	public static final int SIZE = 360;
+    /**
+     * Size of array chunks. Must be multiple of:
+     * 4 (LineLayer/PolygonLayer),
+     * 24 (TexLineLayer - one block, i.e. two segments)
+     * 24 (TextureLayer)
+     */
+    public static final int SIZE = 360;
 
-	/**
-	 * Shared chunk pool size.
-	 */
-	private static final int MAX_POOL = 500;
+    /**
+     * Shared chunk pool size.
+     */
+    private static final int MAX_POOL = 500;
 
-	public static class Chunk extends Inlist<Chunk> {
-		public final short[] vertices = new short[SIZE];
-		public int used;
-	};
+    public static class Chunk extends Inlist<Chunk> {
+        public final short[] vertices = new short[SIZE];
+        public int used;
+    }
 
-	private static class Pool extends SyncPool<Chunk> {
-		public Pool() {
-			super(MAX_POOL);
-		}
+    ;
 
-		@Override
-		protected Chunk createItem() {
-			return new Chunk();
-		}
+    private static class Pool extends SyncPool<Chunk> {
+        public Pool() {
+            super(MAX_POOL);
+        }
 
-		@Override
-		protected boolean clearItem(Chunk it) {
-			it.used = 0;
-			return true;
-		}
-	}
+        @Override
+        protected Chunk createItem() {
+            return new Chunk();
+        }
 
-	public int countSize() {
-		if (cur == null)
-			return 0;
+        @Override
+        protected boolean clearItem(Chunk it) {
+            it.used = 0;
+            return true;
+        }
+    }
 
-		cur.used = used;
+    public int countSize() {
+        if (cur == null)
+            return 0;
 
-		int size = 0;
-		for (Chunk it = head(); it != null; it = it.next)
-			size += it.used;
+        cur.used = used;
 
-		return size;
-	}
+        int size = 0;
+        for (Chunk it = head(); it != null; it = it.next)
+            size += it.used;
 
-	@Override
-	public Chunk clear() {
-		if (cur == null)
-			return null;
+        return size;
+    }
 
-		cur.used = used;
-		used = SIZE; /* set SIZE to get new item on add */
-		cur = null;
-		vertices = null;
+    @Override
+    public Chunk clear() {
+        if (cur == null)
+            return null;
 
-		return super.clear();
-	}
+        cur.used = used;
+        used = SIZE; /* set SIZE to get new item on add */
+        cur = null;
+        vertices = null;
 
-	private final static Pool pool = new Pool();
+        return super.clear();
+    }
 
-	public void dispose() {
-		pool.releaseAll(super.clear());
-		used = SIZE; /* set SIZE to get new item on add */
-		cur = null;
-		vertices = null;
-	}
+    private final static Pool pool = new Pool();
 
-	/**
-	 * @return sum of elements added
-	 */
-	public int compile(ShortBuffer sbuf) {
-		if (cur == null)
-			return 0;
+    public void dispose() {
+        pool.releaseAll(super.clear());
+        used = SIZE; /* set SIZE to get new item on add */
+        cur = null;
+        vertices = null;
+    }
 
-		cur.used = used;
+    /**
+     * @return sum of elements added
+     */
+    public int compile(ShortBuffer sbuf) {
+        if (cur == null)
+            return 0;
 
-		int size = 0;
-		for (Chunk it = head(); it != null; it = it.next) {
-			size += it.used;
-			sbuf.put(it.vertices, 0, it.used);
-		}
-		dispose();
-		return size;
-	}
+        cur.used = used;
 
-	private Chunk cur;
+        int size = 0;
+        for (Chunk it = head(); it != null; it = it.next) {
+            size += it.used;
+            sbuf.put(it.vertices, 0, it.used);
+        }
+        dispose();
+        return size;
+    }
 
-	/* set SIZE to get new item on add */
-	private int used = SIZE;
+    private Chunk cur;
 
-	private short[] vertices;
+    /* set SIZE to get new item on add */
+    private int used = SIZE;
 
-	private void getNext() {
-		if (cur == null) {
-			cur = pool.get();
-			push(cur);
-		} else {
-			if (cur.next != null)
-				throw new IllegalStateException("seeeked...");
+    private short[] vertices;
 
-			cur.used = SIZE;
-			cur.next = pool.get();
-			cur = cur.next;
-		}
-		vertices = cur.vertices;
-		used = 0;
-	}
+    private void getNext() {
+        if (cur == null) {
+            cur = pool.get();
+            push(cur);
+        } else {
+            if (cur.next != null)
+                throw new IllegalStateException("seeeked...");
 
-	public void add(short a) {
-		if (used == SIZE)
-			getNext();
+            cur.used = SIZE;
+            cur.next = pool.get();
+            cur = cur.next;
+        }
+        vertices = cur.vertices;
+        used = 0;
+    }
 
-		vertices[used++] = a;
-	}
+    public void add(short a) {
+        if (used == SIZE)
+            getNext();
 
-	static final short toShort(float v) {
-		return (short) FastMath.clamp(v, Short.MIN_VALUE, Short.MAX_VALUE);
-	}
+        vertices[used++] = a;
+    }
 
-	public void add(float a, float b) {
-		add(toShort(a), toShort(b));
-	}
+    static final short toShort(float v) {
+        return (short) FastMath.clamp(v, Short.MIN_VALUE, Short.MAX_VALUE);
+    }
 
-	public void add(short a, short b) {
-		if (used == SIZE)
-			getNext();
+    public void add(float a, float b) {
+        add(toShort(a), toShort(b));
+    }
 
-		vertices[used + 0] = a;
-		vertices[used + 1] = b;
-		used += 2;
-	}
+    public void add(short a, short b) {
+        if (used == SIZE)
+            getNext();
 
-	public void add(float a, float b, float c) {
-		add(toShort(a), toShort(b), toShort(c));
-	}
+        vertices[used + 0] = a;
+        vertices[used + 1] = b;
+        used += 2;
+    }
 
-	public void add(short a, short b, short c) {
-		if (used == SIZE)
-			getNext();
+    public void add(float a, float b, float c) {
+        add(toShort(a), toShort(b), toShort(c));
+    }
 
-		vertices[used + 0] = a;
-		vertices[used + 1] = b;
-		vertices[used + 2] = c;
-		used += 3;
-	}
+    public void add(short a, short b, short c) {
+        if (used == SIZE)
+            getNext();
 
-	public void add(float a, float b, float c, float d) {
-		add(toShort(a), toShort(b), toShort(c), toShort(d));
-	}
+        vertices[used + 0] = a;
+        vertices[used + 1] = b;
+        vertices[used + 2] = c;
+        used += 3;
+    }
 
-	public void add(short a, short b, short c, short d) {
-		if (used == SIZE)
-			getNext();
+    public void add(float a, float b, float c, float d) {
+        add(toShort(a), toShort(b), toShort(c), toShort(d));
+    }
 
-		vertices[used + 0] = a;
-		vertices[used + 1] = b;
-		vertices[used + 2] = c;
-		vertices[used + 3] = d;
-		used += 4;
-	}
+    public void add(short a, short b, short c, short d) {
+        if (used == SIZE)
+            getNext();
 
-	public void add(float a, float b, float c, float d, float e, float f) {
-		add(toShort(a), toShort(b), toShort(c), toShort(d), toShort(e), toShort(f));
-	}
+        vertices[used + 0] = a;
+        vertices[used + 1] = b;
+        vertices[used + 2] = c;
+        vertices[used + 3] = d;
+        used += 4;
+    }
 
-	public void add(short a, short b, short c, short d, short e, short f) {
-		if (used == SIZE)
-			getNext();
+    public void add(float a, float b, float c, float d, float e, float f) {
+        add(toShort(a), toShort(b), toShort(c), toShort(d), toShort(e), toShort(f));
+    }
 
-		vertices[used + 0] = a;
-		vertices[used + 1] = b;
-		vertices[used + 2] = c;
-		vertices[used + 3] = d;
-		vertices[used + 4] = e;
-		vertices[used + 5] = f;
-		used += 6;
-	}
+    public void add(short a, short b, short c, short d, short e, short f) {
+        if (used == SIZE)
+            getNext();
 
-	/**
-	 * Direct access to the current chunk of VertexData. Use with care!
-	 * 
-	 * When changing the position use releaseChunk to update internal state
-	 */
-	public Chunk obtainChunk() {
-		if (used == SIZE)
-			getNext();
+        vertices[used + 0] = a;
+        vertices[used + 1] = b;
+        vertices[used + 2] = c;
+        vertices[used + 3] = d;
+        vertices[used + 4] = e;
+        vertices[used + 5] = f;
+        used += 6;
+    }
 
-		cur.used = used;
+    /**
+     * Direct access to the current chunk of VertexData. Use with care!
+     * <p/>
+     * When changing the position use releaseChunk to update internal state
+     */
+    public Chunk obtainChunk() {
+        if (used == SIZE)
+            getNext();
 
-		return cur;
-	}
+        cur.used = used;
 
-	public void releaseChunk() {
-		used = cur.used;
-	}
+        return cur;
+    }
 
-	public void releaseChunk(int size) {
-		cur.used = size;
-		used = size;
-	}
+    public void releaseChunk() {
+        used = cur.used;
+    }
 
-	/** Do not use! */
-	public void seek(int offset) {
-		used += offset;
-		cur.used = used;
+    public void releaseChunk(int size) {
+        cur.used = size;
+        used = size;
+    }
 
-		if (used > SIZE || used < 0)
-			throw new IllegalStateException("seeked too far: " + offset + "/" + used);
-	}
+    /**
+     * Do not use!
+     */
+    public void seek(int offset) {
+        used += offset;
+        cur.used = used;
 
-	public boolean empty() {
-		return cur == null;
-	}
+        if (used > SIZE || used < 0)
+            throw new IllegalStateException("seeked too far: " + offset + "/" + used);
+    }
+
+    public boolean empty() {
+        return cur == null;
+    }
 }

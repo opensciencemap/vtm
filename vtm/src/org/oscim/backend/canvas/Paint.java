@@ -22,45 +22,45 @@ package org.oscim.backend.canvas;
  */
 public interface Paint {
 
-	public static enum Align {
-		CENTER, LEFT, RIGHT;
-	}
+    public static enum Align {
+        CENTER, LEFT, RIGHT;
+    }
 
-	public enum Cap {
-		BUTT, ROUND, SQUARE;
-	}
+    public enum Cap {
+        BUTT, ROUND, SQUARE;
+    }
 
-	public enum Style {
-		FILL, STROKE
-	}
+    public enum Style {
+        FILL, STROKE
+    }
 
-	public enum FontFamily {
-		DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF;
-	}
+    public enum FontFamily {
+        DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF;
+    }
 
-	public enum FontStyle {
-		BOLD, BOLD_ITALIC, ITALIC, NORMAL;
-	}
+    public enum FontStyle {
+        BOLD, BOLD_ITALIC, ITALIC, NORMAL;
+    }
 
-	int getColor();
+    int getColor();
 
-	void setColor(int color);
+    void setColor(int color);
 
-	void setStrokeCap(Cap cap);
+    void setStrokeCap(Cap cap);
 
-	void setStrokeWidth(float width);
+    void setStrokeWidth(float width);
 
-	void setStyle(Style style);
+    void setStyle(Style style);
 
-	void setTextAlign(Align align);
+    void setTextAlign(Align align);
 
-	void setTextSize(float textSize);
+    void setTextSize(float textSize);
 
-	void setTypeface(FontFamily fontFamily, FontStyle fontStyle);
+    void setTypeface(FontFamily fontFamily, FontStyle fontStyle);
 
-	float measureText(String text);
+    float measureText(String text);
 
-	float getFontHeight();
+    float getFontHeight();
 
-	float getFontDescent();
+    float getFontDescent();
 }

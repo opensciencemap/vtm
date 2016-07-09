@@ -8,15 +8,15 @@ import org.oscim.theme.styles.TextStyle;
 
 public class TileGridLayer extends GenericLayer {
 
-	public TileGridLayer(Map map) {
-		super(map, new GridRenderer());
-	}
+    public TileGridLayer(Map map) {
+        super(map, new GridRenderer());
+    }
 
-	public TileGridLayer(Map map, int color, float width, int repeat) {
-		super(map, new GridRenderer(repeat, new LineStyle(color, width, Cap.BUTT), null));
-	}
+    public TileGridLayer(Map map, int color, float width, int repeat) {
+        super(map, new GridRenderer(repeat, new LineStyle(color, width, Cap.BUTT), null));
+    }
 
-	public TileGridLayer(Map map, int color, float width, TextStyle text, int repeat) {
-		super(map, new GridRenderer(repeat, new LineStyle(color, width, Cap.BUTT), text));
-	}
+    public TileGridLayer(Map map, int color, float width, TextStyle text, int repeat) {
+        super(map, new GridRenderer(repeat, new LineStyle(color, width, Cap.BUTT), text));
+    }
 }

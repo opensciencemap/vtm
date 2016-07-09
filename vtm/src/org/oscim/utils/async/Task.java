@@ -18,26 +18,26 @@ package org.oscim.utils.async;
 
 public abstract class Task implements Runnable {
 
-	public static final int ERROR = -1;
-	public static final int CANCEL = 0;
-	public static final int GO = 1;
-	public static final int DONE = 2;
+    public static final int ERROR = -1;
+    public static final int CANCEL = 0;
+    public static final int GO = 1;
+    public static final int DONE = 2;
 
-	protected int state = GO;
+    protected int state = GO;
 
-	boolean isCanceled;
+    boolean isCanceled;
 
-	@Override
-	public void run() {
-		go(state == CANCEL);
-	}
+    @Override
+    public void run() {
+        go(state == CANCEL);
+    }
 
-	/**
-	 * @return ignored
-	 */
-	public abstract int go(boolean canceled);
+    /**
+     * @return ignored
+     */
+    public abstract int go(boolean canceled);
 
-	public void cancel() {
-		state = CANCEL;
-	}
+    public void cancel() {
+        state = CANCEL;
+    }
 }

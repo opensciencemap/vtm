@@ -22,104 +22,108 @@ import org.timepedia.exporter.client.Exportable;
 
 @ExportPackage("")
 public class JsOverlays implements Exportable {
-	@ExportPackage("vtm")
-	@Export("Layers")
-	public interface XLayers extends ExportOverlay<Layers> {
-		void add(Layer layer);
-	}
+    @ExportPackage("vtm")
+    @Export("Layers")
+    public interface XLayers extends ExportOverlay<Layers> {
+        void add(Layer layer);
+    }
 
-	@ExportPackage("vtm")
-	@Export("Map")
-	public interface XMap extends ExportOverlay<Map> {
-		public abstract Layers layers();
+    @ExportPackage("vtm")
+    @Export("Map")
+    public interface XMap extends ExportOverlay<Map> {
+        public abstract Layers layers();
 
-		public abstract void setMapPosition(MapPosition pos);
+        public abstract void setMapPosition(MapPosition pos);
 
-		public abstract MapPosition getMapPosition();
+        public abstract MapPosition getMapPosition();
 
-	}
+    }
 
-	@ExportPackage("vtm")
-	@Export("MapPosition")
-	public static class XMapPosition implements ExportOverlay<MapPosition> {
-		public XMapPosition(double latitude, double longitude, double scale) {
-		};
+    @ExportPackage("vtm")
+    @Export("MapPosition")
+    public static class XMapPosition implements ExportOverlay<MapPosition> {
+        public XMapPosition(double latitude, double longitude, double scale) {
+        }
 
-		public XMapPosition() {
-		};
+        ;
 
-		public void setPosition(double latitude, double longitude) {
-		}
+        public XMapPosition() {
+        }
 
-		public void setScale(double scale) {
-		}
-	}
+        ;
 
-	@ExportPackage("vtm")
-	@Export("GenericLayer")
-	public abstract class XGenericLayer implements ExportOverlay<GenericLayer> {
-		public XGenericLayer(Map map, LayerRenderer renderer) {
-		}
-	}
+        public void setPosition(double latitude, double longitude) {
+        }
 
-	@ExportPackage("vtm")
-	@Export("TileGridLayer")
-	public static class XTileGridLayer implements ExportOverlay<TileGridLayer> {
-		public XTileGridLayer(Map map) {
-		}
-	}
+        public void setScale(double scale) {
+        }
+    }
 
-	@ExportPackage("vtm")
-	@Export("OsmTileLayer")
-	public static class XOsmTileLayer implements ExportOverlay<OsmTileLayer> {
-		public XOsmTileLayer(Map map) {
-		}
+    @ExportPackage("vtm")
+    @Export("GenericLayer")
+    public abstract class XGenericLayer implements ExportOverlay<GenericLayer> {
+        public XGenericLayer(Map map, LayerRenderer renderer) {
+        }
+    }
 
-		public boolean setTileSource(TileSource tileSource) {
-			return false;
-		}
+    @ExportPackage("vtm")
+    @Export("TileGridLayer")
+    public static class XTileGridLayer implements ExportOverlay<TileGridLayer> {
+        public XTileGridLayer(Map map) {
+        }
+    }
 
-		public void setRenderTheme(IRenderTheme theme) {
-		}
-	}
+    @ExportPackage("vtm")
+    @Export("OsmTileLayer")
+    public static class XOsmTileLayer implements ExportOverlay<OsmTileLayer> {
+        public XOsmTileLayer(Map map) {
+        }
 
-	@ExportPackage("vtm")
-	@Export("HighroadJsonTileSource")
-	public static class XHighroadJsonTileSource implements
-	        ExportOverlay<HighroadJsonTileSource> {
-		public XHighroadJsonTileSource() {
-		}
-	}
+        public boolean setTileSource(TileSource tileSource) {
+            return false;
+        }
 
-	@ExportPackage("vtm")
-	@Export("OSciMap4TileSource")
-	public static class XOSciMap4TileSource implements
-	        ExportOverlay<OSciMap4TileSource> {
-		public XOSciMap4TileSource(String url) {
-		}
+        public void setRenderTheme(IRenderTheme theme) {
+        }
+    }
 
-		public XOSciMap4TileSource() {
-		}
-	}
+    @ExportPackage("vtm")
+    @Export("HighroadJsonTileSource")
+    public static class XHighroadJsonTileSource implements
+            ExportOverlay<HighroadJsonTileSource> {
+        public XHighroadJsonTileSource() {
+        }
+    }
 
-	@ExportPackage("vtm")
-	@Export("LabelLayer")
-	public static class XLabelLayer implements
-	        ExportOverlay<LabelLayer> {
-		public XLabelLayer(Map map, VectorTileLayer l) {
-		}
-	}
+    @ExportPackage("vtm")
+    @Export("OSciMap4TileSource")
+    public static class XOSciMap4TileSource implements
+            ExportOverlay<OSciMap4TileSource> {
+        public XOSciMap4TileSource(String url) {
+        }
 
-	@ExportPackage("vtm")
-	@Export("BuildingLayer")
-	public static class XBuildingLayer implements
-	        ExportOverlay<BuildingLayer> {
-		public XBuildingLayer(Map map, VectorTileLayer l) {
-		}
-	}
+        public XOSciMap4TileSource() {
+        }
+    }
 
-	//	@ExportPackage("vtm")
-	//	@Export("Viewport")
-	//	public interface XViewport extends ExportOverlay
-	//	
+    @ExportPackage("vtm")
+    @Export("LabelLayer")
+    public static class XLabelLayer implements
+            ExportOverlay<LabelLayer> {
+        public XLabelLayer(Map map, VectorTileLayer l) {
+        }
+    }
+
+    @ExportPackage("vtm")
+    @Export("BuildingLayer")
+    public static class XBuildingLayer implements
+            ExportOverlay<BuildingLayer> {
+        public XBuildingLayer(Map map, VectorTileLayer l) {
+        }
+    }
+
+    //	@ExportPackage("vtm")
+    //	@Export("Viewport")
+    //	public interface XViewport extends ExportOverlay
+    //
 }

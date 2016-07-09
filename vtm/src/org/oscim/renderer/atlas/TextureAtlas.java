@@ -61,192 +61,200 @@
  */
 package org.oscim.renderer.atlas;
 
-import java.util.HashMap;
-
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.utils.pool.Inlist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+
 public class TextureAtlas extends Inlist<TextureAtlas> {
-	static final Logger log = LoggerFactory.getLogger(TextureAtlas.class);
+    static final Logger log = LoggerFactory.getLogger(TextureAtlas.class);
 
-	/** Allocated slots */
-	public Slot mSlots;
-	private Rect mRects;
+    /**
+     * Allocated slots
+     */
+    public Slot mSlots;
+    private Rect mRects;
 
-	/** Width (in pixels) of the underlying texture */
-	final int mWidth;
+    /**
+     * Width (in pixels) of the underlying texture
+     */
+    final int mWidth;
 
-	/** Height (in pixels) of the underlying texture */
-	final int mHeight;
+    /**
+     * Height (in pixels) of the underlying texture
+     */
+    final int mHeight;
 
-	/** Depth (in bytes) of the underlying texture */
+    /** Depth (in bytes) of the underlying texture */
 
-	/** Allocated surface size */
-	int mUsed;
+    /**
+     * Allocated surface size
+     */
+    int mUsed;
 
-	public TextureItem texture;
+    public TextureItem texture;
 
-	public static class Slot extends Inlist<Slot> {
-		public int x, y, w;
+    public static class Slot extends Inlist<Slot> {
+        public int x, y, w;
 
-		public Slot(int x, int y, int w) {
-			this.x = x;
-			this.y = y;
-			this.w = w;
-		}
-	}
+        public Slot(int x, int y, int w) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+        }
+    }
 
-	public static class Rect extends Inlist<Rect> {
-		public Rect(int x, int y, int w, int h) {
-			this.x = x;
-			this.y = y;
-			this.w = w;
-			this.h = h;
-		}
+    public static class Rect extends Inlist<Rect> {
+        public Rect(int x, int y, int w, int h) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+        }
 
-		public int x, y, w, h;
+        public int x, y, w, h;
 
-		@Override
-		public String toString() {
-			return x + ":" + y + " " + w + "x" + h;
-		}
-	}
+        @Override
+        public String toString() {
+            return x + ":" + y + " " + w + "x" + h;
+        }
+    }
 
-	public TextureAtlas(int width, int height) {
-		mWidth = width;
-		mHeight = height;
-		mSlots = new Slot(1, 1, width - 2);
-	}
+    public TextureAtlas(int width, int height) {
+        mWidth = width;
+        mHeight = height;
+        mSlots = new Slot(1, 1, width - 2);
+    }
 
-	public TextureAtlas(Bitmap bitmap) {
-		texture = new TextureItem(bitmap);
-		mWidth = texture.width;
-		mHeight = texture.height;
+    public TextureAtlas(Bitmap bitmap) {
+        texture = new TextureItem(bitmap);
+        mWidth = texture.width;
+        mHeight = texture.height;
 
-		mRegions = new HashMap<Object, TextureRegion>();
-	}
+        mRegions = new HashMap<Object, TextureRegion>();
+    }
 
-	private HashMap<Object, TextureRegion> mRegions;
+    private HashMap<Object, TextureRegion> mRegions;
 
-	public void addTextureRegion(Object key, Rect r) {
+    public void addTextureRegion(Object key, Rect r) {
 
-		mRegions.put(key, new TextureRegion(this.texture, r));
+        mRegions.put(key, new TextureRegion(this.texture, r));
 
-	}
+    }
 
-	public TextureRegion getTextureRegion(Object key) {
-		return mRegions.get(key);
-	}
+    public TextureRegion getTextureRegion(Object key) {
+        return mRegions.get(key);
+    }
 
-	public Rect getRegion(int width, int height) {
-		int y, bestHeight, bestWidth;
-		Slot slot, prev;
-		Rect r = new Rect(0, 0, width, height);
+    public Rect getRegion(int width, int height) {
+        int y, bestHeight, bestWidth;
+        Slot slot, prev;
+        Rect r = new Rect(0, 0, width, height);
 
-		bestHeight = Integer.MAX_VALUE;
-		bestWidth = Integer.MAX_VALUE;
+        bestHeight = Integer.MAX_VALUE;
+        bestWidth = Integer.MAX_VALUE;
 
-		Slot bestSlot = null;
+        Slot bestSlot = null;
 
-		for (slot = mSlots; slot != null; slot = slot.next) {
-			// fit width
-			if ((slot.x + width) > (mWidth - 1))
-				continue;
+        for (slot = mSlots; slot != null; slot = slot.next) {
+            // fit width
+            if ((slot.x + width) > (mWidth - 1))
+                continue;
 
-			// fit height
-			y = slot.y;
-			int widthLeft = width;
+            // fit height
+            y = slot.y;
+            int widthLeft = width;
 
-			Slot fit = slot;
-			while (widthLeft > 0) {
-				if (fit.y > y)
-					y = fit.y;
+            Slot fit = slot;
+            while (widthLeft > 0) {
+                if (fit.y > y)
+                    y = fit.y;
 
-				if ((y + height) > (mHeight - 1)) {
-					y = -1;
-					break;
-				}
-				widthLeft -= fit.w;
+                if ((y + height) > (mHeight - 1)) {
+                    y = -1;
+                    break;
+                }
+                widthLeft -= fit.w;
 
-				fit = fit.next;
-			}
+                fit = fit.next;
+            }
 
-			if (y < 0)
-				continue;
+            if (y < 0)
+                continue;
 
-			int h = y + height;
-			if ((h < bestHeight) || ((h == bestHeight) && (slot.w < bestWidth))) {
-				bestHeight = h;
-				bestSlot = slot;
-				bestWidth = slot.w;
-				r.x = slot.x;
-				r.y = y;
-			}
-		}
+            int h = y + height;
+            if ((h < bestHeight) || ((h == bestHeight) && (slot.w < bestWidth))) {
+                bestHeight = h;
+                bestSlot = slot;
+                bestWidth = slot.w;
+                r.x = slot.x;
+                r.y = y;
+            }
+        }
 
-		if (bestSlot == null)
-			return null;
+        if (bestSlot == null)
+            return null;
 
-		Slot curSlot = new Slot(r.x, r.y + height, width);
-		mSlots = Inlist.prependRelative(mSlots, curSlot, bestSlot);
+        Slot curSlot = new Slot(r.x, r.y + height, width);
+        mSlots = Inlist.prependRelative(mSlots, curSlot, bestSlot);
 
-		// split
-		for (prev = curSlot; prev.next != null;) {
-			slot = prev.next;
+        // split
+        for (prev = curSlot; prev.next != null; ) {
+            slot = prev.next;
 
-			int shrink = (prev.x + prev.w) - slot.x;
+            int shrink = (prev.x + prev.w) - slot.x;
 
-			if (shrink <= 0)
-				break;
+            if (shrink <= 0)
+                break;
 
-			slot.x += shrink;
-			slot.w -= shrink;
-			if (slot.w > 0)
-				break;
+            slot.x += shrink;
+            slot.w -= shrink;
+            if (slot.w > 0)
+                break;
 
-			// erease slot
-			prev.next = slot.next;
-		}
+            // erease slot
+            prev.next = slot.next;
+        }
 
-		// merge
-		for (slot = mSlots; slot.next != null;) {
-			Slot nextSlot = slot.next;
+        // merge
+        for (slot = mSlots; slot.next != null; ) {
+            Slot nextSlot = slot.next;
 
-			if (slot.y == nextSlot.y) {
-				slot.w += nextSlot.w;
+            if (slot.y == nextSlot.y) {
+                slot.w += nextSlot.w;
 
-				// erease 'next' slot
-				slot.next = nextSlot.next;
-			} else {
-				slot = nextSlot;
-			}
-		}
+                // erease 'next' slot
+                slot.next = nextSlot.next;
+            } else {
+                slot = nextSlot;
+            }
+        }
 
-		mUsed += width * height;
+        mUsed += width * height;
 
-		mRects = Inlist.push(mRects, r);
-		return r;
-	}
+        mRects = Inlist.push(mRects, r);
+        return r;
+    }
 
-	public void clear() {
-		mRects = null;
-		mSlots = new Slot(1, 1, mWidth - 2);
-	}
+    public void clear() {
+        mRects = null;
+        mSlots = new Slot(1, 1, mWidth - 2);
+    }
 
-	public static TextureAtlas create(int width, int height, int depth) {
-		if (!(depth == 1 || depth == 3 || depth == 4))
-			throw new IllegalArgumentException("invalid depth");
+    public static TextureAtlas create(int width, int height, int depth) {
+        if (!(depth == 1 || depth == 3 || depth == 4))
+            throw new IllegalArgumentException("invalid depth");
 
-		return new TextureAtlas(width, height);
-	}
+        return new TextureAtlas(width, height);
+    }
 
-	//	/// FIXME
-	//	@Override
-	//	protected void finalize(){
-	//		if (texture != null)
-	//			TextureItem.releaseTexture(texture);
-	//	}
+    //	/// FIXME
+    //	@Override
+    //	protected void finalize(){
+    //		if (texture != null)
+    //			TextureItem.releaseTexture(texture);
+    //	}
 }

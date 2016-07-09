@@ -16,8 +16,6 @@
  */
 package org.oscim.tiling.source.test;
 
-import static org.oscim.tiling.QueryResult.SUCCESS;
-
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
@@ -26,170 +24,172 @@ import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.TileSource;
 
+import static org.oscim.tiling.QueryResult.SUCCESS;
+
 public class TestTileSource extends TileSource {
 
-	// private boolean mOpenFile = false;
+    // private boolean mOpenFile = false;
 
-	public TestTileSource() {
-		super(0, 18);
-	}
+    public TestTileSource() {
+        super(0, 18);
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new TileDataSource();
-	}
+    @Override
+    public ITileDataSource getDataSource() {
+        return new TileDataSource();
+    }
 
-	@Override
-	public OpenResult open() {
-		// mOpenFile =true;
-		return OpenResult.SUCCESS;
-	}
+    @Override
+    public OpenResult open() {
+        // mOpenFile =true;
+        return OpenResult.SUCCESS;
+    }
 
-	@Override
-	public void close() {
-		// mOpenFile = false;
-	}
+    @Override
+    public void close() {
+        // mOpenFile = false;
+    }
 
-	static class TileDataSource implements ITileDataSource {
+    static class TileDataSource implements ITileDataSource {
 
-		private static final Tag[] mTags = {
-		        new Tag("natural", "water")
-		};
-		private static final Tag[] mTagsWay = {
-		        new Tag("highway", "primary"),
-		        new Tag("name", "Highway Rd")
-		};
-		private static final Tag[] mTagsBoundary = {
-		        new Tag("boundary", "administrative"),
-		        new Tag("admin_level", "2")
-		};
+        private static final Tag[] mTags = {
+                new Tag("natural", "water")
+        };
+        private static final Tag[] mTagsWay = {
+                new Tag("highway", "primary"),
+                new Tag("name", "Highway Rd")
+        };
+        private static final Tag[] mTagsBoundary = {
+                new Tag("boundary", "administrative"),
+                new Tag("admin_level", "2")
+        };
 
-		private static final Tag[] mTagsPlace = {
-		        new Tag("place", "city"),
-		        null
-		};
+        private static final Tag[] mTagsPlace = {
+                new Tag("place", "city"),
+                null
+        };
 
-		private final MapElement mElem;
+        private final MapElement mElem;
 
-		public TileDataSource() {
-			mElem = new MapElement();
-		}
+        public TileDataSource() {
+            mElem = new MapElement();
+        }
 
-		private boolean renderWays = true;
-		private boolean renderBoundary = true;
-		private boolean renderPlace = false;
+        private boolean renderWays = true;
+        private boolean renderBoundary = true;
+        private boolean renderPlace = false;
 
-		@Override
-		public void query(MapTile tile, ITileDataSink sink) {
+        @Override
+        public void query(MapTile tile, ITileDataSink sink) {
 
-			int size = Tile.SIZE;
-			MapElement e = mElem;
+            int size = Tile.SIZE;
+            MapElement e = mElem;
 
-			float x1 = -1;
-			float y1 = -1;
-			float x2 = size + 1;
-			float y2 = size + 1;
+            float x1 = -1;
+            float y1 = -1;
+            float x2 = size + 1;
+            float y2 = size + 1;
 
-			// always clear geometry before starting
-			// a different type.
-			e.clear();
-			e.startPolygon();
-			e.addPoint(x1, y1);
-			e.addPoint(x2, y1);
-			e.addPoint(x2, y2);
-			e.addPoint(x1, y2);
+            // always clear geometry before starting
+            // a different type.
+            e.clear();
+            e.startPolygon();
+            e.addPoint(x1, y1);
+            e.addPoint(x2, y1);
+            e.addPoint(x2, y2);
+            e.addPoint(x1, y2);
 
-			y1 = 5;
-			y2 = size - 5;
-			x1 = 5;
-			x2 = size - 5;
+            y1 = 5;
+            y2 = size - 5;
+            x1 = 5;
+            x2 = size - 5;
 
-			e.startHole();
-			e.addPoint(x1, y1);
-			e.addPoint(x2, y1);
-			e.addPoint(x2, y2);
-			e.addPoint(x1, y2);
+            e.startHole();
+            e.addPoint(x1, y1);
+            e.addPoint(x2, y1);
+            e.addPoint(x2, y2);
+            e.addPoint(x1, y2);
 
-			e.setLayer(0);
-			e.tags.set(mTags);
-			sink.process(e);
+            e.setLayer(0);
+            e.tags.set(mTags);
+            sink.process(e);
 
-			if (renderWays) {
-				e.clear();
+            if (renderWays) {
+                e.clear();
 
-				// middle horizontal
-				e.startLine();
-				e.addPoint(0, size / 2);
-				e.addPoint(size, size / 2);
+                // middle horizontal
+                e.startLine();
+                e.addPoint(0, size / 2);
+                e.addPoint(size, size / 2);
 
-				// center up
-				e.startLine();
-				e.addPoint(size / 2, -size / 2);
-				e.addPoint(size / 2, size / 2);
+                // center up
+                e.startLine();
+                e.addPoint(size / 2, -size / 2);
+                e.addPoint(size / 2, size / 2);
 
-				// center down
-				e.startLine();
-				e.addPoint(size / 2, size / 2);
-				e.addPoint(size / 2, size / 2 + size);
+                // center down
+                e.startLine();
+                e.addPoint(size / 2, size / 2);
+                e.addPoint(size / 2, size / 2 + size);
 
-				// //e.setLayer(mTagsWay, 0);
-				sink.process(e);
+                // //e.setLayer(mTagsWay, 0);
+                sink.process(e);
 
-				e.clear();
-				// left-top to center
-				e.startLine();
-				e.addPoint(size / 2, size / 2);
-				e.addPoint(10, 10);
+                e.clear();
+                // left-top to center
+                e.startLine();
+                e.addPoint(size / 2, size / 2);
+                e.addPoint(10, 10);
 
-				e.startLine();
-				e.addPoint(0, 10);
-				e.addPoint(size, 10);
+                e.startLine();
+                e.addPoint(0, 10);
+                e.addPoint(size, 10);
 
-				e.startLine();
-				e.addPoint(10, 0);
-				e.addPoint(10, size);
+                e.startLine();
+                e.addPoint(10, 0);
+                e.addPoint(10, size);
 
-				e.setLayer(1);
-				e.tags.set(mTagsWay);
-				sink.process(e);
-			}
+                e.setLayer(1);
+                e.tags.set(mTagsWay);
+                sink.process(e);
+            }
 
-			if (renderBoundary) {
-				e.clear();
-				e.startPolygon();
-				float r = size / 2;
+            if (renderBoundary) {
+                e.clear();
+                e.startPolygon();
+                float r = size / 2;
 
-				for (int i = 0; i < 360; i += 4) {
-					double d = Math.toRadians(i);
-					e.addPoint(r + (float) Math.cos(d) * (r - 40),
-					           r + (float) Math.sin(d) * (r - 40));
-				}
+                for (int i = 0; i < 360; i += 4) {
+                    double d = Math.toRadians(i);
+                    e.addPoint(r + (float) Math.cos(d) * (r - 40),
+                            r + (float) Math.sin(d) * (r - 40));
+                }
 
-				e.setLayer(1);
-				e.tags.set(mTagsBoundary);
-				sink.process(e);
-			}
+                e.setLayer(1);
+                e.tags.set(mTagsBoundary);
+                sink.process(e);
+            }
 
-			if (renderPlace) {
-				e.clear();
-				e.startPoints();
-				e.addPoint(size / 2, size / 2);
+            if (renderPlace) {
+                e.clear();
+                e.startPoints();
+                e.addPoint(size / 2, size / 2);
 
-				mTagsPlace[1] = new Tag("name", tile.toString());
-				e.tags.set(mTagsPlace);
-				sink.process(e);
-			}
+                mTagsPlace[1] = new Tag("name", tile.toString());
+                e.tags.set(mTagsPlace);
+                sink.process(e);
+            }
 
-			sink.completed(SUCCESS);
-		}
+            sink.completed(SUCCESS);
+        }
 
-		@Override
-		public void dispose() {
-		}
+        @Override
+        public void dispose() {
+        }
 
-		@Override
-		public void cancel() {
-		}
-	}
+        @Override
+        public void cancel() {
+        }
+    }
 
 }

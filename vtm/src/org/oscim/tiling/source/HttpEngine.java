@@ -16,32 +16,32 @@
  */
 package org.oscim.tiling.source;
 
+import org.oscim.core.Tile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.oscim.core.Tile;
-
 public interface HttpEngine {
 
-	InputStream read() throws IOException;
+    InputStream read() throws IOException;
 
-	void sendRequest(Tile tile) throws IOException;
+    void sendRequest(Tile tile) throws IOException;
 
-	void close();
+    void close();
 
-	void setCache(OutputStream os);
+    void setCache(OutputStream os);
 
-	/**
-	 * @param success maybe false when tile could not be decoded.
-	 *            Dont write cache in this case, close socket, etc
-	 *            at your option.
-	 * @return true when everything went ok
-	 */
-	boolean requestCompleted(boolean success);
+    /**
+     * @param success maybe false when tile could not be decoded.
+     *                Dont write cache in this case, close socket, etc
+     *                at your option.
+     * @return true when everything went ok
+     */
+    boolean requestCompleted(boolean success);
 
-	public interface Factory {
-		HttpEngine create(UrlTileSource tileSource);
-	}
+    public interface Factory {
+        HttpEngine create(UrlTileSource tileSource);
+    }
 
 }

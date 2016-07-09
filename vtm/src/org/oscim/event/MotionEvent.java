@@ -18,30 +18,30 @@ package org.oscim.event;
 
 public abstract class MotionEvent {
 
-	public static final int ACTION_DOWN = 0;
-	public static final int ACTION_UP = 1;
-	public static final int ACTION_MOVE = 2;
-	public static final int ACTION_CANCEL = 3;
-	public static final int ACTION_POINTER_DOWN = 5;
-	public static final int ACTION_POINTER_UP = 6;
+    public static final int ACTION_DOWN = 0;
+    public static final int ACTION_UP = 1;
+    public static final int ACTION_MOVE = 2;
+    public static final int ACTION_CANCEL = 3;
+    public static final int ACTION_POINTER_DOWN = 5;
+    public static final int ACTION_POINTER_UP = 6;
 
-	// FIXME this should not be in the API!
-	public static final int ACTION_MASK = 0xff;
-	public static final int ACTION_POINTER_INDEX_MASK = 0xff00;
-	public static final int ACTION_POINTER_INDEX_SHIFT = 8;
+    // FIXME this should not be in the API!
+    public static final int ACTION_MASK = 0xff;
+    public static final int ACTION_POINTER_INDEX_MASK = 0xff00;
+    public static final int ACTION_POINTER_INDEX_SHIFT = 8;
 
-	public abstract long getTime();
+    public abstract long getTime();
 
-	public abstract int getAction();
+    public abstract int getAction();
 
-	public abstract float getX();
+    public abstract float getX();
 
-	public abstract float getY();
+    public abstract float getY();
 
-	public abstract float getX(int idx);
+    public abstract float getX(int idx);
 
-	public abstract float getY(int idx);
+    public abstract float getY(int idx);
 
-	public abstract int getPointerCount();
+    public abstract int getPointerCount();
 
 }

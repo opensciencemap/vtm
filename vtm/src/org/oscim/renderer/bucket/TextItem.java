@@ -21,81 +21,81 @@ import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.SyncPool;
 
 public class TextItem extends Inlist<TextItem> {
-	//static final Logger log = LoggerFactory.getLogger(TextItem.class);
-	private final static int MAX_POOL = 250;
+    //static final Logger log = LoggerFactory.getLogger(TextItem.class);
+    private final static int MAX_POOL = 250;
 
-	public final static SyncPool<TextItem> pool = new SyncPool<TextItem>(MAX_POOL) {
+    public final static SyncPool<TextItem> pool = new SyncPool<TextItem>(MAX_POOL) {
 
-		@Override
-		protected TextItem createItem() {
-			return new TextItem();
-		}
+        @Override
+        protected TextItem createItem() {
+            return new TextItem();
+        }
 
-		@Override
-		protected boolean clearItem(TextItem ti) {
-			// drop references
-			ti.string = null;
-			ti.text = null;
-			//ti.n1 = null;
-			//ti.n2 = null;
-			return true;
-		}
-	};
+        @Override
+        protected boolean clearItem(TextItem ti) {
+            // drop references
+            ti.string = null;
+            ti.text = null;
+            //ti.n1 = null;
+            //ti.n2 = null;
+            return true;
+        }
+    };
 
-	public static TextItem copy(TextItem orig) {
+    public static TextItem copy(TextItem orig) {
 
-		TextItem ti = pool.get();
+        TextItem ti = pool.get();
 
-		ti.x = orig.x;
-		ti.y = orig.y;
+        ti.x = orig.x;
+        ti.y = orig.y;
 
-		ti.x1 = orig.x1;
-		ti.y1 = orig.y1;
-		ti.x2 = orig.x2;
-		ti.y2 = orig.y2;
+        ti.x1 = orig.x1;
+        ti.y1 = orig.y1;
+        ti.x2 = orig.x2;
+        ti.y2 = orig.y2;
 
-		return ti;
-	}
+        return ti;
+    }
 
-	public TextItem set(float x, float y, String string, TextStyle text) {
-		this.x = x;
-		this.y = y;
-		this.string = string;
-		this.text = text;
-		this.x1 = 0;
-		this.y1 = 0;
-		this.x2 = 1;
-		this.y2 = 0;
-		this.width = text.paint.measureText(string);
-		return this;
-	}
+    public TextItem set(float x, float y, String string, TextStyle text) {
+        this.x = x;
+        this.y = y;
+        this.string = string;
+        this.text = text;
+        this.x1 = 0;
+        this.y1 = 0;
+        this.x2 = 1;
+        this.y2 = 0;
+        this.width = text.paint.measureText(string);
+        return this;
+    }
 
-	// center
-	public float x, y;
+    // center
+    public float x, y;
 
-	// label text
-	public String string;
+    // label text
+    public String string;
 
-	// text style
-	public TextStyle text;
+    // text style
+    public TextStyle text;
 
-	// label width
-	public float width;
+    // label width
+    public float width;
 
-	// left and right corner of segment
-	public float x1, y1, x2, y2;
+    // left and right corner of segment
+    public float x1, y1, x2, y2;
 
-	// segment length
-	public short length;
+    // segment length
+    public short length;
 
-	// link to next/prev label of the way
-	//public TextItem n1;
-	//public TextItem n2;
+    // link to next/prev label of the way
+    //public TextItem n1;
+    //public TextItem n2;
 
-	public byte edges;
+    public byte edges;
 
-	@Override
-	public String toString() {
-		return x + " " + y + " " + string;
-	}
+    @Override
+    public String toString() {
+        return x + " " + y + " " + string;
+    }
 }

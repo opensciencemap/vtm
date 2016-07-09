@@ -26,72 +26,71 @@ import org.oscim.theme.styles.LineStyle;
 
 class Debug {
 
-	private final static float[] mDebugPoints = new float[8];
-	// TODO Auto-generated method stub
-	static RenderBuckets dbg;
+    private final static float[] mDebugPoints = new float[8];
+    // TODO Auto-generated method stub
+    static RenderBuckets dbg;
 
-	static void addDebugBox(Label l, TextItem ti, int overlaps, boolean prev,
-	        float scale) {
+    static void addDebugBox(Label l, TextItem ti, int overlaps, boolean prev,
+                            float scale) {
 
-		LineBucket ll;
-		if (prev) {
-			if (overlaps == 1)
-				ll = dbg.getLineBucket(4);
-			else
-				ll = dbg.getLineBucket(5);
+        LineBucket ll;
+        if (prev) {
+            if (overlaps == 1)
+                ll = dbg.getLineBucket(4);
+            else
+                ll = dbg.getLineBucket(5);
 
-		} else {
-			if (ti.width > ti.length * scale) {
-				ll = dbg.getLineBucket(1);
-				overlaps = 3;
-			}
-			else if (overlaps == 1)
-				ll = dbg.getLineBucket(0);
-			else if (overlaps == 2)
-				ll = dbg.getLineBucket(3);
-			else
-				ll = dbg.getLineBucket(2);
-		}
-		float[] points = mDebugPoints;
-		float width = (ti.x2 - ti.x1) / 2f;
-		float height = (ti.y2 - ti.y1) / 2f;
-		points[0] = (l.x - width * scale);
-		points[1] = (l.y - height * scale);
-		points[2] = (l.x + width * scale);
-		points[3] = (l.y + height * scale);
-		ll.addLine(points, 4, false);
+        } else {
+            if (ti.width > ti.length * scale) {
+                ll = dbg.getLineBucket(1);
+                overlaps = 3;
+            } else if (overlaps == 1)
+                ll = dbg.getLineBucket(0);
+            else if (overlaps == 2)
+                ll = dbg.getLineBucket(3);
+            else
+                ll = dbg.getLineBucket(2);
+        }
+        float[] points = mDebugPoints;
+        float width = (ti.x2 - ti.x1) / 2f;
+        float height = (ti.y2 - ti.y1) / 2f;
+        points[0] = (l.x - width * scale);
+        points[1] = (l.y - height * scale);
+        points[2] = (l.x + width * scale);
+        points[3] = (l.y + height * scale);
+        ll.addLine(points, 4, false);
 
-		System.arraycopy(l.bbox.vec, 2, points, 0, 8);
-		if (l.bbox != null && overlaps != 3) {
-			ll.addLine(points, 8, true);
-		}
-	}
+        System.arraycopy(l.bbox.vec, 2, points, 0, 8);
+        if (l.bbox != null && overlaps != 3) {
+            ll.addLine(points, 8, true);
+        }
+    }
 
-	static void addDebugLayers(RenderBuckets dbg) {
-		int alpha = 0xaaffffff;
+    static void addDebugLayers(RenderBuckets dbg) {
+        int alpha = 0xaaffffff;
 
-		dbg.clear();
-		dbg.addLineBucket(0, new LineStyle((Color.BLUE & alpha), 2));
-		dbg.addLineBucket(1, new LineStyle((Color.RED & alpha), 2));
-		dbg.addLineBucket(3, new LineStyle((Color.YELLOW & alpha), 2));
-		dbg.addLineBucket(2, new LineStyle((Color.GREEN & alpha), 2));
-		dbg.addLineBucket(4, new LineStyle((Color.CYAN & alpha), 2));
-		dbg.addLineBucket(5, new LineStyle((Color.MAGENTA & alpha), 2));
-	}
+        dbg.clear();
+        dbg.addLineBucket(0, new LineStyle((Color.BLUE & alpha), 2));
+        dbg.addLineBucket(1, new LineStyle((Color.RED & alpha), 2));
+        dbg.addLineBucket(3, new LineStyle((Color.YELLOW & alpha), 2));
+        dbg.addLineBucket(2, new LineStyle((Color.GREEN & alpha), 2));
+        dbg.addLineBucket(4, new LineStyle((Color.CYAN & alpha), 2));
+        dbg.addLineBucket(5, new LineStyle((Color.MAGENTA & alpha), 2));
+    }
 
-	public static void draw(MapPosition pos, GLViewport m, RenderBuckets layers) {
-		//		if (layers.baseLayers != null) {
-		//			//setMatrix(pos, m, true);
-		//
-		//			for (RenderElement l = layers.baseLayers; l != null;) {
-		//				if (l.type == RenderElement.POLYGON) {
-		//					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
-		//				} else {
-		//					//float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
-		//					l = LineLayer.Renderer.draw(layers, l, pos, m, div);
-		//				}
-		//			}
-		//		}
-	}
+    public static void draw(MapPosition pos, GLViewport m, RenderBuckets layers) {
+        //		if (layers.baseLayers != null) {
+        //			//setMatrix(pos, m, true);
+        //
+        //			for (RenderElement l = layers.baseLayers; l != null;) {
+        //				if (l.type == RenderElement.POLYGON) {
+        //					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
+        //				} else {
+        //					//float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
+        //					l = LineLayer.Renderer.draw(layers, l, pos, m, div);
+        //				}
+        //			}
+        //		}
+    }
 
 }

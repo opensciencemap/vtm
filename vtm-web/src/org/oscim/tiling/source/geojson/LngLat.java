@@ -4,15 +4,15 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class LngLat extends JavaScriptObject {
 
-	protected LngLat() {
+    protected LngLat() {
 
-	}
+    }
 
-	public final native double getLongitude() /*-{
-		return this[0];
+    public final native double getLongitude() /*-{
+        return this[0];
 	}-*/;
 
-	public final native double getLatitude() /*-{
-		return this[1];
+    public final native double getLatitude() /*-{
+        return this[1];
 	}-*/;
 }

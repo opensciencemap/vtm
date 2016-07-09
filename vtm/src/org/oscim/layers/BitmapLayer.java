@@ -22,17 +22,17 @@ import org.oscim.renderer.LayerRenderer;
 
 public class BitmapLayer extends GenericLayer {
 
-	/**
-	 * Class for rendering a Bitmap as overlay. The
-	 * set Bitmap can be modified and updated:
-	 * See {@link BitmapRenderer}
-	 */
-	public BitmapLayer(Map map, LayerRenderer renderer) {
-		super(map, new BitmapRenderer());
-	}
+    /**
+     * Class for rendering a Bitmap as overlay. The
+     * set Bitmap can be modified and updated:
+     * See {@link BitmapRenderer}
+     */
+    public BitmapLayer(Map map, LayerRenderer renderer) {
+        super(map, new BitmapRenderer());
+    }
 
-	public BitmapRenderer getBitmapRenderer() {
-		return (BitmapRenderer) mRenderer;
-	}
+    public BitmapRenderer getBitmapRenderer() {
+        return (BitmapRenderer) mRenderer;
+    }
 
 }

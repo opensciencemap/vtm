@@ -24,43 +24,43 @@ import org.oscim.utils.pool.SyncPool;
 
 public class SymbolItem extends Inlist<SymbolItem> {
 
-	public final static SyncPool<SymbolItem> pool = new SyncPool<SymbolItem>(128) {
+    public final static SyncPool<SymbolItem> pool = new SyncPool<SymbolItem>(128) {
 
-		@Override
-		protected SymbolItem createItem() {
-			return new SymbolItem();
-		}
+        @Override
+        protected SymbolItem createItem() {
+            return new SymbolItem();
+        }
 
-		@Override
-		protected boolean clearItem(SymbolItem it) {
-			// drop references
-			it.bitmap = null;
-			it.texRegion = null;
-			it.offset = null;
-			return true;
-		}
-	};
+        @Override
+        protected boolean clearItem(SymbolItem it) {
+            // drop references
+            it.bitmap = null;
+            it.texRegion = null;
+            it.offset = null;
+            return true;
+        }
+    };
 
-	public boolean billboard;
-	public float x;
-	public float y;
+    public boolean billboard;
+    public float x;
+    public float y;
 
-	public TextureRegion texRegion;
-	public Bitmap bitmap;
-	public PointF offset;
+    public TextureRegion texRegion;
+    public Bitmap bitmap;
+    public PointF offset;
 
-	public void set(float x, float y, TextureRegion texture, boolean billboard) {
-		this.x = x;
-		this.y = y;
-		this.texRegion = texture;
-		this.billboard = billboard;
-	}
+    public void set(float x, float y, TextureRegion texture, boolean billboard) {
+        this.x = x;
+        this.y = y;
+        this.texRegion = texture;
+        this.billboard = billboard;
+    }
 
-	public void set(float x, float y, Bitmap bitmap, boolean billboard) {
-		this.x = x;
-		this.y = y;
-		this.bitmap = bitmap;
-		this.billboard = billboard;
-	}
+    public void set(float x, float y, Bitmap bitmap, boolean billboard) {
+        this.x = x;
+        this.y = y;
+        this.bitmap = bitmap;
+        this.billboard = billboard;
+    }
 
 }

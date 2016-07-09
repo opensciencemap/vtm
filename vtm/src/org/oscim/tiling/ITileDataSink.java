@@ -23,21 +23,21 @@ import org.oscim.core.MapElement;
  * ITileDataSink callbacks (implemented by MapTileLoader)
  */
 public interface ITileDataSink {
-	/**
-	 * Pass read MapElement data to loader.
-	 * <p>
-	 * NOTE: MapElement passed belong to the caller! i.e. dont hold references
-	 * to any of its data after callback function returns.
-	 */
-	void process(MapElement element);
+    /**
+     * Pass read MapElement data to loader.
+     * <p/>
+     * NOTE: MapElement passed belong to the caller! i.e. dont hold references
+     * to any of its data after callback function returns.
+     */
+    void process(MapElement element);
 
-	/**
-	 * Pass read Bitmap data to loader.
-	 */
-	void setTileImage(Bitmap bitmap);
+    /**
+     * Pass read Bitmap data to loader.
+     */
+    void setTileImage(Bitmap bitmap);
 
-	/**
-	 * Notify loader that tile loading is completed.
-	 */
-	void completed(QueryResult result);
+    /**
+     * Notify loader that tile loading is completed.
+     */
+    void completed(QueryResult result);
 }

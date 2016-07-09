@@ -21,54 +21,53 @@ import org.oscim.core.Tag;
 
 /**
  * Contains the immutable metadata of a map file.
- * 
  */
 public class MapFileInfo extends org.oscim.tiling.source.mapfile.MapInfo {
 
-	/**
-	 * True if the map file includes debug information, false otherwise.
-	 */
-	public final boolean debugFile;
+    /**
+     * True if the map file includes debug information, false otherwise.
+     */
+    public final boolean debugFile;
 
-	/**
-	 * The number of sub-files in the map file.
-	 */
-	public final byte numberOfSubFiles;
+    /**
+     * The number of sub-files in the map file.
+     */
+    public final byte numberOfSubFiles;
 
-	/**
-	 * The POI tags.
-	 */
-	public final Tag[] poiTags;
+    /**
+     * The POI tags.
+     */
+    public final Tag[] poiTags;
 
-	/**
-	 * The way tags.
-	 */
-	public final Tag[] wayTags;
+    /**
+     * The way tags.
+     */
+    public final Tag[] wayTags;
 
-	/**
-	 * The size of the tiles in pixels.
-	 */
-	public final int tilePixelSize;
+    /**
+     * The size of the tiles in pixels.
+     */
+    public final int tilePixelSize;
 
-	MapFileInfo(MapFileInfoBuilder mapFileInfoBuilder) {
-		super(mapFileInfoBuilder.boundingBox,
-		      mapFileInfoBuilder.optionalFields.startZoomLevel,
-		      mapFileInfoBuilder.optionalFields.startPosition,
-		      mapFileInfoBuilder.projectionName,
-		      mapFileInfoBuilder.mapDate,
-		      mapFileInfoBuilder.fileSize,
-		      mapFileInfoBuilder.fileVersion,
-		      mapFileInfoBuilder.optionalFields.languagesPreference,
-		      mapFileInfoBuilder.optionalFields.comment,
-		      mapFileInfoBuilder.optionalFields.createdBy,
-		      mapFileInfoBuilder.zoomLevel);
+    MapFileInfo(MapFileInfoBuilder mapFileInfoBuilder) {
+        super(mapFileInfoBuilder.boundingBox,
+                mapFileInfoBuilder.optionalFields.startZoomLevel,
+                mapFileInfoBuilder.optionalFields.startPosition,
+                mapFileInfoBuilder.projectionName,
+                mapFileInfoBuilder.mapDate,
+                mapFileInfoBuilder.fileSize,
+                mapFileInfoBuilder.fileVersion,
+                mapFileInfoBuilder.optionalFields.languagesPreference,
+                mapFileInfoBuilder.optionalFields.comment,
+                mapFileInfoBuilder.optionalFields.createdBy,
+                mapFileInfoBuilder.zoomLevel);
 
-		debugFile = mapFileInfoBuilder.optionalFields.isDebugFile;
+        debugFile = mapFileInfoBuilder.optionalFields.isDebugFile;
 
-		numberOfSubFiles = mapFileInfoBuilder.numberOfSubFiles;
-		poiTags = mapFileInfoBuilder.poiTags;
+        numberOfSubFiles = mapFileInfoBuilder.numberOfSubFiles;
+        poiTags = mapFileInfoBuilder.poiTags;
 
-		tilePixelSize = mapFileInfoBuilder.tilePixelSize;
-		wayTags = mapFileInfoBuilder.wayTags;
-	}
+        tilePixelSize = mapFileInfoBuilder.tilePixelSize;
+        wayTags = mapFileInfoBuilder.wayTags;
+    }
 }

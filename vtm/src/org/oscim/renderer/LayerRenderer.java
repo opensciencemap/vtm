@@ -18,52 +18,55 @@ package org.oscim.renderer;
 
 public abstract class LayerRenderer {
 
-	/** flag to set when layer is ready for rendering */
-	boolean isReady;
+    /**
+     * flag to set when layer is ready for rendering
+     */
+    boolean isReady;
 
-	/** set by MapRenderer */
-	boolean isInitialized;
+    /**
+     * set by MapRenderer
+     */
+    boolean isInitialized;
 
-	/**
-	 * Set 'ready for render' state when layer data is ready for rendering.
-	 * 
-	 * @param ready true if render() should be called, false otherwise.
-	 */
-	protected void setReady(boolean ready) {
-		isReady = ready;
-	}
+    /**
+     * Set 'ready for render' state when layer data is ready for rendering.
+     *
+     * @param ready true if render() should be called, false otherwise.
+     */
+    protected void setReady(boolean ready) {
+        isReady = ready;
+    }
 
-	public boolean isReady() {
-		return isReady;
-	}
+    public boolean isReady() {
+        return isReady;
+    }
 
-	/**
-	 * 0. Called on GL Thread before first update().
-	 */
-	public boolean setup() {
-		return true;
-	}
+    /**
+     * 0. Called on GL Thread before first update().
+     */
+    public boolean setup() {
+        return true;
+    }
 
-	/**
-	 * 1. Called first by MapRenderer: Update the state here, compile
-	 * vertex-data and set setReady(true).
-	 * 
-	 * @param position current MapPosition
-	 * @param changed
-	 *            true when MapPosition has changed since last frame
-	 * @param matrices contains the current view- and projection-matrices
-	 *            and 'mvp' matrix for temporary use.
-	 */
-	public abstract void update(GLViewport viewport);
+    /**
+     * 1. Called first by MapRenderer: Update the state here, compile
+     * vertex-data and set setReady(true).
+     *
+     * @param position current MapPosition
+     * @param changed  true when MapPosition has changed since last frame
+     * @param matrices contains the current view- and projection-matrices
+     *                 and 'mvp' matrix for temporary use.
+     */
+    public abstract void update(GLViewport viewport);
 
-	/**
-	 * 2. Draw layer: called by MapRenderer when isReady == true.
-	 * 
-	 * @param position current MapPosition
-	 * @param matrices contains the current view- and projection-matrices.
-	 *            'matrices.mvp' is for temporary use to build the model-
-	 *            view-projection to set as uniform.
-	 */
-	public abstract void render(GLViewport viewport);
+    /**
+     * 2. Draw layer: called by MapRenderer when isReady == true.
+     *
+     * @param position current MapPosition
+     * @param matrices contains the current view- and projection-matrices.
+     *                 'matrices.mvp' is for temporary use to build the model-
+     *                 view-projection to set as uniform.
+     */
+    public abstract void render(GLViewport viewport);
 
 }

@@ -16,6 +16,10 @@
  */
 package org.oscim.android.test;
 
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import org.oscim.android.cache.TileCache;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.TileGridLayer;
@@ -26,101 +30,97 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-
 public class BaseMapActivity extends MapActivity {
-	static final Logger log = LoggerFactory.getLogger(BaseMapActivity.class);
+    static final Logger log = LoggerFactory.getLogger(BaseMapActivity.class);
 
-	final static boolean USE_CACHE = true;
+    final static boolean USE_CACHE = true;
 
-	VectorTileLayer mBaseLayer;
-	TileSource mTileSource;
-	TileGridLayer mGridLayer;
+    VectorTileLayer mBaseLayer;
+    TileSource mTileSource;
+    TileGridLayer mGridLayer;
 
-	private TileCache mCache;
+    private TileCache mCache;
 
-	public BaseMapActivity(int contentView) {
-		super(contentView);
-	}
+    public BaseMapActivity(int contentView) {
+        super(contentView);
+    }
 
-	public BaseMapActivity() {
-	}
+    public BaseMapActivity() {
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		mTileSource = new OSciMap4TileSource();
+        mTileSource = new OSciMap4TileSource();
 
-		if (USE_CACHE) {
-			mCache = new TileCache(this, null, "tile.db");
-			mCache.setCacheSize(512 * (1 << 10));
-			mTileSource.setCache(mCache);
-		}
-		mBaseLayer = mMap.setBaseMap(mTileSource);
+        if (USE_CACHE) {
+            mCache = new TileCache(this, null, "tile.db");
+            mCache.setCacheSize(512 * (1 << 10));
+            mTileSource.setCache(mCache);
+        }
+        mBaseLayer = mMap.setBaseMap(mTileSource);
 
 		/* set initial position on first run */
-		MapPosition pos = new MapPosition();
-		mMap.getMapPosition(pos);
-		if (pos.x == 0.5 && pos.y == 0.5)
-			mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
-	}
+        MapPosition pos = new MapPosition();
+        mMap.getMapPosition(pos);
+        if (pos.x == 0.5 && pos.y == 0.5)
+            mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
-		if (mCache != null)
-			mCache.dispose();
-	}
+        if (mCache != null)
+            mCache.dispose();
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-		switch (item.getItemId()) {
-			case R.id.theme_default:
-				mMap.setTheme(VtmThemes.DEFAULT);
-				item.setChecked(true);
-				return true;
+        switch (item.getItemId()) {
+            case R.id.theme_default:
+                mMap.setTheme(VtmThemes.DEFAULT);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_tubes:
-				mMap.setTheme(VtmThemes.TRONRENDER);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_tubes:
+                mMap.setTheme(VtmThemes.TRONRENDER);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_osmarender:
-				mMap.setTheme(VtmThemes.OSMARENDER);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_osmarender:
+                mMap.setTheme(VtmThemes.OSMARENDER);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_newtron:
-				mMap.setTheme(VtmThemes.NEWTRON);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_newtron:
+                mMap.setTheme(VtmThemes.NEWTRON);
+                item.setChecked(true);
+                return true;
 
-			case R.id.gridlayer:
-				if (item.isChecked()) {
-					item.setChecked(false);
-					mMap.layers().remove(mGridLayer);
-				} else {
-					item.setChecked(true);
-					if (mGridLayer == null)
-						mGridLayer = new TileGridLayer(mMap);
+            case R.id.gridlayer:
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    mMap.layers().remove(mGridLayer);
+                } else {
+                    item.setChecked(true);
+                    if (mGridLayer == null)
+                        mGridLayer = new TileGridLayer(mMap);
 
-					mMap.layers().add(mGridLayer);
-				}
-				mMap.updateMap(true);
-				return true;
-		}
+                    mMap.layers().add(mGridLayer);
+                }
+                mMap.updateMap(true);
+                return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.theme_menu, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.theme_menu, menu);
+        return true;
+    }
 }

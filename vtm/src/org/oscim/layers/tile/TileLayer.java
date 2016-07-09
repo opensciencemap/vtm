@@ -29,115 +29,115 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class TileLayer extends Layer implements UpdateListener {
 
-	static final Logger log = LoggerFactory.getLogger(TileLayer.class);
+    static final Logger log = LoggerFactory.getLogger(TileLayer.class);
 
-	private static final int NUM_LOADERS = 4;
+    private static final int NUM_LOADERS = 4;
 
-	/**
-	 * TileManager responsible for adding visible tiles
-	 * to load queue and managing in-memory tile cache.
-	 */
-	protected final TileManager mTileManager;
+    /**
+     * TileManager responsible for adding visible tiles
+     * to load queue and managing in-memory tile cache.
+     */
+    protected final TileManager mTileManager;
 
-	protected TileLoader[] mTileLoader;
+    protected TileLoader[] mTileLoader;
 
-	public TileLayer(Map map, TileManager tileManager, TileRenderer renderer) {
-		super(map);
-		renderer.setTileManager(tileManager);
+    public TileLayer(Map map, TileManager tileManager, TileRenderer renderer) {
+        super(map);
+        renderer.setTileManager(tileManager);
 
-		mTileManager = tileManager;
-		mRenderer = renderer;
+        mTileManager = tileManager;
+        mRenderer = renderer;
 
-	}
+    }
 
-	public TileLayer(Map map, TileManager tileManager) {
-		super(map);
-		mTileManager = tileManager;
-	}
+    public TileLayer(Map map, TileManager tileManager) {
+        super(map);
+        mTileManager = tileManager;
+    }
 
-	protected void setRenderer(TileRenderer renderer) {
-		renderer.setTileManager(mTileManager);
-		mRenderer = renderer;
-	}
+    protected void setRenderer(TileRenderer renderer) {
+        renderer.setTileManager(mTileManager);
+        mRenderer = renderer;
+    }
 
-	abstract protected TileLoader createLoader();
+    abstract protected TileLoader createLoader();
 
-	public TileRenderer tileRenderer() {
-		return (TileRenderer) mRenderer;
-	}
+    public TileRenderer tileRenderer() {
+        return (TileRenderer) mRenderer;
+    }
 
-	protected void initLoader(int numLoaders) {
-		mTileLoader = new TileLoader[numLoaders];
+    protected void initLoader(int numLoaders) {
+        mTileLoader = new TileLoader[numLoaders];
 
-		for (int i = 0; i < numLoaders; i++) {
-			mTileLoader[i] = createLoader();
-			mTileLoader[i].start();
-		}
-	}
+        for (int i = 0; i < numLoaders; i++) {
+            mTileLoader[i] = createLoader();
+            mTileLoader[i].start();
+        }
+    }
 
-	/**
-	 * Override to set number of loader threads. Default is 4.
-	 */
-	protected int getNumLoaders() {
-		return NUM_LOADERS;
-	}
+    /**
+     * Override to set number of loader threads. Default is 4.
+     */
+    protected int getNumLoaders() {
+        return NUM_LOADERS;
+    }
 
-	@Override
-	public void onMapEvent(Event event, MapPosition mapPosition) {
+    @Override
+    public void onMapEvent(Event event, MapPosition mapPosition) {
 
-		if (event == Map.CLEAR_EVENT) {
-			/* sync with TileRenderer */
-			synchronized (mRenderer) {
-				tileRenderer().clearTiles();
-				mTileManager.init();
-			}
+        if (event == Map.CLEAR_EVENT) {
+            /* sync with TileRenderer */
+            synchronized (mRenderer) {
+                tileRenderer().clearTiles();
+                mTileManager.init();
+            }
 
-			if (mTileManager.update(mapPosition))
-				notifyLoaders();
+            if (mTileManager.update(mapPosition))
+                notifyLoaders();
 
-		} else if (event == Map.POSITION_EVENT) {
-			if (mTileManager.update(mapPosition))
-				notifyLoaders();
-		}
-	}
+        } else if (event == Map.POSITION_EVENT) {
+            if (mTileManager.update(mapPosition))
+                notifyLoaders();
+        }
+    }
 
-	@Override
-	public void onDetach() {
-		for (TileLoader loader : mTileLoader) {
-			loader.pause();
-			loader.finish();
-			loader.dispose();
-		}
-	}
+    @Override
+    public void onDetach() {
+        for (TileLoader loader : mTileLoader) {
+            loader.pause();
+            loader.finish();
+            loader.dispose();
+        }
+    }
 
-	void notifyLoaders() {
-		for (TileLoader loader : mTileLoader)
-			loader.go();
-	}
+    void notifyLoaders() {
+        for (TileLoader loader : mTileLoader)
+            loader.go();
+    }
 
-	protected void pauseLoaders(boolean wait) {
-		for (TileLoader loader : mTileLoader) {
-			loader.cancel();
+    protected void pauseLoaders(boolean wait) {
+        for (TileLoader loader : mTileLoader) {
+            loader.cancel();
 
-			if (!loader.isPausing())
-				loader.pause();
-		}
+            if (!loader.isPausing())
+                loader.pause();
+        }
 
-		if (!wait)
-			return;
+        if (!wait)
+            return;
 
-		for (TileLoader loader : mTileLoader) {
-			if (!loader.isPausing())
-				loader.awaitPausing();
-		}
-	}
+        for (TileLoader loader : mTileLoader) {
+            if (!loader.isPausing())
+                loader.awaitPausing();
+        }
+    }
 
-	protected void resumeLoaders() {
-		for (TileLoader loader : mTileLoader)
-			loader.proceed();
-	}
+    protected void resumeLoaders() {
+        for (TileLoader loader : mTileLoader)
+            loader.proceed();
+    }
 
-	public TileManager getManager() {
-		return mTileManager;
-	}
+    public TileManager getManager() {
+        return mTileManager;
+    }
 }

@@ -18,49 +18,63 @@ package org.oscim.utils.quadtree;
 
 public class TreeNode<T extends TreeNode<T, E>, E> {
 
-	public T parent;
+    public T parent;
 
-	/** top-left */
-	public T child00;
+    /**
+     * top-left
+     */
+    public T child00;
 
-	/** bottom-left */
-	public T child01;
+    /**
+     * bottom-left
+     */
+    public T child01;
 
-	/** top-right */
-	public T child10;
+    /**
+     * top-right
+     */
+    public T child10;
 
-	/** bottom-right */
-	public T child11;
+    /**
+     * bottom-right
+     */
+    public T child11;
 
-	/** payload */
-	public E item;
+    /**
+     * payload
+     */
+    public E item;
 
-	/** id of this child relative to parent */
-	int id;
+    /**
+     * id of this child relative to parent
+     */
+    int id;
 
-	/** number of children and grandchildren */
-	int refs = 0;
+    /**
+     * number of children and grandchildren
+     */
+    int refs = 0;
 
-	public E parent() {
-		return parent.item;
-	}
+    public E parent() {
+        return parent.item;
+    }
 
-	public E child(int i) {
-		switch (i) {
-			case 0:
-				return (child00 != null) ? child00.item : null;
-			case 1:
-				return (child01 != null) ? child01.item : null;
-			case 2:
-				return (child10 != null) ? child10.item : null;
-			case 3:
-				return (child11 != null) ? child11.item : null;
-		}
-		return null;
-	}
+    public E child(int i) {
+        switch (i) {
+            case 0:
+                return (child00 != null) ? child00.item : null;
+            case 1:
+                return (child01 != null) ? child01.item : null;
+            case 2:
+                return (child10 != null) ? child10.item : null;
+            case 3:
+                return (child11 != null) ? child11.item : null;
+        }
+        return null;
+    }
 
-	public boolean isRoot() {
-		return this == parent;
-	}
+    public boolean isRoot() {
+        return this == parent;
+    }
 
 }

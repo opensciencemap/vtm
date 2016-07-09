@@ -9,13 +9,13 @@ import org.timepedia.exporter.client.ExportPackage;
 
 @ExportPackage("vtm")
 public class JsVectorTileLayer implements ExportOverlay<VectorTileLayer> {
-	public JsVectorTileLayer(Map map, TileSource tileSource) {
-	}
+    public JsVectorTileLayer(Map map, TileSource tileSource) {
+    }
 
-	public boolean setTileSource(TileSource tileSource) {
-		return false;
-	}
+    public boolean setTileSource(TileSource tileSource) {
+        return false;
+    }
 
-	public void setRenderTheme(IRenderTheme theme) {
-	}
+    public void setRenderTheme(IRenderTheme theme) {
+    }
 }

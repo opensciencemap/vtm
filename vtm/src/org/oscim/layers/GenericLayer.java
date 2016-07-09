@@ -20,14 +20,12 @@ import org.oscim.map.Map;
 import org.oscim.renderer.LayerRenderer;
 
 public class GenericLayer extends Layer {
-	/**
-	 * @param map
-	 *            ...
-	 * @param renderer
-	 *            ...
-	 */
-	public GenericLayer(Map map, LayerRenderer renderer) {
-		super(map);
-		mRenderer = renderer;
-	}
+    /**
+     * @param map      ...
+     * @param renderer ...
+     */
+    public GenericLayer(Map map, LayerRenderer renderer) {
+        super(map);
+        mRenderer = renderer;
+    }
 }

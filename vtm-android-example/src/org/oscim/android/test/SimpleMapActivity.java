@@ -13,7 +13,10 @@
  *
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
- */package org.oscim.android.test;
+ */
+package org.oscim.android.test;
+
+import android.os.Bundle;
 
 import org.oscim.android.MapScaleBar;
 import org.oscim.core.MapPosition;
@@ -25,63 +28,61 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 
-import android.os.Bundle;
-
 public class SimpleMapActivity extends BaseMapActivity {
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		Layers layers = mMap.layers();
-		layers.add(new BuildingLayer(mMap, mBaseLayer));
-		layers.add(new LabelLayer(mMap, mBaseLayer));
-		layers.add(new MapScaleBar(mMapView));
+        Layers layers = mMap.layers();
+        layers.add(new BuildingLayer(mMap, mBaseLayer));
+        layers.add(new LabelLayer(mMap, mBaseLayer));
+        layers.add(new MapScaleBar(mMapView));
 
-		mMap.setTheme(VtmThemes.DEFAULT);
-	}
+        mMap.setTheme(VtmThemes.DEFAULT);
+    }
 
-	void runTheMonkey() {
-		themes[0] = ThemeLoader.load(VtmThemes.DEFAULT);
-		themes[1] = ThemeLoader.load(VtmThemes.OSMARENDER);
-		themes[2] = ThemeLoader.load(VtmThemes.TRONRENDER);
-		loooop(1);
-	}
+    void runTheMonkey() {
+        themes[0] = ThemeLoader.load(VtmThemes.DEFAULT);
+        themes[1] = ThemeLoader.load(VtmThemes.OSMARENDER);
+        themes[2] = ThemeLoader.load(VtmThemes.TRONRENDER);
+        loooop(1);
+    }
 
-	IRenderTheme[] themes = new IRenderTheme[3];
+    IRenderTheme[] themes = new IRenderTheme[3];
 
-	// Stress testing
-	void loooop(final int i) {
-		final long time = (long) (500 + Math.random() * 1000);
-		mMapView.postDelayed(new Runnable() {
-			@Override
-			public void run() {
+    // Stress testing
+    void loooop(final int i) {
+        final long time = (long) (500 + Math.random() * 1000);
+        mMapView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-				mMapView.map().setTheme(themes[i]);
+                mMapView.map().setTheme(themes[i]);
 
-				MapPosition p = new MapPosition();
-				if (i == 1) {
-					mMapView.map().getMapPosition(p);
-					p.setScale(4);
-					mMapView.map().animator().animateTo(time, p);
-				} else {
-					//mMapView.map().setMapPosition(p);
+                MapPosition p = new MapPosition();
+                if (i == 1) {
+                    mMapView.map().getMapPosition(p);
+                    p.setScale(4);
+                    mMapView.map().animator().animateTo(time, p);
+                } else {
+                    //mMapView.map().setMapPosition(p);
 
-					p.setScale(2 + (1 << (int) (Math.random() * 13)));
-					//	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
-					//	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
-					p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
-					p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
+                    p.setScale(2 + (1 << (int) (Math.random() * 13)));
+                    //	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
+                    //	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
+                    p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
+                    p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
 
-					p.setTilt((float) (Math.random() * 60));
-					p.setBearing((float) (Math.random() * 360));
-					//mMapView.map().setMapPosition(p);
+                    p.setTilt((float) (Math.random() * 60));
+                    p.setBearing((float) (Math.random() * 360));
+                    //mMapView.map().setMapPosition(p);
 
-					mMapView.map().animator().animateTo(time, p);
-				}
-				loooop((i + 1) % 2);
+                    mMapView.map().animator().animateTo(time, p);
+                }
+                loooop((i + 1) % 2);
 
-			}
-		}, time);
-	}
+            }
+        }, time);
+    }
 }

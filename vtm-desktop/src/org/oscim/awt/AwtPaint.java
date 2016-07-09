@@ -17,6 +17,8 @@
  */
 package org.oscim.awt;
 
+import org.oscim.backend.canvas.Paint;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -27,136 +29,135 @@ import java.text.AttributedCharacterIterator.Attribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.oscim.backend.canvas.Paint;
-
 public class AwtPaint implements Paint {
 
-	final static float TEXT_OFFSET = 2;
+    final static float TEXT_OFFSET = 2;
 
-	private static int getCap(Cap cap) {
-		switch (cap) {
-			case BUTT:
-				return BasicStroke.CAP_BUTT;
-			case ROUND:
-				return BasicStroke.CAP_ROUND;
-			case SQUARE:
-				return BasicStroke.CAP_SQUARE;
-		}
+    private static int getCap(Cap cap) {
+        switch (cap) {
+            case BUTT:
+                return BasicStroke.CAP_BUTT;
+            case ROUND:
+                return BasicStroke.CAP_ROUND;
+            case SQUARE:
+                return BasicStroke.CAP_SQUARE;
+        }
 
-		throw new IllegalArgumentException("unknown cap: " + cap);
-	}
+        throw new IllegalArgumentException("unknown cap: " + cap);
+    }
 
-	static final Font defaultFont;
-	static {
-		Map<Attribute, Object> textAttributes = new HashMap<Attribute, Object>();
-		textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-		textAttributes.put(TextAttribute.FAMILY, "Arial");
-		textAttributes.put(TextAttribute.SIZE, 14);
+    static final Font defaultFont;
 
-		defaultFont = Font.getFont(textAttributes);
-	}
+    static {
+        Map<Attribute, Object> textAttributes = new HashMap<Attribute, Object>();
+        textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        textAttributes.put(TextAttribute.FAMILY, "Arial");
+        textAttributes.put(TextAttribute.SIZE, 14);
 
-	Font font = defaultFont; // new Font("Default", Font.PLAIN, 13);
-	Stroke stroke;
-	FontMetrics fm;
-	Color color = new Color(0.1f, 0.1f, 0.1f, 1);
+        defaultFont = Font.getFont(textAttributes);
+    }
 
-	private int cap;
-	private float strokeWidth;
+    Font font = defaultFont; // new Font("Default", Font.PLAIN, 13);
+    Stroke stroke;
+    FontMetrics fm;
+    Color color = new Color(0.1f, 0.1f, 0.1f, 1);
 
-	//private Align mAlign;
+    private int cap;
+    private float strokeWidth;
 
-	@Override
-	public int getColor() {
-		return 0;
-	}
+    //private Align mAlign;
 
-	@Override
-	public void setColor(int c) {
-		color = new Color(((c >> 16) & 0xff) / 255f,
-		                  ((c >> 8) & 0xff) / 255f,
-		                  ((c >> 0) & 0xff) / 255f,
-		                  ((c >> 24) & 0xff) / 255f);
-	}
+    @Override
+    public int getColor() {
+        return 0;
+    }
 
-	@Override
-	public void setStrokeCap(Cap cap) {
-		this.cap = getCap(cap);
-		createStroke();
-	}
+    @Override
+    public void setColor(int c) {
+        color = new Color(((c >> 16) & 0xff) / 255f,
+                ((c >> 8) & 0xff) / 255f,
+                ((c >> 0) & 0xff) / 255f,
+                ((c >> 24) & 0xff) / 255f);
+    }
 
-	@Override
-	public void setStrokeWidth(float width) {
-		strokeWidth = width + 1;
-		createStroke();
+    @Override
+    public void setStrokeCap(Cap cap) {
+        this.cap = getCap(cap);
+        createStroke();
+    }
 
-		// int size = font.getSize();
-		// font = font.deriveFont(size + width * 4);
+    @Override
+    public void setStrokeWidth(float width) {
+        strokeWidth = width + 1;
+        createStroke();
 
-		// TODO Auto-generated method stub
+        // int size = font.getSize();
+        // font = font.deriveFont(size + width * 4);
 
-	}
+        // TODO Auto-generated method stub
 
-	@Override
-	public void setStyle(Style style) {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    @Override
+    public void setStyle(Style style) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void setTextAlign(Align align) {
-		//mAlign = align;
-	}
+    }
 
-	@Override
-	public void setTextSize(float textSize) {
-		font = font.deriveFont(textSize);
+    @Override
+    public void setTextAlign(Align align) {
+        //mAlign = align;
+    }
 
-	}
+    @Override
+    public void setTextSize(float textSize) {
+        font = font.deriveFont(textSize);
 
-	@Override
-	public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    @Override
+    public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public float measureText(String text) {
-		if (fm == null)
-			fm = AwtGraphics.getFontMetrics(this.font);
+    }
 
-		float w = AwtGraphics.getTextWidth(fm, text);
-		//Gdx.app.log("text width:", text + " " + w);
-		return w + 4;
-		// return fm.getStringBounds(text, A).getWidth();
-		// return AwtGraphics.getTextWidth(fm, text);
-		// return fm.stringWidth(text);
-	}
+    @Override
+    public float measureText(String text) {
+        if (fm == null)
+            fm = AwtGraphics.getFontMetrics(this.font);
 
-	@Override
-	public float getFontHeight() {
-		if (fm == null)
-			fm = AwtGraphics.getFontMetrics(this.font);
+        float w = AwtGraphics.getTextWidth(fm, text);
+        //Gdx.app.log("text width:", text + " " + w);
+        return w + 4;
+        // return fm.getStringBounds(text, A).getWidth();
+        // return AwtGraphics.getTextWidth(fm, text);
+        // return fm.stringWidth(text);
+    }
 
-		float height = fm.getHeight();
+    @Override
+    public float getFontHeight() {
+        if (fm == null)
+            fm = AwtGraphics.getFontMetrics(this.font);
 
-		return height;
-	}
+        float height = fm.getHeight();
 
-	@Override
-	public float getFontDescent() {
-		if (fm == null)
-			fm = AwtGraphics.getFontMetrics(this.font);
+        return height;
+    }
 
-		float desc = fm.getDescent();
+    @Override
+    public float getFontDescent() {
+        if (fm == null)
+            fm = AwtGraphics.getFontMetrics(this.font);
 
-		return desc;
-	}
+        float desc = fm.getDescent();
 
-	private void createStroke() {
-		if (strokeWidth <= 0) {
-			return;
-		}
-		stroke = new BasicStroke(strokeWidth, cap, BasicStroke.JOIN_MITER, 1, null, 0);
-	}
+        return desc;
+    }
+
+    private void createStroke() {
+        if (strokeWidth <= 0) {
+            return;
+        }
+        stroke = new BasicStroke(strokeWidth, cap, BasicStroke.JOIN_MITER, 1, null, 0);
+    }
 }

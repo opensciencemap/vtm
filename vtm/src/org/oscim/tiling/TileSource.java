@@ -16,171 +16,170 @@
  */
 package org.oscim.tiling;
 
-import java.util.HashMap;
-
 import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
+
+import java.util.HashMap;
 
 public abstract class TileSource {
 
-	public abstract static class Builder<T extends Builder<T>> {
-		protected int zoomMin, zoomMax;
-		protected FadeStep[] fadeSteps;
+    public abstract static class Builder<T extends Builder<T>> {
+        protected int zoomMin, zoomMax;
+        protected FadeStep[] fadeSteps;
 
-		public T zoomMin(int zoom) {
-			zoomMin = zoom;
-			return self();
-		}
+        public T zoomMin(int zoom) {
+            zoomMin = zoom;
+            return self();
+        }
 
-		public T zoomMax(int zoom) {
-			zoomMax = zoom;
-			return self();
-		}
+        public T zoomMax(int zoom) {
+            zoomMax = zoom;
+            return self();
+        }
 
-		public T fadeSteps(FadeStep[] fadeSteps) {
-			this.fadeSteps = fadeSteps;
-			return self();
-		}
+        public T fadeSteps(FadeStep[] fadeSteps) {
+            this.fadeSteps = fadeSteps;
+            return self();
+        }
 
-		@SuppressWarnings("unchecked")
-		protected T self() {
-			return (T) this;
-		}
+        @SuppressWarnings("unchecked")
+        protected T self() {
+            return (T) this;
+        }
 
-		public abstract TileSource build();
-	}
+        public abstract TileSource build();
+    }
 
-	protected int mZoomMin = 0;
-	protected int mZoomMax = 20;
+    protected int mZoomMin = 0;
+    protected int mZoomMax = 20;
 
-	protected TileSource() {
-	}
+    protected TileSource() {
+    }
 
-	protected TileSource(int zoomMin, int zoomMax) {
-		mZoomMin = zoomMin;
-		mZoomMax = zoomMax;
-	}
+    protected TileSource(int zoomMin, int zoomMax) {
+        mZoomMin = zoomMin;
+        mZoomMax = zoomMax;
+    }
 
-	public TileSource(Builder<?> builder) {
-		mZoomMin = builder.zoomMin;
-		mZoomMax = builder.zoomMax;
-		mFadeSteps = builder.fadeSteps;
-	}
+    public TileSource(Builder<?> builder) {
+        mZoomMin = builder.zoomMin;
+        mZoomMax = builder.zoomMax;
+        mFadeSteps = builder.fadeSteps;
+    }
 
-	public abstract ITileDataSource getDataSource();
+    public abstract ITileDataSource getDataSource();
 
-	public abstract OpenResult open();
+    public abstract OpenResult open();
 
-	public abstract void close();
+    public abstract void close();
 
-	protected final Options options = new Options();
+    protected final Options options = new Options();
 
-	public ITileCache tileCache;
+    public ITileCache tileCache;
 
-	private FadeStep[] mFadeSteps;
+    private FadeStep[] mFadeSteps;
 
-	/**
-	 * Cache MUST be set before TileSource is added to a TileLayer!
-	 */
-	public void setCache(ITileCache cache) {
-		tileCache = cache;
-	}
+    /**
+     * Cache MUST be set before TileSource is added to a TileLayer!
+     */
+    public void setCache(ITileCache cache) {
+        tileCache = cache;
+    }
 
-	public int getZoomLevelMax() {
-		return mZoomMax;
-	}
+    public int getZoomLevelMax() {
+        return mZoomMax;
+    }
 
-	public int getZoomLevelMin() {
-		return mZoomMin;
-	}
+    public int getZoomLevelMin() {
+        return mZoomMin;
+    }
 
-	public FadeStep[] getFadeSteps() {
-		return mFadeSteps;
-	}
+    public FadeStep[] getFadeSteps() {
+        return mFadeSteps;
+    }
 
-	public TileSource setOption(String key, String value) {
-		options.put(key, value);
-		return this;
-	}
+    public TileSource setOption(String key, String value) {
+        options.put(key, value);
+        return this;
+    }
 
-	public String getOption(String key) {
-		return options.get(key);
-	}
+    public String getOption(String key) {
+        return options.get(key);
+    }
 
-	public static class Options extends HashMap<String, String> {
+    public static class Options extends HashMap<String, String> {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		@Override
-		public boolean equals(Object other) {
-			if (!(other instanceof Options))
-				return false;
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof Options))
+                return false;
 
-			//if (this.db != ((MapOptions) other).db)
-			//	return false;
+            //if (this.db != ((MapOptions) other).db)
+            //	return false;
 
-			// FIXME test if this is correct!
-			if (!this.entrySet().equals(((Options) other).entrySet()))
-				return false;
+            // FIXME test if this is correct!
+            if (!this.entrySet().equals(((Options) other).entrySet()))
+                return false;
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 
-	/**
-	 * A FileOpenResult is a simple DTO which is returned by
-	 * IMapDatabase#open().
-	 */
-	public static class OpenResult {
-		/**
-		 * Singleton for a FileOpenResult instance with {@code success=true}.
-		 */
-		public static final OpenResult SUCCESS = new OpenResult();
+    /**
+     * A FileOpenResult is a simple DTO which is returned by
+     * IMapDatabase#open().
+     */
+    public static class OpenResult {
+        /**
+         * Singleton for a FileOpenResult instance with {@code success=true}.
+         */
+        public static final OpenResult SUCCESS = new OpenResult();
 
-		private final String errorMessage;
-		private final boolean success;
+        private final String errorMessage;
+        private final boolean success;
 
-		/**
-		 * @param errorMessage
-		 *            a textual message describing the error, must not be null.
-		 */
-		public OpenResult(String errorMessage) {
-			if (errorMessage == null) {
-				throw new IllegalArgumentException("error message must not be null");
-			}
+        /**
+         * @param errorMessage a textual message describing the error, must not be null.
+         */
+        public OpenResult(String errorMessage) {
+            if (errorMessage == null) {
+                throw new IllegalArgumentException("error message must not be null");
+            }
 
-			this.success = false;
-			this.errorMessage = errorMessage;
-		}
+            this.success = false;
+            this.errorMessage = errorMessage;
+        }
 
-		public OpenResult() {
-			this.success = true;
-			this.errorMessage = null;
-		}
+        public OpenResult() {
+            this.success = true;
+            this.errorMessage = null;
+        }
 
-		/**
-		 * @return a textual error description (might be null).
-		 */
-		public String getErrorMessage() {
-			return this.errorMessage;
-		}
+        /**
+         * @return a textual error description (might be null).
+         */
+        public String getErrorMessage() {
+            return this.errorMessage;
+        }
 
-		/**
-		 * @return true if the file could be opened successfully, false
-		 *         otherwise.
-		 */
-		public boolean isSuccess() {
-			return this.success;
-		}
+        /**
+         * @return true if the file could be opened successfully, false
+         * otherwise.
+         */
+        public boolean isSuccess() {
+            return this.success;
+        }
 
-		@Override
-		public String toString() {
-			return new StringBuilder()
-			    .append("FileOpenResult [success=")
-			    .append(this.success)
-			    .append(", errorMessage=")
-			    .append(this.errorMessage)
-			    .append("]")
-			    .toString();
-		}
-	}
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("FileOpenResult [success=")
+                    .append(this.success)
+                    .append(", errorMessage=")
+                    .append(this.errorMessage)
+                    .append("]")
+                    .toString();
+        }
+    }
 }

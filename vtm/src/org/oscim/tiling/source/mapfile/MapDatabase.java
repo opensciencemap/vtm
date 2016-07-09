@@ -18,14 +18,6 @@
  */
 package org.oscim.tiling.source.mapfile;
 
-import static org.oscim.core.GeometryBuffer.GeometryType.LINE;
-import static org.oscim.core.GeometryBuffer.GeometryType.POLY;
-import static org.oscim.tiling.QueryResult.FAILED;
-import static org.oscim.tiling.QueryResult.SUCCESS;
-
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -39,349 +31,402 @@ import org.oscim.utils.geom.TileClipper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import static org.oscim.core.GeometryBuffer.GeometryType.LINE;
+import static org.oscim.core.GeometryBuffer.GeometryType.POLY;
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
+
 /**
  * A class for reading binary map files.
- * 
+ *
  * @see <a
- *      href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
+ * href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
  */
 public class MapDatabase implements ITileDataSource {
-	/** Bitmask to extract the block offset from an index entry. */
-	private static final long BITMASK_INDEX_OFFSET = 0x7FFFFFFFFFL;
+    /**
+     * Bitmask to extract the block offset from an index entry.
+     */
+    private static final long BITMASK_INDEX_OFFSET = 0x7FFFFFFFFFL;
 
-	/** Bitmask to extract the water information from an index entry. */
-	private static final long BITMASK_INDEX_WATER = 0x8000000000L;
+    /**
+     * Bitmask to extract the water information from an index entry.
+     */
+    private static final long BITMASK_INDEX_WATER = 0x8000000000L;
 
-	/** Debug message prefix for the block signature. */
-	private static final String DEBUG_SIGNATURE_BLOCK = "block signature: ";
+    /**
+     * Debug message prefix for the block signature.
+     */
+    private static final String DEBUG_SIGNATURE_BLOCK = "block signature: ";
 
-	/** Debug message prefix for the POI signature. */
-	// private static final String DEBUG_SIGNATURE_POI = "POI signature: ";
+    /** Debug message prefix for the POI signature. */
+    // private static final String DEBUG_SIGNATURE_POI = "POI signature: ";
 
-	/** Debug message prefix for the way signature. */
-	private static final String DEBUG_SIGNATURE_WAY = "way signature: ";
+    /**
+     * Debug message prefix for the way signature.
+     */
+    private static final String DEBUG_SIGNATURE_WAY = "way signature: ";
 
-	/** Error message for an invalid first way offset. */
-	private static final String INVALID_FIRST_WAY_OFFSET = "invalid first way offset: ";
+    /**
+     * Error message for an invalid first way offset.
+     */
+    private static final String INVALID_FIRST_WAY_OFFSET = "invalid first way offset: ";
 
-	static final Logger log = LoggerFactory.getLogger(MapDatabase.class);
+    static final Logger log = LoggerFactory.getLogger(MapDatabase.class);
 
-	/** Maximum way nodes sequence length which is considered as valid. */
-	private static final int MAXIMUM_WAY_NODES_SEQUENCE_LENGTH = 8192;
+    /**
+     * Maximum way nodes sequence length which is considered as valid.
+     */
+    private static final int MAXIMUM_WAY_NODES_SEQUENCE_LENGTH = 8192;
 
-	/**
-	 * Maximum number of map objects in the zoom table which is considered as
-	 * valid.
-	 */
-	private static final int MAXIMUM_ZOOM_TABLE_OBJECTS = 65536 * 2;
+    /**
+     * Maximum number of map objects in the zoom table which is considered as
+     * valid.
+     */
+    private static final int MAXIMUM_ZOOM_TABLE_OBJECTS = 65536 * 2;
 
-	/** Bitmask for the optional POI feature "elevation". */
-	private static final int POI_FEATURE_ELEVATION = 0x20;
+    /**
+     * Bitmask for the optional POI feature "elevation".
+     */
+    private static final int POI_FEATURE_ELEVATION = 0x20;
 
-	/** Bitmask for the optional POI feature "house number". */
-	private static final int POI_FEATURE_HOUSE_NUMBER = 0x40;
+    /**
+     * Bitmask for the optional POI feature "house number".
+     */
+    private static final int POI_FEATURE_HOUSE_NUMBER = 0x40;
 
-	/** Bitmask for the optional POI feature "name". */
-	private static final int POI_FEATURE_NAME = 0x80;
+    /**
+     * Bitmask for the optional POI feature "name".
+     */
+    private static final int POI_FEATURE_NAME = 0x80;
 
-	/** Bitmask for the POI layer. */
-	private static final int POI_LAYER_BITMASK = 0xf0;
+    /**
+     * Bitmask for the POI layer.
+     */
+    private static final int POI_LAYER_BITMASK = 0xf0;
 
-	/** Bit shift for calculating the POI layer. */
-	private static final int POI_LAYER_SHIFT = 4;
+    /**
+     * Bit shift for calculating the POI layer.
+     */
+    private static final int POI_LAYER_SHIFT = 4;
 
-	/** Bitmask for the number of POI tags. */
-	private static final int POI_NUMBER_OF_TAGS_BITMASK = 0x0f;
+    /**
+     * Bitmask for the number of POI tags.
+     */
+    private static final int POI_NUMBER_OF_TAGS_BITMASK = 0x0f;
 
-	/** Length of the debug signature at the beginning of each block. */
-	private static final byte SIGNATURE_LENGTH_BLOCK = 32;
+    /**
+     * Length of the debug signature at the beginning of each block.
+     */
+    private static final byte SIGNATURE_LENGTH_BLOCK = 32;
 
-	/** Length of the debug signature at the beginning of each POI. */
-	private static final byte SIGNATURE_LENGTH_POI = 32;
+    /**
+     * Length of the debug signature at the beginning of each POI.
+     */
+    private static final byte SIGNATURE_LENGTH_POI = 32;
 
-	/** Length of the debug signature at the beginning of each way. */
-	private static final byte SIGNATURE_LENGTH_WAY = 32;
+    /**
+     * Length of the debug signature at the beginning of each way.
+     */
+    private static final byte SIGNATURE_LENGTH_WAY = 32;
 
-	/** Bitmask for the optional way data blocks byte. */
-	private static final int WAY_FEATURE_DATA_BLOCKS_BYTE = 0x08;
+    /**
+     * Bitmask for the optional way data blocks byte.
+     */
+    private static final int WAY_FEATURE_DATA_BLOCKS_BYTE = 0x08;
 
-	/** Bitmask for the optional way double delta encoding. */
-	private static final int WAY_FEATURE_DOUBLE_DELTA_ENCODING = 0x04;
+    /**
+     * Bitmask for the optional way double delta encoding.
+     */
+    private static final int WAY_FEATURE_DOUBLE_DELTA_ENCODING = 0x04;
 
-	/** Bitmask for the optional way feature "house number". */
-	private static final int WAY_FEATURE_HOUSE_NUMBER = 0x40;
+    /**
+     * Bitmask for the optional way feature "house number".
+     */
+    private static final int WAY_FEATURE_HOUSE_NUMBER = 0x40;
 
-	/** Bitmask for the optional way feature "label position". */
-	private static final int WAY_FEATURE_LABEL_POSITION = 0x10;
+    /**
+     * Bitmask for the optional way feature "label position".
+     */
+    private static final int WAY_FEATURE_LABEL_POSITION = 0x10;
 
-	/** Bitmask for the optional way feature "name". */
-	private static final int WAY_FEATURE_NAME = 0x80;
+    /**
+     * Bitmask for the optional way feature "name".
+     */
+    private static final int WAY_FEATURE_NAME = 0x80;
 
-	/** Bitmask for the optional way feature "reference". */
-	private static final int WAY_FEATURE_REF = 0x20;
+    /**
+     * Bitmask for the optional way feature "reference".
+     */
+    private static final int WAY_FEATURE_REF = 0x20;
 
-	/** Bitmask for the way layer. */
-	private static final int WAY_LAYER_BITMASK = 0xf0;
+    /**
+     * Bitmask for the way layer.
+     */
+    private static final int WAY_LAYER_BITMASK = 0xf0;
 
-	/** Bit shift for calculating the way layer. */
-	private static final int WAY_LAYER_SHIFT = 4;
+    /**
+     * Bit shift for calculating the way layer.
+     */
+    private static final int WAY_LAYER_SHIFT = 4;
 
-	/** Bitmask for the number of way tags. */
-	private static final int WAY_NUMBER_OF_TAGS_BITMASK = 0x0f;
+    /**
+     * Bitmask for the number of way tags.
+     */
+    private static final int WAY_NUMBER_OF_TAGS_BITMASK = 0x0f;
 
-	private long mFileSize;
-	private boolean mDebugFile;
-	private RandomAccessFile mInputFile;
-	private ReadBuffer mReadBuffer;
-	private String mSignatureBlock;
-	private String mSignaturePoi;
-	private String mSignatureWay;
-	private int mTileLatitude;
-	private int mTileLongitude;
-	private int[] mIntBuffer;
+    private long mFileSize;
+    private boolean mDebugFile;
+    private RandomAccessFile mInputFile;
+    private ReadBuffer mReadBuffer;
+    private String mSignatureBlock;
+    private String mSignaturePoi;
+    private String mSignatureWay;
+    private int mTileLatitude;
+    private int mTileLongitude;
+    private int[] mIntBuffer;
 
-	private final MapElement mElem = new MapElement();
+    private final MapElement mElem = new MapElement();
 
-	private int minDeltaLat, minDeltaLon;
+    private int minDeltaLat, minDeltaLon;
 
-	private final TileProjection mTileProjection;
-	private final TileClipper mTileClipper;
+    private final TileProjection mTileProjection;
+    private final TileClipper mTileClipper;
 
-	private final MapFileTileSource mTileSource;
+    private final MapFileTileSource mTileSource;
 
-	public MapDatabase(MapFileTileSource tileSource) throws IOException {
-		mTileSource = tileSource;
-		try {
-			/* open the file in read only mode */
-			mInputFile = new RandomAccessFile(tileSource.mapFile, "r");
-			mFileSize = mInputFile.length();
-			mReadBuffer = new ReadBuffer(mInputFile);
+    public MapDatabase(MapFileTileSource tileSource) throws IOException {
+        mTileSource = tileSource;
+        try {
+            /* open the file in read only mode */
+            mInputFile = new RandomAccessFile(tileSource.mapFile, "r");
+            mFileSize = mInputFile.length();
+            mReadBuffer = new ReadBuffer(mInputFile);
 
-		} catch (IOException e) {
-			log.error(e.getMessage());
-			/* make sure that the file is closed */
-			dispose();
-			throw new IOException();
-		}
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            /* make sure that the file is closed */
+            dispose();
+            throw new IOException();
+        }
 
-		mTileProjection = new TileProjection();
-		mTileClipper = new TileClipper(0, 0, 0, 0);
-	}
+        mTileProjection = new TileProjection();
+        mTileClipper = new TileClipper(0, 0, 0, 0);
+    }
 
-	@Override
-	public void query(MapTile tile, ITileDataSink sink) {
+    @Override
+    public void query(MapTile tile, ITileDataSink sink) {
 
-		if (mTileSource.fileHeader == null) {
-			sink.completed(FAILED);
-			return;
-		}
+        if (mTileSource.fileHeader == null) {
+            sink.completed(FAILED);
+            return;
+        }
 
-		if (mIntBuffer == null)
-			mIntBuffer = new int[MAXIMUM_WAY_NODES_SEQUENCE_LENGTH * 2];
+        if (mIntBuffer == null)
+            mIntBuffer = new int[MAXIMUM_WAY_NODES_SEQUENCE_LENGTH * 2];
 
-		try {
-			mTileProjection.setTile(tile);
-			//mTile = tile;
+        try {
+            mTileProjection.setTile(tile);
+            //mTile = tile;
 
 			/* size of tile in map coordinates; */
-			double size = 1.0 / (1 << tile.zoomLevel);
+            double size = 1.0 / (1 << tile.zoomLevel);
 
 			/* simplification tolerance */
-			int pixel = (tile.zoomLevel > 11) ? 1 : 2;
+            int pixel = (tile.zoomLevel > 11) ? 1 : 2;
 
-			int simplify = Tile.SIZE / pixel;
+            int simplify = Tile.SIZE / pixel;
 
 			/* translate screen pixel for tile to latitude and longitude
 			 * tolerance for point reduction before projection. */
-			minDeltaLat = (int) (Math.abs(MercatorProjection.toLatitude(tile.y + size)
-			        - MercatorProjection.toLatitude(tile.y)) * 1e6) / simplify;
-			minDeltaLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
-			        - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
+            minDeltaLat = (int) (Math.abs(MercatorProjection.toLatitude(tile.y + size)
+                    - MercatorProjection.toLatitude(tile.y)) * 1e6) / simplify;
+            minDeltaLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
+                    - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
 
-			QueryParameters queryParameters = new QueryParameters();
-			queryParameters.queryZoomLevel =
-			        mTileSource.fileHeader.getQueryZoomLevel(tile.zoomLevel);
+            QueryParameters queryParameters = new QueryParameters();
+            queryParameters.queryZoomLevel =
+                    mTileSource.fileHeader.getQueryZoomLevel(tile.zoomLevel);
 
 			/* get and check the sub-file for the query zoom level */
-			SubFileParameter subFileParameter =
-			        mTileSource.fileHeader.getSubFileParameter(queryParameters.queryZoomLevel);
+            SubFileParameter subFileParameter =
+                    mTileSource.fileHeader.getSubFileParameter(queryParameters.queryZoomLevel);
 
-			if (subFileParameter == null) {
-				log.warn("no sub-file for zoom level: "
-				        + queryParameters.queryZoomLevel);
+            if (subFileParameter == null) {
+                log.warn("no sub-file for zoom level: "
+                        + queryParameters.queryZoomLevel);
 
-				sink.completed(FAILED);
-				return;
-			}
+                sink.completed(FAILED);
+                return;
+            }
 
-			QueryCalculations.calculateBaseTiles(queryParameters, tile, subFileParameter);
-			QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
-			processBlocks(sink, queryParameters, subFileParameter);
-		} catch (IOException e) {
-			log.error(e.getMessage());
-			sink.completed(FAILED);
-			return;
-		}
+            QueryCalculations.calculateBaseTiles(queryParameters, tile, subFileParameter);
+            QueryCalculations.calculateBlocks(queryParameters, subFileParameter);
+            processBlocks(sink, queryParameters, subFileParameter);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            sink.completed(FAILED);
+            return;
+        }
 
-		sink.completed(SUCCESS);
-	}
+        sink.completed(SUCCESS);
+    }
 
-	@Override
-	public void dispose() {
-		mReadBuffer = null;
-		if (mInputFile != null) {
+    @Override
+    public void dispose() {
+        mReadBuffer = null;
+        if (mInputFile != null) {
 
-			try {
-				mInputFile.close();
-				mInputFile = null;
-			} catch (IOException e) {
-				log.error(e.getMessage());
-			}
-		}
-	}
+            try {
+                mInputFile.close();
+                mInputFile = null;
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
 
-	@Override
-	public void cancel() {
-	}
+    @Override
+    public void cancel() {
+    }
 
-	/**
-	 * Logs the debug signatures of the current way and block.
-	 */
-	private void logDebugSignatures() {
-		if (mDebugFile) {
-			log.warn(DEBUG_SIGNATURE_WAY + mSignatureWay);
-			log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-		}
-	}
+    /**
+     * Logs the debug signatures of the current way and block.
+     */
+    private void logDebugSignatures() {
+        if (mDebugFile) {
+            log.warn(DEBUG_SIGNATURE_WAY + mSignatureWay);
+            log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+        }
+    }
 
-	/**
-	 * Processes a single block and executes the callback functions on all map
-	 * elements.
-	 * 
-	 * @param queryParameters
-	 *            the parameters of the current query.
-	 * @param subFileParameter
-	 *            the parameters of the current map file.
-	 * @param mapDataSink
-	 *            the callback which handles the extracted map elements.
-	 */
-	private void processBlock(QueryParameters queryParameters,
-	        SubFileParameter subFileParameter, ITileDataSink mapDataSink) {
+    /**
+     * Processes a single block and executes the callback functions on all map
+     * elements.
+     *
+     * @param queryParameters  the parameters of the current query.
+     * @param subFileParameter the parameters of the current map file.
+     * @param mapDataSink      the callback which handles the extracted map elements.
+     */
+    private void processBlock(QueryParameters queryParameters,
+                              SubFileParameter subFileParameter, ITileDataSink mapDataSink) {
 
-		if (!processBlockSignature()) {
-			return;
-		}
+        if (!processBlockSignature()) {
+            return;
+        }
 
-		int[][] zoomTable = readZoomTable(subFileParameter);
-		if (zoomTable == null) {
-			return;
-		}
-		int zoomTableRow = queryParameters.queryZoomLevel - subFileParameter.zoomLevelMin;
-		int poisOnQueryZoomLevel = zoomTable[zoomTableRow][0];
-		int waysOnQueryZoomLevel = zoomTable[zoomTableRow][1];
+        int[][] zoomTable = readZoomTable(subFileParameter);
+        if (zoomTable == null) {
+            return;
+        }
+        int zoomTableRow = queryParameters.queryZoomLevel - subFileParameter.zoomLevelMin;
+        int poisOnQueryZoomLevel = zoomTable[zoomTableRow][0];
+        int waysOnQueryZoomLevel = zoomTable[zoomTableRow][1];
 
 		/* get the relative offset to the first stored way in the block */
-		int firstWayOffset = mReadBuffer.readUnsignedInt();
-		if (firstWayOffset < 0) {
-			log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
-			if (mDebugFile) {
-				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-			}
-			return;
-		}
+        int firstWayOffset = mReadBuffer.readUnsignedInt();
+        if (firstWayOffset < 0) {
+            log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+            if (mDebugFile) {
+                log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+            }
+            return;
+        }
 
 		/* add the current buffer position to the relative first way offset */
-		firstWayOffset += mReadBuffer.getBufferPosition();
-		if (firstWayOffset > mReadBuffer.getBufferSize()) {
-			log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
-			if (mDebugFile) {
-				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-			}
-			return;
-		}
+        firstWayOffset += mReadBuffer.getBufferPosition();
+        if (firstWayOffset > mReadBuffer.getBufferSize()) {
+            log.warn(INVALID_FIRST_WAY_OFFSET + firstWayOffset);
+            if (mDebugFile) {
+                log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+            }
+            return;
+        }
 
-		if (!processPOIs(mapDataSink, poisOnQueryZoomLevel)) {
-			return;
-		}
+        if (!processPOIs(mapDataSink, poisOnQueryZoomLevel)) {
+            return;
+        }
 
 		/* finished reading POIs, check if the current buffer position is valid */
-		if (mReadBuffer.getBufferPosition() > firstWayOffset) {
-			log.warn("invalid buffer position: " + mReadBuffer.getBufferPosition());
-			if (mDebugFile) {
-				log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-			}
-			return;
-		}
+        if (mReadBuffer.getBufferPosition() > firstWayOffset) {
+            log.warn("invalid buffer position: " + mReadBuffer.getBufferPosition());
+            if (mDebugFile) {
+                log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+            }
+            return;
+        }
 
 		/* move the pointer to the first way */
-		mReadBuffer.setBufferPosition(firstWayOffset);
+        mReadBuffer.setBufferPosition(firstWayOffset);
 
-		if (!processWays(queryParameters, mapDataSink, waysOnQueryZoomLevel)) {
-			return;
-		}
+        if (!processWays(queryParameters, mapDataSink, waysOnQueryZoomLevel)) {
+            return;
+        }
 
-	}
+    }
 
-	//	private long mCurrentRow;
-	//	private long mCurrentCol;
+    //	private long mCurrentRow;
+    //	private long mCurrentCol;
 
-	private int xmin, ymin, xmax, ymax;
+    private int xmin, ymin, xmax, ymax;
 
-	private void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
-		long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
-		long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
+    private void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
+        long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
+        long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
 
-		//log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
-		xmin = -16;
-		ymin = -16;
-		xmax = Tile.SIZE + 16;
-		ymax = Tile.SIZE + 16;
+        //log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
+        xmin = -16;
+        ymin = -16;
+        xmax = Tile.SIZE + 16;
+        ymax = Tile.SIZE + 16;
 
-		if (numRows > 0) {
-			int w = (int) (Tile.SIZE / (numCols + 1));
-			int h = (int) (Tile.SIZE / (numRows + 1));
+        if (numRows > 0) {
+            int w = (int) (Tile.SIZE / (numCols + 1));
+            int h = (int) (Tile.SIZE / (numRows + 1));
 
-			if (mCurrentCol > 0)
-				xmin = (int) (mCurrentCol * w);
+            if (mCurrentCol > 0)
+                xmin = (int) (mCurrentCol * w);
 
-			if (mCurrentCol < numCols)
-				xmax = (int) (mCurrentCol * w + w);
+            if (mCurrentCol < numCols)
+                xmax = (int) (mCurrentCol * w + w);
 
-			if (mCurrentRow > 0)
-				ymin = (int) (mCurrentRow * h);
+            if (mCurrentRow > 0)
+                ymin = (int) (mCurrentRow * h);
 
-			if (mCurrentRow < numRows)
-				ymax = (int) (mCurrentRow * h + h);
-		}
-		mTileClipper.setRect(xmin, ymin, xmax, ymax);
-	}
+            if (mCurrentRow < numRows)
+                ymax = (int) (mCurrentRow * h + h);
+        }
+        mTileClipper.setRect(xmin, ymin, xmax, ymax);
+    }
 
-	//private final static Tag mWaterTag = new Tag("natural", "water");
+    //private final static Tag mWaterTag = new Tag("natural", "water");
 
-	private void processBlocks(ITileDataSink mapDataSink, QueryParameters queryParams,
-	        SubFileParameter subFileParameter) throws IOException {
+    private void processBlocks(ITileDataSink mapDataSink, QueryParameters queryParams,
+                               SubFileParameter subFileParameter) throws IOException {
 
 		/* read and process all blocks from top to bottom and from left to right */
-		for (long row = queryParams.fromBlockY; row <= queryParams.toBlockY; row++) {
-			for (long column = queryParams.fromBlockX; column <= queryParams.toBlockX; column++) {
-				//mCurrentCol = column - queryParameters.fromBlockX;
-				//mCurrentRow = row - queryParameters.fromBlockY;
+        for (long row = queryParams.fromBlockY; row <= queryParams.toBlockY; row++) {
+            for (long column = queryParams.fromBlockX; column <= queryParams.toBlockX; column++) {
+                //mCurrentCol = column - queryParameters.fromBlockX;
+                //mCurrentRow = row - queryParameters.fromBlockY;
 
-				setTileClipping(queryParams,
-				                row - queryParams.fromBlockY,
-				                column - queryParams.fromBlockX);
+                setTileClipping(queryParams,
+                        row - queryParams.fromBlockY,
+                        column - queryParams.fromBlockX);
 
 				/* calculate the actual block number of the needed block in the
 				 * file */
-				long blockNumber = row * subFileParameter.blocksWidth + column;
+                long blockNumber = row * subFileParameter.blocksWidth + column;
 
 				/* get the current index entry */
-				long blockIndexEntry = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
-				                                                                    blockNumber);
+                long blockIndexEntry = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
+                        blockNumber);
 
 				/* check the water flag of the block in its index entry */
-				if ((blockIndexEntry & BITMASK_INDEX_WATER) != 0) {
-					// Deprecate water tiles rendering
+                if ((blockIndexEntry & BITMASK_INDEX_WATER) != 0) {
+                    // Deprecate water tiles rendering
 					/*MapElement e = mElem;
 					e.clear();
 					e.tags.clear();
@@ -392,593 +437,588 @@ public class MapDatabase implements ITileDataSource {
 					e.addPoint(xmax, ymax);
 					e.addPoint(xmin, ymax);
 					mapDataSink.process(e);*/
-				}
+                }
 
 				/* get and check the current block pointer */
-				long blockPointer = blockIndexEntry & BITMASK_INDEX_OFFSET;
-				if (blockPointer < 1 || blockPointer > subFileParameter.subFileSize) {
-					log.warn("invalid current block pointer: " + blockPointer);
-					log.warn("subFileSize: " + subFileParameter.subFileSize);
-					return;
-				}
+                long blockPointer = blockIndexEntry & BITMASK_INDEX_OFFSET;
+                if (blockPointer < 1 || blockPointer > subFileParameter.subFileSize) {
+                    log.warn("invalid current block pointer: " + blockPointer);
+                    log.warn("subFileSize: " + subFileParameter.subFileSize);
+                    return;
+                }
 
-				long nextBlockPointer;
+                long nextBlockPointer;
 				/* check if the current block is the last block in the file */
-				if (blockNumber + 1 == subFileParameter.numberOfBlocks) {
+                if (blockNumber + 1 == subFileParameter.numberOfBlocks) {
 					/* set the next block pointer to the end of the file */
-					nextBlockPointer = subFileParameter.subFileSize;
-				} else {
+                    nextBlockPointer = subFileParameter.subFileSize;
+                } else {
 					/* get and check the next block pointer */
-					nextBlockPointer = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
-					                                                                blockNumber + 1);
-					nextBlockPointer &= BITMASK_INDEX_OFFSET;
+                    nextBlockPointer = mTileSource.databaseIndexCache.getIndexEntry(subFileParameter,
+                            blockNumber + 1);
+                    nextBlockPointer &= BITMASK_INDEX_OFFSET;
 
-					if (nextBlockPointer < 1 || nextBlockPointer > subFileParameter.subFileSize) {
-						log.warn("invalid next block pointer: " + nextBlockPointer);
-						log.warn("sub-file size: " + subFileParameter.subFileSize);
-						return;
-					}
-				}
+                    if (nextBlockPointer < 1 || nextBlockPointer > subFileParameter.subFileSize) {
+                        log.warn("invalid next block pointer: " + nextBlockPointer);
+                        log.warn("sub-file size: " + subFileParameter.subFileSize);
+                        return;
+                    }
+                }
 
 				/* calculate the size of the current block */
-				int blockSize = (int) (nextBlockPointer - blockPointer);
-				if (blockSize < 0) {
-					log.warn("current block size must not be negative: "
-					        + blockSize);
-					return;
-				} else if (blockSize == 0) {
+                int blockSize = (int) (nextBlockPointer - blockPointer);
+                if (blockSize < 0) {
+                    log.warn("current block size must not be negative: "
+                            + blockSize);
+                    return;
+                } else if (blockSize == 0) {
 					/* the current block is empty, continue with the next block */
-					continue;
-				} else if (blockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
+                    continue;
+                } else if (blockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
 					/* the current block is too large, continue with the next
 					 * block */
-					log.warn("current block size too large: " + blockSize);
-					continue;
-				} else if (blockPointer + blockSize > mFileSize) {
-					log.warn("current block larger than file size: "
-					        + blockSize);
-					return;
-				}
+                    log.warn("current block size too large: " + blockSize);
+                    continue;
+                } else if (blockPointer + blockSize > mFileSize) {
+                    log.warn("current block larger than file size: "
+                            + blockSize);
+                    return;
+                }
 
 				/* seek to the current block in the map file */
-				mInputFile.seek(subFileParameter.startAddress + blockPointer);
+                mInputFile.seek(subFileParameter.startAddress + blockPointer);
 
 				/* read the current block into the buffer */
-				if (!mReadBuffer.readFromFile(blockSize)) {
+                if (!mReadBuffer.readFromFile(blockSize)) {
 					/* skip the current block */
-					log.warn("reading current block has failed: " + blockSize);
-					return;
-				}
+                    log.warn("reading current block has failed: " + blockSize);
+                    return;
+                }
 
 				/* calculate the top-left coordinates of the underlying tile */
-				double tileLatitudeDeg =
-				        Projection.tileYToLatitude(subFileParameter.boundaryTileTop + row,
-				                                   subFileParameter.baseZoomLevel);
-				double tileLongitudeDeg =
-				        Projection.tileXToLongitude(subFileParameter.boundaryTileLeft + column,
-				                                    subFileParameter.baseZoomLevel);
+                double tileLatitudeDeg =
+                        Projection.tileYToLatitude(subFileParameter.boundaryTileTop + row,
+                                subFileParameter.baseZoomLevel);
+                double tileLongitudeDeg =
+                        Projection.tileXToLongitude(subFileParameter.boundaryTileLeft + column,
+                                subFileParameter.baseZoomLevel);
 
-				mTileLatitude = (int) (tileLatitudeDeg * 1E6);
-				mTileLongitude = (int) (tileLongitudeDeg * 1E6);
+                mTileLatitude = (int) (tileLatitudeDeg * 1E6);
+                mTileLongitude = (int) (tileLongitudeDeg * 1E6);
 
-				processBlock(queryParams, subFileParameter, mapDataSink);
-			}
-		}
-	}
+                processBlock(queryParams, subFileParameter, mapDataSink);
+            }
+        }
+    }
 
-	/**
-	 * Processes the block signature, if present.
-	 * 
-	 * @return true if the block signature could be processed successfully,
-	 *         false otherwise.
-	 */
-	private boolean processBlockSignature() {
-		if (mDebugFile) {
+    /**
+     * Processes the block signature, if present.
+     *
+     * @return true if the block signature could be processed successfully,
+     * false otherwise.
+     */
+    private boolean processBlockSignature() {
+        if (mDebugFile) {
 			/* get and check the block signature */
-			mSignatureBlock = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_BLOCK);
-			if (!mSignatureBlock.startsWith("###TileStart")) {
-				log.warn("invalid block signature: " + mSignatureBlock);
-				return false;
-			}
-		}
-		return true;
-	}
+            mSignatureBlock = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_BLOCK);
+            if (!mSignatureBlock.startsWith("###TileStart")) {
+                log.warn("invalid block signature: " + mSignatureBlock);
+                return false;
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Processes the given number of POIs.
-	 * 
-	 * @param mapDataSink
-	 *            the callback which handles the extracted POIs.
-	 * @param numberOfPois
-	 *            how many POIs should be processed.
-	 * @return true if the POIs could be processed successfully, false
-	 *         otherwise.
-	 */
-	private boolean processPOIs(ITileDataSink mapDataSink, int numberOfPois) {
-		Tag[] poiTags = mTileSource.fileInfo.poiTags;
-		MapElement e = mElem;
+    /**
+     * Processes the given number of POIs.
+     *
+     * @param mapDataSink  the callback which handles the extracted POIs.
+     * @param numberOfPois how many POIs should be processed.
+     * @return true if the POIs could be processed successfully, false
+     * otherwise.
+     */
+    private boolean processPOIs(ITileDataSink mapDataSink, int numberOfPois) {
+        Tag[] poiTags = mTileSource.fileInfo.poiTags;
+        MapElement e = mElem;
 
-		int numTags = 0;
+        int numTags = 0;
 
-		for (int elementCounter = numberOfPois; elementCounter != 0; --elementCounter) {
-			if (mDebugFile) {
+        for (int elementCounter = numberOfPois; elementCounter != 0; --elementCounter) {
+            if (mDebugFile) {
 				/* get and check the POI signature */
-				mSignaturePoi = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_POI);
-				if (!mSignaturePoi.startsWith("***POIStart")) {
-					log.warn("invalid POI signature: " + mSignaturePoi);
-					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-					return false;
-				}
-			}
+                mSignaturePoi = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_POI);
+                if (!mSignaturePoi.startsWith("***POIStart")) {
+                    log.warn("invalid POI signature: " + mSignaturePoi);
+                    log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+                    return false;
+                }
+            }
 
 			/* get the POI latitude offset (VBE-S) */
-			int latitude = mTileLatitude + mReadBuffer.readSignedInt();
+            int latitude = mTileLatitude + mReadBuffer.readSignedInt();
 			/* get the POI longitude offset (VBE-S) */
-			int longitude = mTileLongitude + mReadBuffer.readSignedInt();
+            int longitude = mTileLongitude + mReadBuffer.readSignedInt();
 
 			/* get the special byte which encodes multiple flags */
-			byte specialByte = mReadBuffer.readByte();
+            byte specialByte = mReadBuffer.readByte();
 
 			/* bit 1-4 represent the layer */
-			byte layer = (byte) ((specialByte & POI_LAYER_BITMASK) >>> POI_LAYER_SHIFT);
+            byte layer = (byte) ((specialByte & POI_LAYER_BITMASK) >>> POI_LAYER_SHIFT);
 
 			/* bit 5-8 represent the number of tag IDs */
-			byte numberOfTags = (byte) (specialByte & POI_NUMBER_OF_TAGS_BITMASK);
+            byte numberOfTags = (byte) (specialByte & POI_NUMBER_OF_TAGS_BITMASK);
 
-			if (numberOfTags != 0) {
-				if (!mReadBuffer.readTags(e.tags, poiTags, numberOfTags))
-					return false;
+            if (numberOfTags != 0) {
+                if (!mReadBuffer.readTags(e.tags, poiTags, numberOfTags))
+                    return false;
 
-				numTags = numberOfTags;
-			}
+                numTags = numberOfTags;
+            }
 
 			/* reset to common tag position */
-			e.tags.numTags = numTags;
+            e.tags.numTags = numTags;
 
 			/* get the feature bitmask (1 byte) */
-			byte featureByte = mReadBuffer.readByte();
+            byte featureByte = mReadBuffer.readByte();
 
 			/* bit 1-3 enable optional features
 			 * check if the POI has a name */
-			if ((featureByte & POI_FEATURE_NAME) != 0) {
-				String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
-				e.tags.add(new Tag(Tag.KEY_NAME, str, false));
-			}
+            if ((featureByte & POI_FEATURE_NAME) != 0) {
+                String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
+                e.tags.add(new Tag(Tag.KEY_NAME, str, false));
+            }
 
 			/* check if the POI has a house number */
-			if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
-				String str = mReadBuffer.readUTF8EncodedString();
-				e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
-			}
+            if ((featureByte & POI_FEATURE_HOUSE_NUMBER) != 0) {
+                String str = mReadBuffer.readUTF8EncodedString();
+                e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
+            }
 
 			/* check if the POI has an elevation */
-			if ((featureByte & POI_FEATURE_ELEVATION) != 0) {
-				String str = Integer.toString(mReadBuffer.readSignedInt());
-				e.tags.add(new Tag(Tag.KEY_ELE, str, false));
-			}
-			mTileProjection.projectPoint(latitude, longitude, e);
+            if ((featureByte & POI_FEATURE_ELEVATION) != 0) {
+                String str = Integer.toString(mReadBuffer.readSignedInt());
+                e.tags.add(new Tag(Tag.KEY_ELE, str, false));
+            }
+            mTileProjection.projectPoint(latitude, longitude, e);
 
-			e.setLayer(layer);
+            e.setLayer(layer);
 
-			mapDataSink.process(e);
-		}
+            mapDataSink.process(e);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private boolean processWayDataBlock(MapElement e, boolean doubleDeltaEncoding, boolean isLine) {
+    private boolean processWayDataBlock(MapElement e, boolean doubleDeltaEncoding, boolean isLine) {
 		/* get and check the number of way coordinate blocks (VBE-U) */
-		int numBlocks = mReadBuffer.readUnsignedInt();
-		if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
-			log.warn("invalid number of way coordinate blocks: " + numBlocks);
-			return false;
-		}
+        int numBlocks = mReadBuffer.readUnsignedInt();
+        if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
+            log.warn("invalid number of way coordinate blocks: " + numBlocks);
+            return false;
+        }
 
-		int[] wayLengths = e.ensureIndexSize(numBlocks, false);
-		if (wayLengths.length > numBlocks)
-			wayLengths[numBlocks] = -1;
+        int[] wayLengths = e.ensureIndexSize(numBlocks, false);
+        if (wayLengths.length > numBlocks)
+            wayLengths[numBlocks] = -1;
 
 		/* read the way coordinate blocks */
-		for (int coordinateBlock = 0; coordinateBlock < numBlocks; ++coordinateBlock) {
-			int numWayNodes = mReadBuffer.readUnsignedInt();
+        for (int coordinateBlock = 0; coordinateBlock < numBlocks; ++coordinateBlock) {
+            int numWayNodes = mReadBuffer.readUnsignedInt();
 
-			if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
-				log.warn("invalid number of way nodes: " + numWayNodes);
-				logDebugSignatures();
-				return false;
-			}
+            if (numWayNodes < 2 || numWayNodes > MAXIMUM_WAY_NODES_SEQUENCE_LENGTH) {
+                log.warn("invalid number of way nodes: " + numWayNodes);
+                logDebugSignatures();
+                return false;
+            }
 
 			/* each way node consists of latitude and longitude */
-			int len = numWayNodes * 2;
+            int len = numWayNodes * 2;
 
-			wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding,
-			                                             e, len, isLine);
-		}
+            wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding,
+                    e, len, isLine);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private int decodeWayNodes(boolean doubleDelta, MapElement e, int length, boolean isLine) {
-		int[] buffer = mIntBuffer;
-		mReadBuffer.readSignedInt(buffer, length);
+    private int decodeWayNodes(boolean doubleDelta, MapElement e, int length, boolean isLine) {
+        int[] buffer = mIntBuffer;
+        mReadBuffer.readSignedInt(buffer, length);
 
-		float[] outBuffer = e.ensurePointSize(e.pointPos + length, true);
-		int outPos = e.pointPos;
-		int lat, lon;
+        float[] outBuffer = e.ensurePointSize(e.pointPos + length, true);
+        int outPos = e.pointPos;
+        int lat, lon;
 
 		/* first node latitude single-delta offset */
-		int firstLat = lat = mTileLatitude + buffer[0];
-		int firstLon = lon = mTileLongitude + buffer[1];
+        int firstLat = lat = mTileLatitude + buffer[0];
+        int firstLon = lon = mTileLongitude + buffer[1];
 
-		outBuffer[outPos++] = lon;
-		outBuffer[outPos++] = lat;
-		int cnt = 2;
+        outBuffer[outPos++] = lon;
+        outBuffer[outPos++] = lat;
+        int cnt = 2;
 
-		int deltaLat = 0;
-		int deltaLon = 0;
+        int deltaLat = 0;
+        int deltaLon = 0;
 
-		for (int pos = 2; pos < length; pos += 2) {
-			if (doubleDelta) {
-				deltaLat = buffer[pos] + deltaLat;
-				deltaLon = buffer[pos + 1] + deltaLon;
-			} else {
-				deltaLat = buffer[pos];
-				deltaLon = buffer[pos + 1];
-			}
-			lat += deltaLat;
-			lon += deltaLon;
+        for (int pos = 2; pos < length; pos += 2) {
+            if (doubleDelta) {
+                deltaLat = buffer[pos] + deltaLat;
+                deltaLon = buffer[pos + 1] + deltaLon;
+            } else {
+                deltaLat = buffer[pos];
+                deltaLon = buffer[pos + 1];
+            }
+            lat += deltaLat;
+            lon += deltaLon;
 
-			if (pos == length - 2) {
-				boolean line = isLine || (lon != firstLon && lat != firstLat);
+            if (pos == length - 2) {
+                boolean line = isLine || (lon != firstLon && lat != firstLat);
 
-				if (line) {
-					outBuffer[outPos++] = lon;
-					outBuffer[outPos++] = lat;
-					cnt += 2;
-				}
+                if (line) {
+                    outBuffer[outPos++] = lon;
+                    outBuffer[outPos++] = lat;
+                    cnt += 2;
+                }
 
-				if (e.type == GeometryType.NONE)
-					e.type = line ? LINE : POLY;
+                if (e.type == GeometryType.NONE)
+                    e.type = line ? LINE : POLY;
 
-			} else if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
-			        || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
-					|| e.tags.contains("natural", "nosea")) {
-				outBuffer[outPos++] = lon;
-				outBuffer[outPos++] = lat;
-				cnt += 2;
-			}
-		}
+            } else if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
+                    || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
+                    || e.tags.contains("natural", "nosea")) {
+                outBuffer[outPos++] = lon;
+                outBuffer[outPos++] = lat;
+                cnt += 2;
+            }
+        }
 
-		e.pointPos = outPos;
+        e.pointPos = outPos;
 
-		return cnt;
-	}
+        return cnt;
+    }
 
-	private int stringOffset = -1;
+    private int stringOffset = -1;
 
-	/**
-	 * Processes the given number of ways.
-	 * 
-	 * @param queryParameters
-	 *            the parameters of the current query.
-	 * @param mapDataSink
-	 *            the callback which handles the extracted ways.
-	 * @param numberOfWays
-	 *            how many ways should be processed.
-	 * @return true if the ways could be processed successfully, false
-	 *         otherwise.
-	 */
-	private boolean processWays(QueryParameters queryParameters,
-	        ITileDataSink mapDataSink, int numberOfWays) {
+    /**
+     * Processes the given number of ways.
+     *
+     * @param queryParameters the parameters of the current query.
+     * @param mapDataSink     the callback which handles the extracted ways.
+     * @param numberOfWays    how many ways should be processed.
+     * @return true if the ways could be processed successfully, false
+     * otherwise.
+     */
+    private boolean processWays(QueryParameters queryParameters,
+                                ITileDataSink mapDataSink, int numberOfWays) {
 
-		Tag[] wayTags = mTileSource.fileInfo.wayTags;
-		MapElement e = mElem;
+        Tag[] wayTags = mTileSource.fileInfo.wayTags;
+        MapElement e = mElem;
 
-		int numTags = 0;
+        int numTags = 0;
 
-		int wayDataBlocks;
+        int wayDataBlocks;
 
-		// skip string block
-		int stringsSize = 0;
-		stringOffset = 0;
+        // skip string block
+        int stringsSize = 0;
+        stringOffset = 0;
 
-		if (mTileSource.experimental) {
-			stringsSize = mReadBuffer.readUnsignedInt();
-			stringOffset = mReadBuffer.getBufferPosition();
-			mReadBuffer.skipBytes(stringsSize);
-		}
+        if (mTileSource.experimental) {
+            stringsSize = mReadBuffer.readUnsignedInt();
+            stringOffset = mReadBuffer.getBufferPosition();
+            mReadBuffer.skipBytes(stringsSize);
+        }
 
-		//setTileClipping(queryParameters);
+        //setTileClipping(queryParameters);
 
-		for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
-			if (mDebugFile) {
-				// get and check the way signature
-				mSignatureWay = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_WAY);
-				if (!mSignatureWay.startsWith("---WayStart")) {
-					log.warn("invalid way signature: " + mSignatureWay);
-					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-					return false;
-				}
-			}
+        for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
+            if (mDebugFile) {
+                // get and check the way signature
+                mSignatureWay = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_WAY);
+                if (!mSignatureWay.startsWith("---WayStart")) {
+                    log.warn("invalid way signature: " + mSignatureWay);
+                    log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+                    return false;
+                }
+            }
 
-			if (queryParameters.useTileBitmask) {
-				elementCounter = mReadBuffer.skipWays(queryParameters.queryTileBitmask,
-				                                      elementCounter);
+            if (queryParameters.useTileBitmask) {
+                elementCounter = mReadBuffer.skipWays(queryParameters.queryTileBitmask,
+                        elementCounter);
 
-				if (elementCounter == 0)
-					return true;
+                if (elementCounter == 0)
+                    return true;
 
-				if (elementCounter < 0)
-					return false;
+                if (elementCounter < 0)
+                    return false;
 
-				if (mTileSource.experimental && mReadBuffer.lastTagPosition > 0) {
-					int pos = mReadBuffer.getBufferPosition();
-					mReadBuffer.setBufferPosition(mReadBuffer.lastTagPosition);
+                if (mTileSource.experimental && mReadBuffer.lastTagPosition > 0) {
+                    int pos = mReadBuffer.getBufferPosition();
+                    mReadBuffer.setBufferPosition(mReadBuffer.lastTagPosition);
 
-					byte numberOfTags =
-					        (byte) (mReadBuffer.readByte() & WAY_NUMBER_OF_TAGS_BITMASK);
-					if (!mReadBuffer.readTags(e.tags, wayTags, numberOfTags))
-						return false;
+                    byte numberOfTags =
+                            (byte) (mReadBuffer.readByte() & WAY_NUMBER_OF_TAGS_BITMASK);
+                    if (!mReadBuffer.readTags(e.tags, wayTags, numberOfTags))
+                        return false;
 
-					numTags = numberOfTags;
+                    numTags = numberOfTags;
 
-					mReadBuffer.setBufferPosition(pos);
-				}
-			} else {
-				int wayDataSize = mReadBuffer.readUnsignedInt();
-				if (wayDataSize < 0) {
-					log.warn("invalid way data size: " + wayDataSize);
-					if (mDebugFile) {
-						log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-					}
-					log.error("BUG way 2");
-					return false;
-				}
+                    mReadBuffer.setBufferPosition(pos);
+                }
+            } else {
+                int wayDataSize = mReadBuffer.readUnsignedInt();
+                if (wayDataSize < 0) {
+                    log.warn("invalid way data size: " + wayDataSize);
+                    if (mDebugFile) {
+                        log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+                    }
+                    log.error("BUG way 2");
+                    return false;
+                }
 
 				/* ignore the way tile bitmask (2 bytes) */
-				mReadBuffer.skipBytes(2);
-			}
+                mReadBuffer.skipBytes(2);
+            }
 
 			/* get the special byte which encodes multiple flags */
-			byte specialByte = mReadBuffer.readByte();
+            byte specialByte = mReadBuffer.readByte();
 
 			/* bit 1-4 represent the layer */
-			byte layer = (byte) ((specialByte & WAY_LAYER_BITMASK) >>> WAY_LAYER_SHIFT);
+            byte layer = (byte) ((specialByte & WAY_LAYER_BITMASK) >>> WAY_LAYER_SHIFT);
 			/* bit 5-8 represent the number of tag IDs */
-			byte numberOfTags = (byte) (specialByte & WAY_NUMBER_OF_TAGS_BITMASK);
+            byte numberOfTags = (byte) (specialByte & WAY_NUMBER_OF_TAGS_BITMASK);
 
-			if (numberOfTags != 0) {
+            if (numberOfTags != 0) {
 
-				if (!mReadBuffer.readTags(e.tags, wayTags, numberOfTags))
-					return false;
+                if (!mReadBuffer.readTags(e.tags, wayTags, numberOfTags))
+                    return false;
 
-				numTags = numberOfTags;
-			}
+                numTags = numberOfTags;
+            }
 
 			/* get the feature bitmask (1 byte) */
-			byte featureByte = mReadBuffer.readByte();
+            byte featureByte = mReadBuffer.readByte();
 
 			/* bit 1-6 enable optional features */
-			boolean featureWayDoubleDeltaEncoding =
-			        (featureByte & WAY_FEATURE_DOUBLE_DELTA_ENCODING) != 0;
+            boolean featureWayDoubleDeltaEncoding =
+                    (featureByte & WAY_FEATURE_DOUBLE_DELTA_ENCODING) != 0;
 
-			boolean hasName = (featureByte & WAY_FEATURE_NAME) != 0;
-			boolean hasHouseNr = (featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0;
-			boolean hasRef = (featureByte & WAY_FEATURE_REF) != 0;
+            boolean hasName = (featureByte & WAY_FEATURE_NAME) != 0;
+            boolean hasHouseNr = (featureByte & WAY_FEATURE_HOUSE_NUMBER) != 0;
+            boolean hasRef = (featureByte & WAY_FEATURE_REF) != 0;
 
-			e.tags.numTags = numTags;
+            e.tags.numTags = numTags;
 
-			if (mTileSource.experimental) {
-				if (hasName) {
-					int textPos = mReadBuffer.readUnsignedInt();
-					String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos));
-					e.tags.add(new Tag(Tag.KEY_NAME, str, false));
-				}
-				if (hasHouseNr) {
-					int textPos = mReadBuffer.readUnsignedInt();
-					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
-				}
-				if (hasRef) {
-					int textPos = mReadBuffer.readUnsignedInt();
-					String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
-					e.tags.add(new Tag(Tag.KEY_REF, str, false));
-				}
-			} else {
-				if (hasName) {
-					String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
-					e.tags.add(new Tag(Tag.KEY_NAME, str, false));
-				}
-				if (hasHouseNr) {
-					String str = mReadBuffer.readUTF8EncodedString();
-					e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
-				}
-				if (hasRef) {
-					String str = mReadBuffer.readUTF8EncodedString();
-					e.tags.add(new Tag(Tag.KEY_REF, str, false));
-				}
-			}
-			if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)
-				// labelPosition =
-				readOptionalLabelPosition();
+            if (mTileSource.experimental) {
+                if (hasName) {
+                    int textPos = mReadBuffer.readUnsignedInt();
+                    String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos));
+                    e.tags.add(new Tag(Tag.KEY_NAME, str, false));
+                }
+                if (hasHouseNr) {
+                    int textPos = mReadBuffer.readUnsignedInt();
+                    String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+                    e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
+                }
+                if (hasRef) {
+                    int textPos = mReadBuffer.readUnsignedInt();
+                    String str = mReadBuffer.readUTF8EncodedStringAt(stringOffset + textPos);
+                    e.tags.add(new Tag(Tag.KEY_REF, str, false));
+                }
+            } else {
+                if (hasName) {
+                    String str = mTileSource.extractLocalized(mReadBuffer.readUTF8EncodedString());
+                    e.tags.add(new Tag(Tag.KEY_NAME, str, false));
+                }
+                if (hasHouseNr) {
+                    String str = mReadBuffer.readUTF8EncodedString();
+                    e.tags.add(new Tag(Tag.KEY_HOUSE_NUMBER, str, false));
+                }
+                if (hasRef) {
+                    String str = mReadBuffer.readUTF8EncodedString();
+                    e.tags.add(new Tag(Tag.KEY_REF, str, false));
+                }
+            }
+            if ((featureByte & WAY_FEATURE_LABEL_POSITION) != 0)
+                // labelPosition =
+                readOptionalLabelPosition();
 
-			if ((featureByte & WAY_FEATURE_DATA_BLOCKS_BYTE) != 0) {
-				wayDataBlocks = mReadBuffer.readUnsignedInt();
+            if ((featureByte & WAY_FEATURE_DATA_BLOCKS_BYTE) != 0) {
+                wayDataBlocks = mReadBuffer.readUnsignedInt();
 
-				if (wayDataBlocks < 1) {
-					log.warn("invalid number of way data blocks: " + wayDataBlocks);
-					logDebugSignatures();
-					return false;
-				}
-			} else {
-				wayDataBlocks = 1;
-			}
+                if (wayDataBlocks < 1) {
+                    log.warn("invalid number of way data blocks: " + wayDataBlocks);
+                    logDebugSignatures();
+                    return false;
+                }
+            } else {
+                wayDataBlocks = 1;
+            }
 
 			/* some guessing if feature is a line or a polygon */
-			boolean linearFeature = !OSMUtils.isArea(e);
+            boolean linearFeature = !OSMUtils.isArea(e);
 
-			for (int wayDataBlock = 0; wayDataBlock < wayDataBlocks; wayDataBlock++) {
-				e.clear();
+            for (int wayDataBlock = 0; wayDataBlock < wayDataBlocks; wayDataBlock++) {
+                e.clear();
 
-				if (!processWayDataBlock(e, featureWayDoubleDeltaEncoding, linearFeature))
-					return false;
+                if (!processWayDataBlock(e, featureWayDoubleDeltaEncoding, linearFeature))
+                    return false;
 
 				/* drop invalid outer ring */
-				if (e.isPoly() && e.index[0] < 6) {
-					continue;
-				}
+                if (e.isPoly() && e.index[0] < 6) {
+                    continue;
+                }
 
-				mTileProjection.project(e);
+                mTileProjection.project(e);
 
-				if (!e.tags.containsKey("building"))
-					if (!mTileClipper.clip(e)) {
-						continue;
-					}
-				e.simplify(1, true);
+                if (!e.tags.containsKey("building"))
+                    if (!mTileClipper.clip(e)) {
+                        continue;
+                    }
+                e.simplify(1, true);
 
-				e.setLayer(layer);
-				mapDataSink.process(e);
-			}
-		}
+                e.setLayer(layer);
+                mapDataSink.process(e);
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private float[] readOptionalLabelPosition() {
-		float[] labelPosition = new float[2];
+    private float[] readOptionalLabelPosition() {
+        float[] labelPosition = new float[2];
 
 		/* get the label position latitude offset (VBE-S) */
-		labelPosition[1] = mTileLatitude + mReadBuffer.readSignedInt();
+        labelPosition[1] = mTileLatitude + mReadBuffer.readSignedInt();
 
 		/* get the label position longitude offset (VBE-S) */
-		labelPosition[0] = mTileLongitude + mReadBuffer.readSignedInt();
+        labelPosition[0] = mTileLongitude + mReadBuffer.readSignedInt();
 
-		return labelPosition;
-	}
+        return labelPosition;
+    }
 
-	private int[][] readZoomTable(SubFileParameter subFileParameter) {
-		int rows = subFileParameter.zoomLevelMax - subFileParameter.zoomLevelMin + 1;
-		int[][] zoomTable = new int[rows][2];
+    private int[][] readZoomTable(SubFileParameter subFileParameter) {
+        int rows = subFileParameter.zoomLevelMax - subFileParameter.zoomLevelMin + 1;
+        int[][] zoomTable = new int[rows][2];
 
-		int cumulatedNumberOfPois = 0;
-		int cumulatedNumberOfWays = 0;
+        int cumulatedNumberOfPois = 0;
+        int cumulatedNumberOfWays = 0;
 
-		for (int row = 0; row < rows; row++) {
-			cumulatedNumberOfPois += mReadBuffer.readUnsignedInt();
-			cumulatedNumberOfWays += mReadBuffer.readUnsignedInt();
+        for (int row = 0; row < rows; row++) {
+            cumulatedNumberOfPois += mReadBuffer.readUnsignedInt();
+            cumulatedNumberOfWays += mReadBuffer.readUnsignedInt();
 
-			if (cumulatedNumberOfPois < 0
-			        || cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				log.warn("invalid cumulated number of POIs in row " + row + ' '
-				        + cumulatedNumberOfPois);
-				if (mDebugFile) {
-					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-				}
-				return null;
-			} else if (cumulatedNumberOfWays < 0
-			        || cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
-				log.warn("invalid cumulated number of ways in row " + row + ' '
-				        + cumulatedNumberOfWays);
-				if (mTileSource.fileInfo.debugFile) {
-					log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
-				}
-				return null;
-			}
+            if (cumulatedNumberOfPois < 0
+                    || cumulatedNumberOfPois > MAXIMUM_ZOOM_TABLE_OBJECTS) {
+                log.warn("invalid cumulated number of POIs in row " + row + ' '
+                        + cumulatedNumberOfPois);
+                if (mDebugFile) {
+                    log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+                }
+                return null;
+            } else if (cumulatedNumberOfWays < 0
+                    || cumulatedNumberOfWays > MAXIMUM_ZOOM_TABLE_OBJECTS) {
+                log.warn("invalid cumulated number of ways in row " + row + ' '
+                        + cumulatedNumberOfWays);
+                if (mTileSource.fileInfo.debugFile) {
+                    log.warn(DEBUG_SIGNATURE_BLOCK + mSignatureBlock);
+                }
+                return null;
+            }
 
-			zoomTable[row][0] = cumulatedNumberOfPois;
-			zoomTable[row][1] = cumulatedNumberOfWays;
-		}
+            zoomTable[row][0] = cumulatedNumberOfPois;
+            zoomTable[row][1] = cumulatedNumberOfWays;
+        }
 
-		return zoomTable;
-	}
+        return zoomTable;
+    }
 
-	static class TileProjection {
-		private static final double COORD_SCALE = 1000000.0;
+    static class TileProjection {
+        private static final double COORD_SCALE = 1000000.0;
 
-		long dx, dy;
-		double divx, divy;
+        long dx, dy;
+        double divx, divy;
 
-		void setTile(Tile tile) {
+        void setTile(Tile tile) {
 			/* tile position in pixels at tile zoom */
-			long x = tile.tileX * Tile.SIZE;
-			long y = tile.tileY * Tile.SIZE + Tile.SIZE;
+            long x = tile.tileX * Tile.SIZE;
+            long y = tile.tileY * Tile.SIZE + Tile.SIZE;
 
 			/* size of the map in pixel at tile zoom */
-			long mapExtents = Tile.SIZE << tile.zoomLevel;
+            long mapExtents = Tile.SIZE << tile.zoomLevel;
 
 			/* offset relative to lat/lon == 0 */
-			dx = (x - (mapExtents >> 1));
-			dy = (y - (mapExtents >> 1));
+            dx = (x - (mapExtents >> 1));
+            dy = (y - (mapExtents >> 1));
 
 			/* scales longitude(1e6) to map-pixel */
-			divx = (180.0 * COORD_SCALE) / (mapExtents >> 1);
+            divx = (180.0 * COORD_SCALE) / (mapExtents >> 1);
 
 			/* scale latidute to map-pixel */
-			divy = (Math.PI * 2.0) / (mapExtents >> 1);
-		}
+            divy = (Math.PI * 2.0) / (mapExtents >> 1);
+        }
 
-		public void projectPoint(int lat, int lon, MapElement out) {
-			out.clear();
-			out.startPoints();
-			out.addPoint(projectLon(lon), projectLat(lat));
-		}
+        public void projectPoint(int lat, int lon, MapElement out) {
+            out.clear();
+            out.startPoints();
+            out.addPoint(projectLon(lon), projectLat(lat));
+        }
 
-		public float projectLat(double lat) {
-			double s = Math.sin(lat * ((Math.PI / 180) / COORD_SCALE));
-			double r = Math.log((1.0 + s) / (1.0 - s));
+        public float projectLat(double lat) {
+            double s = Math.sin(lat * ((Math.PI / 180) / COORD_SCALE));
+            double r = Math.log((1.0 + s) / (1.0 - s));
 
-			return Tile.SIZE - (float) (r / divy + dy);
-		}
+            return Tile.SIZE - (float) (r / divy + dy);
+        }
 
-		public float projectLon(double lon) {
-			return (float) (lon / divx - dx);
-		}
+        public float projectLon(double lon) {
+            return (float) (lon / divx - dx);
+        }
 
-		void project(MapElement e) {
+        void project(MapElement e) {
 
-			float[] coords = e.points;
-			int[] indices = e.index;
+            float[] coords = e.points;
+            int[] indices = e.index;
 
-			int inPos = 0;
-			int outPos = 0;
+            int inPos = 0;
+            int outPos = 0;
 
-			boolean isPoly = e.isPoly();
+            boolean isPoly = e.isPoly();
 
-			for (int idx = 0, m = indices.length; idx < m; idx++) {
-				int len = indices[idx];
-				if (len == 0)
-					continue;
-				if (len < 0)
-					break;
+            for (int idx = 0, m = indices.length; idx < m; idx++) {
+                int len = indices[idx];
+                if (len == 0)
+                    continue;
+                if (len < 0)
+                    break;
 
-				float lat, lon, pLon = 0, pLat = 0;
-				int cnt = 0, first = outPos;
+                float lat, lon, pLon = 0, pLat = 0;
+                int cnt = 0, first = outPos;
 
-				for (int end = inPos + len; inPos < end; inPos += 2) {
-					lon = projectLon(coords[inPos]);
-					lat = projectLat(coords[inPos + 1]);
+                for (int end = inPos + len; inPos < end; inPos += 2) {
+                    lon = projectLon(coords[inPos]);
+                    lat = projectLat(coords[inPos + 1]);
 
-					if (cnt != 0) {
+                    if (cnt != 0) {
 						/* drop small distance intermediate nodes */
-						if (lat == pLat && lon == pLon) {
-							//log.debug("drop zero delta ");
-							continue;
-						}
-					}
-					coords[outPos++] = pLon = lon;
-					coords[outPos++] = pLat = lat;
-					cnt += 2;
-				}
+                        if (lat == pLat && lon == pLon) {
+                            //log.debug("drop zero delta ");
+                            continue;
+                        }
+                    }
+                    coords[outPos++] = pLon = lon;
+                    coords[outPos++] = pLat = lat;
+                    cnt += 2;
+                }
 
-				if (isPoly && coords[first] == pLon && coords[first + 1] == pLat) {
+                if (isPoly && coords[first] == pLon && coords[first + 1] == pLat) {
 					/* remove identical start/end point */
-					//log.debug("drop closing point {}", e);
-					indices[idx] = (short) (cnt - 2);
-					outPos -= 2;
-				} else {
-					indices[idx] = (short) cnt;
-				}
-			}
-		}
-	}
+                    //log.debug("drop closing point {}", e);
+                    indices[idx] = (short) (cnt - 2);
+                    outPos -= 2;
+                } else {
+                    indices[idx] = (short) cnt;
+                }
+            }
+        }
+    }
 }

@@ -16,10 +16,10 @@
  */
 package org.oscim.tiling.source;
 
-import static org.oscim.tiling.QueryResult.FAILED;
-import static org.oscim.tiling.QueryResult.SUCCESS;
-
-import java.io.InputStream;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.jsonp.client.JsonpRequest;
+import com.google.gwt.jsonp.client.JsonpRequestBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile.State;
@@ -30,95 +30,95 @@ import org.oscim.tiling.source.geojson.GeoJsonTileSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.jsonp.client.JsonpRequest;
-import com.google.gwt.jsonp.client.JsonpRequestBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.io.InputStream;
+
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
 
 public class JsonTileDataSource implements ITileDataSource {
-	static final Logger log = LoggerFactory.getLogger(JsonTileDataSource.class);
+    static final Logger log = LoggerFactory.getLogger(JsonTileDataSource.class);
 
-	protected final GeoJsonTileDecoder mTileDecoder;
-	protected final UrlTileSource mTileSource;
+    protected final GeoJsonTileDecoder mTileDecoder;
+    protected final UrlTileSource mTileSource;
 
-	public JsonTileDataSource(GeoJsonTileSource tileSource) {
-		mTileSource = tileSource;
-		mTileDecoder = new GeoJsonTileDecoder(tileSource);
-	}
+    public JsonTileDataSource(GeoJsonTileSource tileSource) {
+        mTileSource = tileSource;
+        mTileDecoder = new GeoJsonTileDecoder(tileSource);
+    }
 
-	UrlTileSource getTileSource() {
-		return mTileSource;
-	}
+    UrlTileSource getTileSource() {
+        return mTileSource;
+    }
 
-	private ITileDataSink mSink;
-	private MapTile mTile;
+    private ITileDataSink mSink;
+    private MapTile mTile;
 
-	@Override
-	public void query(MapTile tile, ITileDataSink sink) {
-		mTile = tile;
-		mSink = sink;
+    @Override
+    public void query(MapTile tile, ITileDataSink sink) {
+        mTile = tile;
+        mSink = sink;
 
-		try {
-			doGet(mTileSource.getTileUrl(tile));
-		} catch (Exception e) {
-			e.printStackTrace();
-			sink.completed(FAILED);
-		}
-	}
+        try {
+            doGet(mTileSource.getTileUrl(tile));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sink.completed(FAILED);
+        }
+    }
 
-	public void process(InputStream is) {
-	}
+    public void process(InputStream is) {
+    }
 
-	boolean mFinished;
+    boolean mFinished;
 
-	@Override
-	public void dispose() {
-		mFinished = true;
-	}
+    @Override
+    public void dispose() {
+        mFinished = true;
+    }
 
-	@Override
-	public void cancel() {
-		mFinished = true;
-	}
+    @Override
+    public void cancel() {
+        mFinished = true;
+    }
 
-	JsonpRequest<JavaScriptObject> mRequestHandle;
+    JsonpRequest<JavaScriptObject> mRequestHandle;
 
-	void doGet(final String url) {
-		JsonpRequestBuilder builder = new JsonpRequestBuilder();
-		//builder.setCallbackParam("json_callback");
+    void doGet(final String url) {
+        JsonpRequestBuilder builder = new JsonpRequestBuilder();
+        //builder.setCallbackParam("json_callback");
 
-		mRequestHandle = builder.requestObject(url, new AsyncCallback<JavaScriptObject>() {
-			public void onFailure(Throwable caught) {
+        mRequestHandle = builder.requestObject(url, new AsyncCallback<JavaScriptObject>() {
+            public void onFailure(Throwable caught) {
 
-				mSink.completed(FAILED);
-				log.debug("fail! {} {}", mRequestHandle, caught.getMessage());
-				//mRequestHandle.cancel();
-			}
+                mSink.completed(FAILED);
+                log.debug("fail! {} {}", mRequestHandle, caught.getMessage());
+                //mRequestHandle.cancel();
+            }
 
-			public void onSuccess(JavaScriptObject jso) {
-				if (mTile.state(State.NONE)) {
-					log.debug("tile cleared {}", url);
-					mSink.completed(FAILED);
-					return;
-				}
+            public void onSuccess(JavaScriptObject jso) {
+                if (mTile.state(State.NONE)) {
+                    log.debug("tile cleared {}", url);
+                    mSink.completed(FAILED);
+                    return;
+                }
 
-				if (jso == null) {
-					log.debug("Couldn't retrieve JSON for {}", url);
-					mSink.completed(FAILED);
-					return;
-				}
+                if (jso == null) {
+                    log.debug("Couldn't retrieve JSON for {}", url);
+                    mSink.completed(FAILED);
+                    return;
+                }
 
-				try {
-					if (mTileDecoder.decode(mTile, mSink, jso)) {
-						mSink.completed(SUCCESS);
-						return;
-					}
-				} catch (Exception e) {
-					log.debug("Couldn't retrieve JSON for {} {}" + url, e);
-					// FIXME need to check where it might be thrown
-					mSink.completed(FAILED);
-				}
-			}
-		});
-	}
+                try {
+                    if (mTileDecoder.decode(mTile, mSink, jso)) {
+                        mSink.completed(SUCCESS);
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.debug("Couldn't retrieve JSON for {} {}" + url, e);
+                    // FIXME need to check where it might be thrown
+                    mSink.completed(FAILED);
+                }
+            }
+        });
+    }
 }

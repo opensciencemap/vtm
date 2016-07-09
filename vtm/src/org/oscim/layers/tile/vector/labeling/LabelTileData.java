@@ -5,12 +5,12 @@ import org.oscim.renderer.bucket.SymbolItem;
 import org.oscim.renderer.bucket.TextItem;
 
 public class LabelTileData extends TileData {
-	public final List<SymbolItem> symbols = new List<SymbolItem>();
-	public final List<TextItem> labels = new List<TextItem>();
+    public final List<SymbolItem> symbols = new List<SymbolItem>();
+    public final List<TextItem> labels = new List<TextItem>();
 
-	@Override
-	protected void dispose() {
-		TextItem.pool.releaseAll(labels.clear());
-		SymbolItem.pool.releaseAll(symbols.clear());
-	}
+    @Override
+    protected void dispose() {
+        TextItem.pool.releaseAll(labels.clear());
+        SymbolItem.pool.releaseAll(symbols.clear());
+    }
 }

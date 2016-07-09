@@ -22,39 +22,39 @@ import org.oscim.tiling.source.UrlTileSource;
 
 public class OSciMap4TileSource extends UrlTileSource {
 
-	private final static String DEFAULT_URL = "http://opensciencemap.org/tiles/vtm";
-	private final static String DEFAULT_PATH = "/{Z}/{X}/{Y}.vtm";
+    private final static String DEFAULT_URL = "http://opensciencemap.org/tiles/vtm";
+    private final static String DEFAULT_PATH = "/{Z}/{X}/{Y}.vtm";
 
-	public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
+    public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
 
-		public Builder() {
-			super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
-		}
+        public Builder() {
+            super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
+        }
 
-		public OSciMap4TileSource build() {
-			return new OSciMap4TileSource(this);
-		}
-	}
+        public OSciMap4TileSource build() {
+            return new OSciMap4TileSource(this);
+        }
+    }
 
-	@SuppressWarnings("rawtypes")
-	public static Builder<?> builder() {
-		return new Builder();
-	}
+    @SuppressWarnings("rawtypes")
+    public static Builder<?> builder() {
+        return new Builder();
+    }
 
-	protected OSciMap4TileSource(Builder<?> builder) {
-		super(builder);
-	}
+    protected OSciMap4TileSource(Builder<?> builder) {
+        super(builder);
+    }
 
-	public OSciMap4TileSource() {
-		this(builder());
-	}
+    public OSciMap4TileSource() {
+        this(builder());
+    }
 
-	public OSciMap4TileSource(String urlString) {
-		this(builder().url(urlString));
-	}
+    public OSciMap4TileSource(String urlString) {
+        this(builder().url(urlString));
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
-	}
+    @Override
+    public ITileDataSource getDataSource() {
+        return new UrlTileDataSource(this, new TileDecoder(), getHttpEngine());
+    }
 }

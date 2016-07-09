@@ -24,81 +24,78 @@ package org.oscim.core;
  */
 public class Tile {
 
-	/**
-	 * Width and height of a map tile in pixel.
-	 */
-	public static int SIZE = 400;
+    /**
+     * Width and height of a map tile in pixel.
+     */
+    public static int SIZE = 400;
 
-	/**
-	 * The X number of this tile.
-	 */
-	public final int tileX;
+    /**
+     * The X number of this tile.
+     */
+    public final int tileX;
 
-	/**
-	 * The Y number of this tile.
-	 */
-	public final int tileY;
+    /**
+     * The Y number of this tile.
+     */
+    public final int tileY;
 
-	/**
-	 * The Zoom level of this tile.
-	 */
-	public final byte zoomLevel;
+    /**
+     * The Zoom level of this tile.
+     */
+    public final byte zoomLevel;
 
-	/**
-	 * @param tileX
-	 *            the X number of the tile.
-	 * @param tileY
-	 *            the Y number of the tile.
-	 * @param zoomLevel
-	 *            the zoom level of the tile.
-	 */
-	public Tile(int tileX, int tileY, byte zoomLevel) {
-		this.tileX = tileX;
-		this.tileY = tileY;
-		this.zoomLevel = zoomLevel;
-	}
+    /**
+     * @param tileX     the X number of the tile.
+     * @param tileY     the Y number of the tile.
+     * @param zoomLevel the zoom level of the tile.
+     */
+    public Tile(int tileX, int tileY, byte zoomLevel) {
+        this.tileX = tileX;
+        this.tileY = tileY;
+        this.zoomLevel = zoomLevel;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		    .append("[X:")
-		    .append(this.tileX)
-		    .append(", Y:")
-		    .append(this.tileY)
-		    .append(", Z:")
-		    .append(this.zoomLevel)
-		    .append("]")
-		    .toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("[X:")
+                .append(this.tileX)
+                .append(", Y:")
+                .append(this.tileY)
+                .append(", Z:")
+                .append(this.zoomLevel)
+                .append("]")
+                .toString();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
 
-		if (!(obj instanceof Tile))
-			return false;
+        if (!(obj instanceof Tile))
+            return false;
 
-		Tile o = (Tile) obj;
+        Tile o = (Tile) obj;
 
-		if (o.tileX == this.tileX && o.tileY == this.tileY
-		        && o.zoomLevel == this.zoomLevel)
-			return true;
+        if (o.tileX == this.tileX && o.tileY == this.tileY
+                && o.zoomLevel == this.zoomLevel)
+            return true;
 
-		return false;
-	}
+        return false;
+    }
 
-	private int mHash = 0;
+    private int mHash = 0;
 
-	@Override
-	public int hashCode() {
-		if (mHash == 0) {
-			int result = 7;
-			result = 31 * result + this.tileX;
-			result = 31 * result + this.tileY;
-			result = 31 * result + this.zoomLevel;
-			mHash = result;
-		}
-		return mHash;
-	}
+    @Override
+    public int hashCode() {
+        if (mHash == 0) {
+            int result = 7;
+            result = 31 * result + this.tileX;
+            result = 31 * result + this.tileY;
+            result = 31 * result + this.zoomLevel;
+            mHash = result;
+        }
+        return mHash;
+    }
 }

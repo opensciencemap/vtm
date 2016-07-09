@@ -17,56 +17,56 @@
 package org.oscim.core;
 
 public class Point {
-	public double x;
-	public double y;
+    public double x;
+    public double y;
 
-	public Point() {
-	}
+    public Point() {
+    }
 
-	public Point(double x, double y) {
-		this.x = x;
-		this.y = y;
-	}
+    public Point(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public double getX() {
+        return x;
+    }
 
-	public double getY() {
-		return y;
-	}
+    public double getY() {
+        return y;
+    }
 
-	public double distance(Point other) {
-		return Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) + (y - other.y));
-	}
+    public double distance(Point other) {
+        return Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) + (y - other.y));
+    }
 
-	public double distanceSq(Point other) {
-		return (x - other.x) * (x - other.x) + (y - other.y) + (y - other.y);
-	}
+    public double distanceSq(Point other) {
+        return (x - other.x) * (x - other.x) + (y - other.y) + (y - other.y);
+    }
 
-	@Override
-	public String toString() {
-		return x + " " + y;
-	}
+    @Override
+    public String toString() {
+        return x + " " + y;
+    }
 
-	public void setPerpendicular(Point other) {
-		x = -other.y;
-		y = other.x;
-	}
+    public void setPerpendicular(Point other) {
+        x = -other.y;
+        y = other.x;
+    }
 
-	public void setPerpendicular(Point p1, Point p2) {
-		x = p1.x + p2.x;
-		y = p1.y + p2.y;
+    public void setPerpendicular(Point p1, Point p2) {
+        x = p1.x + p2.x;
+        y = p1.y + p2.y;
 
-		double a = p2.x * y - p2.y * x;
+        double a = p2.x * y - p2.y * x;
 
-		if (a < 0.01 && a > -0.01) {
-			/* Almost straight */
-			x = -p2.y;
-			y = p2.x;
-		} else {
-			x /= a;
-			y /= a;
-		}
-	}
+        if (a < 0.01 && a > -0.01) {
+            /* Almost straight */
+            x = -p2.y;
+            y = p2.x;
+        } else {
+            x /= a;
+            y /= a;
+        }
+    }
 }

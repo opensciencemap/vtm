@@ -20,46 +20,46 @@ import org.oscim.event.MotionEvent;
 
 public class AndroidMotionEvent extends MotionEvent {
 
-	android.view.MotionEvent mEvent;
+    android.view.MotionEvent mEvent;
 
-	public MotionEvent wrap(android.view.MotionEvent e) {
-		mEvent = e;
-		return this;
-	}
+    public MotionEvent wrap(android.view.MotionEvent e) {
+        mEvent = e;
+        return this;
+    }
 
-	@Override
-	public int getAction() {
-		return mEvent.getAction();
-	}
+    @Override
+    public int getAction() {
+        return mEvent.getAction();
+    }
 
-	@Override
-	public float getX() {
-		return mEvent.getX();
-	}
+    @Override
+    public float getX() {
+        return mEvent.getX();
+    }
 
-	@Override
-	public float getY() {
-		return mEvent.getY();
-	}
+    @Override
+    public float getY() {
+        return mEvent.getY();
+    }
 
-	@Override
-	public float getX(int pointer) {
-		return mEvent.getX(pointer);
-	}
+    @Override
+    public float getX(int pointer) {
+        return mEvent.getX(pointer);
+    }
 
-	@Override
-	public float getY(int pointer) {
-		return mEvent.getY(pointer);
-	}
+    @Override
+    public float getY(int pointer) {
+        return mEvent.getY(pointer);
+    }
 
-	@Override
-	public int getPointerCount() {
-		return mEvent.getPointerCount();
-	}
+    @Override
+    public int getPointerCount() {
+        return mEvent.getPointerCount();
+    }
 
-	@Override
-	public long getTime() {
-		return mEvent.getEventTime();
-	}
+    @Override
+    public long getTime() {
+        return mEvent.getEventTime();
+    }
 
 }

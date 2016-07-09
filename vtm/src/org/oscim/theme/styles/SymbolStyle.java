@@ -24,28 +24,28 @@ import org.oscim.renderer.atlas.TextureRegion;
  */
 public final class SymbolStyle extends RenderStyle {
 
-	public final TextureRegion texture;
+    public final TextureRegion texture;
 
-	public SymbolStyle(TextureRegion symbol) {
-		this.texture = symbol;
-	}
+    public SymbolStyle(TextureRegion symbol) {
+        this.texture = symbol;
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public void renderNode(Callback cb) {
-		cb.renderSymbol(this);
-	}
+    @Override
+    public void renderNode(Callback cb) {
+        cb.renderSymbol(this);
+    }
 
-	@Override
-	public void renderWay(Callback cb) {
-		cb.renderSymbol(this);
-	}
+    @Override
+    public void renderWay(Callback cb) {
+        cb.renderSymbol(this);
+    }
 
-	@Override
-	public SymbolStyle current() {
-		return (SymbolStyle) mCurrent;
-	}
+    @Override
+    public SymbolStyle current() {
+        return (SymbolStyle) mCurrent;
+    }
 }

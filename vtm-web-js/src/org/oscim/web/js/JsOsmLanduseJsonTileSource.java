@@ -6,6 +6,6 @@ import org.timepedia.exporter.client.ExportPackage;
 
 @ExportPackage("vtm")
 public class JsOsmLanduseJsonTileSource implements ExportOverlay<OsmLanduseJsonTileSource> {
-	public JsOsmLanduseJsonTileSource() {
-	}
+    public JsOsmLanduseJsonTileSource() {
+    }
 }

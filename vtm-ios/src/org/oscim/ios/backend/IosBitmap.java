@@ -16,11 +16,18 @@ package org.oscim.ios.backend;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+
 import org.oscim.backend.AssetAdapter;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
-import org.robovm.apple.coregraphics.*;
+import org.robovm.apple.coregraphics.CGBitmapContext;
+import org.robovm.apple.coregraphics.CGBlendMode;
+import org.robovm.apple.coregraphics.CGColor;
+import org.robovm.apple.coregraphics.CGColorSpace;
+import org.robovm.apple.coregraphics.CGImage;
+import org.robovm.apple.coregraphics.CGImageAlphaInfo;
+import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSData;
 import org.robovm.apple.uikit.UIColor;
 import org.robovm.apple.uikit.UIImage;

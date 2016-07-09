@@ -17,8 +17,10 @@
  */
 package org.oscim.android.canvas;
 
-import java.io.IOException;
-import java.io.InputStream;
+import android.content.res.Resources;
+import android.graphics.Bitmap.Config;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
@@ -27,99 +29,97 @@ import org.oscim.backend.canvas.Paint;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap.Config;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import java.io.IOException;
+import java.io.InputStream;
 
 public final class AndroidGraphics extends CanvasAdapter {
 
-	public static void init() {
-		CanvasAdapter.init(new AndroidGraphics());
-	}
+    public static void init() {
+        CanvasAdapter.init(new AndroidGraphics());
+    }
 
-	public static android.graphics.Paint getAndroidPaint(Paint paint) {
-		return ((AndroidPaint) paint).mPaint;
-	}
+    public static android.graphics.Paint getAndroidPaint(Paint paint) {
+        return ((AndroidPaint) paint).mPaint;
+    }
 
-	public static android.graphics.Bitmap getBitmap(Bitmap bitmap) {
-		return ((AndroidBitmap) bitmap).mBitmap;
-	}
+    public static android.graphics.Bitmap getBitmap(Bitmap bitmap) {
+        return ((AndroidBitmap) bitmap).mBitmap;
+    }
 
-	private AndroidGraphics() {
-		// do nothing
-	}
+    private AndroidGraphics() {
+        // do nothing
+    }
 
-	@Override
-	public Bitmap decodeBitmapImpl(InputStream inputStream) {
-		return new AndroidBitmap(inputStream);
-	}
+    @Override
+    public Bitmap decodeBitmapImpl(InputStream inputStream) {
+        return new AndroidBitmap(inputStream);
+    }
 
-	@Override
-	public Bitmap loadBitmapAssetImpl(String fileName) {
-		try {
-			return createBitmap(fileName);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+    @Override
+    public Bitmap loadBitmapAssetImpl(String fileName) {
+        try {
+            return createBitmap(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	@Override
-	public Paint newPaintImpl() {
-		return new AndroidPaint();
-	}
+    @Override
+    public Paint newPaintImpl() {
+        return new AndroidPaint();
+    }
 
-	@Override
-	public Bitmap newBitmapImpl(int width, int height, int format) {
-		return new AndroidBitmap(width, height, format);
-	}
+    @Override
+    public Bitmap newBitmapImpl(int width, int height, int format) {
+        return new AndroidBitmap(width, height, format);
+    }
 
-	@Override
-	public Canvas newCanvasImpl() {
-		return new AndroidCanvas();
-	}
+    @Override
+    public Canvas newCanvasImpl() {
+        return new AndroidCanvas();
+    }
 
-	//-------------------------------------
-	public static Bitmap drawableToBitmap(Drawable drawable) {
-		if (drawable instanceof BitmapDrawable) {
-			return new AndroidBitmap(((BitmapDrawable) drawable).getBitmap());
-		}
+    //-------------------------------------
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return new AndroidBitmap(((BitmapDrawable) drawable).getBitmap());
+        }
 
-		android.graphics.Bitmap bitmap = android.graphics.Bitmap
-		    .createBitmap(drawable.getIntrinsicWidth(),
-		                  drawable.getIntrinsicHeight(),
-		                  Config.ARGB_8888);
+        android.graphics.Bitmap bitmap = android.graphics.Bitmap
+                .createBitmap(drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
+                        Config.ARGB_8888);
 
-		android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
-		drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawable.draw(canvas);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
 
-		return new AndroidBitmap(bitmap);
-	}
+        return new AndroidBitmap(bitmap);
+    }
 
-	public static Bitmap drawableToBitmap(Resources res, int resId) {
-		return new AndroidBitmap(res.openRawResource(resId));
-	}
+    public static Bitmap drawableToBitmap(Resources res, int resId) {
+        return new AndroidBitmap(res.openRawResource(resId));
+    }
 
-	/**
-	 * @deprecated
-	 */
-	public static MarkerSymbol makeMarker(Drawable drawable, HotspotPlace place) {
-		if (place == null)
-			place = HotspotPlace.CENTER;
+    /**
+     * @deprecated
+     */
+    public static MarkerSymbol makeMarker(Drawable drawable, HotspotPlace place) {
+        if (place == null)
+            place = HotspotPlace.CENTER;
 
-		return new MarkerSymbol(drawableToBitmap(drawable), place);
-	}
+        return new MarkerSymbol(drawableToBitmap(drawable), place);
+    }
 
-	/**
-	 * @deprecated
-	 */
-	public static MarkerSymbol makeMarker(Resources res, int resId, HotspotPlace place) {
-		if (place == null)
-			place = HotspotPlace.CENTER;
+    /**
+     * @deprecated
+     */
+    public static MarkerSymbol makeMarker(Resources res, int resId, HotspotPlace place) {
+        if (place == null)
+            place = HotspotPlace.CENTER;
 
-		InputStream in = res.openRawResource(resId);
-		return new MarkerSymbol(new AndroidBitmap(in), place);
-	}
+        InputStream in = res.openRawResource(resId);
+        return new MarkerSymbol(new AndroidBitmap(in), place);
+    }
 }

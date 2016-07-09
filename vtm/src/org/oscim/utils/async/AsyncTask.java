@@ -17,42 +17,42 @@
 package org.oscim.utils.async;
 
 public abstract class AsyncTask extends Task {
-	private TaskQueue mainloop;
+    private TaskQueue mainloop;
 
-	void setTaskQueue(TaskQueue mainloop) {
-		this.mainloop = mainloop;
-	}
+    void setTaskQueue(TaskQueue mainloop) {
+        this.mainloop = mainloop;
+    }
 
-	/**
-	 * Do not override! Unless you have a reason, of course.
-	 */
-	@Override
-	public void run() {
-		if (state == GO) {
-			/* running on worker thread */
-			state = go(false);
+    /**
+     * Do not override! Unless you have a reason, of course.
+     */
+    @Override
+    public void run() {
+        if (state == GO) {
+            /* running on worker thread */
+            state = go(false);
 
-			if (state == GO)
-				/* run on worker again */
-				mainloop.addTask(this);
-			else
-				mainloop.post(this);
-		} else {
+            if (state == GO)
+                /* run on worker again */
+                mainloop.addTask(this);
+            else
+                mainloop.post(this);
+        } else {
 			/* post result on main-loop */
-			onPostExecute(state);
-		}
-	}
+            onPostExecute(state);
+        }
+    }
 
-	/**
-	 * Executed on worker thread.
-	 * 
-	 * @return Task.DONE on success, Task.ERROR otherwise
-	 */
-	public abstract int go(boolean canceled);
+    /**
+     * Executed on worker thread.
+     *
+     * @return Task.DONE on success, Task.ERROR otherwise
+     */
+    public abstract int go(boolean canceled);
 
-	/**
-	 * Executed on mainloop thread.
-	 */
-	public abstract void onPostExecute(int state);
+    /**
+     * Executed on mainloop thread.
+     */
+    public abstract void onPostExecute(int state);
 
 }

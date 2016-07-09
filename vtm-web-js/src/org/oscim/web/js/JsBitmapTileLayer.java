@@ -11,12 +11,12 @@ import org.timepedia.exporter.client.ExportPackage;
 @Export("BitmapTileLayer")
 public class JsBitmapTileLayer extends BitmapTileLayer implements ExportOverlay<BitmapTileLayer> {
 
-	public JsBitmapTileLayer(Map map, TileSource tileSource) {
-		super(map, tileSource);
-	}
+    public JsBitmapTileLayer(Map map, TileSource tileSource) {
+        super(map, tileSource);
+    }
 
-	//	@ExportConstructor
-	//	public static BitmapTileLayer constructor(Map map, TileSource tileSource) {
-	//		return new JsBitmapTileLayer(map, tileSource);
-	//	}
+    //	@ExportConstructor
+    //	public static BitmapTileLayer constructor(Map map, TileSource tileSource) {
+    //		return new JsBitmapTileLayer(map, tileSource);
+    //	}
 }

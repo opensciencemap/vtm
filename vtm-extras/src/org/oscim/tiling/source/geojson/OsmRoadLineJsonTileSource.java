@@ -16,83 +16,78 @@
  */
 package org.oscim.tiling.source.geojson;
 
-import java.util.Map;
-
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class OsmRoadLineJsonTileSource extends GeoJsonTileSource {
 
-	static final Logger log = LoggerFactory.getLogger(OsmRoadLineJsonTileSource.class);
+    static final Logger log = LoggerFactory.getLogger(OsmRoadLineJsonTileSource.class);
 
-	Tag mTagTunnel = new Tag("tunnel", "yes");
-	Tag mTagBridge = new Tag("bridge", "yes");
+    Tag mTagTunnel = new Tag("tunnel", "yes");
+    Tag mTagBridge = new Tag("bridge", "yes");
 
-	public OsmRoadLineJsonTileSource() {
-		super("http://tile.openstreetmap.us/vectiles-highroad");
-	}
+    public OsmRoadLineJsonTileSource() {
+        super("http://tile.openstreetmap.us/vectiles-highroad");
+    }
 
-	@Override
-	public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
-		String highway = null;
-		boolean isLink = false;
+    @Override
+    public void decodeTags(MapElement mapElement, Map<String, Object> properties) {
+        String highway = null;
+        boolean isLink = false;
 
-		mapElement.layer = 5;
+        mapElement.layer = 5;
 
-		for (Map.Entry<String, Object> entry : properties.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-			//log.debug(key + " : " + String.valueOf(value));
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            //log.debug(key + " : " + String.valueOf(value));
 
-			if (value == null)
-				continue;
+            if (value == null)
+                continue;
 
-			if ("no".equals(value))
-				continue;
+            if ("no".equals(value))
+                continue;
 
-			if ("highway".equals(key) && value instanceof String) {
-				highway = (String) entry.getValue();
-			}
-			else if ("is_link".equals(key)) {
-				isLink = "yes".equals(value);
-			}
-			else if ("is_tunnel".equals(key)) {
-				mapElement.tags.add(mTagTunnel);
-			}
-			else if ("is_bridge".equals(key)) {
-				mapElement.tags.add(mTagBridge);
-			}
-			else if ("sort_key".equals(key)) {
-				if (value instanceof Integer)
-					mapElement.layer = 5 + (Integer) value;
-			}
-			else if ("railway".equals(key) && value instanceof String) {
-				mapElement.tags.add(new Tag("railway", (String) value));
-			}
-		}
+            if ("highway".equals(key) && value instanceof String) {
+                highway = (String) entry.getValue();
+            } else if ("is_link".equals(key)) {
+                isLink = "yes".equals(value);
+            } else if ("is_tunnel".equals(key)) {
+                mapElement.tags.add(mTagTunnel);
+            } else if ("is_bridge".equals(key)) {
+                mapElement.tags.add(mTagBridge);
+            } else if ("sort_key".equals(key)) {
+                if (value instanceof Integer)
+                    mapElement.layer = 5 + (Integer) value;
+            } else if ("railway".equals(key) && value instanceof String) {
+                mapElement.tags.add(new Tag("railway", (String) value));
+            }
+        }
 
-		if (highway == null)
-			return;
+        if (highway == null)
+            return;
 
-		if (isLink)
-			highway += "_link";
+        if (isLink)
+            highway += "_link";
 
-		mapElement.tags.add(new Tag("highway", highway));
+        mapElement.tags.add(new Tag("highway", highway));
 
-	}
+    }
 
-	@Override
-	public Tag rewriteTag(String key, Object value) {
-		if ("kind".equals(key))
-			return null;
+    @Override
+    public Tag rewriteTag(String key, Object value) {
+        if ("kind".equals(key))
+            return null;
 
-		if (value == null)
-			return null;
+        if (value == null)
+            return null;
 
-		String val = (value instanceof String) ? (String) value : String.valueOf(value);
+        String val = (value instanceof String) ? (String) value : String.valueOf(value);
 
-		return new Tag(key, val);
-	}
+        return new Tag(key, val);
+    }
 }

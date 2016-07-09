@@ -16,50 +16,49 @@
  */
 package org.oscim.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A utility class with IO-specific helper methods.
  */
 public final class IOUtils {
-	final static Logger log = LoggerFactory.getLogger(IOUtils.class);
+    final static Logger log = LoggerFactory.getLogger(IOUtils.class);
 
-	/**
-	 * Invokes the {@link Closeable#close()} method on the given object. If an
-	 * {@link IOException} occurs during the
-	 * method call, it will be caught and logged.
-	 * 
-	 * @param closeable
-	 *            the data source which should be closed (may be null).
-	 */
-	public static void closeQuietly(Closeable closeable) {
-		if (closeable == null)
-			return;
+    /**
+     * Invokes the {@link Closeable#close()} method on the given object. If an
+     * {@link IOException} occurs during the
+     * method call, it will be caught and logged.
+     *
+     * @param closeable the data source which should be closed (may be null).
+     */
+    public static void closeQuietly(Closeable closeable) {
+        if (closeable == null)
+            return;
 
-		try {
-			closeable.close();
-		} catch (IOException e) {
-			log.debug(e.getMessage());
-		}
-	}
+        try {
+            closeable.close();
+        } catch (IOException e) {
+            log.debug(e.getMessage());
+        }
+    }
 
-	/* for old java versions */
-	public static void closeQuietly(Socket closeable) {
-		if (closeable == null)
-			return;
+    /* for old java versions */
+    public static void closeQuietly(Socket closeable) {
+        if (closeable == null)
+            return;
 
-		try {
-			closeable.close();
-		} catch (IOException e) {
-			log.debug(e.getMessage());
-		}
-	}
+        try {
+            closeable.close();
+        } catch (IOException e) {
+            log.debug(e.getMessage());
+        }
+    }
 
-	private IOUtils() {
-	}
+    private IOUtils() {
+    }
 }

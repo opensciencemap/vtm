@@ -20,18 +20,20 @@ import org.oscim.layers.tile.MapTile;
 
 public interface ITileDataSource {
 
-	/**
-	 * @param tile
-	 *            the tile to load.
-	 * @param mapDataSink
-	 *            the callback to handle the extracted map elements.
-	 */
-	abstract void query(MapTile tile, ITileDataSink mapDataSink);
+    /**
+     * @param tile        the tile to load.
+     * @param mapDataSink the callback to handle the extracted map elements.
+     */
+    abstract void query(MapTile tile, ITileDataSink mapDataSink);
 
-	/** Implementations should cancel and release all resources */
-	abstract void dispose();
+    /**
+     * Implementations should cancel and release all resources
+     */
+    abstract void dispose();
 
-	/** Implementations should cancel their IO work and return */
-	abstract void cancel();
+    /**
+     * Implementations should cancel their IO work and return
+     */
+    abstract void cancel();
 
 }

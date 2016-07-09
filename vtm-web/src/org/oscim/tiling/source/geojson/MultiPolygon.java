@@ -18,15 +18,15 @@ package org.oscim.tiling.source.geojson;
 
 public class MultiPolygon extends Geometry<Polygon> {
 
-	protected MultiPolygon() {
-	}
+    protected MultiPolygon() {
+    }
 
-	public final native Polygon getGeometryN(int i) /*-{
-		return this[i];
+    public final native Polygon getGeometryN(int i) /*-{
+        return this[i];
 	}-*/;
 
-	public final native int getNumGeometries() /*-{
-		return this.length;
+    public final native int getNumGeometries() /*-{
+        return this.length;
 	}-*/;
 
 }

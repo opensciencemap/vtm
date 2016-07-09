@@ -16,28 +16,28 @@
  */
 package org.oscim.core.osm;
 
-import org.oscim.core.TagSet;
-
 import com.vividsolutions.jts.geom.Geometry;
+
+import org.oscim.core.TagSet;
 
 public class OsmNode extends OsmElement {
 
-	public final double lat;
-	public final double lon;
+    public final double lat;
+    public final double lon;
 
-	public OsmNode(double lat, double lon, TagSet tags, long id) {
-		super(tags, id);
-		this.lat = lat;
-		this.lon = lon;
-	}
+    public OsmNode(double lat, double lon, TagSet tags, long id) {
+        super(tags, id);
+        this.lat = lat;
+        this.lon = lon;
+    }
 
-	@Override
-	public String toString() {
-		return "n" + id;
-	}
+    @Override
+    public String toString() {
+        return "n" + id;
+    }
 
-	@Override
-	public Geometry toJts() {
-		return null; //bnew Point(new Coordinate(lat, lon), null);
-	}
+    @Override
+    public Geometry toJts() {
+        return null; //bnew Point(new Coordinate(lat, lon), null);
+    }
 }

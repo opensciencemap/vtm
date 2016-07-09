@@ -18,15 +18,15 @@ package org.oscim.tiling.source.geojson;
 
 public class MultiLineString extends Geometry<LineString> {
 
-	protected MultiLineString() {
-	}
+    protected MultiLineString() {
+    }
 
-	public final native LineString getGeometryN(int i) /*-{
-		return this[i];
+    public final native LineString getGeometryN(int i) /*-{
+        return this[i];
 	}-*/;
 
-	public final native int getNumGeometries() /*-{
-		return this.length;
+    public final native int getNumGeometries() /*-{
+        return this.length;
 	}-*/;
 
 }

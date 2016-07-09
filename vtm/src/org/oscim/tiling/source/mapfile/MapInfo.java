@@ -22,111 +22,99 @@ import org.oscim.core.GeoPoint;
 
 /**
  * Contains the immutable metadata of a map file.
- * 
  */
 public class MapInfo {
-	/**
-	 * The bounding box of the map file.
-	 */
-	public final BoundingBox boundingBox;
+    /**
+     * The bounding box of the map file.
+     */
+    public final BoundingBox boundingBox;
 
-	/**
-	 * The comment field of the map file (may be null).
-	 */
-	public final String comment;
+    /**
+     * The comment field of the map file (may be null).
+     */
+    public final String comment;
 
-	/**
-	 * The created by field of the map file (may be null).
-	 */
-	public final String createdBy;
+    /**
+     * The created by field of the map file (may be null).
+     */
+    public final String createdBy;
 
-	/**
-	 * The size of the map file, measured in bytes.
-	 */
-	public final long fileSize;
+    /**
+     * The size of the map file, measured in bytes.
+     */
+    public final long fileSize;
 
-	/**
-	 * The file version number of the map file.
-	 */
-	public final int fileVersion;
+    /**
+     * The file version number of the map file.
+     */
+    public final int fileVersion;
 
-	/**
-	 * The preferred language(s) separated with ',' for names as defined in ISO 639-1 or ISO 639-2 (may be null).
-	 */
-	public final String languagesPreference;
+    /**
+     * The preferred language(s) separated with ',' for names as defined in ISO 639-1 or ISO 639-2 (may be null).
+     */
+    public final String languagesPreference;
 
-	/**
-	 * The center point of the map file.
-	 */
-	public final GeoPoint mapCenter;
+    /**
+     * The center point of the map file.
+     */
+    public final GeoPoint mapCenter;
 
-	/**
-	 * The date of the map data in milliseconds since January 1, 1970.
-	 */
-	public final long mapDate;
+    /**
+     * The date of the map data in milliseconds since January 1, 1970.
+     */
+    public final long mapDate;
 
-	/**
-	 * The name of the projection used in the map file.
-	 */
-	public final String projectionName;
+    /**
+     * The name of the projection used in the map file.
+     */
+    public final String projectionName;
 
-	/**
-	 * The map start position from the file header (may be null).
-	 */
-	public final GeoPoint startPosition;
+    /**
+     * The map start position from the file header (may be null).
+     */
+    public final GeoPoint startPosition;
 
-	/**
-	 * The map start zoom level from the file header (may be null).
-	 */
-	public final Byte startZoomLevel;
+    /**
+     * The map start zoom level from the file header (may be null).
+     */
+    public final Byte startZoomLevel;
 
-	/**
-	 * Zoomlevels provided by this Database, if null then any zoomlevel can be
-	 * queried.
-	 */
-	public final int[] zoomLevel;
+    /**
+     * Zoomlevels provided by this Database, if null then any zoomlevel can be
+     * queried.
+     */
+    public final int[] zoomLevel;
 
-	/**
-	 * @param bbox
-	 *            ...
-	 * @param zoom
-	 *            ...
-	 * @param start
-	 *            ...
-	 * @param projection
-	 *            ...
-	 * @param date
-	 *            ...
-	 * @param size
-	 *            ...
-	 * @param version
-	 *            ...
-	 * @param language
-	 *            ...
-	 * @param comment
-	 *            ...
-	 * @param createdBy
-	 *            ...
-	 * @param zoomLevel
-	 *            TODO
-	 */
-	public MapInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
-	        long date, long size, int version, String language, String comment,
-	        String createdBy, int[] zoomLevel) {
+    /**
+     * @param bbox       ...
+     * @param zoom       ...
+     * @param start      ...
+     * @param projection ...
+     * @param date       ...
+     * @param size       ...
+     * @param version    ...
+     * @param language   ...
+     * @param comment    ...
+     * @param createdBy  ...
+     * @param zoomLevel  TODO
+     */
+    public MapInfo(BoundingBox bbox, Byte zoom, GeoPoint start, String projection,
+                   long date, long size, int version, String language, String comment,
+                   String createdBy, int[] zoomLevel) {
 
-		this.startZoomLevel = zoom;
-		this.zoomLevel = zoomLevel;
-		this.startPosition = start;
-		this.projectionName = projection;
-		this.mapDate = date;
-		this.boundingBox = bbox;
-		this.mapCenter = bbox.getCenterPoint();
-		this.languagesPreference = language;
-		this.fileSize = size;
-		this.fileVersion = version;
+        this.startZoomLevel = zoom;
+        this.zoomLevel = zoomLevel;
+        this.startPosition = start;
+        this.projectionName = projection;
+        this.mapDate = date;
+        this.boundingBox = bbox;
+        this.mapCenter = bbox.getCenterPoint();
+        this.languagesPreference = language;
+        this.fileSize = size;
+        this.fileVersion = version;
 
-		this.comment = comment;
-		this.createdBy = createdBy;
+        this.comment = comment;
+        this.createdBy = createdBy;
 
-	}
+    }
 }

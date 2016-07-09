@@ -10,21 +10,21 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MapTest extends GdxMapApp {
 
-	@Override
-	public void createLayers() {
-		Map map = getMap();
+    @Override
+    public void createLayers() {
+        Map map = getMap();
 
-		VectorTileLayer l = map.setBaseMap(new OSciMap4TileSource());
+        VectorTileLayer l = map.setBaseMap(new OSciMap4TileSource());
 
-		map.layers().add(new BuildingLayer(map, l));
-		map.layers().add(new LabelLayer(map, l));
+        map.layers().add(new BuildingLayer(map, l));
+        map.layers().add(new LabelLayer(map, l));
 
-		map.setTheme(VtmThemes.DEFAULT);
-		map.setMapPosition(53.075, 8.808, 1 << 17);
-	}
+        map.setTheme(VtmThemes.DEFAULT);
+        map.setMapPosition(53.075, 8.808, 1 << 17);
+    }
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new MapTest(), null, 400);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new MapTest(), null, 400);
+    }
 }

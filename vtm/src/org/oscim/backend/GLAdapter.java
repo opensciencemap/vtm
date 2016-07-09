@@ -18,22 +18,24 @@ package org.oscim.backend;
 
 public class GLAdapter {
 
-	public final static boolean debug = false;
-	public final static boolean debugView = false;
+    public final static boolean debug = false;
+    public final static boolean debugView = false;
 
-	/** The instance provided by backend */
-	public static GL gl;
+    /**
+     * The instance provided by backend
+     */
+    public static GL gl;
 
-	public static boolean GDX_DESKTOP_QUIRKS = false;
-	public static boolean GDX_WEBGL_QUIRKS = false;
+    public static boolean GDX_DESKTOP_QUIRKS = false;
+    public static boolean GDX_WEBGL_QUIRKS = false;
 
-	/**
-	 * Set true as workaround for adreno driver issue:
-	 * https://github.com/opensciencemap/vtm/issues/52
-	 */
-	public static boolean NO_BUFFER_SUB_DATA = false;
+    /**
+     * Set true as workaround for adreno driver issue:
+     * https://github.com/opensciencemap/vtm/issues/52
+     */
+    public static boolean NO_BUFFER_SUB_DATA = false;
 
-	public static void init(GL gl20) {
-		gl = gl20;
-	}
+    public static void init(GL gl20) {
+        gl = gl20;
+    }
 }

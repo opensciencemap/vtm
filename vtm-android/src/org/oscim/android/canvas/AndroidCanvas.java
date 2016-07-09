@@ -21,31 +21,31 @@ import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 
 public class AndroidCanvas implements Canvas {
-	final android.graphics.Canvas canvas;
+    final android.graphics.Canvas canvas;
 
-	public AndroidCanvas() {
-		canvas = new android.graphics.Canvas();
-	}
+    public AndroidCanvas() {
+        canvas = new android.graphics.Canvas();
+    }
 
-	@Override
-	public void setBitmap(Bitmap bitmap) {
-		canvas.setBitmap(((AndroidBitmap) bitmap).mBitmap);
-	}
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        canvas.setBitmap(((AndroidBitmap) bitmap).mBitmap);
+    }
 
-	@Override
-	public void drawText(String string, float x, float y, Paint fill, Paint stroke) {
-		if (string != null) {
-			if (stroke != null)
-				canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
+    @Override
+    public void drawText(String string, float x, float y, Paint fill, Paint stroke) {
+        if (string != null) {
+            if (stroke != null)
+                canvas.drawText(string, x, y, ((AndroidPaint) stroke).mPaint);
 
-			canvas.drawText(string, x, y, ((AndroidPaint) fill).mPaint);
-		}
-	}
+            canvas.drawText(string, x, y, ((AndroidPaint) fill).mPaint);
+        }
+    }
 
-	@Override
-	public void drawBitmap(Bitmap bitmap, float x, float y) {
-		canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
+    @Override
+    public void drawBitmap(Bitmap bitmap, float x, float y) {
+        canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
 
-	}
+    }
 
 }

@@ -14,16 +14,16 @@
  */
 package org.oscim.android.filepicker;
 
-import java.io.FileFilter;
-
 import org.oscim.tiling.TileSource.OpenResult;
+
+import java.io.FileFilter;
 
 /**
  * An extension of the {@link FileFilter} interface.
  */
 public interface ValidFileFilter extends FileFilter {
-	/**
-	 * @return the result of the last {@link #accept} call (might be null).
-	 */
-	OpenResult getFileOpenResult();
+    /**
+     * @return the result of the last {@link #accept} call (might be null).
+     */
+    OpenResult getFileOpenResult();
 }

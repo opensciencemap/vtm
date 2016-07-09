@@ -23,30 +23,30 @@ import org.oscim.renderer.bucket.SymbolBucket;
 import org.oscim.renderer.bucket.SymbolItem;
 
 public class SymbolRenderLayer extends BucketRenderer {
-	boolean initialize = true;
+    boolean initialize = true;
 
-	public SymbolRenderLayer() {
-		SymbolBucket l = new SymbolBucket();
-		buckets.set(l);
+    public SymbolRenderLayer() {
+        SymbolBucket l = new SymbolBucket();
+        buckets.set(l);
 
-		SymbolItem it = SymbolItem.pool.get();
-		it.billboard = false;
+        SymbolItem it = SymbolItem.pool.get();
+        it.billboard = false;
 
-		try {
-			it.bitmap = CanvasAdapter.getBitmapAsset("jar:symbols/cafe.png");
-		} catch (Exception e) {
-			e.printStackTrace();
+        try {
+            it.bitmap = CanvasAdapter.getBitmapAsset("jar:symbols/cafe.png");
+        } catch (Exception e) {
+            e.printStackTrace();
 
-		}
-		l.addSymbol(it);
-	}
+        }
+        l.addSymbol(it);
+    }
 
-	@Override
-	public void update(GLViewport v) {
-		if (initialize) {
-			initialize = false;
-			mMapPosition.copy(v.pos);
-			compile();
-		}
-	}
+    @Override
+    public void update(GLViewport v) {
+        if (initialize) {
+            initialize = false;
+            mMapPosition.copy(v.pos);
+            compile();
+        }
+    }
 }

@@ -17,6 +17,11 @@
  */
 package org.oscim.android.test;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import org.oscim.android.filepicker.FilePicker;
 import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
@@ -30,106 +35,101 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-
 public class MapsforgeMapActivity extends MapActivity {
-	private static final int SELECT_MAP_FILE = 0;
+    private static final int SELECT_MAP_FILE = 0;
 
-	private TileGridLayer mGridLayer;
+    private TileGridLayer mGridLayer;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		startActivityForResult(new Intent(this, MapFilePicker.class),
-		                       SELECT_MAP_FILE);
-	}
+        startActivityForResult(new Intent(this, MapFilePicker.class),
+                SELECT_MAP_FILE);
+    }
 
-	public static class MapFilePicker extends FilePicker {
-		public MapFilePicker() {
-			setFileDisplayFilter(new FilterByFileExtension(".map"));
-			setFileSelectFilter(new ValidMapFile());
-		}
-	}
+    public static class MapFilePicker extends FilePicker {
+        public MapFilePicker() {
+            setFileDisplayFilter(new FilterByFileExtension(".map"));
+            setFileSelectFilter(new ValidMapFile());
+        }
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.theme_menu, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.theme_menu, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-		switch (item.getItemId()) {
-			case R.id.theme_default:
-				mMap.setTheme(VtmThemes.DEFAULT);
-				item.setChecked(true);
-				return true;
+        switch (item.getItemId()) {
+            case R.id.theme_default:
+                mMap.setTheme(VtmThemes.DEFAULT);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_tubes:
-				mMap.setTheme(VtmThemes.TRONRENDER);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_tubes:
+                mMap.setTheme(VtmThemes.TRONRENDER);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_osmarender:
-				mMap.setTheme(VtmThemes.OSMARENDER);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_osmarender:
+                mMap.setTheme(VtmThemes.OSMARENDER);
+                item.setChecked(true);
+                return true;
 
-			case R.id.theme_newtron:
-				mMap.setTheme(VtmThemes.NEWTRON);
-				item.setChecked(true);
-				return true;
+            case R.id.theme_newtron:
+                mMap.setTheme(VtmThemes.NEWTRON);
+                item.setChecked(true);
+                return true;
 
-			case R.id.gridlayer:
-				if (item.isChecked()) {
-					item.setChecked(false);
-					mMap.layers().remove(mGridLayer);
-				} else {
-					item.setChecked(true);
-					if (mGridLayer == null)
-						mGridLayer = new TileGridLayer(mMap);
+            case R.id.gridlayer:
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    mMap.layers().remove(mGridLayer);
+                } else {
+                    item.setChecked(true);
+                    if (mGridLayer == null)
+                        mGridLayer = new TileGridLayer(mMap);
 
-					mMap.layers().add(mGridLayer);
-				}
-				mMap.updateMap(true);
-				return true;
-		}
+                    mMap.layers().add(mGridLayer);
+                }
+                mMap.updateMap(true);
+                return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if (requestCode == SELECT_MAP_FILE) {
-			if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
-				finish();
-				return;
-			}
+        if (requestCode == SELECT_MAP_FILE) {
+            if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
+                finish();
+                return;
+            }
 
-			MapFileTileSource tileSource = new MapFileTileSource();
-			tileSource.setPreferredLanguage("en");
-			String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
-			if (tileSource.setMapFile(file)) {
+            MapFileTileSource tileSource = new MapFileTileSource();
+            tileSource.setPreferredLanguage("en");
+            String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
+            if (tileSource.setMapFile(file)) {
 
-				VectorTileLayer l = mMap.setBaseMap(tileSource);
-				mMap.setTheme(VtmThemes.DEFAULT);
+                VectorTileLayer l = mMap.setBaseMap(tileSource);
+                mMap.setTheme(VtmThemes.DEFAULT);
 
-				mMap.layers().add(new BuildingLayer(mMap, l));
-				mMap.layers().add(new LabelLayer(mMap, l));
+                mMap.layers().add(new BuildingLayer(mMap, l));
+                mMap.layers().add(new LabelLayer(mMap, l));
 
-				MapInfo info = tileSource.getMapInfo();
-				MapPosition pos = new MapPosition();
-				pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
-				mMap.setMapPosition(pos);
+                MapInfo info = tileSource.getMapInfo();
+                MapPosition pos = new MapPosition();
+                pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+                mMap.setMapPosition(pos);
 
-				mPrefs.clear();
-			}
-		}
-	}
+                mPrefs.clear();
+            }
+        }
+    }
 }

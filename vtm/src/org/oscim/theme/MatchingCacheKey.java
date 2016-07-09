@@ -20,78 +20,80 @@ import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 
 class MatchingCacheKey {
-	int mHash;
-	Tag[] mTags;
+    int mHash;
+    Tag[] mTags;
 
-	MatchingCacheKey() {
-	}
+    MatchingCacheKey() {
+    }
 
-	MatchingCacheKey(MatchingCacheKey key) {
-		mTags = key.mTags;
-		mHash = key.mHash;
-	}
+    MatchingCacheKey(MatchingCacheKey key) {
+        mTags = key.mTags;
+        mHash = key.mHash;
+    }
 
-	/** set temporary values for comparison */
-	boolean set(TagSet tags, MatchingCacheKey compare) {
-		int numTags = tags.numTags;
+    /**
+     * set temporary values for comparison
+     */
+    boolean set(TagSet tags, MatchingCacheKey compare) {
+        int numTags = tags.numTags;
 
 		/* Test if tags are equal to previous query */
-		if (compare != null && numTags == compare.mTags.length) {
-			int i = 0;
-			for (; i < numTags; i++) {
-				Tag t1 = tags.tags[i];
-				Tag t2 = compare.mTags[i];
+        if (compare != null && numTags == compare.mTags.length) {
+            int i = 0;
+            for (; i < numTags; i++) {
+                Tag t1 = tags.tags[i];
+                Tag t2 = compare.mTags[i];
 
-				if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
-					break;
-			}
-			if (i == numTags)
-				return true;
-		}
+                if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+                    break;
+            }
+            if (i == numTags)
+                return true;
+        }
 
 		/* Clone tags as they belong to TileDataSource.
-		 * Also needed for comparison if previous tags
+         * Also needed for comparison if previous tags
 		 * were equal. */
-		mTags = new Tag[numTags];
+        mTags = new Tag[numTags];
 
-		int result = 7;
-		for (int i = 0; i < numTags; i++) {
-			Tag t = tags.tags[i];
-			result = 31 * result + t.hashCode();
-			mTags[i] = t;
-		}
+        int result = 7;
+        for (int i = 0; i < numTags; i++) {
+            Tag t = tags.tags[i];
+            result = 31 * result + t.hashCode();
+            mTags[i] = t;
+        }
 
-		mHash = 31 * result;
+        mHash = 31 * result;
 
-		return false;
-	}
+        return false;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
 
-		if (this == obj)
-			return true;
+        if (this == obj)
+            return true;
 
-		MatchingCacheKey other = (MatchingCacheKey) obj;
+        MatchingCacheKey other = (MatchingCacheKey) obj;
 
-		int length = mTags.length;
-		if (length != other.mTags.length)
-			return false;
+        int length = mTags.length;
+        if (length != other.mTags.length)
+            return false;
 
-		for (int i = 0; i < length; i++) {
-			Tag t1 = mTags[i];
-			Tag t2 = other.mTags[i];
+        for (int i = 0; i < length; i++) {
+            Tag t1 = mTags[i];
+            Tag t2 = other.mTags[i];
 
-			if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
-				return false;
-		}
-		return true;
-	}
+            if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+                return false;
+        }
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		return mHash;
-	}
+    @Override
+    public int hashCode() {
+        return mHash;
+    }
 }

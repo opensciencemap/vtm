@@ -24,170 +24,164 @@ import static org.oscim.backend.canvas.Color.parseColor;
  */
 public abstract class RenderStyle {
 
-	public static abstract class StyleBuilder<T extends StyleBuilder<T>> {
+    public static abstract class StyleBuilder<T extends StyleBuilder<T>> {
 
-		public String style;
+        public String style;
 
-		public int level;
+        public int level;
 
-		public int fillColor;
+        public int fillColor;
 
-		public int strokeColor;
-		public float strokeWidth;
+        public int strokeColor;
+        public float strokeWidth;
 
-		public T setStyle(String style) {
-			this.style = style;
-			return self();
-		}
+        public T setStyle(String style) {
+            this.style = style;
+            return self();
+        }
 
-		public T level(int level) {
-			this.level = level;
-			return self();
-		}
+        public T level(int level) {
+            this.level = level;
+            return self();
+        }
 
-		public T outline(int color, float width) {
-			this.strokeColor = color;
-			this.strokeWidth = width;
-			return self();
-		}
+        public T outline(int color, float width) {
+            this.strokeColor = color;
+            this.strokeWidth = width;
+            return self();
+        }
 
-		public T strokeColor(int color) {
-			this.strokeColor = color;
-			return self();
-		}
+        public T strokeColor(int color) {
+            this.strokeColor = color;
+            return self();
+        }
 
-		public T strokeColor(String color) {
-			this.strokeColor = parseColor(color);
-			return self();
-		}
+        public T strokeColor(String color) {
+            this.strokeColor = parseColor(color);
+            return self();
+        }
 
-		public T strokeWidth(float width) {
-			this.strokeWidth = width;
-			return self();
-		}
+        public T strokeWidth(float width) {
+            this.strokeWidth = width;
+            return self();
+        }
 
-		public T color(int color) {
-			this.fillColor = color;
-			return self();
-		}
+        public T color(int color) {
+            this.fillColor = color;
+            return self();
+        }
 
-		public T color(String color) {
-			this.fillColor = parseColor(color);
-			return self();
-		}
+        public T color(String color) {
+            this.fillColor = parseColor(color);
+            return self();
+        }
 
-		@SuppressWarnings("unchecked")
-		protected T self() {
-			return (T) this;
-		}
+        @SuppressWarnings("unchecked")
+        protected T self() {
+            return (T) this;
+        }
 
-		public abstract RenderStyle build();
-	}
+        public abstract RenderStyle build();
+    }
 
-	/**
-	 * Callback methods for rendering areas, ways and points of interest (POIs).
-	 */
-	public static interface Callback {
-		/**
-		 * Renders an area with the given parameters.
-		 * 
-		 * @param area
-		 * @param level
-		 */
-		void renderArea(AreaStyle area, int level);
+    /**
+     * Callback methods for rendering areas, ways and points of interest (POIs).
+     */
+    public static interface Callback {
+        /**
+         * Renders an area with the given parameters.
+         *
+         * @param area
+         * @param level
+         */
+        void renderArea(AreaStyle area, int level);
 
-		/**
-		 * Renders an extrusion with the given parameters.
-		 * 
-		 * @param extrusion
-		 * @param level
-		 */
-		void renderExtrusion(ExtrusionStyle extrusion, int level);
+        /**
+         * Renders an extrusion with the given parameters.
+         *
+         * @param extrusion
+         * @param level
+         */
+        void renderExtrusion(ExtrusionStyle extrusion, int level);
 
-		/**
-		 * Renders a point of interest circle with the given parameters.
-		 * 
-		 * @param circle
-		 *            the circle.
-		 * @param level
-		 *            the drawing level on which the circle should be rendered.
-		 */
-		void renderCircle(CircleStyle circle, int level);
+        /**
+         * Renders a point of interest circle with the given parameters.
+         *
+         * @param circle the circle.
+         * @param level  the drawing level on which the circle should be rendered.
+         */
+        void renderCircle(CircleStyle circle, int level);
 
-		/**
-		 * Renders a point of interest symbol with the given bitmap.
-		 * 
-		 * @param symbol
-		 *            the symbol to be rendered.
-		 */
-		void renderSymbol(SymbolStyle symbol);
+        /**
+         * Renders a point of interest symbol with the given bitmap.
+         *
+         * @param symbol the symbol to be rendered.
+         */
+        void renderSymbol(SymbolStyle symbol);
 
-		/**
-		 * Renders a way with the given parameters.
-		 * 
-		 * @param line
-		 * @param level
-		 */
-		void renderWay(LineStyle line, int level);
+        /**
+         * Renders a way with the given parameters.
+         *
+         * @param line
+         * @param level
+         */
+        void renderWay(LineStyle line, int level);
 
-		/**
-		 * Renders a way with the given text along the way path.
-		 * 
-		 * @param text
-		 */
-		void renderText(TextStyle text);
+        /**
+         * Renders a way with the given text along the way path.
+         *
+         * @param text
+         */
+        void renderText(TextStyle text);
 
-	}
+    }
 
-	RenderStyle mCurrent = this;
-	RenderStyle mNext;
-	boolean update;
+    RenderStyle mCurrent = this;
+    RenderStyle mNext;
+    boolean update;
 
-	public void set(RenderStyle next) {
-		update = true;
-		mNext = next;
-	}
+    public void set(RenderStyle next) {
+        update = true;
+        mNext = next;
+    }
 
-	public void unsetOverride() {
-		update = true;
-		mNext = null;
-	}
+    public void unsetOverride() {
+        update = true;
+        mNext = null;
+    }
 
-	/**
-	 * Destroys this RenderInstruction and cleans up all its internal resources.
-	 */
-	public void dispose() {
-	}
+    /**
+     * Destroys this RenderInstruction and cleans up all its internal resources.
+     */
+    public void dispose() {
+    }
 
-	/**
-	 * @param renderCallback
-	 *            a reference to the receiver of all render callbacks.
-	 */
-	public void renderNode(Callback renderCallback) {
-	}
+    /**
+     * @param renderCallback a reference to the receiver of all render callbacks.
+     */
+    public void renderNode(Callback renderCallback) {
+    }
 
-	/**
-	 * @param renderCallback
-	 *            a reference to the receiver of all render callbacks.
-	 */
-	public void renderWay(Callback renderCallback) {
-	}
+    /**
+     * @param renderCallback a reference to the receiver of all render callbacks.
+     */
+    public void renderWay(Callback renderCallback) {
+    }
 
-	/**
-	 * Scales the text size of this RenderInstruction by the given factor.
-	 * 
-	 * @param scaleFactor
-	 *            the factor by which the text size should be scaled.
-	 */
-	public void scaleTextSize(float scaleFactor) {
-	}
+    /**
+     * Scales the text size of this RenderInstruction by the given factor.
+     *
+     * @param scaleFactor the factor by which the text size should be scaled.
+     */
+    public void scaleTextSize(float scaleFactor) {
+    }
 
-	public void update() {
-		if (update) {
-			update = false;
-			mCurrent = mNext;
-		}
-	}
+    public void update() {
+        if (update) {
+            update = false;
+            mCurrent = mNext;
+        }
+    }
 
-	public abstract RenderStyle current();
+    public abstract RenderStyle current();
 }

@@ -16,25 +16,25 @@
  */
 package org.oscim.utils.osmpbf;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.openstreetmap.osmosis.osmbinary.file.BlockInputStream;
 import org.oscim.core.osm.OsmData;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class OsmPbfReader {
 
-	public static OsmData process(InputStream is) {
-		OsmPbfParser parser = new OsmPbfParser();
+    public static OsmData process(InputStream is) {
+        OsmPbfParser parser = new OsmPbfParser();
 
-		try {
-			(new BlockInputStream(is, parser)).process();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+        try {
+            (new BlockInputStream(is, parser)).process();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
 
-		return parser.getData();
-	}
+        return parser.getData();
+    }
 }

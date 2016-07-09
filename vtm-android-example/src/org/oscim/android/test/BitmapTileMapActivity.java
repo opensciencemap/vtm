@@ -14,6 +14,8 @@
  */
 package org.oscim.android.test;
 
+import android.os.Bundle;
+
 import org.oscim.android.cache.TileCache;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
@@ -26,92 +28,90 @@ import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.os.Bundle;
-
 public class BitmapTileMapActivity extends MapActivity {
 
-	static final Logger log = LoggerFactory.getLogger(BitmapTileMapActivity.class);
+    static final Logger log = LoggerFactory.getLogger(BitmapTileMapActivity.class);
 
-	private final static boolean USE_CACHE = true;
+    private final static boolean USE_CACHE = true;
 
-	private final BitmapTileSource mTileSource;
-	protected BitmapTileLayer mBitmapLayer;
+    private final BitmapTileSource mTileSource;
+    protected BitmapTileLayer mBitmapLayer;
 
-	public BitmapTileMapActivity() {
-		this(DefaultSources.OPENSTREETMAP.build());
-	}
+    public BitmapTileMapActivity() {
+        this(DefaultSources.OPENSTREETMAP.build());
+    }
 
-	public BitmapTileMapActivity(BitmapTileSource tileSource) {
-		super(R.layout.activity_map);
-		mTileSource = tileSource;
-	}
+    public BitmapTileMapActivity(BitmapTileSource tileSource) {
+        super(R.layout.activity_map);
+        mTileSource = tileSource;
+    }
 
-	private TileCache mCache;
+    private TileCache mCache;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		MapRenderer.setBackgroundColor(0xff777777);
-		mMap.layers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
+        MapRenderer.setBackgroundColor(0xff777777);
+        mMap.layers().add(new TileGridLayer(mMap, Color.GRAY, 1.8f, 8));
 
-		if (mTileSource == null)
-			return;
+        if (mTileSource == null)
+            return;
 
-		if (USE_CACHE) {
-			String cacheFile = mTileSource.getUrl()
-			    .toString()
-			    .replaceFirst("https?://", "")
-			    .replaceAll("/", "-");
+        if (USE_CACHE) {
+            String cacheFile = mTileSource.getUrl()
+                    .toString()
+                    .replaceFirst("https?://", "")
+                    .replaceAll("/", "-");
 
-			log.debug("use bitmap cache {}", cacheFile);
-			mCache = new TileCache(this, null, cacheFile);
-			mCache.setCacheSize(512 * (1 << 10));
-			mTileSource.setCache(mCache);
-		}
+            log.debug("use bitmap cache {}", cacheFile);
+            mCache = new TileCache(this, null, cacheFile);
+            mCache.setCacheSize(512 * (1 << 10));
+            mTileSource.setCache(mCache);
+        }
 
-		mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
-		mMap.layers().add(mBitmapLayer);
+        mBitmapLayer = new BitmapTileLayer(mMap, mTileSource);
+        mMap.layers().add(mBitmapLayer);
 
-		//loooop(1);
-	}
+        //loooop(1);
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mCache != null)
-			mCache.dispose();
-	}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCache != null)
+            mCache.dispose();
+    }
 
-	// Stress testing
-	void loooop(final int i) {
-		final long time = (long) (500 + Math.random() * 1000);
-		mMapView.postDelayed(new Runnable() {
-			@Override
-			public void run() {
+    // Stress testing
+    void loooop(final int i) {
+        final long time = (long) (500 + Math.random() * 1000);
+        mMapView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-				MapPosition p = new MapPosition();
-				if (i == 1) {
-					mMapView.map().getMapPosition(p);
-					p.setScale(4);
-					mMapView.map().animator().animateTo(time, p);
-				} else {
-					//mMapView.map().setMapPosition(p);
-					p.setScale(2 + (1 << (int) (Math.random() * 13)));
-					//	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
-					//	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
-					p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
-					p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
+                MapPosition p = new MapPosition();
+                if (i == 1) {
+                    mMapView.map().getMapPosition(p);
+                    p.setScale(4);
+                    mMapView.map().animator().animateTo(time, p);
+                } else {
+                    //mMapView.map().setMapPosition(p);
+                    p.setScale(2 + (1 << (int) (Math.random() * 13)));
+                    //	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
+                    //	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
+                    p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
+                    p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
 
-					p.setTilt((float) (Math.random() * 60));
-					p.setBearing((float) (Math.random() * 360));
-					//mMapView.map().setMapPosition(p);
+                    p.setTilt((float) (Math.random() * 60));
+                    p.setBearing((float) (Math.random() * 360));
+                    //mMapView.map().setMapPosition(p);
 
-					mMapView.map().animator().animateTo(time, p);
-				}
-				loooop((i + 1) % 2);
+                    mMapView.map().animator().animateTo(time, p);
+                }
+                loooop((i + 1) % 2);
 
-			}
-		}, time);
-	}
+            }
+        }, time);
+    }
 }

@@ -22,10 +22,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 public interface ThemeFile extends Serializable {
-	/**
-	 * @return an InputStream to read the render theme data from.
-	 * @throws FileNotFoundException
-	 *             if the render theme file cannot be found.
-	 */
-	InputStream getRenderThemeAsStream() throws FileNotFoundException;
+    /**
+     * @return an InputStream to read the render theme data from.
+     * @throws FileNotFoundException if the render theme file cannot be found.
+     */
+    InputStream getRenderThemeAsStream() throws FileNotFoundException;
 }

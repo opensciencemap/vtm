@@ -16,32 +16,32 @@
  */
 package org.oscim.core.osm;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vividsolutions.jts.geom.Geometry;
 
 import org.oscim.core.TagSet;
 
-import com.vividsolutions.jts.geom.Geometry;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OsmRelation extends OsmElement {
 
-	public final List<OsmMember> relationMembers;
+    public final List<OsmMember> relationMembers;
 
-	// content added after constructor call
+    // content added after constructor call
 
-	public OsmRelation(TagSet tags, long id, int initialMemberSize) {
-		super(tags, id);
-		this.relationMembers =
-		        new ArrayList<OsmMember>(initialMemberSize);
-	}
+    public OsmRelation(TagSet tags, long id, int initialMemberSize) {
+        super(tags, id);
+        this.relationMembers =
+                new ArrayList<OsmMember>(initialMemberSize);
+    }
 
-	@Override
-	public String toString() {
-		return "r" + id;
-	}
+    @Override
+    public String toString() {
+        return "r" + id;
+    }
 
-	@Override
-	public Geometry toJts() {
-		return null;
-	}
+    @Override
+    public Geometry toJts() {
+        return null;
+    }
 }

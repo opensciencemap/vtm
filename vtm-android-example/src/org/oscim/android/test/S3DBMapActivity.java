@@ -16,6 +16,8 @@
  */
 package org.oscim.android.test;
 
+import android.os.Bundle;
+
 import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.TileLayer;
 import org.oscim.layers.tile.buildings.S3DBLayer;
@@ -24,47 +26,45 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-import android.os.Bundle;
-
 public class S3DBMapActivity extends BaseMapActivity {
 
-	TileCache mS3dbCache;
+    TileCache mS3dbCache;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		mMap.setTheme(VtmThemes.DEFAULT);
+        mMap.setTheme(VtmThemes.DEFAULT);
 
-		TileSource ts = OSciMap4TileSource.builder()
-		    .url("http://opensciencemap.org/tiles/s3db")
-		    .zoomMin(16)
-		    .zoomMax(16)
-		    .build();
+        TileSource ts = OSciMap4TileSource.builder()
+                .url("http://opensciencemap.org/tiles/s3db")
+                .zoomMin(16)
+                .zoomMax(16)
+                .build();
 
-		if (USE_CACHE) {
-			mS3dbCache = new TileCache(this, null, "s3db.db");
-			mS3dbCache.setCacheSize(512 * (1 << 10));
-			ts.setCache(mS3dbCache);
-		}
-		TileLayer tl = new S3DBLayer(mMap, ts, true, false);
-		mMap.layers().add(tl);
-		mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
-	}
+        if (USE_CACHE) {
+            mS3dbCache = new TileCache(this, null, "s3db.db");
+            mS3dbCache.setCacheSize(512 * (1 << 10));
+            ts.setCache(mS3dbCache);
+        }
+        TileLayer tl = new S3DBLayer(mMap, ts, true, false);
+        mMap.layers().add(tl);
+        mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
-		if (mS3dbCache != null)
-			mS3dbCache.dispose();
-	}
+        if (mS3dbCache != null)
+            mS3dbCache.dispose();
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+    @Override
+    protected void onResume() {
+        super.onResume();
 
 		/* ignore saved position */
-		mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
-	}
+        mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
+    }
 }

@@ -16,23 +16,23 @@
  */
 package org.oscim.tiling.source.geojson;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 
+import java.util.Collection;
+
 public class FeatureCollection extends JavaScriptObject {
 
-	protected FeatureCollection() {
+    protected FeatureCollection() {
 
-	}
+    }
 
-	public final Collection<Feature> getFeatures() {
-		return new JsArrayCollection<Feature>(getFeaturesInternal());
-	}
+    public final Collection<Feature> getFeatures() {
+        return new JsArrayCollection<Feature>(getFeaturesInternal());
+    }
 
-	public final native JsArray<Feature> getFeaturesInternal()/*-{
-		return this.features;
+    public final native JsArray<Feature> getFeaturesInternal()/*-{
+        return this.features;
 	}-*/;
 
 }

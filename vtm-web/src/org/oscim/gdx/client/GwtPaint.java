@@ -16,106 +16,106 @@
  */
 package org.oscim.gdx.client;
 
-import org.oscim.backend.canvas.Paint;
-
 import com.badlogic.gdx.graphics.Pixmap;
+
+import org.oscim.backend.canvas.Paint;
 
 public class GwtPaint implements Paint {
 
-	String color;
-	boolean stroke;
+    String color;
+    boolean stroke;
 
-	float strokeWidth;
-	Align mAlign;
+    float strokeWidth;
+    Align mAlign;
 
-	float fontSize = 12;
+    float fontSize = 12;
 
-	private FontStyle fontStyle = FontStyle.NORMAL;
-	//private FontFamily fontFamily = FontFamily.DEFAULT;
+    private FontStyle fontStyle = FontStyle.NORMAL;
+    //private FontFamily fontFamily = FontFamily.DEFAULT;
 
-	//String font = "12px sans-serif";
-	String font = "13px Helvetica";
+    //String font = "12px sans-serif";
+    String font = "13px Helvetica";
 
-	//private int cap;
+    //private int cap;
 
-	@Override
-	public int getColor() {
-		return 0;
-	}
+    @Override
+    public int getColor() {
+        return 0;
+    }
 
-	@Override
-	public void setColor(int color) {
-		float a = ((color >>> 24) & 0xff) / 255f;
-		int r = (color >>> 16) & 0xff;
-		int g = (color >>> 8) & 0xff;
-		int b = (color & 0xff);
+    @Override
+    public void setColor(int color) {
+        float a = ((color >>> 24) & 0xff) / 255f;
+        int r = (color >>> 16) & 0xff;
+        int g = (color >>> 8) & 0xff;
+        int b = (color & 0xff);
 
-		this.color = Pixmap.make(r, g, b, a);
-	}
+        this.color = Pixmap.make(r, g, b, a);
+    }
 
-	@Override
-	public void setStrokeCap(Cap cap) {
-		stroke = true;
-	}
+    @Override
+    public void setStrokeCap(Cap cap) {
+        stroke = true;
+    }
 
-	@Override
-	public void setStrokeWidth(float width) {
-		stroke = true;
-		strokeWidth = width;
-	}
+    @Override
+    public void setStrokeWidth(float width) {
+        stroke = true;
+        strokeWidth = width;
+    }
 
-	@Override
-	public void setStyle(Style style) {
-	}
+    @Override
+    public void setStyle(Style style) {
+    }
 
-	@Override
-	public void setTextAlign(Align align) {
-		mAlign = align;
-	}
+    @Override
+    public void setTextAlign(Align align) {
+        mAlign = align;
+    }
 
-	@Override
-	public void setTextSize(float size) {
-		fontSize = size;
-		buildFont();
-	}
+    @Override
+    public void setTextSize(float size) {
+        fontSize = size;
+        buildFont();
+    }
 
-	@Override
-	public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
-		this.fontStyle = fontStyle;
-		//this.fontFamily = fontFamily;
-		buildFont();
-	}
+    @Override
+    public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
+        this.fontStyle = fontStyle;
+        //this.fontFamily = fontFamily;
+        buildFont();
+    }
 
-	@Override
-	public float measureText(String text) {
-		return GwtGdxGraphics.getTextWidth(text, font);
-	}
+    @Override
+    public float measureText(String text) {
+        return GwtGdxGraphics.getTextWidth(text, font);
+    }
 
-	// FIXME all estimates. no idea how to properly measure canvas text..
-	@Override
-	public float getFontHeight() {
-		return 2 + fontSize + strokeWidth * 2;
-	}
+    // FIXME all estimates. no idea how to properly measure canvas text..
+    @Override
+    public float getFontHeight() {
+        return 2 + fontSize + strokeWidth * 2;
+    }
 
-	@Override
-	public float getFontDescent() {
-		return 4 + strokeWidth;
-	}
+    @Override
+    public float getFontDescent() {
+        return 4 + strokeWidth;
+    }
 
-	void buildFont() {
-		StringBuilder sb = new StringBuilder();
+    void buildFont() {
+        StringBuilder sb = new StringBuilder();
 
-		if (this.fontStyle == FontStyle.BOLD)
-			sb.append("bold ");
-		else if (this.fontStyle == FontStyle.ITALIC)
-			sb.append("italic ");
+        if (this.fontStyle == FontStyle.BOLD)
+            sb.append("bold ");
+        else if (this.fontStyle == FontStyle.ITALIC)
+            sb.append("italic ");
 
-		sb.append(Math.round(this.fontSize));
-		sb.append("px ");
+        sb.append(Math.round(this.fontSize));
+        sb.append("px ");
 
-		sb.append("Helvetica");
+        sb.append("Helvetica");
 
-		this.font = sb.toString();
+        this.font = sb.toString();
 
-	}
+    }
 }

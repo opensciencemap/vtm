@@ -12,37 +12,37 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class Gdx3DTest extends GdxMap {
 
-	@Override
-	public void createLayers() {
-		MapRenderer.setBackgroundColor(0xff888888);
+    @Override
+    public void createLayers() {
+        MapRenderer.setBackgroundColor(0xff888888);
 
-		mMap.setMapPosition(53.1, 8.8, 1 << 15);
+        mMap.setMapPosition(53.1, 8.8, 1 << 15);
 
-		TileSource ts = new OSciMap4TileSource();
-		// initDefaultLayers(ts, false, false, false);
+        TileSource ts = new OSciMap4TileSource();
+        // initDefaultLayers(ts, false, false, false);
 
-		VectorTileLayer mMapLayer = mMap.setBaseMap(ts);
-		mMap.setTheme(VtmThemes.DEFAULT);
-		// mMap.setTheme(VtmThemes.TRONRENDER);
+        VectorTileLayer mMapLayer = mMap.setBaseMap(ts);
+        mMap.setTheme(VtmThemes.DEFAULT);
+        // mMap.setTheme(VtmThemes.TRONRENDER);
 
-		mMap.layers().add(new BuildingLayer(mMap, mMapLayer));
+        mMap.layers().add(new BuildingLayer(mMap, mMapLayer));
 
-		// mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
+        // mMap.getLayers().add(new GenericLayer(mMap, new GridRenderer()));
 
-		// ts = new OSciMap4TileSource("http://opensciencemap.org/tiles/s3db");
-		// VectorTileLayer tl = new VectorTileLayer(mMap, 16, 16, 20);
-		// tl.setTileSource(ts);
-		// tl.setRenderTheme(ThemeLoader.load(VtmThemes.DEFAULT));
-		// mMap.getLayers().add(tl);
-		// mMap.getLayers().add(new BuildingLayer(mMap, tl.getTileLayer()));
+        // ts = new OSciMap4TileSource("http://opensciencemap.org/tiles/s3db");
+        // VectorTileLayer tl = new VectorTileLayer(mMap, 16, 16, 20);
+        // tl.setTileSource(ts);
+        // tl.setRenderTheme(ThemeLoader.load(VtmThemes.DEFAULT));
+        // mMap.getLayers().add(tl);
+        // mMap.getLayers().add(new BuildingLayer(mMap, tl.getTileLayer()));
 
-		mMap.layers().add(new Poi3DLayer(mMap, mMapLayer));
+        mMap.layers().add(new Poi3DLayer(mMap, mMapLayer));
 
-		mMap.layers().add(new LabelLayer(mMap, mMapLayer));
-	}
+        mMap.layers().add(new LabelLayer(mMap, mMapLayer));
+    }
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new Gdx3DTest(), null, 320);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new Gdx3DTest(), null, 320);
+    }
 }

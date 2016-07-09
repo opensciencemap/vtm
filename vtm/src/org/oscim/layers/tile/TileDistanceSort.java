@@ -16,48 +16,48 @@
  */
 package org.oscim.layers.tile;
 
-import java.util.Comparator;
-
 import org.oscim.utils.TimSort;
+
+import java.util.Comparator;
 
 public class TileDistanceSort extends TimSort<MapTile> {
 
-	static TileDistanceSort INSTANCE = new TileDistanceSort();
+    static TileDistanceSort INSTANCE = new TileDistanceSort();
 
-	private TileDistanceSort() {
-		super();
-	}
+    private TileDistanceSort() {
+        super();
+    }
 
-	public static void sort(MapTile[] a, int lo, int hi) {
-		int nRemaining = hi - lo;
-		if (nRemaining < 2) {
-			return;
-		}
+    public static void sort(MapTile[] a, int lo, int hi) {
+        int nRemaining = hi - lo;
+        if (nRemaining < 2) {
+            return;
+        }
 
-		synchronized (INSTANCE) {
-			INSTANCE.doSort(a, DistanceComparator, lo, hi);
-		}
-	}
+        synchronized (INSTANCE) {
+            INSTANCE.doSort(a, DistanceComparator, lo, hi);
+        }
+    }
 
-	final static Comparator<MapTile> DistanceComparator = new Comparator<MapTile>() {
-		@Override
-		public int compare(MapTile a, MapTile b) {
-			if (a == null) {
-				if (b == null)
-					return 0;
+    final static Comparator<MapTile> DistanceComparator = new Comparator<MapTile>() {
+        @Override
+        public int compare(MapTile a, MapTile b) {
+            if (a == null) {
+                if (b == null)
+                    return 0;
 
-				return 1;
-			}
-			if (b == null)
-				return -1;
+                return 1;
+            }
+            if (b == null)
+                return -1;
 
-			if (a.distance < b.distance) {
-				return -1;
-			}
-			if (a.distance > b.distance) {
-				return 1;
-			}
-			return 0;
-		}
-	};
+            if (a.distance < b.distance) {
+                return -1;
+            }
+            if (a.distance > b.distance) {
+                return 1;
+            }
+            return 0;
+        }
+    };
 }

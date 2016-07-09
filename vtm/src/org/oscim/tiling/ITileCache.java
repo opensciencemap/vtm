@@ -16,49 +16,44 @@
  */
 package org.oscim.tiling;
 
+import org.oscim.core.Tile;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.oscim.core.Tile;
 
 /*
  * Thie interface CacheManager defines the operation for the cache.
  */
 public interface ITileCache {
 
-	/**
-	 * @param tile
-	 *            The accessed tile.
-	 * @return
-	 *         The CacheFile which contains the Fileoutputstream for the cache.
-	 */
-	TileWriter writeTile(Tile tile);
+    /**
+     * @param tile The accessed tile.
+     * @return The CacheFile which contains the Fileoutputstream for the cache.
+     */
+    TileWriter writeTile(Tile tile);
 
-	/**
-	 * @param tile
-	 *            The accessed tile.
-	 * @return
-	 *         The stored file for this tile or null if tile is not stored.
-	 */
-	TileReader getTile(Tile tile);
+    /**
+     * @param tile The accessed tile.
+     * @return The stored file for this tile or null if tile is not stored.
+     */
+    TileReader getTile(Tile tile);
 
-	/**
-	 * @param size
-	 *            The size for the cache directionary.
-	 */
-	void setCacheSize(long size);
+    /**
+     * @param size The size for the cache directionary.
+     */
+    void setCacheSize(long size);
 
-	public interface TileReader {
-		Tile getTile();
+    public interface TileReader {
+        Tile getTile();
 
-		InputStream getInputStream();
-	}
+        InputStream getInputStream();
+    }
 
-	public interface TileWriter {
-		Tile getTile();
+    public interface TileWriter {
+        Tile getTile();
 
-		OutputStream getOutputStream();
+        OutputStream getOutputStream();
 
-		void complete(boolean success);
-	}
+        void complete(boolean success);
+    }
 }

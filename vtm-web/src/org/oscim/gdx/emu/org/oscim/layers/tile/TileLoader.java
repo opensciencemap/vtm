@@ -14,7 +14,8 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.tiling.QueryResult.FAILED;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Timer;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
@@ -24,136 +25,135 @@ import org.oscim.tiling.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Timer;
+import static org.oscim.tiling.QueryResult.FAILED;
 
 public abstract class TileLoader implements ITileDataSink {
-	final static Logger log = LoggerFactory.getLogger(TileLoader.class);
+    final static Logger log = LoggerFactory.getLogger(TileLoader.class);
 
-	private final TileManager mTileManager;
-	private Timer mTimer;
+    private final TileManager mTileManager;
+    private Timer mTimer;
 
-	public TileLoader(TileManager tileManager) {
-		if (mTimer == null)
-			mTimer = new Timer();
+    public TileLoader(TileManager tileManager) {
+        if (mTimer == null)
+            mTimer = new Timer();
 
-		mTileManager = tileManager;
-	}
+        mTileManager = tileManager;
+    }
 
-	public abstract void dispose();
+    public abstract void dispose();
 
-	protected abstract boolean loadTile(MapTile tile);
+    protected abstract boolean loadTile(MapTile tile);
 
-	boolean isInterrupted;
+    boolean isInterrupted;
 
-	public void finish() {
-		isInterrupted = true;
-		// cancel loading
-	}
+    public void finish() {
+        isInterrupted = true;
+        // cancel loading
+    }
 
-	public void cancel() {
-		isInterrupted = true;
-		// cancel loading... ?
-	}
+    public void cancel() {
+        isInterrupted = true;
+        // cancel loading... ?
+    }
 
-	boolean mPausing;
+    boolean mPausing;
 
-	public boolean isCanceled() {
-		return mPausing;
-	}
+    public boolean isCanceled() {
+        return mPausing;
+    }
 
-	public boolean isPausing() {
-		return mPausing;
-	}
+    public boolean isPausing() {
+        return mPausing;
+    }
 
-	public void pause() {
-		mPausing = true;
-	}
+    public void pause() {
+        mPausing = true;
+    }
 
-	public void proceed() {
-		mPausing = false;
-		// FIXME
-		mWorking = false;
-		if (mTileManager.hasTileJobs())
-			go();
-	}
+    public void proceed() {
+        mPausing = false;
+        // FIXME
+        mWorking = false;
+        if (mTileManager.hasTileJobs())
+            go();
+    }
 
-	public void awaitPausing() {
+    public void awaitPausing() {
 
-	}
+    }
 
-	public void start() {
-		mPausing = false;
-	}
+    public void start() {
+        mPausing = false;
+    }
 
-	protected boolean mWorking;
-	protected MapTile mTile;
+    protected boolean mWorking;
+    protected MapTile mTile;
 
-	public void go() {
-		if (mWorking)
-			return;
+    public void go() {
+        if (mWorking)
+            return;
 
-		mTile = mTileManager.getTileJob();
+        mTile = mTileManager.getTileJob();
 
-		if (mTile == null)
-			return;
+        if (mTile == null)
+            return;
 
-		try {
-			loadTile(mTile);
-			mWorking = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			completed(FAILED);
-		}
-	}
+        try {
+            loadTile(mTile);
+            mWorking = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            completed(FAILED);
+        }
+    }
 
-	public static long lastLoadTime;
+    public static long lastLoadTime;
 
-	/**
-	 * Callback to be called by TileDataSource when finished
-	 * loading or on failure. MUST BE CALLED IN ANY CASE!
-	 */
-	@Override
-	public void completed(QueryResult result) {
-		long now = MapRenderer.frametime;
+    /**
+     * Callback to be called by TileDataSource when finished
+     * loading or on failure. MUST BE CALLED IN ANY CASE!
+     */
+    @Override
+    public void completed(QueryResult result) {
+        long now = MapRenderer.frametime;
 
-		//log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
-		lastLoadTime = now;
+        //log.debug("completed {}  diff time:{}", mTile, (now - lastLoadTime));
+        lastLoadTime = now;
 
-		mTileManager.jobCompleted(mTile, result);
-		mTile = null;
+        mTileManager.jobCompleted(mTile, result);
+        mTile = null;
 
-		mWorking = false;
+        mWorking = false;
 
-		if (mPausing || !mTileManager.hasTileJobs())
-			return;
+        if (mPausing || !mTileManager.hasTileJobs())
+            return;
 
-		Gdx.app.postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				go();
-			}
-		});
-	}
+        Gdx.app.postRunnable(new Runnable() {
+            @Override
+            public void run() {
+                go();
+            }
+        });
+    }
 
-	/**
-	 * Called by TileDataSource
-	 */
-	@Override
-	public void process(MapElement element) {
+    /**
+     * Called by TileDataSource
+     */
+    @Override
+    public void process(MapElement element) {
 
-	}
+    }
 
-	/**
-	 * Called by TileDataSource
-	 */
-	@Override
-	public void setTileImage(Bitmap bitmap) {
+    /**
+     * Called by TileDataSource
+     */
+    @Override
+    public void setTileImage(Bitmap bitmap) {
 
-	}
+    }
 
-	public static void postLoadDelay(LoadDelayTask<?> task) {
-		Gdx.app.postRunnable(task);
-	}
+    public static void postLoadDelay(LoadDelayTask<?> task) {
+        Gdx.app.postRunnable(task);
+    }
 
 }

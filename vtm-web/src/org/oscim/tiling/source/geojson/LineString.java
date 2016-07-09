@@ -18,6 +18,6 @@ package org.oscim.tiling.source.geojson;
 
 public class LineString extends Geometry<LngLat> {
 
-	protected LineString() {
-	}
+    protected LineString() {
+    }
 }

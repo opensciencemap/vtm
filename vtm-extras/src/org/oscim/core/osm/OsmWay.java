@@ -16,43 +16,43 @@
  */
 package org.oscim.core.osm;
 
-import java.util.List;
-
-import org.oscim.core.TagSet;
-
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
 
+import org.oscim.core.TagSet;
+
+import java.util.List;
+
 public class OsmWay extends OsmElement {
 
-	public final List<OsmNode> nodes;
+    public final List<OsmNode> nodes;
 
-	public OsmWay(TagSet tags, long id, List<OsmNode> nodes) {
-		super(tags, id);
-		this.nodes = nodes;
-	}
+    public OsmWay(TagSet tags, long id, List<OsmNode> nodes) {
+        super(tags, id);
+        this.nodes = nodes;
+    }
 
-	public boolean isClosed() {
-		return nodes.size() > 0 &&
-		        nodes.get(0).equals(nodes.get(nodes.size() - 1));
-	}
+    public boolean isClosed() {
+        return nodes.size() > 0 &&
+                nodes.get(0).equals(nodes.get(nodes.size() - 1));
+    }
 
-	@Override
-	public String toString() {
-		return "w" + id;
-	}
+    @Override
+    public String toString() {
+        return "w" + id;
+    }
 
-	public Geometry toJts() {
-		double[] coords = new double[nodes.size() * 2];
-		int i = 0;
-		for (OsmNode n : nodes) {
-			coords[i++] = n.lon;
-			coords[i++] = n.lat;
-		}
+    public Geometry toJts() {
+        double[] coords = new double[nodes.size() * 2];
+        int i = 0;
+        for (OsmNode n : nodes) {
+            coords[i++] = n.lon;
+            coords[i++] = n.lat;
+        }
 
-		CoordinateSequence c = PackedCoordinateSequenceFactory.DOUBLE_FACTORY.create(coords, 2);
-		return new LineString(c, null);
-	}
+        CoordinateSequence c = PackedCoordinateSequenceFactory.DOUBLE_FACTORY.create(coords, 2);
+        return new LineString(c, null);
+    }
 }

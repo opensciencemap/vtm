@@ -21,30 +21,30 @@ import java.util.Map;
 
 public class Feature extends GeoJsonObject {
 
-	protected Feature() {
+    protected Feature() {
 
-	}
+    }
 
-	public final native Geometry<?> getGeometry() /*-{
-		return this.geometry;
+    public final native Geometry<?> getGeometry() /*-{
+        return this.geometry;
 	}-*/;
 
-	public final native String getId() /*-{
-		return this.id;
+    public final native String getId() /*-{
+        return this.id;
 	}-*/;
 
-	public final native void setId(String id) /*-{
+    public final native void setId(String id) /*-{
 		this.id = id;
 	}-*/;
 
-	public final Map<String, Object> getProperties(HashMap<String, Object> map) {
-		map.clear();
-		fromJavascriptObject(map);
+    public final Map<String, Object> getProperties(HashMap<String, Object> map) {
+        map.clear();
+        fromJavascriptObject(map);
 
-		return map;
-	}
+        return map;
+    }
 
-	public final native void fromJavascriptObject(HashMap<String, Object> s) /*-{
+    public final native void fromJavascriptObject(HashMap<String, Object> s) /*-{
 		for(var key in this.properties) {
 		     s.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, Object(this.properties[key]));
 		}

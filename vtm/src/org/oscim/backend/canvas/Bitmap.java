@@ -21,45 +21,45 @@ package org.oscim.backend.canvas;
  */
 public interface Bitmap {
 
-	/**
-	 * Gets the width.
-	 * 
-	 * @return the width
-	 */
-	int getWidth();
+    /**
+     * Gets the width.
+     *
+     * @return the width
+     */
+    int getWidth();
 
-	/**
-	 * Gets the height.
-	 * 
-	 * @return the height
-	 */
-	int getHeight();
+    /**
+     * Gets the height.
+     *
+     * @return the height
+     */
+    int getHeight();
 
-	/**
-	 * Recycle.
-	 */
-	void recycle();
+    /**
+     * Recycle.
+     */
+    void recycle();
 
-	/**
-	 * Gets the pixels as ARGB int array.
-	 * 
-	 * @return the pixels
-	 */
-	int[] getPixels();
+    /**
+     * Gets the pixels as ARGB int array.
+     *
+     * @return the pixels
+     */
+    int[] getPixels();
 
-	/**
-	 * Erase color, clear Bitmap.
-	 * 
-	 * @param color the color
-	 */
-	void eraseColor(int color);
+    /**
+     * Erase color, clear Bitmap.
+     *
+     * @param color the color
+     */
+    void eraseColor(int color);
 
-	/**
-	 * Upload Bitmap to currently bound GL texture.
-	 * 
-	 * @param replace true, when glSubImage2D can be used for upload
-	 */
-	void uploadToTexture(boolean replace);
+    /**
+     * Upload Bitmap to currently bound GL texture.
+     *
+     * @param replace true, when glSubImage2D can be used for upload
+     */
+    void uploadToTexture(boolean replace);
 
-	boolean isValid();
+    boolean isValid();
 }

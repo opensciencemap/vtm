@@ -26,34 +26,36 @@ package org.oscim.core;
  */
 public class MapElement extends GeometryBuffer {
 
-	/** layer of the element (0-10) overrides the theme drawing order */
-	public int layer;
+    /**
+     * layer of the element (0-10) overrides the theme drawing order
+     */
+    public int layer;
 
-	public final TagSet tags = new TagSet();
+    public final TagSet tags = new TagSet();
 
-	public MapElement() {
-		super(1024, 16);
-	}
+    public MapElement() {
+        super(1024, 16);
+    }
 
-	public MapElement(int points, int indices) {
-		super(points, indices);
-	}
+    public MapElement(int points, int indices) {
+        super(points, indices);
+    }
 
-	public void setLayer(int layer) {
-		this.layer = layer;
-	}
+    public void setLayer(int layer) {
+        this.layer = layer;
+    }
 
-	@Override
-	public MapElement clear() {
-		layer = 5;
-		super.clear();
-		return this;
-	}
+    @Override
+    public MapElement clear() {
+        layer = 5;
+        super.clear();
+        return this;
+    }
 
-	@Override
-	public String toString() {
+    @Override
+    public String toString() {
 
-		return tags.toString() + '\n' + super.toString() + '\n';
+        return tags.toString() + '\n' + super.toString() + '\n';
 
-	}
+    }
 }

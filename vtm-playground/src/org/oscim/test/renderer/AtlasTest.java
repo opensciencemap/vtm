@@ -1,7 +1,5 @@
 package org.oscim.test.renderer;
 
-import java.util.Arrays;
-
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.gdx.GdxMap;
@@ -20,123 +18,125 @@ import org.oscim.theme.styles.TextStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 public class AtlasTest extends GdxMap {
 
-	@Override
-	protected void createLayers() {
-		mMap.setMapPosition(0, 0, 1 << 4);
-		mMap.layers().add(new GenericLayer(mMap, new AtlasRenderLayer()));
-	}
+    @Override
+    protected void createLayers() {
+        mMap.setMapPosition(0, 0, 1 << 4);
+        mMap.layers().add(new GenericLayer(mMap, new AtlasRenderLayer()));
+    }
 
-	public static void main(String[] args) {
-		GdxMapApp.init();
-		GdxMapApp.run(new AtlasTest(), null, 400);
-	}
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new AtlasTest(), null, 400);
+    }
 
-	static class AtlasRenderLayer extends BucketRenderer {
+    static class AtlasRenderLayer extends BucketRenderer {
 
-		Logger log = LoggerFactory.getLogger(AtlasRenderLayer.class);
+        Logger log = LoggerFactory.getLogger(AtlasRenderLayer.class);
 
-		public AtlasRenderLayer() {
+        public AtlasRenderLayer() {
 
-			TextureAtlas mAtlas = TextureAtlas.create(2048, 2048, 1);
+            TextureAtlas mAtlas = TextureAtlas.create(2048, 2048, 1);
 
-			TextBucket tl = new TextBucket();
-			TextStyle t = TextStyle.builder().fontSize(20).color(Color.BLACK).build();
-			buckets.set(tl);
+            TextBucket tl = new TextBucket();
+            TextStyle t = TextStyle.builder().fontSize(20).color(Color.BLACK).build();
+            buckets.set(tl);
 
-			LineBucket ll = buckets.getLineBucket(0);
-			ll.line = new LineStyle(Color.BLUE, 3, Cap.BUTT);
-			ll.scale = 1f;
+            LineBucket ll = buckets.getLineBucket(0);
+            ll.line = new LineStyle(Color.BLUE, 3, Cap.BUTT);
+            ll.scale = 1f;
 
-			LineBucket ll2 = buckets.getLineBucket(1);
-			ll2.line = new LineStyle(Color.RED, 3, Cap.BUTT);
-			ll2.scale = 1f;
+            LineBucket ll2 = buckets.getLineBucket(1);
+            ll2.line = new LineStyle(Color.RED, 3, Cap.BUTT);
+            ll2.scale = 1f;
 
-			LineBucket ll3 = buckets.getLineBucket(2);
-			ll3.line = new LineStyle(Color.GREEN, 3, Cap.BUTT);
-			ll3.scale = 1f;
+            LineBucket ll3 = buckets.getLineBucket(2);
+            ll3.line = new LineStyle(Color.GREEN, 3, Cap.BUTT);
+            ll3.scale = 1f;
 
-			float[] points = new float[10];
+            float[] points = new float[10];
 
-			for (int i = 0; i < 400; i++) {
-				int w = (int) (20 + Math.random() * 256);
-				int h = (int) (20 + Math.random() * 56);
-				Rect r = mAtlas.getRegion(w, h);
-				if (r == null) {
-					log.debug("no space left");
-					continue;
-				}
-				r.x += 1;
-				r.y += 1;
+            for (int i = 0; i < 400; i++) {
+                int w = (int) (20 + Math.random() * 256);
+                int h = (int) (20 + Math.random() * 56);
+                Rect r = mAtlas.getRegion(w, h);
+                if (r == null) {
+                    log.debug("no space left");
+                    continue;
+                }
+                r.x += 1;
+                r.y += 1;
 
-				points[0] = r.x;
-				points[1] = r.y;
-				points[2] = r.x + (r.w - 2);
-				points[3] = r.y;
-				points[4] = r.x + (r.w - 2);
-				points[5] = r.y + (r.h - 2);
-				points[6] = r.x;
-				points[7] = r.y + (r.h - 2);
-				points[8] = r.x;
-				points[9] = r.y;
-				ll.addLine(points, 10, false);
+                points[0] = r.x;
+                points[1] = r.y;
+                points[2] = r.x + (r.w - 2);
+                points[3] = r.y;
+                points[4] = r.x + (r.w - 2);
+                points[5] = r.y + (r.h - 2);
+                points[6] = r.x;
+                points[7] = r.y + (r.h - 2);
+                points[8] = r.x;
+                points[9] = r.y;
+                ll.addLine(points, 10, false);
 
-				r.x += 1;
-				r.y += 1;
-				points[0] = r.x;
-				points[1] = r.y;
-				points[2] = r.x + (w - 4);
-				points[3] = r.y;
-				points[4] = r.x + (w - 4);
-				points[5] = r.y + (h - 4);
-				points[6] = r.x;
-				points[7] = r.y + (h - 4);
-				points[8] = r.x;
-				points[9] = r.y;
+                r.x += 1;
+                r.y += 1;
+                points[0] = r.x;
+                points[1] = r.y;
+                points[2] = r.x + (w - 4);
+                points[3] = r.y;
+                points[4] = r.x + (w - 4);
+                points[5] = r.y + (h - 4);
+                points[6] = r.x;
+                points[7] = r.y + (h - 4);
+                points[8] = r.x;
+                points[9] = r.y;
 
-				log.debug("add region: " + Arrays.toString(points));
-				ll2.addLine(points, 10, false);
+                log.debug("add region: " + Arrays.toString(points));
+                ll2.addLine(points, 10, false);
 
-				TextItem ti = TextItem.pool.get();
-				ti.set(r.x + r.w / 2, r.y + r.h / 2, "" + i, t);
-				ti.x1 = 0;
-				ti.y1 = 1; // (short) (size / 2);
-				ti.x2 = 1; // (short) size;
-				ti.y2 = 1;
-				tl.addText(ti);
-			}
+                TextItem ti = TextItem.pool.get();
+                ti.set(r.x + r.w / 2, r.y + r.h / 2, "" + i, t);
+                ti.x1 = 0;
+                ti.y1 = 1; // (short) (size / 2);
+                ti.x2 = 1; // (short) size;
+                ti.y2 = 1;
+                tl.addText(ti);
+            }
 
-			for (Slot s = mAtlas.mSlots; s != null; s = s.next) {
-				points[0] = s.x;
-				points[1] = s.y;
-				points[2] = s.x + s.w;
-				points[3] = s.y;
-				points[4] = s.x + s.w;
-				points[5] = 2048;
-				points[6] = s.x;
-				points[7] = 2048;
-				points[8] = s.x;
-				points[9] = s.y;
+            for (Slot s = mAtlas.mSlots; s != null; s = s.next) {
+                points[0] = s.x;
+                points[1] = s.y;
+                points[2] = s.x + s.w;
+                points[3] = s.y;
+                points[4] = s.x + s.w;
+                points[5] = 2048;
+                points[6] = s.x;
+                points[7] = 2048;
+                points[8] = s.x;
+                points[9] = s.y;
 
-				ll3.addLine(points, 10, false);
-			}
+                ll3.addLine(points, 10, false);
+            }
 
-			tl.prepare();
-			//tl.labels = TextItem.pool.releaseAll(tl.labels);
-		}
+            tl.prepare();
+            //tl.labels = TextItem.pool.releaseAll(tl.labels);
+        }
 
-		boolean initial = true;
+        boolean initial = true;
 
-		@Override
-		public void update(GLViewport v) {
+        @Override
+        public void update(GLViewport v) {
 
-			if (initial) {
-				mMapPosition.copy(v.pos);
-				initial = false;
+            if (initial) {
+                mMapPosition.copy(v.pos);
+                initial = false;
 
-				compile();
-			}
-		}
-	}
+                compile();
+            }
+        }
+    }
 }

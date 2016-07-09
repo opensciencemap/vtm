@@ -16,12 +16,7 @@
  */
 package org.oscim.tiling.source.geojson;
 
-import static org.oscim.core.MercatorProjection.latitudeToY;
-import static org.oscim.core.MercatorProjection.longitudeToX;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
+import com.google.gwt.core.client.JavaScriptObject;
 
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
@@ -31,109 +26,114 @@ import org.oscim.tiling.source.ITileDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+
+import static org.oscim.core.MercatorProjection.latitudeToY;
+import static org.oscim.core.MercatorProjection.longitudeToX;
 
 public class GeoJsonTileDecoder implements ITileDecoder {
-	static final Logger log = LoggerFactory.getLogger(GeoJsonTileDecoder.class);
+    static final Logger log = LoggerFactory.getLogger(GeoJsonTileDecoder.class);
 
-	private final MapElement mapElement;
-	private final GeoJsonTileSource mTileSource;
+    private final MapElement mapElement;
+    private final GeoJsonTileSource mTileSource;
 
-	private ITileDataSink mTileDataSink;
+    private ITileDataSink mTileDataSink;
 
-	public GeoJsonTileDecoder(GeoJsonTileSource tileSource) {
-		mTileSource = tileSource;
-		mapElement = new MapElement();
-		mapElement.layer = 5;
-	}
+    public GeoJsonTileDecoder(GeoJsonTileSource tileSource) {
+        mTileSource = tileSource;
+        mapElement = new MapElement();
+        mapElement.layer = 5;
+    }
 
-	final static LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>(10);
+    final static LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>(10);
 
-	double mTileY, mTileX, mTileScale;
+    double mTileY, mTileX, mTileScale;
 
-	public boolean decode(Tile tile, ITileDataSink sink, JavaScriptObject jso) {
-		mTileDataSink = sink;
+    public boolean decode(Tile tile, ITileDataSink sink, JavaScriptObject jso) {
+        mTileDataSink = sink;
 
-		mTileScale = 1 << tile.zoomLevel;
-		mTileX = tile.tileX / mTileScale;
-		mTileY = tile.tileY / mTileScale;
-		mTileScale *= Tile.SIZE;
+        mTileScale = 1 << tile.zoomLevel;
+        mTileX = tile.tileX / mTileScale;
+        mTileY = tile.tileY / mTileScale;
+        mTileScale *= Tile.SIZE;
 
-		FeatureCollection c = (FeatureCollection) jso;
+        FeatureCollection c = (FeatureCollection) jso;
 
-		for (Feature f : c.getFeatures()) {
-			mapElement.clear();
-			mapElement.tags.clear();
+        for (Feature f : c.getFeatures()) {
+            mapElement.clear();
+            mapElement.tags.clear();
 
 			/* add tag information */
-			mTileSource.decodeTags(mapElement, f.getProperties(mProperties));
-			if (mapElement.tags.numTags == 0)
-				continue;
+            mTileSource.decodeTags(mapElement, f.getProperties(mProperties));
+            if (mapElement.tags.numTags == 0)
+                continue;
 
 			/* add geometry information */
-			decodeGeometry(f.getGeometry());
+            decodeGeometry(f.getGeometry());
 
-			if (mapElement.type == GeometryType.NONE)
-				continue;
+            if (mapElement.type == GeometryType.NONE)
+                continue;
 
-			mTileDataSink.process(mapElement);
-		}
+            mTileDataSink.process(mapElement);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private void decodeGeometry(Geometry<?> geometry) {
-		String type = geometry.type();
+    private void decodeGeometry(Geometry<?> geometry) {
+        String type = geometry.type();
 
-		if ("Polygon".equals(type)) {
-			Polygon p = (Polygon) geometry.getCoordinates();
-			decodePolygon(p);
-		} else if ("MultiPolygon".equals(type)) {
-			MultiPolygon mp = (MultiPolygon) geometry.getCoordinates();
-			for (int k = 0, l = mp.getNumGeometries(); k < l; k++)
-				decodePolygon(mp.getGeometryN(k));
+        if ("Polygon".equals(type)) {
+            Polygon p = (Polygon) geometry.getCoordinates();
+            decodePolygon(p);
+        } else if ("MultiPolygon".equals(type)) {
+            MultiPolygon mp = (MultiPolygon) geometry.getCoordinates();
+            for (int k = 0, l = mp.getNumGeometries(); k < l; k++)
+                decodePolygon(mp.getGeometryN(k));
 
-		} else if ("LineString".equals(type)) {
-			LineString ls = (LineString) geometry.getCoordinates();
-			decodeLineString(ls);
+        } else if ("LineString".equals(type)) {
+            LineString ls = (LineString) geometry.getCoordinates();
+            decodeLineString(ls);
 
-		} else if ("MultiLineString".equals(type)) {
-			MultiLineString ml = (MultiLineString) geometry.getCoordinates();
-			for (int k = 0, n = ml.getNumGeometries(); k < n; k++)
-				decodeLineString(ml.getGeometryN(k));
-		}
-	}
+        } else if ("MultiLineString".equals(type)) {
+            MultiLineString ml = (MultiLineString) geometry.getCoordinates();
+            for (int k = 0, n = ml.getNumGeometries(); k < n; k++)
+                decodeLineString(ml.getGeometryN(k));
+        }
+    }
 
-	private void decodeLineString(LineString l) {
-		mapElement.startLine();
-		for (int j = 0, m = l.length(); j < m; j++) {
-			decodePoint(l.get(j));
-		}
-	}
+    private void decodeLineString(LineString l) {
+        mapElement.startLine();
+        for (int j = 0, m = l.length(); j < m; j++) {
+            decodePoint(l.get(j));
+        }
+    }
 
-	private void decodePolygon(Polygon p) {
-		for (int i = 0, n = p.getNumRings(); i < n; i++) {
-			if (i > 0)
-				mapElement.startHole();
-			else
-				mapElement.startPolygon();
+    private void decodePolygon(Polygon p) {
+        for (int i = 0, n = p.getNumRings(); i < n; i++) {
+            if (i > 0)
+                mapElement.startHole();
+            else
+                mapElement.startPolygon();
 
-			LineString ls = p.getRing(i);
-			for (int j = 0, m = ls.length() - 1; j < m; j++)
-				decodePoint(ls.get(j));
-		}
-	}
+            LineString ls = p.getRing(i);
+            for (int j = 0, m = ls.length() - 1; j < m; j++)
+                decodePoint(ls.get(j));
+        }
+    }
 
-	private void decodePoint(LngLat point) {
+    private void decodePoint(LngLat point) {
 
-		float x = (float) ((longitudeToX(point.getLongitude()) - mTileX) * mTileScale);
-		float y = (float) ((latitudeToY(point.getLatitude()) - mTileY) * mTileScale);
+        float x = (float) ((longitudeToX(point.getLongitude()) - mTileX) * mTileScale);
+        float y = (float) ((latitudeToY(point.getLatitude()) - mTileY) * mTileScale);
 
-		mapElement.addPoint(x, y);
-	}
+        mapElement.addPoint(x, y);
+    }
 
-	@Override
-	public boolean decode(Tile tile, ITileDataSink sink, InputStream is) throws IOException {
-		return false;
-	}
+    @Override
+    public boolean decode(Tile tile, ITileDataSink sink, InputStream is) throws IOException {
+        return false;
+    }
 }

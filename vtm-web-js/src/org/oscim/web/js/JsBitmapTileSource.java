@@ -11,17 +11,17 @@ import org.timepedia.exporter.client.ExportPackage;
 public class JsBitmapTileSource extends BitmapTileSource implements
         ExportOverlay<BitmapTileSource> {
 
-	public JsBitmapTileSource(String url, int zoomMin, int zoomMax) {
-		super(url, zoomMin, zoomMax);
-	}
+    public JsBitmapTileSource(String url, int zoomMin, int zoomMax) {
+        super(url, zoomMin, zoomMax);
+    }
 
-	@Override
-	public ITileDataSource getDataSource() {
-		return null;
-	}
-	//	@ExportConstructor
-	//	public static BitmapTileSource constructor(String url, int zoomMin, int zoomMax) {
-	//		return new JsBitmapTileSource(url, zoomMin, zoomMax);
-	//	}
+    @Override
+    public ITileDataSource getDataSource() {
+        return null;
+    }
+    //	@ExportConstructor
+    //	public static BitmapTileSource constructor(String url, int zoomMin, int zoomMax) {
+    //		return new JsBitmapTileSource(url, zoomMin, zoomMax);
+    //	}
 
 }

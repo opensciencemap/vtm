@@ -16,9 +16,6 @@
  */
 package org.oscim.layers.tile;
 
-import static org.oscim.tiling.QueryResult.FAILED;
-import static org.oscim.tiling.QueryResult.SUCCESS;
-
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
 import org.oscim.tiling.ITileDataSink;
@@ -27,94 +24,99 @@ import org.oscim.utils.PausableThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
+
 public abstract class TileLoader extends PausableThread implements ITileDataSink {
 
-	static final Logger log = LoggerFactory.getLogger(TileLoader.class);
+    static final Logger log = LoggerFactory.getLogger(TileLoader.class);
 
-	private static int id;
+    private static int id;
 
-	private final String THREAD_NAME;
-	private final TileManager mTileManager;
+    private final String THREAD_NAME;
+    private final TileManager mTileManager;
 
-	/** currently processed tile */
-	protected MapTile mTile;
+    /**
+     * currently processed tile
+     */
+    protected MapTile mTile;
 
-	public TileLoader(TileManager tileManager) {
-		super();
-		mTileManager = tileManager;
-		THREAD_NAME = "TileLoader" + (id++);
-	}
+    public TileLoader(TileManager tileManager) {
+        super();
+        mTileManager = tileManager;
+        THREAD_NAME = "TileLoader" + (id++);
+    }
 
-	protected abstract boolean loadTile(MapTile tile);
+    protected abstract boolean loadTile(MapTile tile);
 
-	public void go() {
-		synchronized (this) {
-			notify();
-		}
-	}
+    public void go() {
+        synchronized (this) {
+            notify();
+        }
+    }
 
-	@Override
-	protected void doWork() {
-		mTile = mTileManager.getTileJob();
+    @Override
+    protected void doWork() {
+        mTile = mTileManager.getTileJob();
 
-		if (mTile == null)
-			return;
+        if (mTile == null)
+            return;
 
-		try {
-			loadTile(mTile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			completed(FAILED);
-		}
-	}
+        try {
+            loadTile(mTile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            completed(FAILED);
+        }
+    }
 
-	@Override
-	protected String getThreadName() {
-		return THREAD_NAME;
-	}
+    @Override
+    protected String getThreadName() {
+        return THREAD_NAME;
+    }
 
-	@Override
-	protected int getThreadPriority() {
-		return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
-	}
+    @Override
+    protected int getThreadPriority() {
+        return (Thread.NORM_PRIORITY + Thread.MIN_PRIORITY) / 2;
+    }
 
-	@Override
-	protected boolean hasWork() {
-		return mTileManager.hasTileJobs();
-	}
+    @Override
+    protected boolean hasWork() {
+        return mTileManager.hasTileJobs();
+    }
 
-	public abstract void dispose();
+    public abstract void dispose();
 
-	public abstract void cancel();
+    public abstract void cancel();
 
-	/**
-	 * Callback to be called by TileDataSource when finished
-	 * loading or on failure. MUST BE CALLED IN ANY CASE!
-	 */
-	@Override
-	public void completed(QueryResult result) {
-		boolean ok = (result == SUCCESS);
+    /**
+     * Callback to be called by TileDataSource when finished
+     * loading or on failure. MUST BE CALLED IN ANY CASE!
+     */
+    @Override
+    public void completed(QueryResult result) {
+        boolean ok = (result == SUCCESS);
 
-		if (ok && (isCanceled() || isInterrupted()))
-			result = QueryResult.FAILED;
+        if (ok && (isCanceled() || isInterrupted()))
+            result = QueryResult.FAILED;
 
-		mTileManager.jobCompleted(mTile, result);
-		mTile = null;
-	}
+        mTileManager.jobCompleted(mTile, result);
+        mTile = null;
+    }
 
-	/**
-	 * Called by TileDataSource
-	 */
-	@Override
-	public void process(MapElement element) {
+    /**
+     * Called by TileDataSource
+     */
+    @Override
+    public void process(MapElement element) {
 
-	}
+    }
 
-	/**
-	 * Called by TileDataSource
-	 */
-	@Override
-	public void setTileImage(Bitmap bitmap) {
+    /**
+     * Called by TileDataSource
+     */
+    @Override
+    public void setTileImage(Bitmap bitmap) {
 
-	}
+    }
 }

@@ -21,143 +21,137 @@ package org.oscim.core;
  * An implementation of the spherical Mercator projection.
  */
 public final class MercatorProjection {
-	/**
-	 * The circumference of the earth at the equator in meters.
-	 */
-	public static final double EARTH_CIRCUMFERENCE = 40075016.686;
+    /**
+     * The circumference of the earth at the equator in meters.
+     */
+    public static final double EARTH_CIRCUMFERENCE = 40075016.686;
 
-	/**
-	 * Maximum possible latitude coordinate of the map.
-	 */
-	public static final double LATITUDE_MAX = 85.05112877980659;
+    /**
+     * Maximum possible latitude coordinate of the map.
+     */
+    public static final double LATITUDE_MAX = 85.05112877980659;
 
-	/**
-	 * Minimum possible latitude coordinate of the map.
-	 */
-	public static final double LATITUDE_MIN = -LATITUDE_MAX;
+    /**
+     * Minimum possible latitude coordinate of the map.
+     */
+    public static final double LATITUDE_MIN = -LATITUDE_MAX;
 
-	/**
-	 * Maximum possible longitude coordinate of the map.
-	 */
-	public static final double LONGITUDE_MAX = 180;
+    /**
+     * Maximum possible longitude coordinate of the map.
+     */
+    public static final double LONGITUDE_MAX = 180;
 
-	/**
-	 * Minimum possible longitude coordinate of the map.
-	 */
-	public static final double LONGITUDE_MIN = -LONGITUDE_MAX;
+    /**
+     * Minimum possible longitude coordinate of the map.
+     */
+    public static final double LONGITUDE_MIN = -LONGITUDE_MAX;
 
-	/**
-	 * Calculates the distance on the ground that is represented by a single
-	 * pixel on the map.
-	 * 
-	 * @param latitude
-	 *            the latitude coordinate at which the resolution should be
-	 *            calculated.
-	 * @param scale
-	 *            the map scale at which the resolution should be calculated.
-	 * @return the ground resolution at the given latitude and zoom level.
-	 */
-	public static double groundResolution(double latitude, double scale) {
-		return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
-		        / (Tile.SIZE * scale);
-	}
+    /**
+     * Calculates the distance on the ground that is represented by a single
+     * pixel on the map.
+     *
+     * @param latitude the latitude coordinate at which the resolution should be
+     *                 calculated.
+     * @param scale    the map scale at which the resolution should be calculated.
+     * @return the ground resolution at the given latitude and zoom level.
+     */
+    public static double groundResolution(double latitude, double scale) {
+        return Math.cos(latitude * (Math.PI / 180)) * EARTH_CIRCUMFERENCE
+                / (Tile.SIZE * scale);
+    }
 
-	public static float groundResolution(MapPosition pos) {
-		double lat = MercatorProjection.toLatitude(pos.y);
-		return (float) (Math.cos(lat * (Math.PI / 180))
-		        * MercatorProjection.EARTH_CIRCUMFERENCE
-		        / (Tile.SIZE * pos.scale));
-	}
+    public static float groundResolution(MapPosition pos) {
+        double lat = MercatorProjection.toLatitude(pos.y);
+        return (float) (Math.cos(lat * (Math.PI / 180))
+                * MercatorProjection.EARTH_CIRCUMFERENCE
+                / (Tile.SIZE * pos.scale));
+    }
 
-	/**
-	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
-	 * 
-	 * @param latitude
-	 *            the latitude coordinate that should be converted.
-	 * @return the position .
-	 */
-	public static double latitudeToY(double latitude) {
-		double sinLatitude = Math.sin(latitude * (Math.PI / 180));
-		return 0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI);
-	}
+    /**
+     * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+     *
+     * @param latitude the latitude coordinate that should be converted.
+     * @return the position .
+     */
+    public static double latitudeToY(double latitude) {
+        double sinLatitude = Math.sin(latitude * (Math.PI / 180));
+        return 0.5 - Math.log((1 + sinLatitude) / (1 - sinLatitude)) / (4 * Math.PI);
+    }
 
-	public static double toLatitude(double y) {
-		return 90 - 360 * Math.atan(Math.exp((y - 0.5) * (2 * Math.PI))) / Math.PI;
-	}
+    public static double toLatitude(double y) {
+        return 90 - 360 * Math.atan(Math.exp((y - 0.5) * (2 * Math.PI))) / Math.PI;
+    }
 
-	/**
-	 * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
-	 * 
-	 * @param longitude
-	 *            the longitude coordinate that should be converted.
-	 * @return the position .
-	 */
-	public static double longitudeToX(double longitude) {
-		return (longitude + 180.0) / 360.0;
-	}
+    /**
+     * Projects a longitude coordinate (in degrees) to the range [0.0,1.0]
+     *
+     * @param longitude the longitude coordinate that should be converted.
+     * @return the position .
+     */
+    public static double longitudeToX(double longitude) {
+        return (longitude + 180.0) / 360.0;
+    }
 
-	public static double toLongitude(double x) {
-		return 360.0 * (x - 0.5);
-	}
+    public static double toLongitude(double x) {
+        return 360.0 * (x - 0.5);
+    }
 
-	public static Point project(GeoPoint p, Point reuse) {
-		if (reuse == null)
-			reuse = new Point();
+    public static Point project(GeoPoint p, Point reuse) {
+        if (reuse == null)
+            reuse = new Point();
 
-		reuse.x = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
+        reuse.x = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
 
-		double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
-		reuse.y = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
+        double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
+        reuse.y = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude)) / (4.0 * Math.PI);
 
-		return reuse;
-	}
+        return reuse;
+    }
 
-	public static void project(GeoPoint p, double[] out, int pos) {
+    public static void project(GeoPoint p, double[] out, int pos) {
 
-		out[pos * 2] = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
+        out[pos * 2] = ((p.longitudeE6 / 1E6) + 180.0) / 360.0;
 
-		double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
-		out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
-		        / (4.0 * Math.PI);
-	}
+        double sinLatitude = Math.sin((p.latitudeE6 / 1E6) * (Math.PI / 180.0));
+        out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
+                / (4.0 * Math.PI);
+    }
 
-	public static void project(double latitude, double longitude, double[] out, int pos) {
+    public static void project(double latitude, double longitude, double[] out, int pos) {
 
-		out[pos * 2] = (longitude + 180.0) / 360.0;
+        out[pos * 2] = (longitude + 180.0) / 360.0;
 
-		double sinLatitude = Math.sin(latitude * (Math.PI / 180.0));
-		out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
-		        / (4.0 * Math.PI);
-	}
+        double sinLatitude = Math.sin(latitude * (Math.PI / 180.0));
+        out[pos * 2 + 1] = 0.5 - Math.log((1.0 + sinLatitude) / (1.0 - sinLatitude))
+                / (4.0 * Math.PI);
+    }
 
-	/**
-	 * @param latitude
-	 *            the latitude value which should be checked.
-	 * @return the given latitude value, limited to the possible latitude range.
-	 */
-	public static double limitLatitude(double latitude) {
-		return Math.max(Math.min(latitude, LATITUDE_MAX), LATITUDE_MIN);
-	}
+    /**
+     * @param latitude the latitude value which should be checked.
+     * @return the given latitude value, limited to the possible latitude range.
+     */
+    public static double limitLatitude(double latitude) {
+        return Math.max(Math.min(latitude, LATITUDE_MAX), LATITUDE_MIN);
+    }
 
-	/**
-	 * @param longitude
-	 *            the longitude value which should be checked.
-	 * @return the given longitude value, limited to the possible longitude
-	 *         range.
-	 */
-	public static double limitLongitude(double longitude) {
-		return Math.max(Math.min(longitude, LONGITUDE_MAX), LONGITUDE_MIN);
-	}
+    /**
+     * @param longitude the longitude value which should be checked.
+     * @return the given longitude value, limited to the possible longitude
+     * range.
+     */
+    public static double limitLongitude(double longitude) {
+        return Math.max(Math.min(longitude, LONGITUDE_MAX), LONGITUDE_MIN);
+    }
 
-	public static double wrapLongitude(double longitude) {
-		if (longitude < -180)
-			return Math.max(Math.min(360 + longitude, LONGITUDE_MAX), LONGITUDE_MIN);
-		else if (longitude > 180)
-			return Math.max(Math.min(longitude - 360, LONGITUDE_MAX), LONGITUDE_MIN);
+    public static double wrapLongitude(double longitude) {
+        if (longitude < -180)
+            return Math.max(Math.min(360 + longitude, LONGITUDE_MAX), LONGITUDE_MIN);
+        else if (longitude > 180)
+            return Math.max(Math.min(longitude - 360, LONGITUDE_MAX), LONGITUDE_MIN);
 
-		return longitude;
-	}
+        return longitude;
+    }
 
-	private MercatorProjection() {
-	}
+    private MercatorProjection() {
+    }
 }

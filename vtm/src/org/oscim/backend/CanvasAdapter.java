@@ -16,105 +16,111 @@
  */
 package org.oscim.backend;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The Class CanvasAdapter.
  */
 public abstract class CanvasAdapter {
 
-	/** The instance provided by backend */
-	static CanvasAdapter g;
+    /**
+     * The instance provided by backend
+     */
+    static CanvasAdapter g;
 
-	/** The dpi. */
-	public static float dpi = 240;
+    /**
+     * The dpi.
+     */
+    public static float dpi = 240;
 
-	/** The text scale. */
-	public static float textScale = 1;
+    /**
+     * The text scale.
+     */
+    public static float textScale = 1;
 
-	/**
-	 * Create a Canvas.
-	 * 
-	 * @return the canvas
-	 */
-	protected abstract Canvas newCanvasImpl();
+    /**
+     * Create a Canvas.
+     *
+     * @return the canvas
+     */
+    protected abstract Canvas newCanvasImpl();
 
-	public static Canvas newCanvas() {
-		return g.newCanvasImpl();
-	}
+    public static Canvas newCanvas() {
+        return g.newCanvasImpl();
+    }
 
-	/**
-	 * Create Paint.
-	 * 
-	 * @return the paint
-	 */
-	protected abstract Paint newPaintImpl();
+    /**
+     * Create Paint.
+     *
+     * @return the paint
+     */
+    protected abstract Paint newPaintImpl();
 
-	public static Paint newPaint() {
-		return g.newPaintImpl();
-	}
+    public static Paint newPaint() {
+        return g.newPaintImpl();
+    }
 
-	/**
-	 * Create {@link Bitmap} with given dimensions.
-	 * 
-	 * @param width the width
-	 * @param height the height
-	 * @param format the format
-	 * @return the bitmap
-	 */
-	protected abstract Bitmap newBitmapImpl(int width, int height, int format);
+    /**
+     * Create {@link Bitmap} with given dimensions.
+     *
+     * @param width  the width
+     * @param height the height
+     * @param format the format
+     * @return the bitmap
+     */
+    protected abstract Bitmap newBitmapImpl(int width, int height, int format);
 
-	public static Bitmap newBitmap(int width, int height, int format) {
-		return g.newBitmapImpl(width, height, format);
-	}
+    public static Bitmap newBitmap(int width, int height, int format) {
+        return g.newBitmapImpl(width, height, format);
+    }
 
-	/**
-	 * Create {@link Bitmap} from InputStream.
-	 * 
-	 * @param inputStream the input stream
-	 * @return the bitmap
-	 */
-	protected abstract Bitmap decodeBitmapImpl(InputStream inputStream);
+    /**
+     * Create {@link Bitmap} from InputStream.
+     *
+     * @param inputStream the input stream
+     * @return the bitmap
+     */
+    protected abstract Bitmap decodeBitmapImpl(InputStream inputStream);
 
-	public static Bitmap decodeBitmap(InputStream inputStream) {
-		return g.decodeBitmapImpl(inputStream);
-	}
+    public static Bitmap decodeBitmap(InputStream inputStream) {
+        return g.decodeBitmapImpl(inputStream);
+    }
 
-	/**
-	 * Create {@link Bitmap} from bundled assets.
-	 * 
-	 * @param fileName the file name
-	 * @return the bitmap
-	 */
-	protected abstract Bitmap loadBitmapAssetImpl(String fileName);
+    /**
+     * Create {@link Bitmap} from bundled assets.
+     *
+     * @param fileName the file name
+     * @return the bitmap
+     */
+    protected abstract Bitmap loadBitmapAssetImpl(String fileName);
 
-	public static Bitmap getBitmapAsset(String fileName) {
-		return g.loadBitmapAssetImpl(fileName);
-	}
+    public static Bitmap getBitmapAsset(String fileName) {
+        return g.loadBitmapAssetImpl(fileName);
+    }
 
-	protected static Bitmap createBitmap(String src) throws IOException {
-		if (src == null || src.length() == 0) {
-			// no image source defined
-			return null;
-		}
+    protected static Bitmap createBitmap(String src) throws IOException {
+        if (src == null || src.length() == 0) {
+            // no image source defined
+            return null;
+        }
 
-		InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
-		if (inputStream == null) {
-			//log.error("invalid bitmap source: " + src);
-			return null;
-		}
+        InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
+        if (inputStream == null) {
+            //log.error("invalid bitmap source: " + src);
+            return null;
+        }
 
-		Bitmap bitmap = decodeBitmap(inputStream);
-		inputStream.close();
-		return bitmap;
-	}
+        Bitmap bitmap = decodeBitmap(inputStream);
+        inputStream.close();
+        return bitmap;
+    }
 
-	protected static void init(CanvasAdapter adapter) {
-		g = adapter;
-	}
+    protected static void init(CanvasAdapter adapter) {
+        g = adapter;
+    }
 }

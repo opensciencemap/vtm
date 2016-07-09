@@ -22,36 +22,36 @@ package org.oscim.theme.styles;
  */
 public final class CircleStyle extends RenderStyle {
 
-	public final int level;
+    public final int level;
 
-	public final int fill;
-	public final int outline;
-	public final float radius;
-	public float renderRadius;
-	public final boolean scaleRadius;
-	public final float strokeWidth;
+    public final int fill;
+    public final int outline;
+    public final float radius;
+    public float renderRadius;
+    public final boolean scaleRadius;
+    public final float strokeWidth;
 
-	public CircleStyle(Float radius, boolean scaleRadius, int fill, int stroke,
-	        float strokeWidth, int level) {
-		super();
+    public CircleStyle(Float radius, boolean scaleRadius, int fill, int stroke,
+                       float strokeWidth, int level) {
+        super();
 
-		this.radius = radius.floatValue();
-		this.scaleRadius = scaleRadius;
+        this.radius = radius.floatValue();
+        this.scaleRadius = scaleRadius;
 
-		this.fill = fill;
-		this.outline = stroke;
+        this.fill = fill;
+        this.outline = stroke;
 
-		this.strokeWidth = strokeWidth;
-		this.level = level;
-	}
+        this.strokeWidth = strokeWidth;
+        this.level = level;
+    }
 
-	@Override
-	public void renderNode(Callback cb) {
-		cb.renderCircle(this, this.level);
-	}
+    @Override
+    public void renderNode(Callback cb) {
+        cb.renderCircle(this, this.level);
+    }
 
-	@Override
-	public CircleStyle current() {
-		return (CircleStyle) mCurrent;
-	}
+    @Override
+    public CircleStyle current() {
+        return (CircleStyle) mCurrent;
+    }
 }

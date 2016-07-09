@@ -17,42 +17,42 @@
  */
 package org.oscim.gdx;
 
-import org.oscim.android.canvas.AndroidGraphics;
-import org.oscim.backend.GLAdapter;
-import org.oscim.core.Tile;
-import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
-
 import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
+import org.oscim.android.canvas.AndroidGraphics;
+import org.oscim.backend.GLAdapter;
+import org.oscim.core.Tile;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+
 public class MainActivity extends AndroidApplication {
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		AndroidGraphics.init();
-		GdxAssets.init("");
-		GLAdapter.init(new AndroidGL());
-		Tile.SIZE = 400;
+        AndroidGraphics.init();
+        GdxAssets.init("");
+        GLAdapter.init(new AndroidGL());
+        Tile.SIZE = 400;
 
-		AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
-		cfg.stencil = 8;
+        AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
+        cfg.stencil = 8;
 
-		new SharedLibraryLoader().load("vtm-jni");
+        new SharedLibraryLoader().load("vtm-jni");
 
-		initialize(new GdxMapAndroid(), cfg);
-	}
+        initialize(new GdxMapAndroid(), cfg);
+    }
 
-	class GdxMapAndroid extends GdxMap {
-		@Override
-		public void createLayers() {
-			TileSource ts = new OSciMap4TileSource();
-			initDefaultLayers(ts, true, true, true);
-		}
-	}
+    class GdxMapAndroid extends GdxMap {
+        @Override
+        public void createLayers() {
+            TileSource ts = new OSciMap4TileSource();
+            initDefaultLayers(ts, true, true, true);
+        }
+    }
 }

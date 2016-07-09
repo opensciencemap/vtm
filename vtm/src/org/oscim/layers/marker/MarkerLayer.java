@@ -34,82 +34,79 @@ import org.oscim.map.Map;
  */
 public abstract class MarkerLayer<Item extends MarkerItem> extends Layer {
 
-	protected final MarkerRenderer mMarkerRenderer;
-	protected Item mFocusedItem;
+    protected final MarkerRenderer mMarkerRenderer;
+    protected Item mFocusedItem;
 
-	/**
-	 * Method by which subclasses create the actual Items. This will only be
-	 * called from populate() we'll cache them for later use.
-	 */
-	protected abstract Item createItem(int i);
+    /**
+     * Method by which subclasses create the actual Items. This will only be
+     * called from populate() we'll cache them for later use.
+     */
+    protected abstract Item createItem(int i);
 
-	/**
-	 * The number of items in this overlay.
-	 */
-	public abstract int size();
+    /**
+     * The number of items in this overlay.
+     */
+    public abstract int size();
 
-	@SuppressWarnings("unchecked")
-	public MarkerLayer(Map map, MarkerSymbol defaultSymbol) {
-		super(map);
+    @SuppressWarnings("unchecked")
+    public MarkerLayer(Map map, MarkerSymbol defaultSymbol) {
+        super(map);
 
-		mMarkerRenderer = new MarkerRenderer((MarkerLayer<MarkerItem>) this, defaultSymbol);
-		mRenderer = mMarkerRenderer;
-	}
+        mMarkerRenderer = new MarkerRenderer((MarkerLayer<MarkerItem>) this, defaultSymbol);
+        mRenderer = mMarkerRenderer;
+    }
 
-	/**
-	 * Utility method to perform all processing on a new ItemizedOverlay.
-	 * Subclasses provide Items through the createItem(int) method. The subclass
-	 * should call this as soon as it has data, before anything else gets
-	 * called.
-	 */
-	protected final void populate() {
-		mMarkerRenderer.populate(size());
-	}
+    /**
+     * Utility method to perform all processing on a new ItemizedOverlay.
+     * Subclasses provide Items through the createItem(int) method. The subclass
+     * should call this as soon as it has data, before anything else gets
+     * called.
+     */
+    protected final void populate() {
+        mMarkerRenderer.populate(size());
+    }
 
-	/**
-	 * TODO
-	 * If the given Item is found in the overlay, force it to be the current
-	 * focus-bearer. Any registered {link ItemizedLayer#OnFocusChangeListener}
-	 * will be notified. This does not move the map, so if the Item isn't
-	 * already centered, the user may get confused. If the Item is not found,
-	 * this is a no-op. You can also pass null to remove focus.
-	 * 
-	 * @param item
-	 */
-	public void setFocus(Item item) {
-		mFocusedItem = item;
-	}
+    /**
+     * TODO
+     * If the given Item is found in the overlay, force it to be the current
+     * focus-bearer. Any registered {link ItemizedLayer#OnFocusChangeListener}
+     * will be notified. This does not move the map, so if the Item isn't
+     * already centered, the user may get confused. If the Item is not found,
+     * this is a no-op. You can also pass null to remove focus.
+     *
+     * @param item
+     */
+    public void setFocus(Item item) {
+        mFocusedItem = item;
+    }
 
-	/**
-	 * @return the currently-focused item, or null if no item is currently
-	 *         focused.
-	 */
-	public Item getFocus() {
-		return mFocusedItem;
-	}
+    /**
+     * @return the currently-focused item, or null if no item is currently
+     * focused.
+     */
+    public Item getFocus() {
+        return mFocusedItem;
+    }
 
-	/**
-	 * TODO
-	 * Interface definition for overlays that contain items that can be snapped
-	 * to (for example, when the user invokes a zoom, this could be called
-	 * allowing the user to snap the zoom to an interesting point.)
-	 */
-	public interface Snappable {
+    /**
+     * TODO
+     * Interface definition for overlays that contain items that can be snapped
+     * to (for example, when the user invokes a zoom, this could be called
+     * allowing the user to snap the zoom to an interesting point.)
+     */
+    public interface Snappable {
 
-		/**
-		 * Checks to see if the given x and y are close enough to an item
-		 * resulting in snapping the current action (e.g. zoom) to the item.
-		 * 
-		 * @param x
-		 *            The x in screen coordinates.
-		 * @param y
-		 *            The y in screen coordinates.
-		 * @param snapPoint
-		 *            To be filled with the the interesting point (in screen
-		 *            coordinates) that is closest to the given x and y. Can be
-		 *            untouched if not snapping.
-		 * @return Whether or not to snap to the interesting point.
-		 */
-		boolean onSnapToItem(int x, int y, Point snapPoint);
-	}
+        /**
+         * Checks to see if the given x and y are close enough to an item
+         * resulting in snapping the current action (e.g. zoom) to the item.
+         *
+         * @param x         The x in screen coordinates.
+         * @param y         The y in screen coordinates.
+         * @param snapPoint To be filled with the the interesting point (in screen
+         *                  coordinates) that is closest to the given x and y. Can be
+         *                  untouched if not snapping.
+         * @return Whether or not to snap to the interesting point.
+         */
+        boolean onSnapToItem(int x, int y, Point snapPoint);
+    }
 }

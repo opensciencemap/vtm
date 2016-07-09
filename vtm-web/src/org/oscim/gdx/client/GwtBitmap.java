@@ -16,9 +16,6 @@
  */
 package org.oscim.gdx.client;
 
-import org.oscim.backend.GL;
-import org.oscim.backend.canvas.Bitmap;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -26,75 +23,80 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import org.oscim.backend.GL;
+import org.oscim.backend.canvas.Bitmap;
+
 public class GwtBitmap implements Bitmap {
-	Pixmap pixmap;
-	Image image;
-	boolean disposable;
+    Pixmap pixmap;
+    Image image;
+    boolean disposable;
 
-	public GwtBitmap(Image data) {
-		ImageElement imageElement = ImageElement.as(data.getElement());
-		pixmap = new Pixmap(imageElement);
-		image = data;
-	}
+    public GwtBitmap(Image data) {
+        ImageElement imageElement = ImageElement.as(data.getElement());
+        pixmap = new Pixmap(imageElement);
+        image = data;
+    }
 
-	/** always argb8888 */
-	public GwtBitmap(int width, int height, int format) {
-		pixmap = new Pixmap(width, height, null);
-	}
+    /**
+     * always argb8888
+     */
+    public GwtBitmap(int width, int height, int format) {
+        pixmap = new Pixmap(width, height, null);
+    }
 
-	public GwtBitmap(String fileName) {
-		FileHandle handle = Gdx.files.internal(fileName);
-		pixmap = new Pixmap(handle);
-		disposable = true;
-	}
+    public GwtBitmap(String fileName) {
+        FileHandle handle = Gdx.files.internal(fileName);
+        pixmap = new Pixmap(handle);
+        disposable = true;
+    }
 
-	@Override
-	public int getWidth() {
-		return pixmap.getWidth();
-	}
+    @Override
+    public int getWidth() {
+        return pixmap.getWidth();
+    }
 
-	@Override
-	public int getHeight() {
-		return pixmap.getHeight();
-	}
+    @Override
+    public int getHeight() {
+        return pixmap.getHeight();
+    }
 
-	@Override
-	public void recycle() {
-		// FIXME this should be called at some point in time
-		pixmap.dispose();
+    @Override
+    public void recycle() {
+        // FIXME this should be called at some point in time
+        pixmap.dispose();
 
-		if (image != null)
-			RootPanel.get().remove(image);
-	}
+        if (image != null)
+            RootPanel.get().remove(image);
+    }
 
-	@Override
-	public int[] getPixels() {
-		return null;
-	}
+    @Override
+    public int[] getPixels() {
+        return null;
+    }
 
-	@Override
-	public void eraseColor(int color) {
-	}
+    @Override
+    public void eraseColor(int color) {
+    }
 
-	@Override
-	public void uploadToTexture(boolean replace) {
+    @Override
+    public void uploadToTexture(boolean replace) {
 
-		Gdx.gl.glTexImage2D(GL.TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
-		                    pixmap.getHeight(), 0,
-		                    pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
+        Gdx.gl.glTexImage2D(GL.TEXTURE_2D, 0, pixmap.getGLInternalFormat(), pixmap.getWidth(),
+                pixmap.getHeight(), 0,
+                pixmap.getGLFormat(), pixmap.getGLType(), pixmap.getPixels());
 
-		if (disposable || image != null) {
-			//log.debug("dispose pixmap " + getWidth() + "/" + getHeight());
-			pixmap.dispose();
+        if (disposable || image != null) {
+            //log.debug("dispose pixmap " + getWidth() + "/" + getHeight());
+            pixmap.dispose();
 
-			if (image != null)
-				RootPanel.get().remove(image);
-		}
-	}
+            if (image != null)
+                RootPanel.get().remove(image);
+        }
+    }
 
-	@Override
-	public boolean isValid() {
-		return true;
-	}
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 
 }

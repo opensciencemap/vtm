@@ -15,7 +15,6 @@
 package org.oscim.ios.backend;
 
 import org.oscim.backend.canvas.Paint;
-
 import org.robovm.apple.coregraphics.CGAffineTransform;
 import org.robovm.apple.coregraphics.CGBitmapContext;
 import org.robovm.apple.coregraphics.CGBlendMode;
@@ -27,7 +26,6 @@ import org.robovm.apple.uikit.NSAttributedStringAttributes;
 import org.robovm.apple.uikit.UIColor;
 import org.robovm.apple.uikit.UIFont;
 import org.robovm.apple.uikit.UIFontWeight;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

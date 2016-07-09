@@ -14,29 +14,29 @@
  */
 package org.oscim.android.filepicker;
 
-import java.io.File;
-
 import org.oscim.tiling.TileSource.OpenResult;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
+
+import java.io.File;
 
 /**
  * Accepts all valid map files.
  */
 public final class ValidMapFile implements ValidFileFilter {
-	private OpenResult mOpenResult;
+    private OpenResult mOpenResult;
 
-	@Override
-	public boolean accept(File file) {
-		MapFileTileSource mapFileSource = new MapFileTileSource();
-		mapFileSource.setMapFile(file.getAbsolutePath());
+    @Override
+    public boolean accept(File file) {
+        MapFileTileSource mapFileSource = new MapFileTileSource();
+        mapFileSource.setMapFile(file.getAbsolutePath());
 
-		this.mOpenResult = mapFileSource.open();
-		mapFileSource.close();
-		return mOpenResult.isSuccess();
-	}
+        this.mOpenResult = mapFileSource.open();
+        mapFileSource.close();
+        return mOpenResult.isSuccess();
+    }
 
-	@Override
-	public OpenResult getFileOpenResult() {
-		return mOpenResult;
-	}
+    @Override
+    public OpenResult getFileOpenResult() {
+        return mOpenResult;
+    }
 }

@@ -17,44 +17,44 @@
 package org.oscim.tiling.source.mapfile;
 
 class QueryParameters {
-	long fromBaseTileX;
-	long fromBaseTileY;
-	long fromBlockX;
-	long fromBlockY;
-	int queryTileBitmask;
-	int queryZoomLevel;
-	long toBaseTileX;
-	long toBaseTileY;
-	long toBlockX;
-	long toBlockY;
-	boolean useTileBitmask;
+    long fromBaseTileX;
+    long fromBaseTileY;
+    long fromBlockX;
+    long fromBlockY;
+    int queryTileBitmask;
+    int queryZoomLevel;
+    long toBaseTileX;
+    long toBaseTileY;
+    long toBlockX;
+    long toBlockY;
+    boolean useTileBitmask;
 
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		    .append("QueryParameters [fromBaseTileX=")
-		    .append(this.fromBaseTileX)
-		    .append(", fromBaseTileY=")
-		    .append(this.fromBaseTileY)
-		    .append(", fromBlockX=")
-		    .append(this.fromBlockX)
-		    .append(", fromBlockY=")
-		    .append(this.fromBlockY)
-		    .append(", queryTileBitmask=")
-		    .append(this.queryTileBitmask)
-		    .append(", queryZoomLevel=")
-		    .append(this.queryZoomLevel)
-		    .append(", toBaseTileX=")
-		    .append(this.toBaseTileX)
-		    .append(", toBaseTileY=")
-		    .append(this.toBaseTileY)
-		    .append(", toBlockX=")
-		    .append(this.toBlockX)
-		    .append(", toBlockY=")
-		    .append(this.toBlockY)
-		    .append(", useTileBitmask=")
-		    .append(this.useTileBitmask)
-		    .append("]")
-		    .toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("QueryParameters [fromBaseTileX=")
+                .append(this.fromBaseTileX)
+                .append(", fromBaseTileY=")
+                .append(this.fromBaseTileY)
+                .append(", fromBlockX=")
+                .append(this.fromBlockX)
+                .append(", fromBlockY=")
+                .append(this.fromBlockY)
+                .append(", queryTileBitmask=")
+                .append(this.queryTileBitmask)
+                .append(", queryZoomLevel=")
+                .append(this.queryZoomLevel)
+                .append(", toBaseTileX=")
+                .append(this.toBaseTileX)
+                .append(", toBaseTileY=")
+                .append(this.toBaseTileY)
+                .append(", toBlockX=")
+                .append(this.toBlockX)
+                .append(", toBlockY=")
+                .append(this.toBlockY)
+                .append(", useTileBitmask=")
+                .append(this.useTileBitmask)
+                .append("]")
+                .toString();
+    }
 }

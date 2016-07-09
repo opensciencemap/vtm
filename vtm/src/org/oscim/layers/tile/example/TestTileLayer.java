@@ -33,62 +33,62 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestTileLayer extends TileLayer {
-	static final Logger log = LoggerFactory.getLogger(TestTileLayer.class);
+    static final Logger log = LoggerFactory.getLogger(TestTileLayer.class);
 
-	public TestTileLayer(Map map) {
-		super(map,
-		      new TileManager(map, 10),
-		      new VectorTileRenderer());
-	}
+    public TestTileLayer(Map map) {
+        super(map,
+                new TileManager(map, 10),
+                new VectorTileRenderer());
+    }
 
-	@Override
-	protected TestTileLoader createLoader() {
-		return new TestTileLoader(this);
-	}
+    @Override
+    protected TestTileLoader createLoader() {
+        return new TestTileLoader(this);
+    }
 
-	static class TestTileLoader extends TileLoader {
+    static class TestTileLoader extends TileLoader {
 
-		public TestTileLoader(TileLayer tileLayer) {
-			super(tileLayer.getManager());
-		}
+        public TestTileLoader(TileLayer tileLayer) {
+            super(tileLayer.getManager());
+        }
 
-		GeometryBuffer mGeom = new GeometryBuffer(128, 16);
-		LineStyle mLineStyle = new LineStyle(Color.BLUE, 2f, Cap.ROUND);
+        GeometryBuffer mGeom = new GeometryBuffer(128, 16);
+        LineStyle mLineStyle = new LineStyle(Color.BLUE, 2f, Cap.ROUND);
 
-		@Override
-		public boolean loadTile(MapTile tile) {
-			log.debug("load tile " + tile);
-			RenderBuckets buckets = new RenderBuckets();
-			tile.data = buckets;
+        @Override
+        public boolean loadTile(MapTile tile) {
+            log.debug("load tile " + tile);
+            RenderBuckets buckets = new RenderBuckets();
+            tile.data = buckets;
 
-			LineBucket lb = buckets.getLineBucket(0);
-			lb.line = mLineStyle;
-			lb.scale = 2;
+            LineBucket lb = buckets.getLineBucket(0);
+            lb.line = mLineStyle;
+            lb.scale = 2;
 
-			int m = 20;
-			int s = Tile.SIZE - m * 2;
-			GeometryBuffer g = mGeom;
+            int m = 20;
+            int s = Tile.SIZE - m * 2;
+            GeometryBuffer g = mGeom;
 
-			g.clear();
-			g.startLine();
-			g.addPoint(m, m);
-			g.addPoint(m, s);
-			g.addPoint(s, s);
-			g.addPoint(s, m);
-			g.addPoint(m, m);
+            g.clear();
+            g.startLine();
+            g.addPoint(m, m);
+            g.addPoint(m, s);
+            g.addPoint(s, s);
+            g.addPoint(s, m);
+            g.addPoint(m, m);
 
-			lb.addLine(g);
+            lb.addLine(g);
 
-			return true;
-		}
+            return true;
+        }
 
-		@Override
-		public void dispose() {
-		}
+        @Override
+        public void dispose() {
+        }
 
-		@Override
-		public void cancel() {
-		}
+        @Override
+        public void cancel() {
+        }
 
-	}
+    }
 }
