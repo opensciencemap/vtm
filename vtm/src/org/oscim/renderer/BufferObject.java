@@ -67,7 +67,7 @@ public final class BufferObject extends Inlist<BufferObject> {
 
         GLState.bindBuffer(target, id);
 
-		/* reuse memory allocated for vbo when possible and allocated
+        /* reuse memory allocated for vbo when possible and allocated
          * memory is less then four times the new data */
         if (!GLAdapter.NO_BUFFER_SUB_DATA && !clear &&
                 (size > newSize) && (size < newSize * 4)) {
@@ -125,7 +125,7 @@ public final class BufferObject extends Inlist<BufferObject> {
         if (size != 0) {
             /* find the item with minimal size greater 'size' bytes. */
             BufferObject bo = pool[t];
-			/* actually points to BufferObject before min */
+            /* actually points to BufferObject before min */
             BufferObject min = null;
             BufferObject prev = null;
 

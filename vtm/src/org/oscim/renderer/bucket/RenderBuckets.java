@@ -205,7 +205,7 @@ public class RenderBuckets extends TileData {
                     bucket = b;
                     break;
                 }
-				/* insert bucket between current and next bucket */
+                /* insert bucket between current and next bucket */
                 if (b.next == null || b.next.level > level)
                     break;
 
@@ -214,7 +214,7 @@ public class RenderBuckets extends TileData {
         }
 
         if (bucket == null) {
-			/* add a new RenderElement */
+            /* add a new RenderElement */
             if (type == LINE)
                 bucket = new LineBucket(level);
             else if (type == POLYGON)
@@ -239,7 +239,7 @@ public class RenderBuckets extends TileData {
             }
         }
 
-		/* check if found buckets matches requested type */
+        /* check if found buckets matches requested type */
         if (bucket.type != type) {
             log.error("BUG wrong bucket {} {} on level {}",
                     Integer.valueOf(bucket.type),
@@ -287,7 +287,7 @@ public class RenderBuckets extends TileData {
      * cleanup only when buckets are not used by tile or bucket anymore!
      */
     public void clear() {
-		/* NB: set null calls clear() on each bucket! */
+        /* NB: set null calls clear() on each bucket! */
         set(null);
         mCurBucket = null;
 
@@ -299,7 +299,7 @@ public class RenderBuckets extends TileData {
      * cleanup only when buckets are not used by tile or bucket anymore!
      */
     public void clearBuckets() {
-		/* NB: set null calls clear() on each bucket! */
+        /* NB: set null calls clear() on each bucket! */
         for (RenderBucket l = buckets; l != null; l = l.next)
             l.clear();
 

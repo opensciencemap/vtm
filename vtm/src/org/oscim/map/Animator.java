@@ -67,7 +67,7 @@ public class Animator {
         mMap.getMapPosition(mStartPos);
         /* TODO for large distance first scale out, then in
          * calculate the maximum scale at which the BoundingBox
-		 * is completely visible */
+         * is completely visible */
         double dx = Math.abs(longitudeToX(bbox.getMaxLongitude())
                 - longitudeToX(bbox.getMinLongitude()));
 
@@ -211,8 +211,8 @@ public class Animator {
 
         ViewController v = mMap.viewport();
 
-		/* cancel animation when position was changed since last
-		 * update, i.e. when it was modified outside the animator. */
+        /* cancel animation when position was changed since last
+         * update, i.e. when it was modified outside the animator. */
         if (v.getMapPosition(mCurPos)) {
             log.debug("cancel anim - changed");
             cancel();
@@ -255,7 +255,7 @@ public class Animator {
             cancel();
         }
 
-		/* remember current map position */
+        /* remember current map position */
         final boolean changed = v.getMapPosition(mCurPos);
 
         if (changed) {

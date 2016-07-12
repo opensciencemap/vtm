@@ -51,7 +51,7 @@ public class KeyMapTest {
             Assert.assertTrue(it == it2);
         }
 
-		/* replace the items with itself */
+        /* replace the items with itself */
         for (Item it : items) {
             Item it2 = map2.put(it);
             Assert.assertTrue(it == it2);

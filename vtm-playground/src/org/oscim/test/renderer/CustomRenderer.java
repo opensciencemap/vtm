@@ -107,7 +107,7 @@ public class CustomRenderer extends LayerRenderer {
 
         GLState.enableVertexArrays(hVertexPosition, -1);
 
-		/* apply view and projection matrices */
+        /* apply view and projection matrices */
         // set mvp (tmp) matrix relative to mMapPosition
         // i.e. fixed on the map
 

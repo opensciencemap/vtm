@@ -165,9 +165,9 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
             throw new IllegalArgumentException("Load factor: " + loadFactor);
         }
 
-		/* Note that this implementation ignores loadFactor; it always uses
+        /* Note that this implementation ignores loadFactor; it always uses
          * a load factor of 3/4. This simplifies the code and generally
-		 * improves performance. */
+         * improves performance. */
     }
 
     /**
@@ -352,7 +352,7 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
 
         for (int j = 0; j < oldCapacity; j++) {
             /* Rehash the bucket using the minimum number of field writes.
-			 * This is the most subtle and delicate code in the class. */
+             * This is the most subtle and delicate code in the class. */
             HashItem e = oldTable[j];
             if (e == null) {
                 continue;
@@ -482,110 +482,110 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
         return i + 1;
     }
 
-    //	public K put(K key) {
-    //		//		if (key == null) {
-    //		//			return putValueForNullKey(value);
-    //		//		}
+    //    public K put(K key) {
+    //        //        if (key == null) {
+    //        //            return putValueForNullKey(value);
+    //        //        }
     //
-    //		int hash = secondaryHash(key.hashCode());
-    //		HashItem[] tab = table;
-    //		int index = hash & (tab.length - 1);
-    //		for (HashItem e = tab[index]; e != null; e = e.next) {
-    //			if (e.hash == hash && key.equals(e.key)) {
-    //				preModify(e);
-    //				//V oldValue = e.value;
-    //				//e.value = value;
-    //				return e.key; //oldValue;
-    //			}
-    //		}
+    //        int hash = secondaryHash(key.hashCode());
+    //        HashItem[] tab = table;
+    //        int index = hash & (tab.length - 1);
+    //        for (HashItem e = tab[index]; e != null; e = e.next) {
+    //            if (e.hash == hash && key.equals(e.key)) {
+    //                preModify(e);
+    //                //V oldValue = e.value;
+    //                //e.value = value;
+    //                return e.key; //oldValue;
+    //            }
+    //        }
     //
-    //		// No entry for (non-null) key is present; create one
-    //		modCount++;
-    //		if (size++ > threshold) {
-    //			tab = doubleCapacity();
-    //			index = hash & (tab.length - 1);
-    //		}
-    //		addNewEntry(key, hash, index);
-    //		return null;
-    //	}
+    //        // No entry for (non-null) key is present; create one
+    //        modCount++;
+    //        if (size++ > threshold) {
+    //            tab = doubleCapacity();
+    //            index = hash & (tab.length - 1);
+    //        }
+    //        addNewEntry(key, hash, index);
+    //        return null;
+    //    }
 
-    //	private V putValueForNullKey(V value) {
-    //		HashMapEntry<K> entry = entryForNullKey;
-    //		if (entry == null) {
-    //			addNewEntryForNullKey(value);
-    //			size++;
-    //			modCount++;
-    //			return null;
-    //		} else {
-    //			preModify(entry);
-    //			V oldValue = entry.value;
-    //			entry.value = value;
-    //			return oldValue;
-    //		}
-    //	}
+    //    private V putValueForNullKey(V value) {
+    //        HashMapEntry<K> entry = entryForNullKey;
+    //        if (entry == null) {
+    //            addNewEntryForNullKey(value);
+    //            size++;
+    //            modCount++;
+    //            return null;
+    //        } else {
+    //            preModify(entry);
+    //            V oldValue = entry.value;
+    //            entry.value = value;
+    //            return oldValue;
+    //        }
+    //    }
 
-    //	/**
-    //	 * Returns whether this map contains the specified key.
-    //	 *
-    //	 * @param key
-    //	 *            the key to search for.
-    //	 * @return {@code true} if this map contains the specified key,
-    //	 *         {@code false} otherwise.
-    //	 */
-    //	//@Override
-    //	public boolean containsKey(Object key) {
-    //		if (key == null) {
-    //			return entryForNullKey != null;
-    //		}
+    //    /**
+    //     * Returns whether this map contains the specified key.
+    //     *
+    //     * @param key
+    //     *            the key to search for.
+    //     * @return {@code true} if this map contains the specified key,
+    //     *         {@code false} otherwise.
+    //     */
+    //    //@Override
+    //    public boolean containsKey(Object key) {
+    //        if (key == null) {
+    //            return entryForNullKey != null;
+    //        }
     //
-    //		// Doug Lea's supplemental secondaryHash function (inlined)
-    //		int hash = key.hashCode();
-    //		hash ^= (hash >>> 20) ^ (hash >>> 12);
-    //		hash ^= (hash >>> 7) ^ (hash >>> 4);
+    //        // Doug Lea's supplemental secondaryHash function (inlined)
+    //        int hash = key.hashCode();
+    //        hash ^= (hash >>> 20) ^ (hash >>> 12);
+    //        hash ^= (hash >>> 7) ^ (hash >>> 4);
     //
-    //		HashItem[] tab = table;
-    //		for (HashItem e = tab[hash & (tab.length - 1)]; e != null; e = e.next) {
-    //			K eKey = e.key;
-    //			if (eKey == key || (e.hash == hash && key.equals(eKey))) {
-    //				return true;
-    //			}
-    //		}
-    //		return false;
-    //	}
+    //        HashItem[] tab = table;
+    //        for (HashItem e = tab[hash & (tab.length - 1)]; e != null; e = e.next) {
+    //            K eKey = e.key;
+    //            if (eKey == key || (e.hash == hash && key.equals(eKey))) {
+    //                return true;
+    //            }
+    //        }
+    //        return false;
+    //    }
 
-    //	/**
-    //	 * Returns whether this map contains the specified value.
-    //	 *
-    //	 * @param value
-    //	 *            the value to search for.
-    //	 * @return {@code true} if this map contains the specified value,
-    //	 *         {@code false} otherwise.
-    //	 */
-    //	@Override
-    //	public boolean containsValue(Object value) {
-    //		HashMapEntry[] tab = table;
-    //		int len = tab.length;
-    //		if (value == null) {
-    //			for (int i = 0; i < len; i++) {
-    //				for (HashMapEntry e = tab[i]; e != null; e = e.next) {
-    //					if (e.value == null) {
-    //						return true;
-    //					}
-    //				}
-    //			}
-    //			return entryForNullKey != null && entryForNullKey.value == null;
-    //		}
+    //    /**
+    //     * Returns whether this map contains the specified value.
+    //     *
+    //     * @param value
+    //     *            the value to search for.
+    //     * @return {@code true} if this map contains the specified value,
+    //     *         {@code false} otherwise.
+    //     */
+    //    @Override
+    //    public boolean containsValue(Object value) {
+    //        HashMapEntry[] tab = table;
+    //        int len = tab.length;
+    //        if (value == null) {
+    //            for (int i = 0; i < len; i++) {
+    //                for (HashMapEntry e = tab[i]; e != null; e = e.next) {
+    //                    if (e.value == null) {
+    //                        return true;
+    //                    }
+    //                }
+    //            }
+    //            return entryForNullKey != null && entryForNullKey.value == null;
+    //        }
     //
-    //		// value is non-null
-    //		for (int i = 0; i < len; i++) {
-    //			for (HashMapEntry e = tab[i]; e != null; e = e.next) {
-    //				if (value.equals(e.value)) {
-    //					return true;
-    //				}
-    //			}
-    //		}
-    //		return entryForNullKey != null && value.equals(entryForNullKey.value);
-    //	}
+    //        // value is non-null
+    //        for (int i = 0; i < len; i++) {
+    //            for (HashMapEntry e = tab[i]; e != null; e = e.next) {
+    //                if (value.equals(e.value)) {
+    //                    return true;
+    //                }
+    //            }
+    //        }
+    //        return entryForNullKey != null && value.equals(entryForNullKey.value);
+    //    }
 
     ///**
     // * Ensures that the hash table has sufficient capacity to store the
@@ -599,32 +599,32 @@ public class KeyMap<K extends HashItem> extends Inlist<KeyMap<K>> {
     // * This method is called only by putAll.
     // */
     //private void ensureCapacity(int numMappings) {
-    //	int newCapacity = roundUpToPowerOfTwo(capacityForInitSize(numMappings));
-    //	HashItem[] oldTable = table;
-    //	int oldCapacity = oldTable.length;
-    //	if (newCapacity <= oldCapacity) {
-    //		return;
-    //	}
-    //	if (newCapacity == oldCapacity * 2) {
-    //		doubleCapacity();
-    //		return;
-    //	}
+    //    int newCapacity = roundUpToPowerOfTwo(capacityForInitSize(numMappings));
+    //    HashItem[] oldTable = table;
+    //    int oldCapacity = oldTable.length;
+    //    if (newCapacity <= oldCapacity) {
+    //        return;
+    //    }
+    //    if (newCapacity == oldCapacity * 2) {
+    //        doubleCapacity();
+    //        return;
+    //    }
     //
-    //	// We're growing by at least 4x, rehash in the obvious way
-    //	HashItem[] newTable = makeTable(newCapacity);
-    //	if (size != 0) {
-    //		int newMask = newCapacity - 1;
-    //		for (int i = 0; i < oldCapacity; i++) {
-    //			for (HashItem e = oldTable[i]; e != null;) {
-    //				HashItem oldNext = e.next;
-    //				int newIndex = e.hash & newMask;
-    //				HashItem newNext = newTable[newIndex];
-    //				newTable[newIndex] = e;
-    //				e.next = newNext;
-    //				e = oldNext;
-    //			}
-    //		}
-    //	}
+    //    // We're growing by at least 4x, rehash in the obvious way
+    //    HashItem[] newTable = makeTable(newCapacity);
+    //    if (size != 0) {
+    //        int newMask = newCapacity - 1;
+    //        for (int i = 0; i < oldCapacity; i++) {
+    //            for (HashItem e = oldTable[i]; e != null;) {
+    //                HashItem oldNext = e.next;
+    //                int newIndex = e.hash & newMask;
+    //                HashItem newNext = newTable[newIndex];
+    //                newTable[newIndex] = e;
+    //                e.next = newNext;
+    //                e = oldNext;
+    //            }
+    //        }
+    //    }
     //}
 
 }

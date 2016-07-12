@@ -53,7 +53,7 @@ public class JsMap implements Exportable {
         mMap = map;
     }
 
-    //	@ExportInstanceMethod("foo")
+    //    @ExportInstanceMethod("foo")
     //    public static String instanceMethod(Map instance, String surname) {
     //      return instance.getName() + "-" + surname;
     //    }

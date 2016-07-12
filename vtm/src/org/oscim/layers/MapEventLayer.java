@@ -172,7 +172,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
                     pivotY = mPrevY1 - mMap.getHeight() / 2;
                 }
 
-				/* handle double tap zoom */
+                /* handle double tap zoom */
                 mMap.animator().animateZoom(300, 2, pivotX, pivotY);
 
             } else if (mStartMove > 0) {
@@ -181,7 +181,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
                 float vx = mTracker.getVelocityX();
                 float vy = mTracker.getVelocityY();
 
-				/* reduce velocity for short moves */
+                /* reduce velocity for short moves */
                 float t = e.getTime() - mStartMove;
                 if (t < FLING_MIN_THREHSHOLD) {
                     t = t / FLING_MIN_THREHSHOLD;
@@ -227,9 +227,9 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
             mPrevX1 = x1;
             mPrevY1 = y1;
 
-			/* double-tap drag zoom */
+            /* double-tap drag zoom */
             if (mDoubleTap) {
-				/* just ignore first move event to set mPrevX/Y */
+                /* just ignore first move event to set mPrevX/Y */
                 if (!mDown) {
                     mDown = true;
                     return;
@@ -248,7 +248,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
                 return;
             }
 
-			/* simple move */
+            /* simple move */
             if (!mEnableMove)
                 return;
 
@@ -290,7 +290,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
                 if (mDoTilt) {
                     tiltBy = my / 5;
                 } else if (Math.abs(my) > (dpi / PINCH_TILT_THRESHOLD)) {
-					/* enter exclusive tilt mode */
+                    /* enter exclusive tilt mode */
                     mCanScale = false;
                     mCanRotate = false;
                     mDoTilt = true;
@@ -317,25 +317,25 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
             } else {
                 r = Math.abs(r);
                 if (r > PINCH_ROTATE_THRESHOLD) {
-					/* start rotate, disable tilt */
+                    /* start rotate, disable tilt */
                     mDoRotate = true;
                     mCanTilt = false;
 
                     mAngle = rad;
                 } else if (!mDoScale) {
-					/* reduce pinch trigger by the amount of rotation */
+                    /* reduce pinch trigger by the amount of rotation */
                     deltaPinch *= 1 - (r / PINCH_ROTATE_THRESHOLD);
                 } else {
                     mPrevPinchWidth = pinchWidth;
                 }
             }
         } else if (mDoScale && mEnableRotate) {
-			/* re-enable rotation when higher threshold is reached */
+            /* re-enable rotation when higher threshold is reached */
             double rad = Math.atan2(dy, dx);
             double r = rad - mAngle;
 
             if (r > PINCH_ROTATE_THRESHOLD2) {
-				/* start rotate again */
+                /* start rotate again */
                 mDoRotate = true;
                 mCanRotate = true;
                 mAngle = rad;
@@ -344,7 +344,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
 
         if (mCanScale || mDoRotate) {
             if (!(mDoScale || mDoRotate)) {
-				/* enter exclusive scale mode */
+                /* enter exclusive scale mode */
                 if (Math.abs(deltaPinch) > (dpi / PINCH_ZOOM_THRESHOLD)) {
 
                     if (!mDoRotate) {

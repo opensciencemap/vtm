@@ -66,7 +66,7 @@ public class GwtMap extends GdxMap {
 
     private final native void createLayersN()/*-{
         $wnd.createLayers();
-	}-*/;
+    }-*/;
 
     @Override
     protected void createLayers() {

@@ -117,10 +117,10 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
      * easily override behavior without resorting to overriding the
      * ItemGestureListener methods.
      */
-    //	@Override
-    //	public boolean onTap(MotionEvent event, MapPosition pos) {
-    //		return activateSelectedItems(event, mActiveItemSingleTap);
-    //	}
+    //    @Override
+    //    public boolean onTap(MotionEvent event, MapPosition pos) {
+    //        return activateSelectedItems(event, mActiveItemSingleTap);
+    //    }
     protected boolean onSingleTapUpHelper(int index, Item item) {
         return mOnItemGestureListener.onItemSingleTapUp(index, item);
     }
@@ -175,7 +175,7 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
         int inside = -1;
         double insideY = -Double.MAX_VALUE;
 
-		/* squared dist: 50*50 pixel ~ 2mm on 400dpi */
+        /* squared dist: 50*50 pixel ~ 2mm on 400dpi */
         double dist = 2500;
 
         for (int i = 0; i < size; i++) {

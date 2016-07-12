@@ -203,7 +203,7 @@ public class OffscreenRenderer extends LayerRenderer {
 
         mShader.useProgram();
 
-		/* bind depth texture */
+        /* bind depth texture */
         if (useDepthTexture) {
             gl.activeTexture(GL.TEXTURE1);
             GLState.bindTex2D(renderDepth);

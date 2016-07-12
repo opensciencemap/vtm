@@ -332,19 +332,19 @@ public abstract class GwtApplication implements EntryPoint, Application {
      **/
     private static native AgentInfo computeAgentInfo() /*-{
         var userAgent = navigator.userAgent.toLowerCase();
-		return {
-			// browser type flags
-			isFirefox : userAgent.indexOf("firefox") != -1,
-			isChrome : userAgent.indexOf("chrome") != -1,
-			isSafari : userAgent.indexOf("safari") != -1,
-			isOpera : userAgent.indexOf("opera") != -1,
-			isIE : userAgent.indexOf("msie") != -1,
-			// OS type flags
-			isMacOS : userAgent.indexOf("mac") != -1,
-			isLinux : userAgent.indexOf("linux") != -1,
-			isWindows : userAgent.indexOf("win") != -1
-		};
-	}-*/;
+        return {
+            // browser type flags
+            isFirefox : userAgent.indexOf("firefox") != -1,
+            isChrome : userAgent.indexOf("chrome") != -1,
+            isSafari : userAgent.indexOf("safari") != -1,
+            isOpera : userAgent.indexOf("opera") != -1,
+            isIE : userAgent.indexOf("msie") != -1,
+            // OS type flags
+            isMacOS : userAgent.indexOf("mac") != -1,
+            isLinux : userAgent.indexOf("linux") != -1,
+            isWindows : userAgent.indexOf("win") != -1
+        };
+    }-*/;
 
     /**
      * Returned by {@link #agentInfo}. Kindly borrowed from PlayN.
@@ -352,35 +352,35 @@ public abstract class GwtApplication implements EntryPoint, Application {
     public static class AgentInfo extends JavaScriptObject {
         public final native boolean isFirefox() /*-{
             return this.isFirefox;
-		}-*/;
+        }-*/;
 
         public final native boolean isChrome() /*-{
-			return this.isChrome;
-		}-*/;
+            return this.isChrome;
+        }-*/;
 
         public final native boolean isSafari() /*-{
-			return this.isSafari;
-		}-*/;
+            return this.isSafari;
+        }-*/;
 
         public final native boolean isOpera() /*-{
-			return this.isOpera;
-		}-*/;
+            return this.isOpera;
+        }-*/;
 
         public final native boolean isIE() /*-{
-			return this.isIE;
-		}-*/;
+            return this.isIE;
+        }-*/;
 
         public final native boolean isMacOS() /*-{
-			return this.isMacOS;
-		}-*/;
+            return this.isMacOS;
+        }-*/;
 
         public final native boolean isLinux() /*-{
-			return this.isLinux;
-		}-*/;
+            return this.isLinux;
+        }-*/;
 
         public final native boolean isWindows() /*-{
-			return this.isWindows;
-		}-*/;
+            return this.isWindows;
+        }-*/;
 
         protected AgentInfo() {
         }

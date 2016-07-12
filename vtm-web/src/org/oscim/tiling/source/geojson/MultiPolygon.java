@@ -23,10 +23,10 @@ public class MultiPolygon extends Geometry<Polygon> {
 
     public final native Polygon getGeometryN(int i) /*-{
         return this[i];
-	}-*/;
+    }-*/;
 
     public final native int getNumGeometries() /*-{
         return this.length;
-	}-*/;
+    }-*/;
 
 }

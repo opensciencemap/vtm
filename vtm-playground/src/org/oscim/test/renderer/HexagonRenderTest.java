@@ -31,11 +31,11 @@ public class HexagonRenderTest extends GdxMap {
         GdxMapApp.run(new HexagonRenderTest(), null, 400);
     }
 
-	/* This is an example how to integrate custom OpenGL drawing routines as map
+    /* This is an example how to integrate custom OpenGL drawing routines as map
      * overlay
-	 * 
-	 * based on chapter 2 from:
-	 * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android */
+     *
+     * based on chapter 2 from:
+     * https://github.com/dalinaum/opengl-es-book-samples/tree/master/Android */
 
     static class HexagonRenderer extends BucketRenderer {
 
@@ -65,8 +65,8 @@ public class HexagonRenderTest extends GdxMap {
             }
 
             //if (mZoom != v.pos.zoomLevel) {
-            //	mMapPosition.copy(v.pos);
-            //	mZoom = v.pos.zoomLevel;
+            //    mMapPosition.copy(v.pos);
+            //    mZoom = v.pos.zoomLevel;
             //}
         }
 
@@ -105,7 +105,7 @@ public class HexagonRenderTest extends GdxMap {
 
             GLState.enableVertexArrays(hVertexPosition, -1);
 
-			/* apply view and projection matrices */
+            /* apply view and projection matrices */
             // set mvp (tmp) matrix relative to mMapPosition
             // i.e. fixed on the map
             setMatrix(v);
@@ -123,7 +123,7 @@ public class HexagonRenderTest extends GdxMap {
                     gl.uniform2f(hCenterPosition, xx * (mCellScale * 1.5f), yy * mCellScale);
 
                     //float alpha = 1 + (float) Math.log10(FastMath.clamp(
-                    //		(float) Math.sqrt(xx * xx + yy * yy) / offset_y, 0.0f, 1.0f)) * 2;
+                    //        (float) Math.sqrt(xx * xx + yy * yy) / offset_y, 0.0f, 1.0f)) * 2;
 
                     float alpha = (float) Math.sqrt(xx * xx + yy * yy) / offset_y;
 

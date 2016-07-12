@@ -82,7 +82,7 @@ public final class PolygonBucket extends RenderBucket {
             if (length < 0)
                 break;
 
-			/* need at least three points */
+            /* need at least three points */
             if (length < 6) {
                 pos += length;
                 continue;
@@ -176,10 +176,10 @@ public final class PolygonBucket extends RenderBucket {
         private static void fillPolygons(GLViewport v, int start, int end,
                                          MapPosition pos, float div) {
 
-			/* draw to framebuffer */
+            /* draw to framebuffer */
             gl.colorMask(true, true, true, true);
 
-			/* do not modify stencil buffer */
+            /* do not modify stencil buffer */
             gl.stencilMask(0x00);
             Shader s;
 
@@ -222,12 +222,12 @@ public final class PolygonBucket extends RenderBucket {
 
                 GLState.blend(blend);
 
-				/* set stencil buffer mask used to draw this layer
-				 * also check that clip bit is set to avoid overdraw
-				 * of other tiles */
+                /* set stencil buffer mask used to draw this layer
+                 * also check that clip bit is set to avoid overdraw
+                 * of other tiles */
                 gl.stencilFunc(GL.EQUAL, 0xff, CLIP_BIT | 1 << i);
 
-				/* draw tile fill coordinates */
+                /* draw tile fill coordinates */
                 gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
 
                 if (a.strokeWidth <= 0)
@@ -258,7 +258,7 @@ public final class PolygonBucket extends RenderBucket {
 
                 ///* disable texture shader */
                 //if (s != polyShader)
-                //	s = setShader(polyShader, v.mvp, false);
+                //    s = setShader(polyShader, v.mvp, false);
             }
         }
 
@@ -312,10 +312,10 @@ public final class PolygonBucket extends RenderBucket {
             int cur = mCount;
             int start = mCount;
 
-			/* draw to stencil buffer */
+            /* draw to stencil buffer */
             gl.colorMask(false, false, false, false);
 
-			/* op for stencil method polygon drawing */
+            /* op for stencil method polygon drawing */
             gl.stencilOp(GL.KEEP, GL.KEEP, GL.INVERT);
 
             boolean drawn = false;
@@ -329,12 +329,12 @@ public final class PolygonBucket extends RenderBucket {
                 PolygonBucket pb = (PolygonBucket) b;
                 AreaStyle area = pb.area.current();
 
-				/* fade out polygon bucket (set in RenderTheme) */
+                /* fade out polygon bucket (set in RenderTheme) */
                 if (area.fadeScale > 0 && area.fadeScale > zoom)
                     continue;
 
                 if (div > 0.5) {
-					/* project bbox of polygon to screen */
+                    /* project bbox of polygon to screen */
                     v.mvp.prj2D(pb.bbox, 0, box, 0, 4);
 
                     int out = 0;
@@ -342,16 +342,16 @@ public final class PolygonBucket extends RenderBucket {
                         int o = mScreenClip.outcode(box[i], box[i + 1]);
 
                         if (o == 0) {
-							/* at least one corner is inside */
+                            /* at least one corner is inside */
                             out = 0;
                             break;
                         }
                         out |= o;
                     }
-					/* Check if any polygon-bucket edge intersects the screen.
-					 * Also check the very unlikely case where the view might
-					 * be
-					 * completly contained within box */
+                    /* Check if any polygon-bucket edge intersects the screen.
+                     * Also check the very unlikely case where the view might
+                     * be
+                     * completly contained within box */
                     if ((out != 0) && (out != 0xF)) {
                         mScreenClip.clipStart(box[6], box[7]);
                         out = 0;
@@ -361,16 +361,16 @@ public final class PolygonBucket extends RenderBucket {
                         if (out == 0) {
                             //log.debug("out {}\n {}\n {}", out, Arrays.toString(pb.bbox), Arrays.toString(box));
 
-                            //	log.debug("outside {} {} {}", out,
-                            //	          Arrays.toString(box),
-                            //	          Arrays.toString(pb.bbox));
+                            //    log.debug("outside {} {} {}", out,
+                            //              Arrays.toString(box),
+                            //              Arrays.toString(pb.bbox));
                             continue;
                         }
                     }
                 }
                 if (mClear) {
                     clearStencilRegion();
-					/* op for stencil method polygon drawing */
+                    /* op for stencil method polygon drawing */
                     gl.stencilOp(GL.KEEP, GL.KEEP, GL.INVERT);
 
                     start = cur = 0;
@@ -378,7 +378,7 @@ public final class PolygonBucket extends RenderBucket {
 
                 mAreaLayer[cur] = pb;
 
-				/* set stencil mask to draw to */
+                /* set stencil mask to draw to */
                 int stencil = 1 << cur++;
 
                 if (area.hasAlpha(zoom)) {
@@ -391,7 +391,7 @@ public final class PolygonBucket extends RenderBucket {
 
                 gl.drawArrays(GL.TRIANGLE_FAN, b.vertexOffset, b.numVertices);
 
-				/* draw up to 7 buckets into stencil buffer */
+                /* draw up to 7 buckets into stencil buffer */
                 if (cur == STENCIL_BITS - 1) {
                     fillPolygons(v, start, cur, v.pos, div);
                     drawn = true;
@@ -412,9 +412,9 @@ public final class PolygonBucket extends RenderBucket {
             }
 
             if (!drawn) {
-				/* fillPolygons would re-enable color-mask
-				 * but it's possible that all polygon buckets
-				 * were skipped */
+                /* fillPolygons would re-enable color-mask
+                 * but it's possible that all polygon buckets
+                 * were skipped */
                 gl.colorMask(true, true, true, true);
                 gl.stencilMask(0x00);
             }
@@ -428,10 +428,10 @@ public final class PolygonBucket extends RenderBucket {
 
             drawStencilRegion(clipMode);
 
-			/* disable writes to stencil buffer */
+            /* disable writes to stencil buffer */
             gl.stencilMask(0x00);
 
-			/* enable writes to color buffer */
+            /* enable writes to color buffer */
             gl.colorMask(true, true, true, true);
         }
 
@@ -447,38 +447,38 @@ public final class PolygonBucket extends RenderBucket {
             mCount = 0;
             mClear = false;
 
-			/* disable drawing to color buffer */
+            /* disable drawing to color buffer */
             gl.colorMask(false, false, false, false);
 
-			/* write to all stencil bits */
+            /* write to all stencil bits */
             gl.stencilMask(0xFF);
 
-			/* Draw clip-region into depth and stencil buffer.
-			 * This is used for tile line and polygon buckets.
-			 * 
-			 * Together with depth test (GL20.LESS) this ensures to
-			 * only draw where no other tile has drawn yet. */
+            /* Draw clip-region into depth and stencil buffer.
+             * This is used for tile line and polygon buckets.
+             *
+             * Together with depth test (GL20.LESS) this ensures to
+             * only draw where no other tile has drawn yet. */
 
             if (clipMode == CLIP_DEPTH) {
-				/* tests GL20.LESS/GL20.ALWAYS and */
-				/* write tile region to depth buffer */
+                /* tests GL20.LESS/GL20.ALWAYS and */
+                /* write tile region to depth buffer */
                 GLState.test(true, true);
                 gl.depthMask(true);
             } else {
                 GLState.test(false, true);
             }
 
-			/* always pass stencil test and set clip bit */
+            /* always pass stencil test and set clip bit */
             gl.stencilFunc(GL.ALWAYS, CLIP_BIT, 0x00);
 
-			/* set clip bit (0x80) for draw region */
+            /* set clip bit (0x80) for draw region */
             gl.stencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 
-			/* draw a quad for the tile region */
+            /* draw a quad for the tile region */
             gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
 
             if (clipMode == CLIP_DEPTH) {
-				/* dont modify depth buffer */
+                /* dont modify depth buffer */
                 gl.depthMask(false);
                 GLState.test(false, true);
             }
@@ -490,20 +490,20 @@ public final class PolygonBucket extends RenderBucket {
             mCount = 0;
             mClear = false;
 
-			/* disable drawing to color buffer */
+            /* disable drawing to color buffer */
             gl.colorMask(false, false, false, false);
 
-			/* write to all stencil bits except clip bit */
+            /* write to all stencil bits except clip bit */
             gl.stencilMask(0xFF);
 
-			/* use clip bit from stencil buffer to clear stencil
-			 * 'layer-bits' (0x7f) */
+            /* use clip bit from stencil buffer to clear stencil
+             * 'layer-bits' (0x7f) */
             gl.stencilFunc(GL.EQUAL, CLIP_BIT, CLIP_BIT);
 
-			/* set clip bit (0x80) for draw region */
+            /* set clip bit (0x80) for draw region */
             gl.stencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 
-			/* draw a quad for the tile region */
+            /* draw a quad for the tile region */
             gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
         }
 
@@ -513,7 +513,7 @@ public final class PolygonBucket extends RenderBucket {
          * and 'alpha' to fake a fade effect.
          */
         public static void drawOver(GLMatrix mvp, int color, float alpha) {
-			/* TODO true could be avoided when same shader and vbo */
+            /* TODO true could be avoided when same shader and vbo */
             setShader(polyShader, mvp, true);
 
             if (color == 0) {
@@ -528,13 +528,13 @@ public final class PolygonBucket extends RenderBucket {
 
             gl.stencilFunc(GL.EQUAL, CLIP_BIT, CLIP_BIT);
 
-			/* write to all bits */
+            /* write to all bits */
             gl.stencilMask(0xFF);
 
             // FIXME uneeded probably
             GLState.test(false, true);
 
-			/* zero out area to draw to */
+            /* zero out area to draw to */
             gl.stencilOp(GL.KEEP, GL.KEEP, GL.ZERO);
 
             gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
@@ -544,7 +544,7 @@ public final class PolygonBucket extends RenderBucket {
         }
 
         private Renderer() {
-			/* Singleton */
+            /* Singleton */
         }
     }
 }

@@ -50,7 +50,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-		/* directly load bitmap from resources */
+        /* directly load bitmap from resources */
         Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
 
         MarkerSymbol symbol;
@@ -59,7 +59,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         else
             symbol = new MarkerSymbol(bitmap, 0.5f, 0.5f, false);
 
-		/* another option: use some bitmap drawable */
+        /* another option: use some bitmap drawable */
         Drawable d = getResources().getDrawable(R.drawable.ic_launcher);
         if (BILLBOARDS)
             mFocusMarker = new MarkerSymbol(drawableToBitmap(d),
@@ -91,7 +91,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
     protected void onResume() {
         super.onResume();
 
-		/* ignore saved position */
+        /* ignore saved position */
         mMap.setMapPosition(0, 0, 1 << 2);
     }
 

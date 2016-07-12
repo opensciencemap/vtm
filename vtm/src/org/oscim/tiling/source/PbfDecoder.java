@@ -462,7 +462,7 @@ public abstract class PbfDecoder implements ITileDecoder {
 
     public boolean hasData() throws IOException {
         //if (mBufferOffset + bufferPos >= mMsgEnd)
-        //	return false;
+        //    return false;
 
         return fillBuffer(1) > 0;
     }

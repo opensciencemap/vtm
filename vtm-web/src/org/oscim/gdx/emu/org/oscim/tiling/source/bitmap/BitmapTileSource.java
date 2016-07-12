@@ -87,11 +87,11 @@ public class BitmapTileSource extends UrlTileSource {
             final Image img = new Image();
             img.setVisible(false);
 
-			/* As if researching CORS issues doesnt result in
+            /* As if researching CORS issues doesnt result in
              * enough headache...
-			 * 
-			 * Here are some more special Chrome/Webkit quirks:
-			 * MUST SET CORS BEFORE URL! */
+             *
+             * Here are some more special Chrome/Webkit quirks:
+             * MUST SET CORS BEFORE URL! */
             img.getElement().setAttribute("crossorigin", "anonymous");
             img.setUrl(uri);
 

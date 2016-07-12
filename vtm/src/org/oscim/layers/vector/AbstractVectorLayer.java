@@ -95,42 +95,42 @@ public abstract class AbstractVectorLayer<T> extends Layer implements UpdateList
                 v.getMapPosition(t.position);
             }
 
-			/* Hmm what is this for? */
-            //	double scale = t.position.scale * Tile.SIZE;
-            //	t.position.x = (long) (t.position.x * scale) / scale;
-            //	t.position.y = (long) (t.position.y * scale) / scale;
+            /* Hmm what is this for? */
+            //    double scale = t.position.scale * Tile.SIZE;
+            //    t.position.x = (long) (t.position.x * scale) / scale;
+            //    t.position.y = (long) (t.position.y * scale) / scale;
 
             bbox.map2mercator();
 
-            //	double xmin = bbox.xmin;
-            //	double xmax = bbox.xmax;
-            //	Box lbox = null;
-            //	Box rbox = null;
-            //	if (bbox.xmin < -180) {
-            //		bbox.xmin = -180;
-            //		lbox = new Box(bbox);
-            //	}
-            //	if (bbox.xmax > 180) {
-            //		bbox.xmax = 180;
-            //		rbox = new Box(bbox);
-            //	}
+            //    double xmin = bbox.xmin;
+            //    double xmax = bbox.xmax;
+            //    Box lbox = null;
+            //    Box rbox = null;
+            //    if (bbox.xmin < -180) {
+            //        bbox.xmin = -180;
+            //        lbox = new Box(bbox);
+            //    }
+            //    if (bbox.xmax > 180) {
+            //        bbox.xmax = 180;
+            //        rbox = new Box(bbox);
+            //    }
 
             processFeatures(t, bbox);
 
             //if (lbox != null) {
-            //	t.position.x += 1;
-            //	lbox.xmax = 180;
-            //	lbox.xmin = xmin + 180;
-            //	processFeatures(t, lbox);
-            //	t.position.x -= 1;
+            //    t.position.x += 1;
+            //    lbox.xmax = 180;
+            //    lbox.xmin = xmin + 180;
+            //    processFeatures(t, lbox);
+            //    t.position.x -= 1;
             //}
             //
             //if (rbox != null) {
-            //	t.position.x -= 1;
-            //	rbox.xmin = -180;
-            //	rbox.xmax = xmax - 180;
-            //	processFeatures(t, rbox);
-            //	t.position.x += 1;
+            //    t.position.x -= 1;
+            //    rbox.xmin = -180;
+            //    rbox.xmax = xmax - 180;
+            //    processFeatures(t, rbox);
+            //    t.position.x += 1;
             //}
 
             t.buckets.prepare();

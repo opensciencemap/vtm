@@ -33,6 +33,6 @@ public class FeatureCollection extends JavaScriptObject {
 
     public final native JsArray<Feature> getFeaturesInternal()/*-{
         return this.features;
-	}-*/;
+    }-*/;
 
 }

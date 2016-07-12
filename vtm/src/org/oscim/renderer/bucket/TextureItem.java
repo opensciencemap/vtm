@@ -225,7 +225,7 @@ public class TextureItem extends Inlist<TextureItem> {
                 return false;
 
             if (t.ref != null) {
-				/* dispose texture if this clone holds the last handle */
+                /* dispose texture if this clone holds the last handle */
                 if (t.ref.used == 0) {
                     t.ref.dispose();
                     return false;
@@ -287,7 +287,7 @@ public class TextureItem extends Inlist<TextureItem> {
             } else {
                 GLState.bindTex2D(t.id);
 
-				/* use faster subimage upload */
+                /* use faster subimage upload */
                 t.bitmap.uploadToTexture(true);
             }
 

@@ -251,10 +251,10 @@ public class TextureAtlas extends Inlist<TextureAtlas> {
         return new TextureAtlas(width, height);
     }
 
-    //	/// FIXME
-    //	@Override
-    //	protected void finalize(){
-    //		if (texture != null)
-    //			TextureItem.releaseTexture(texture);
-    //	}
+    //    /// FIXME
+    //    @Override
+    //    protected void finalize(){
+    //        if (texture != null)
+    //            TextureItem.releaseTexture(texture);
+    //    }
 }

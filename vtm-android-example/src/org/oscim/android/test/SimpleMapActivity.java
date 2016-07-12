@@ -69,8 +69,8 @@ public class SimpleMapActivity extends BaseMapActivity {
                     //mMapView.map().setMapPosition(p);
 
                     p.setScale(2 + (1 << (int) (Math.random() * 13)));
-                    //	p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
-                    //	p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
+                    //    p.setX((p.getX() + (Math.random() * 4 - 2) / p.getScale()));
+                    //    p.setY((p.getY() + (Math.random() * 4 - 2) / p.getScale()));
                     p.setX(MercatorProjection.longitudeToX(Math.random() * 180));
                     p.setY(MercatorProjection.latitudeToY(Math.random() * 60));
 

@@ -88,15 +88,15 @@ public class OsmPbfParser extends BinaryParser {
             long id = i.getId();
             double latf = parseLat(i.getLat()), lonf = parseLon(i.getLon());
 
-            //			if (i.hasInfo()) {
-            //				Osmformat.Info info = i.getInfo();
-            //				tmp = new OsmNode(new CommonEntityData(id, info.getVersion(), getDate(info),
-            //						getUser(info), info.getChangeset(), tags), latf, lonf);
-            //			} else {
+            //            if (i.hasInfo()) {
+            //                Osmformat.Info info = i.getInfo();
+            //                tmp = new OsmNode(new CommonEntityData(id, info.getVersion(), getDate(info),
+            //                        getUser(info), info.getChangeset(), tags), latf, lonf);
+            //            } else {
             tmp = new OsmNode(latf, lonf, tags, id);
-            //				tmp = new Node(new CommonEntityData(id, NOVERSION, NODATE, OsmUser.NONE,
-            //						NOCHANGESET, tags), latf, lonf);
-            //			}
+            //                tmp = new Node(new CommonEntityData(id, NOVERSION, NODATE, OsmUser.NONE,
+            //                        NOCHANGESET, tags), latf, lonf);
+            //            }
             //sink.process(new NodeContainer(tmp));
             mNodeMap.put(Long.valueOf(id), tmp);
         }
@@ -109,12 +109,12 @@ public class OsmPbfParser extends BinaryParser {
         int j = 0; // Index into the keysvals array.
 
         // Stuff for dense info
-        //		long lasttimestamp = 0, lastchangeset = 0;
-        //		int lastuserSid = 0, lastuid = 0;
-        //	DenseInfo di = null;
-        //		if (nodes.hasDenseinfo()) {
-        //			di = nodes.getDenseinfo();
-        //		}
+        //        long lasttimestamp = 0, lastchangeset = 0;
+        //        int lastuserSid = 0, lastuid = 0;
+        //    DenseInfo di = null;
+        //        if (nodes.hasDenseinfo()) {
+        //            di = nodes.getDenseinfo();
+        //        }
 
         for (int i = 0; i < nodes.getIdCount(); i++) {
             OsmNode tmp;
@@ -174,10 +174,10 @@ public class OsmPbfParser extends BinaryParser {
             for (int j = 0; j < tagCnt; j++) {
                 tags.add(new Tag(getStringById(i.getKeys(j)), getStringById(i.getVals(j))));
             }
-            //			List<Tag> tags = new ArrayList<Tag>();
-            //			for (int j = 0; j < ; j++) {
-            //				tags.add(new Tag(getStringById(i.getKeys(j)), getStringById(i.getVals(j))));
-            //			}
+            //            List<Tag> tags = new ArrayList<Tag>();
+            //            for (int j = 0; j < ; j++) {
+            //                tags.add(new Tag(getStringById(i.getKeys(j)), getStringById(i.getVals(j))));
+            //            }
 
             long lastId = 0;
             List<OsmNode> nodes = new ArrayList<OsmNode>();
@@ -196,13 +196,13 @@ public class OsmPbfParser extends BinaryParser {
             // long changesetId, Collection<Tag> tags,
             // List<WayNode> wayNodes
             OsmWay tmp;
-            //			if (i.hasInfo()) {
-            //				Osmformat.Info info = i.getInfo();
-            //				tmp = new Way(new CommonEntityData(id, info.getVersion(), getDate(info),
-            //						getUser(info), info.getChangeset(), tags), nodes);
-            //			} else {
+            //            if (i.hasInfo()) {
+            //                Osmformat.Info info = i.getInfo();
+            //                tmp = new Way(new CommonEntityData(id, info.getVersion(), getDate(info),
+            //                        getUser(info), info.getChangeset(), tags), nodes);
+            //            } else {
             tmp = new OsmWay(tags, id, nodes);
-            //			}
+            //            }
 
             mWayMap.put(Long.valueOf(id), tmp);
 
@@ -225,25 +225,25 @@ public class OsmPbfParser extends BinaryParser {
             List<OsmMember> nodes = new ArrayList<OsmMember>();
             int memberCnt = i.getMemidsCount();
 
-            //			for (int j = 0; j < memberCnt; j++) {
-            //				long mid = lastMid + i.getMemids(j);
-            //				lastMid = mid;
-            //				String role = getStringById(i.getRolesSid(j));
+            //            for (int j = 0; j < memberCnt; j++) {
+            //                long mid = lastMid + i.getMemids(j);
+            //                lastMid = mid;
+            //                String role = getStringById(i.getRolesSid(j));
             //
-            //				Osmformat.Relation.MemberType t = i.getTypes(j);
+            //                Osmformat.Relation.MemberType t = i.getTypes(j);
             //
-            //				if (t == Osmformat.Relation.MemberType.NODE) {
-            //					etype = EntityType.Node;
-            //				} else if (t == Osmformat.Relation.MemberType.WAY) {
-            //					etype = EntityType.Way;
-            //				} else if (t == Osmformat.Relation.MemberType.RELATION) {
-            //					etype = EntityType.Relation;
-            //				} else {
-            //					assert false; // TODO; Illegal file?
-            //				}
+            //                if (t == Osmformat.Relation.MemberType.NODE) {
+            //                    etype = EntityType.Node;
+            //                } else if (t == Osmformat.Relation.MemberType.WAY) {
+            //                    etype = EntityType.Way;
+            //                } else if (t == Osmformat.Relation.MemberType.RELATION) {
+            //                    etype = EntityType.Relation;
+            //                } else {
+            //                    assert false; // TODO; Illegal file?
+            //                }
             //
-            //				nodes.add(new OsmMember(mid, etype, role));
-            //			}
+            //                nodes.add(new OsmMember(mid, etype, role));
+            //            }
 
             // long id, int version, TimestampContainer timestampContainer,
             // OsmUser user,
@@ -251,15 +251,15 @@ public class OsmPbfParser extends BinaryParser {
             // List<RelationMember> members
             OsmRelation tmp = new OsmRelation(tags, id, memberCnt);
 
-            //			if (i.hasInfo()) {
-            //				Osmformat.Info info = i.getInfo();
-            //				tmp = new Relation(new CommonEntityData(id, info.getVersion(), getDate(info),
-            //						getUser(info), info.getChangeset(), tags), nodes);
-            //			} else {
-            //				tmp = new Relation(new CommonEntityData(id, NOVERSION, NODATE, OsmUser.NONE,
-            //						NOCHANGESET, tags), nodes);
-            //			}
-            //			sink.process(new RelationContainer(tmp));
+            //            if (i.hasInfo()) {
+            //                Osmformat.Info info = i.getInfo();
+            //                tmp = new Relation(new CommonEntityData(id, info.getVersion(), getDate(info),
+            //                        getUser(info), info.getChangeset(), tags), nodes);
+            //            } else {
+            //                tmp = new Relation(new CommonEntityData(id, NOVERSION, NODATE, OsmUser.NONE,
+            //                        NOCHANGESET, tags), nodes);
+            //            }
+            //            sink.process(new RelationContainer(tmp));
         }
     }
 
@@ -294,34 +294,34 @@ public class OsmPbfParser extends BinaryParser {
 
     public OsmData getData() {
 
-        //		for (Entry<OsmRelation, List<TmpRelation>> entry : relationMembersForRelation
-        //				.entrySet()) {
+        //        for (Entry<OsmRelation, List<TmpRelation>> entry : relationMembersForRelation
+        //                .entrySet()) {
         //
-        //			OsmRelation relation = entry.getKey();
+        //            OsmRelation relation = entry.getKey();
         //
-        //			for (TmpRelation member : entry.getValue()) {
+        //            for (TmpRelation member : entry.getValue()) {
         //
-        //				OsmElement memberObject = null;
+        //                OsmElement memberObject = null;
         //
-        //				if ("node".equals(member)) {
-        //					memberObject = nodesById.get(member.id);
-        //				} else if ("way".equals(member)) {
-        //					memberObject = waysById.get(member.id);
-        //				} else if ("relation".equals(member)) {
-        //					memberObject = relationsById.get(member.id);
-        //				} else {
-        //					// log("missing relation " + member.id);
-        //					continue;
-        //				}
+        //                if ("node".equals(member)) {
+        //                    memberObject = nodesById.get(member.id);
+        //                } else if ("way".equals(member)) {
+        //                    memberObject = waysById.get(member.id);
+        //                } else if ("relation".equals(member)) {
+        //                    memberObject = relationsById.get(member.id);
+        //                } else {
+        //                    // log("missing relation " + member.id);
+        //                    continue;
+        //                }
         //
-        //				if (memberObject != null) {
-        //					OsmMember ownMember = new OsmMember(member.role,
-        //							memberObject);
+        //                if (memberObject != null) {
+        //                    OsmMember ownMember = new OsmMember(member.role,
+        //                            memberObject);
         //
-        //					relation.relationMembers.add(ownMember);
-        //				}
-        //			}
-        //		}
+        //                    relation.relationMembers.add(ownMember);
+        //                }
+        //            }
+        //        }
 
         // give up references to original collections
 

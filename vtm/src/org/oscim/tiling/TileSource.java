@@ -116,7 +116,7 @@ public abstract class TileSource {
                 return false;
 
             //if (this.db != ((MapOptions) other).db)
-            //	return false;
+            //    return false;
 
             // FIXME test if this is correct!
             if (!this.entrySet().equals(((Options) other).entrySet()))

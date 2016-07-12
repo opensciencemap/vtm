@@ -138,27 +138,27 @@ public class GdxModelRenderer extends LayerRenderer {
 
             //renderContext.begin();
 
-            //			if (shader == null) {
-            //				r = instances.get(0).getRenderable(r);
-            //				DefaultShader.Config c = new DefaultShader.Config();
-            //				c.numBones = 0;
-            //				c.numDirectionalLights = 1;
-            //				r.environment = lights;
+            //            if (shader == null) {
+            //                r = instances.get(0).getRenderable(r);
+            //                DefaultShader.Config c = new DefaultShader.Config();
+            //                c.numBones = 0;
+            //                c.numDirectionalLights = 1;
+            //                r.environment = lights;
             //
-            //				shader = new DefaultShader(r, c);
-            //				shader.init();
-            //			}
+            //                shader = new DefaultShader(r, c);
+            //                shader.init();
+            //            }
             mBatch.begin(cam);
             //shader.begin(cam, renderContext);
 
             for (SharedModel instance : instances) {
                 instance.transform.getTranslation(tempVector);
                 //instance.getRenderables(renderables, pool);
-                //	if (tempVector.x * tempVector.x + tempVector.y * tempVector.y > sqRadius)
-                //	 continue;
-                //	tempVector.scl(0.8f, 0.8f, 1);
-                //	if (!GeometryUtils.pointInPoly(tempVector.x, tempVector.y, mBox, 8, 0))
-                //	continue;
+                //    if (tempVector.x * tempVector.x + tempVector.y * tempVector.y > sqRadius)
+                //     continue;
+                //    tempVector.scl(0.8f, 0.8f, 1);
+                //    if (!GeometryUtils.pointInPoly(tempVector.x, tempVector.y, mBox, 8, 0))
+                //    continue;
 
                 mBatch.render(instance);
 

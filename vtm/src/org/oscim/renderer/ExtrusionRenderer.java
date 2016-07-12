@@ -78,12 +78,12 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 
             int sumIndices = eb.idx[0] + eb.idx[1] + eb.idx[2];
 
-			/* extrusion */
+            /* extrusion */
             if (sumIndices > 0)
                 gl.drawElements(GL.TRIANGLES, sumIndices,
                         GL.UNSIGNED_SHORT, eb.off[0]);
 
-			/* mesh */
+            /* mesh */
             if (eb.idx[4] > 0) {
                 gl.drawElements(GL.TRIANGLES, eb.idx[4],
                         GL.UNSIGNED_SHORT, eb.off[4]);
@@ -106,7 +106,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
         s.useProgram();
         GLState.enableVertexArrays(s.aPos, -1);
 
-		/* only use face-culling when it's unlikely
+        /* only use face-culling when it's unlikely
          * that one'moves through the building' */
         if (v.pos.zoomLevel < 18)
             gl.enable(GL.CULL_FACE);
@@ -140,7 +140,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
                 renderCombined(s.aPos, ebs[i]);
             }
 
-			/* only draw to color buffer */
+            /* only draw to color buffer */
             gl.colorMask(true, true, true, true);
             gl.depthMask(false);
             gl.depthFunc(GL.EQUAL);
@@ -183,32 +183,32 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
                 gl.vertexAttribPointer(s.aLight, 2, GL.UNSIGNED_BYTE,
                         false, 8, eb.getVertexOffset() + 6);
 
-				/* draw extruded outlines */
+                /* draw extruded outlines */
                 if (eb.idx[0] > 0) {
                     if (mTranslucent) {
                         gl.depthFunc(GL.EQUAL);
                         setMatrix(s, v, ebs[i]);
                     }
 
-					/* draw roof */
+                    /* draw roof */
                     gl.uniform1i(s.uMode, 0);
                     gl.drawElements(GL.TRIANGLES, eb.idx[2],
                             GL.UNSIGNED_SHORT, eb.off[2]);
 
-					/* draw sides 1 */
+                    /* draw sides 1 */
                     gl.uniform1i(s.uMode, 1);
                     gl.drawElements(GL.TRIANGLES, eb.idx[0],
                             GL.UNSIGNED_SHORT, eb.off[0]);
 
-					/* draw sides 2 */
+                    /* draw sides 2 */
                     gl.uniform1i(s.uMode, 2);
                     gl.drawElements(GL.TRIANGLES, eb.idx[1],
                             GL.UNSIGNED_SHORT, eb.off[1]);
 
                     if (mTranslucent) {
-						/* drawing gl_lines with the same coordinates
-						 * does not result in same depth values as
-						 * polygons, so add offset and draw gl_lequal */
+                        /* drawing gl_lines with the same coordinates
+                         * does not result in same depth values as
+                         * polygons, so add offset and draw gl_lequal */
                         gl.depthFunc(GL.LEQUAL);
                         v.mvp.addDepthOffset(100);
                         v.mvp.setAsUniform(s.uMVP);
@@ -220,14 +220,14 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
                             GL.UNSIGNED_SHORT, eb.off[3]);
                 }
 
-				/* draw triangle meshes */
+                /* draw triangle meshes */
                 if (eb.idx[4] > 0) {
                     gl.drawElements(GL.TRIANGLES, eb.idx[4],
                             GL.UNSIGNED_SHORT, eb.off[4]);
                 }
             }
 
-			/* just a temporary reference! */
+            /* just a temporary reference! */
             ebs[i] = null;
         }
 
@@ -259,8 +259,8 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
         v.mvp.multiplyLhs(v.viewproj);
 
         if (mTranslucent) {
-			/* should avoid z-fighting of overlapping
-			 * building from different tiles */
+            /* should avoid z-fighting of overlapping
+             * building from different tiles */
             int zoom = (1 << z);
             int delta = (int) (l.x * zoom) % 4 + (int) (l.y * zoom) % 4 * 4;
             v.mvp.addDepthOffset(delta);

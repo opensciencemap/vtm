@@ -48,12 +48,12 @@ public class GridRenderer extends BucketRenderer {
     public GridRenderer(int numLines, LineStyle lineStyle, TextStyle textStyle) {
         int size = Tile.SIZE;
 
-		/* not needed to set but we know: 16 lines 'a' two points */
+        /* not needed to set but we know: 16 lines 'a' two points */
         mLines = new GeometryBuffer(2 * 16, 16);
 
         float pos = -size * 4;
 
-		/* 8 vertical lines */
+        /* 8 vertical lines */
         for (int i = 0; i < 8 * numLines; i++) {
             float x = pos + i * size / numLines;
             mLines.startLine();
@@ -61,7 +61,7 @@ public class GridRenderer extends BucketRenderer {
             mLines.addPoint(x, pos + size * 8);
         }
 
-		/* 8 horizontal lines */
+        /* 8 horizontal lines */
         for (int j = 0; j < 8 * numLines; j++) {
             float y = pos + j * size / numLines;
             mLines.startLine();
@@ -119,7 +119,7 @@ public class GridRenderer extends BucketRenderer {
         int x = (int) (v.pos.x * z);
         int y = (int) (v.pos.y * z);
 
-		/* update buckets when map moved by at least one tile */
+        /* update buckets when map moved by at least one tile */
         if (x == mCurX && y == mCurY && z == mCurZ)
             return;
 

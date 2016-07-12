@@ -64,7 +64,7 @@ public class S3DBMapActivity extends BaseMapActivity {
     protected void onResume() {
         super.onResume();
 
-		/* ignore saved position */
+        /* ignore saved position */
         mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
     }
 }

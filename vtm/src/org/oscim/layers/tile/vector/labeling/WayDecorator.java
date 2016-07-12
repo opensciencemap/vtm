@@ -52,32 +52,32 @@ public final class WayDecorator {
 
             //int clip;
             //if ((clip = clipper.clipNext(curX, curY)) != 0) {
-            //	if (clip < 0) {
-            //		prevX = clipper.out[0];
-            //		prevY = clipper.out[1];
-            //		curX = clipper.out[2];
-            //		curY = clipper.out[3];
+            //    if (clip < 0) {
+            //        prevX = clipper.out[0];
+            //        prevY = clipper.out[1];
+            //        curX = clipper.out[2];
+            //        curY = clipper.out[3];
             //
-            //		if (prevX == min)
-            //			edge |= 1 << 0;
-            //		else if (prevX == max)
-            //			edge |= 1 << 1;
+            //        if (prevX == min)
+            //            edge |= 1 << 0;
+            //        else if (prevX == max)
+            //            edge |= 1 << 1;
             //
-            //		if (prevY == min)
-            //			edge |= 1 << 2;
-            //		else if (prevY == max)
-            //			edge |= 1 << 3;
+            //        if (prevY == min)
+            //            edge |= 1 << 2;
+            //        else if (prevY == max)
+            //            edge |= 1 << 3;
             //
-            //		if (curX == min)
-            //			edge |= 1 << 4;
-            //		else if (curX == max)
-            //			edge |= 1 << 5;
+            //        if (curX == min)
+            //            edge |= 1 << 4;
+            //        else if (curX == max)
+            //            edge |= 1 << 5;
             //
-            //		if (curY == min)
-            //			edge |= 1 << 5;
-            //		else if (curY == max)
-            //			edge |= 1 << 6;
-            //	}
+            //        if (curY == min)
+            //            edge |= 1 << 5;
+            //        else if (curY == max)
+            //            edge |= 1 << 6;
+            //    }
             //}
 
             int last = i;
@@ -101,13 +101,13 @@ public final class WayDecorator {
                     float nextY = coordinates[j + 1];
 
                     //if ((clip = clipper.clipNext(nextX, nextY)) != 0) {
-                    //	if (clip < 0) {
-                    //		curX = clipper.out[0];
-                    //		curY = clipper.out[1];
-                    //		// TODO break when cur has changed
-                    //		nextX = clipper.out[2];
-                    //		nextY = clipper.out[3];
-                    //	}
+                    //    if (clip < 0) {
+                    //        curX = clipper.out[0];
+                    //        curY = clipper.out[1];
+                    //        // TODO break when cur has changed
+                    //        nextX = clipper.out[2];
+                    //        nextY = clipper.out[3];
+                    //    }
                     //}
 
                     float wx = nextX - curX;
@@ -146,15 +146,15 @@ public final class WayDecorator {
                     last = j - 2;
 
                     //if (clip < 0) {
-                    //	if (nextX == min)
-                    //		edge |= 1 << 4;
-                    //	else if (nextX == max)
-                    //		edge |= 1 << 5;
+                    //    if (nextX == min)
+                    //        edge |= 1 << 4;
+                    //    else if (nextX == max)
+                    //        edge |= 1 << 5;
                     //
-                    //	if (nextY == min)
-                    //		edge |= 1 << 6;
-                    //	else if (nextY == max)
-                    //		edge |= 1 << 7;
+                    //    if (nextY == min)
+                    //        edge |= 1 << 6;
+                    //    else if (nextY == max)
+                    //        edge |= 1 << 7;
                     //}
                 }
 
@@ -198,8 +198,8 @@ public final class WayDecorator {
 
             // link items together
             //if (t != null) {
-            //	t.n1 = n;
-            //	n.n2 = t;
+            //    t.n1 = n;
+            //    n.n2 = t;
             //}
 
             t = n;

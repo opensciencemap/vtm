@@ -79,18 +79,18 @@ class Debug {
     }
 
     public static void draw(MapPosition pos, GLViewport m, RenderBuckets layers) {
-        //		if (layers.baseLayers != null) {
-        //			//setMatrix(pos, m, true);
+        //        if (layers.baseLayers != null) {
+        //            //setMatrix(pos, m, true);
         //
-        //			for (RenderElement l = layers.baseLayers; l != null;) {
-        //				if (l.type == RenderElement.POLYGON) {
-        //					l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
-        //				} else {
-        //					//float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
-        //					l = LineLayer.Renderer.draw(layers, l, pos, m, div);
-        //				}
-        //			}
-        //		}
+        //            for (RenderElement l = layers.baseLayers; l != null;) {
+        //                if (l.type == RenderElement.POLYGON) {
+        //                    l = PolygonLayer.Renderer.draw(pos, l, m, true, 1, false);
+        //                } else {
+        //                    //float div = (float) (mMapPosition.scale / (1 << pos.zoomLevel));
+        //                    l = LineLayer.Renderer.draw(layers, l, pos, m, div);
+        //                }
+        //            }
+        //        }
     }
 
 }

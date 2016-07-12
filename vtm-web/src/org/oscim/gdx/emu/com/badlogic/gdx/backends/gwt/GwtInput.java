@@ -271,22 +271,22 @@ public class GwtInput implements Input {
      */
     private native boolean isCursorCatchedJSNI() /*-{
         if (!navigator.pointer) {
-			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-		}
-		if (navigator.pointer) {
-			if (typeof (navigator.pointer.isLocked) === "boolean") {
-				// Chrome initially launched with this interface
-				return navigator.pointer.isLocked;
-			} else if (typeof (navigator.pointer.isLocked) === "function") {
-				// Some older builds might provide isLocked as a function
-				return navigator.pointer.isLocked();
-			} else if (typeof (navigator.pointer.islocked) === "function") {
-				// For compatibility with early Firefox build
-				return navigator.pointer.islocked();
-			}
-		}
-		return false;
-	}-*/;
+            navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+        }
+        if (navigator.pointer) {
+            if (typeof (navigator.pointer.isLocked) === "boolean") {
+                // Chrome initially launched with this interface
+                return navigator.pointer.isLocked;
+            } else if (typeof (navigator.pointer.isLocked) === "function") {
+                // Some older builds might provide isLocked as a function
+                return navigator.pointer.isLocked();
+            } else if (typeof (navigator.pointer.islocked) === "function") {
+                // For compatibility with early Firefox build
+                return navigator.pointer.islocked();
+            }
+        }
+        return false;
+    }-*/;
 
     /**
      * from https://github.com/toji/game-shim/blob/master/game-shim.js
@@ -295,40 +295,40 @@ public class GwtInput implements Input {
      */
     private native void setCursorCatchedJSNI(CanvasElement element) /*-{
         // Navigator pointer is not the right interface according to spec.
-		// Here for backwards compatibility only
-		if (!navigator.pointer) {
-			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-		}
-		// element.requestPointerLock
-		if (!element.requestPointerLock) {
-			element.requestPointerLock = (function() {
-				return element.webkitRequestPointerLock
-						|| element.mozRequestPointerLock || function() {
-							if (navigator.pointer) {
-								navigator.pointer.lock(element);
-							}
-						};
-			})();
-		}
-		element.requestPointerLock();
-	}-*/;
+        // Here for backwards compatibility only
+        if (!navigator.pointer) {
+            navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+        }
+        // element.requestPointerLock
+        if (!element.requestPointerLock) {
+            element.requestPointerLock = (function() {
+                return element.webkitRequestPointerLock
+                        || element.mozRequestPointerLock || function() {
+                            if (navigator.pointer) {
+                                navigator.pointer.lock(element);
+                            }
+                        };
+            })();
+        }
+        element.requestPointerLock();
+    }-*/;
 
     /**
      * from https://github.com/toji/game-shim/blob/master/game-shim.js
      */
     private native void exitCursorCatchedJSNI() /*-{
-		if (!$doc.exitPointerLock) {
-			$doc.exitPointerLock = (function() {
-				return $doc.webkitExitPointerLock || $doc.mozExitPointerLock
-						|| function() {
-							if (navigator.pointer) {
-								var elem = this;
-								navigator.pointer.unlock();
-							}
-						};
-			})();
-		}
-	}-*/;
+        if (!$doc.exitPointerLock) {
+            $doc.exitPointerLock = (function() {
+                return $doc.webkitExitPointerLock || $doc.mozExitPointerLock
+                        || function() {
+                            if (navigator.pointer) {
+                                var elem = this;
+                                navigator.pointer.unlock();
+                            }
+                        };
+            })();
+        }
+    }-*/;
 
     /**
      * from https://github.com/toji/game-shim/blob/master/game-shim.js
@@ -337,8 +337,8 @@ public class GwtInput implements Input {
      * @return movement in x direction
      */
     private native float getMovementXJSNI(NativeEvent event) /*-{
-		return event.movementX || event.webkitMovementX || 0;
-	}-*/;
+        return event.movementX || event.webkitMovementX || 0;
+    }-*/;
 
     /**
      * from https://github.com/toji/game-shim/blob/master/game-shim.js
@@ -347,12 +347,12 @@ public class GwtInput implements Input {
      * @return movement in y direction
      */
     private native float getMovementYJSNI(NativeEvent event) /*-{
-		return event.movementY || event.webkitMovementY || 0;
-	}-*/;
+        return event.movementY || event.webkitMovementY || 0;
+    }-*/;
 
     private static native boolean isTouchScreen() /*-{
-		return (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-	}-*/;
+        return (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+    }-*/;
 
     /**
      * works only for Chrome > Version 18 with enabled Mouse Lock enable in
@@ -384,55 +384,55 @@ public class GwtInput implements Input {
     // kindly borrowed from our dear playn friends...
     static native void addEventListener(JavaScriptObject target, String name, GwtInput handler,
                                         boolean capture) /*-{
-		target
-				.addEventListener(
-						name,
-						function(e) {
-							handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
-						}, capture);
-	}-*/;
+        target
+                .addEventListener(
+                        name,
+                        function(e) {
+                            handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
+                        }, capture);
+    }-*/;
 
     private static native float getMouseWheelVelocity(NativeEvent evt) /*-{
-		var delta = 0.0;
-		var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
+        var delta = 0.0;
+        var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
 
-		if (agentInfo.isFirefox) {
-			if (agentInfo.isMacOS) {
-				delta = 1.0 * evt.detail;
-			} else {
-				delta = 1.0 * evt.detail / 3;
-			}
-		} else if (agentInfo.isOpera) {
-			if (agentInfo.isLinux) {
-				delta = -1.0 * evt.wheelDelta / 80;
-			} else {
-				// on mac
-				delta = -1.0 * evt.wheelDelta / 40;
-			}
-		} else if (agentInfo.isChrome || agentInfo.isSafari) {
-			delta = -1.0 * evt.wheelDelta / 120;
-			// handle touchpad for chrome
-			if (Math.abs(delta) < 1) {
-				if (agentInfo.isWindows) {
-					delta = -1.0 * evt.wheelDelta;
-				} else if (agentInfo.isMacOS) {
-					delta = -1.0 * evt.wheelDelta / 3;
-				}
-			}
-		}
-		return delta;
-	}-*/;
+        if (agentInfo.isFirefox) {
+            if (agentInfo.isMacOS) {
+                delta = 1.0 * evt.detail;
+            } else {
+                delta = 1.0 * evt.detail / 3;
+            }
+        } else if (agentInfo.isOpera) {
+            if (agentInfo.isLinux) {
+                delta = -1.0 * evt.wheelDelta / 80;
+            } else {
+                // on mac
+                delta = -1.0 * evt.wheelDelta / 40;
+            }
+        } else if (agentInfo.isChrome || agentInfo.isSafari) {
+            delta = -1.0 * evt.wheelDelta / 120;
+            // handle touchpad for chrome
+            if (Math.abs(delta) < 1) {
+                if (agentInfo.isWindows) {
+                    delta = -1.0 * evt.wheelDelta;
+                } else if (agentInfo.isMacOS) {
+                    delta = -1.0 * evt.wheelDelta / 3;
+                }
+            }
+        }
+        return delta;
+    }-*/;
 
     /**
      * Kindly borrowed from PlayN.
      **/
     protected static native String getMouseWheelEvent() /*-{
-		if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
-			return "DOMMouseScroll";
-		} else {
-			return "mousewheel";
-		}
-	}-*/;
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
+            return "DOMMouseScroll";
+        } else {
+            return "mousewheel";
+        }
+    }-*/;
 
     /**
      * Kindly borrowed from PlayN.
@@ -452,15 +452,15 @@ public class GwtInput implements Input {
 
     private void hookEvents() {
         addEventListener(canvas, "mousedown", this, true);
-        //		addEventListener(Document.get(), "mousedown", this, true);
+        //        addEventListener(Document.get(), "mousedown", this, true);
         addEventListener(canvas, "mouseup", this, true);
-        //		addEventListener(Document.get(), "mouseup", this, true);
+        //        addEventListener(Document.get(), "mouseup", this, true);
         addEventListener(canvas, "mousemove", this, true);
-        //		addEventListener(Document.get(), "mousemove", this, true);
+        //        addEventListener(Document.get(), "mousemove", this, true);
         addEventListener(canvas, getMouseWheelEvent(), this, true);
-        //		addEventListener(Document.get(), "keydown", this, false);
-        //		addEventListener(Document.get(), "keyup", this, false);
-        //		addEventListener(Document.get(), "keypress", this, false);
+        //        addEventListener(Document.get(), "keydown", this, false);
+        //        addEventListener(Document.get(), "keyup", this, false);
+        //        addEventListener(Document.get(), "keypress", this, false);
         addEventListener(canvas, "keydown", this, false);
         addEventListener(canvas, "keyup", this, false);
         addEventListener(canvas, "keypress", this, false);

@@ -66,7 +66,7 @@ public class SimplifyDP {
         if ((length >> 1) >= markers.length)
             markers = new boolean[length >> 1];
         //else
-        //	Arrays.fill(markers, false);
+        //    Arrays.fill(markers, false);
 
         int first = inPos;
         int last = inPos + length - 2;

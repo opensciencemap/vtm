@@ -234,7 +234,7 @@ public class TileDecoder extends PbfDecoder {
 
         // FIXME, remove all tiles from cache then remove this below
         //if (layer == 0)
-        //	layer = 5;
+        //    layer = 5;
         mElem.type = polygon ? GeometryType.POLY : GeometryType.LINE;
         mElem.setLayer(layer);
         mSink.process(mElem);

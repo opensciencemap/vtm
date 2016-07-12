@@ -106,7 +106,7 @@ public class LwHttp implements HttpEngine {
             String key = l.getKey();
             String val = l.getValue();
             //if ("Accept-Encoding".equals(key) && "gzip".equals(val))
-            //	mUseGZIP = true;
+            //    mUseGZIP = true;
             sb.append('\n').append(key).append(": ").append(val);
         }
         sb.append("\n\n");
@@ -169,7 +169,7 @@ public class LwHttp implements HttpEngine {
         public synchronized long skip(long n) throws IOException {
             /* Android(4.1.2) image decoder *requires* skip to
              * actually skip the requested amount.
-			 * https://code.google.com/p/android/issues/detail?id=6066 */
+             * https://code.google.com/p/android/issues/detail?id=6066 */
             long sumSkipped = 0L;
             while (sumSkipped < n) {
                 long skipped = super.skip(n - sumSkipped);
@@ -181,7 +181,7 @@ public class LwHttp implements HttpEngine {
                     break; // EOF
 
                 sumSkipped += 1;
-				/* was incremented by read() */
+                /* was incremented by read() */
                 bytesRead -= 1;
             }
 
@@ -200,7 +200,7 @@ public class LwHttp implements HttpEngine {
             if (marked >= 0)
                 bytesRead = marked;
 
-			/* TODO could check if the mark is already invalid */
+            /* TODO could check if the mark is already invalid */
             super.reset();
         }
 
@@ -272,12 +272,12 @@ public class LwHttp implements HttpEngine {
 
         int contentLength = -1;
 
-		/* header may not be larger than BUFFER_SIZE for this to work */
+        /* header may not be larger than BUFFER_SIZE for this to work */
         for (; (pos < read) || ((read < BUFFER_SIZE) &&
                 (len = is.read(buf, read, BUFFER_SIZE - read)) >= 0); len = 0) {
 
             read += len;
-			/* end of header lines */
+            /* end of header lines */
             while (end < read && (buf[end] != '\n'))
                 end++;
 
@@ -288,7 +288,7 @@ public class LwHttp implements HttpEngine {
             if (buf[end] != '\n')
                 continue;
 
-			/* empty line (header end) */
+            /* empty line (header end) */
             if (end - pos == 1) {
                 end += 1;
                 break;
@@ -296,13 +296,13 @@ public class LwHttp implements HttpEngine {
 
             if (first) {
                 first = false;
-				/* check only for OK ("HTTP/1.? ".length == 9) */
+                /* check only for OK ("HTTP/1.? ".length == 9) */
                 if (!check(HEADER_HTTP_OK, buf, pos + 9, end)) {
                     throw new IOException("HTTP Error: "
                             + new String(buf, pos, end - pos - 1));
                 }
             } else if (check(HEADER_CONTENT_LENGTH, buf, pos, end)) {
-				/* parse Content-Length */
+                /* parse Content-Length */
                 contentLength = parseInt(buf, pos +
                         HEADER_CONTENT_LENGTH.length + 2, end - 1);
             } else if (check(HEADER_ENCODING_GZIP, buf, pos, end)) {
@@ -320,7 +320,7 @@ public class LwHttp implements HttpEngine {
             end = pos;
         }
 
-		/* back to start of content */
+        /* back to start of content */
         is.reset();
         is.mark(0);
         is.skip(end);
@@ -355,10 +355,10 @@ public class LwHttp implements HttpEngine {
         }
 
         if (mSocket == null) {
-			/* might throw IOException */
+            /* might throw IOException */
             lwHttpConnect();
 
-			/* TODO parse from header */
+            /* TODO parse from header */
             mMaxRequests = RESPONSE_EXPECTED_LIVES;
         }
 
@@ -532,7 +532,7 @@ public class LwHttp implements HttpEngine {
             if (tileSource.getUrlFormatter() != UrlTileSource.URL_FORMATTER)
                 return new LwHttp(tileSource, null);
 
-			/* use optimized formatter replacing the default */
+            /* use optimized formatter replacing the default */
             if (mTilePath == null) {
                 String[] path = tileSource.getTilePath();
                 mTilePath = new byte[path.length][];

@@ -113,45 +113,45 @@ public class TessJNI {
     // @formatter:off
     /*JNI
     #include <tesselator.h>
-	#include <string.h>
-	#include <stdlib.h>
-	void* heapAlloc( void* userData, unsigned int size ){
-		TESS_NOTUSED( userData );
-		return malloc( size );
-	}
-	void* heapRealloc( void *userData, void* ptr, unsigned int size ){
-		TESS_NOTUSED( userData );
-		return realloc( ptr, size );
-	}
-	void heapFree( void* userData, void* ptr ){
-		TESS_NOTUSED( userData );
-		free( ptr );
-	}
-	 */
+    #include <string.h>
+    #include <stdlib.h>
+    void* heapAlloc( void* userData, unsigned int size ){
+        TESS_NOTUSED( userData );
+        return malloc( size );
+    }
+    void* heapRealloc( void *userData, void* ptr, unsigned int size ){
+        TESS_NOTUSED( userData );
+        return realloc( ptr, size );
+    }
+    void heapFree( void* userData, void* ptr ){
+        TESS_NOTUSED( userData );
+        free( ptr );
+    }
+     */
     static native long newTess(int size); /* {
-		if (size <= 0)
-		   return (long)tessNewTess(0);
-		if (size > 10)
-			size = 10;
-		TESSalloc ma;
-		memset(&ma, 0, sizeof(ma));
-	    ma.memalloc = heapAlloc;
-	    ma.memfree = heapFree;
-	    ma.memrealloc = heapRealloc;
-	    //ma.userData = (void*)&allocated;
-	    ma.meshEdgeBucketSize = 2 << size;   // 512
-		ma.meshVertexBucketSize = 2 << size; // 512
-		ma.meshFaceBucketSize = 1 << size;	 // 256
-		ma.dictNodeBucketSize = 2 << size;	 // 512
-		ma.regionBucketSize = 1 << size;	 // 256
-		ma.extraVertices = 8;
-	    //ma.extraVertices = 256;
-	    return (long)tessNewTess(&ma);
-	} */
+        if (size <= 0)
+           return (long)tessNewTess(0);
+        if (size > 10)
+            size = 10;
+        TESSalloc ma;
+        memset(&ma, 0, sizeof(ma));
+        ma.memalloc = heapAlloc;
+        ma.memfree = heapFree;
+        ma.memrealloc = heapRealloc;
+        //ma.userData = (void*)&allocated;
+        ma.meshEdgeBucketSize = 2 << size;   // 512
+        ma.meshVertexBucketSize = 2 << size; // 512
+        ma.meshFaceBucketSize = 1 << size;     // 256
+        ma.dictNodeBucketSize = 2 << size;     // 512
+        ma.regionBucketSize = 1 << size;     // 256
+        ma.extraVertices = 8;
+        //ma.extraVertices = 256;
+        return (long)tessNewTess(&ma);
+    } */
 
     static native void freeTess(long inst); /* {
-		tessDeleteTess((TESStesselator*) inst);
-	} */
+        tessDeleteTess((TESStesselator*) inst);
+    } */
 
     /**
      * Adds a contour to be tesselated.
@@ -164,25 +164,25 @@ public class TessJNI {
      * @param count   - number of vertices in contour.
      */
     static native void addContour(long inst, int size, float[] contour, int stride, int offset, int count);/* {
-		tessAddContour((TESStesselator*) inst, size, contour + (offset * stride), stride, count);
-	} */
+        tessAddContour((TESStesselator*) inst, size, contour + (offset * stride), stride, count);
+    } */
 
     static native void addMultiContour2D(long inst, int[] index, float[] contour, int idxStart, int idxCount);/* {
-		TESStesselator* tess = (TESStesselator*) inst;
-		int offset = 0;
-		// start at 0 to get the correct offset in contour..
-		for (int i = 0; i < idxStart + idxCount; i++){
-			int len = index[i];
-			if ((len % 2 != 0) || (len < 0))
-				break;
-			if (len < 6 || i < idxStart) {
-				offset += len;
-				continue;
-			}
-			tessAddContour(tess, 2, contour + offset, 8, len >> 1);
-			offset += len;
-		}
-	} */
+        TESStesselator* tess = (TESStesselator*) inst;
+        int offset = 0;
+        // start at 0 to get the correct offset in contour..
+        for (int i = 0; i < idxStart + idxCount; i++){
+            int len = index[i];
+            if ((len % 2 != 0) || (len < 0))
+                break;
+            if (len < 6 || i < idxStart) {
+                offset += len;
+                continue;
+            }
+            tessAddContour(tess, 2, contour + offset, 8, len >> 1);
+            offset += len;
+        }
+    } */
 
     /**
      * Tesselate contours.
@@ -196,32 +196,32 @@ public class TessJNI {
      * @return 1 if succeed, 0 if failed.
      */
     static native int tessContour2D(long inst, int windingRule, int elementType, int polySize, int vertexSize);/*{
-		return tessTesselate((TESStesselator*) inst, windingRule, elementType, polySize, vertexSize, 0);
-	} */
+        return tessTesselate((TESStesselator*) inst, windingRule, elementType, polySize, vertexSize, 0);
+    } */
 
     static native int getVertexCount(long inst); /*{
-		return tessGetVertexCount((TESStesselator*) inst);
-	}*/
+        return tessGetVertexCount((TESStesselator*) inst);
+    }*/
 
     /**
      * Returns pointer to first coordinate of first vertex.
      */
     static native boolean getVertices(long inst, float[] out, int offset, int length);/*{
-		const TESSreal* vertices = tessGetVertices((TESStesselator*) inst);
-		if (!vertices)
-			return 0;
-		memcpy(out, vertices + offset, length * sizeof(TESSreal));
-		return 1;
-	}*/
+        const TESSreal* vertices = tessGetVertices((TESStesselator*) inst);
+        if (!vertices)
+            return 0;
+        memcpy(out, vertices + offset, length * sizeof(TESSreal));
+        return 1;
+    }*/
 
     /**
      * Returns pointer to first coordinate of first vertex.
      */
     static native void getVerticesS(long inst, short[] out, int offset, int length, float scale);/*{
-		const TESSreal* vertices = tessGetVertices((TESStesselator*) inst);
-		for(int i = 0; i < length; i++)
-			out[i] = (short)(vertices[offset++] * scale + 0.5f);
-	}*/
+        const TESSreal* vertices = tessGetVertices((TESStesselator*) inst);
+        for(int i = 0; i < length; i++)
+            out[i] = (short)(vertices[offset++] * scale + 0.5f);
+    }*/
 
     /**
      * Returns pointer to first vertex index.
@@ -231,47 +231,47 @@ public class TessJNI {
      * New vertices generated at the intersections of segments are assigned value TESS_UNDEF.
      */
     static native boolean getVertexIndices(long inst, int[] out, int offset, int length);/* {
-		const TESSindex* indices = tessGetVertexIndices((TESStesselator*) inst);
-		if (!indices)
-			return 0;
-		memcpy(out, indices + offset, length * sizeof(TESSindex));
-		return 1;
-	} */
+        const TESSindex* indices = tessGetVertexIndices((TESStesselator*) inst);
+        if (!indices)
+            return 0;
+        memcpy(out, indices + offset, length * sizeof(TESSindex));
+        return 1;
+    } */
 
     /**
      * Returns number of elements in the the tesselated output.
      */
     static native int getElementCount(long inst);/*{
-		return tessGetElementCount((TESStesselator*) inst);
-	}*/
+        return tessGetElementCount((TESStesselator*) inst);
+    }*/
 
     /**
      * Returns pointer to the first element.
      */
     static native boolean getElements(long inst, int[] out, int offset, int length);/*{
-		const TESSindex* elements = tessGetElements((TESStesselator*) inst);
-		if (!elements)
-			return 0;
-		memcpy(out, elements + offset, length * sizeof(TESSindex));
-		return 1;
-	}*/
+        const TESSindex* elements = tessGetElements((TESStesselator*) inst);
+        if (!elements)
+            return 0;
+        memcpy(out, elements + offset, length * sizeof(TESSindex));
+        return 1;
+    }*/
 
     /**
      * Returns pointer to the first element.
      */
     static native void getElementsS(long inst, short[] out, int offset, int length);/*{
-		const TESSindex* elements = tessGetElements((TESStesselator*) inst);
-		for(int i = 0; i < length; i++)
-			out[i] = (short)elements[offset++];
-	}*/
+        const TESSindex* elements = tessGetElements((TESStesselator*) inst);
+        for(int i = 0; i < length; i++)
+            out[i] = (short)elements[offset++];
+    }*/
 
     /**
      * Returns list of triangles indices (or to the first element of convex polygons).
      */
     static native void getElementsWithInputVertexIds(long inst, short[] out, int dstOffset, int offset, int length);/*{
-		const TESSindex* elements = tessGetElements((TESStesselator*) inst);
-		const TESSindex* indices = tessGetVertexIndices((TESStesselator*) inst);
-		for(int i = 0; i < length; i++)
-			out[dstOffset++] = (short)(indices[elements[offset++]]);
-	}*/
+        const TESSindex* elements = tessGetElements((TESStesselator*) inst);
+        const TESSindex* indices = tessGetVertexIndices((TESStesselator*) inst);
+        for(int i = 0; i < length; i++)
+            out[dstOffset++] = (short)(indices[elements[offset++]]);
+    }*/
 }

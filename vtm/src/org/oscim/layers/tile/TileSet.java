@@ -81,7 +81,7 @@ public final class TileSet {
         /* lock tiles (and their proxies) to not be removed from cache */
         source.lockTiles();
 
-		/* unlock previous tiles */
+        /* unlock previous tiles */
         releaseTiles();
 
         if (source.tiles.length != tiles.length) {

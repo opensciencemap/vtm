@@ -317,12 +317,12 @@ public class SharedModel implements RenderableProvider {
         if (nodePart.invBoneBindTransforms != null)
             nodePartBones.put(copy, nodePart.invBoneBindTransforms);
 
-//		final int index = materials.indexOf(nodePart.material, false);
-//		if (index < 0)
-//			materials.add(copy.material = nodePart.material.copy());
-//		else
-//			copy.material = materials.get(index);
-//		
+//        final int index = materials.indexOf(nodePart.material, false);
+//        if (index < 0)
+//            materials.add(copy.material = nodePart.material.copy());
+//        else
+//            copy.material = materials.get(index);
+//
         copy.material = nodePart.material;
 
         return copy;
@@ -502,29 +502,29 @@ public class SharedModel implements RenderableProvider {
         return null;
     }
 
-//	/** @param id The ID of the material to fetch.
-//	 * @return The {@link Material} with the specified id, or null if not available. */
-//	public Material getMaterial(final String id) {
-//		return getMaterial(id, true);
-//	}
-//	
-//	/** @param id The ID of the material to fetch.
-//	 * @param ignoreCase whether to use case sensitivity when comparing the material id.
-//	 * @return The {@link Material} with the specified id, or null if not available. */
-//	public Material getMaterial(final String id, boolean ignoreCase) {
-//		final int n = materials.size;
-//		Material material;
-//		if (ignoreCase) {
-//			for (int i = 0; i < n; i++)
-//				if ((material = materials.get(i)).id.equalsIgnoreCase(id))
-//					return material;
-//		} else {
-//			for (int i = 0; i < n; i++)
-//				if ((material = materials.get(i)).id.equals(id))
-//					return material;
-//		}
-//		return null;
-//	}
+//    /** @param id The ID of the material to fetch.
+//     * @return The {@link Material} with the specified id, or null if not available. */
+//    public Material getMaterial(final String id) {
+//        return getMaterial(id, true);
+//    }
+//
+//    /** @param id The ID of the material to fetch.
+//     * @param ignoreCase whether to use case sensitivity when comparing the material id.
+//     * @return The {@link Material} with the specified id, or null if not available. */
+//    public Material getMaterial(final String id, boolean ignoreCase) {
+//        final int n = materials.size;
+//        Material material;
+//        if (ignoreCase) {
+//            for (int i = 0; i < n; i++)
+//                if ((material = materials.get(i)).id.equalsIgnoreCase(id))
+//                    return material;
+//        } else {
+//            for (int i = 0; i < n; i++)
+//                if ((material = materials.get(i)).id.equals(id))
+//                    return material;
+//        }
+//        return null;
+//    }
 
     /**
      * @param id The ID of the node to fetch.

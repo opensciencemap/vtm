@@ -24,26 +24,26 @@ public class MapConfig extends JavaScriptObject {
 
     public static native MapConfig get()/*-{
         return $wnd.mapconfig;
-	}-*/;
+    }-*/;
 
     public final native double getLatitude() /*-{
         return this.latitude || 0;
-	}-*/;
+    }-*/;
 
     public final native double getLongitude() /*-{
-		return this.longitude || 0;
-	}-*/;
+        return this.longitude || 0;
+    }-*/;
 
     public final native int getZoom() /*-{
-		return this.zoom || 2;
-	}-*/;
+        return this.zoom || 2;
+    }-*/;
 
     public final native String getTileSource() /*-{
-		return this.tilesource;
-	}-*/;
+        return this.tilesource;
+    }-*/;
 
     public final native int getTileSize() /*-{
-		return this.tileSize || 256;
-	}-*/;
+        return this.tileSize || 256;
+    }-*/;
 
 }

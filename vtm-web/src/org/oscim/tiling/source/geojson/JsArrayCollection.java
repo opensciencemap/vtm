@@ -83,19 +83,19 @@ public class JsArrayCollection<T> extends AbstractCollection<T> {
 
         public native final JsArr<T> slice(int start, int end)/*-{
             return this.slice(start, end);
-		}-*/;
+        }-*/;
 
         public static final native <T> JsArr<T> create() /*-{
             return [];
-		}-*/;
+        }-*/;
 
         public final native int size() /*-{
-			return this.length;
-		}-*/;
+            return this.length;
+        }-*/;
 
         public final native T get(int i) /*-{
-			return this[i];
-		}-*/;
+            return this[i];
+        }-*/;
     }
 
 }

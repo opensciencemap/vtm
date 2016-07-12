@@ -195,9 +195,9 @@ public class Viewport {
         unproject(1, -1, box, 0);
         /* top-left */
         unproject(-1, -1, box, 2);
-		/* bottom-left */
+        /* bottom-left */
         unproject(-1, 1, box, 4);
-		/* bottom-right */
+        /* bottom-right */
         unproject(1, 1, box, 6);
 
         if (add == 0)
@@ -290,7 +290,7 @@ public class Viewport {
     }
 
     protected void unprojectScreen(double x, double y, float[] out) {
-		/* scale to -1..1 */
+        /* scale to -1..1 */
         float mx = (float) (1 - (x / mWidth * 2));
         float my = (float) (1 - (y / mHeight * 2));
 

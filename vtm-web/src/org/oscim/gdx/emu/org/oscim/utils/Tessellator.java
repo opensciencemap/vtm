@@ -124,17 +124,17 @@ public class Tessellator {
             return 0;
         }
 
-        //		if (vo.length() != plen) {
-        //			// TODO handle different output points
-        //			log.debug(" + io.length());
+        //        if (vo.length() != plen) {
+        //            // TODO handle different output points
+        //            log.debug(" + io.length());
         //
-        //			//for (int i = 0; i < vo.length(); i += 2)
-        //			//	log.debug(vo.get(i) + " " + vo.get(i + 1));
-        //			//for (int i = ppos; i < ppos + plen; i += 2)
-        //			//	log.debug( points[i]+ " " + points[i + 1]);
+        //            //for (int i = 0; i < vo.length(); i += 2)
+        //            //    log.debug(vo.get(i) + " " + vo.get(i + 1));
+        //            //for (int i = ppos; i < ppos + plen; i += 2)
+        //            //    log.debug( points[i]+ " " + points[i + 1]);
         //
-        //			return 0;
-        //		}
+        //            return 0;
+        //        }
 
         int numIndices = io.length();
 
@@ -164,17 +164,17 @@ public class Tessellator {
     static native Int32Array tessellate(JsArrayNumber points, int pOffset, int pLength,
                                         JsArrayInteger bounds, int bOffset, int bLength)/*-{
 
-		return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
-				bOffset, bOffset + bLength, false);
-	}-*/;
+        return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
+                bOffset, bOffset + bLength, false);
+    }-*/;
 
     static native TessResult tessellate2(JsArrayNumber points, int pOffset, int pLength,
                                          JsArrayInteger bounds, int bOffset, int bLength)
     /*-{
 
-		return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
-				bOffset, bOffset + bLength, true);
-	}-*/;
+        return $wnd.tessellate(points, pOffset, pOffset + pLength, bounds,
+                bOffset, bOffset + bLength, true);
+    }-*/;
 
     static final class TessResult extends JavaScriptObject {
         protected TessResult() {
@@ -182,10 +182,10 @@ public class Tessellator {
 
         native Float32Array getPoints(JavaScriptObject result)/*-{
             return result.vertices;
-		}-*/;
+        }-*/;
 
         native Int32Array getIndices(JavaScriptObject result)/*-{
-			return result.triangles;
-		}-*/;
+            return result.triangles;
+        }-*/;
     }
 }

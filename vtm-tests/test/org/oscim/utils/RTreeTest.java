@@ -41,9 +41,9 @@ public class RTreeTest {
 
         @Override
         public String toString() {
-            //			return val + "/"
-            //			        + Arrays.toString(min) + "/"
-            //			        + Arrays.toString(max);
+            //            return val + "/"
+            //                    + Arrays.toString(min) + "/"
+            //                    + Arrays.toString(max);
             return String.valueOf(val);
         }
     }
@@ -82,8 +82,8 @@ public class RTreeTest {
 
         min[0] = 0;
         min[1] = 0;
-        //		max[0] = 4;
-        //		max[1] = 4;
+        //        max[0] = 4;
+        //        max[1] = 4;
 
         final ArrayList<Item> results = new ArrayList<Item>();
 
@@ -146,14 +146,14 @@ public class RTreeTest {
 
         assertEquals(results.size(), numItems);
 
-        //		for (int i = 999; i >= 0; i--) {
-        //			Item it = results.remove(i);
-        //			boolean removed = t.remove(it.min, it.max, it);
-        //			//out.println("REMOVED: " + it + " " + removed);
+        //        for (int i = 999; i >= 0; i--) {
+        //            Item it = results.remove(i);
+        //            boolean removed = t.remove(it.min, it.max, it);
+        //            //out.println("REMOVED: " + it + " " + removed);
         //
-        //			Assert.assertEquals(i, t.count());
-        //		}
-        //		Assert.assertEquals(0, t.count());
+        //            Assert.assertEquals(i, t.count());
+        //        }
+        //        Assert.assertEquals(0, t.count());
     }
 
     @Test
@@ -189,14 +189,14 @@ public class RTreeTest {
 
         assertEquals(numItems, results.size());
 
-        //		for (int i = 999; i >= 0; i--) {
-        //			Item it = results.remove(i);
-        //			boolean removed = t.remove(it.min, it.max, it);
-        //			//out.println("REMOVED: " + it + " " + removed);
+        //        for (int i = 999; i >= 0; i--) {
+        //            Item it = results.remove(i);
+        //            boolean removed = t.remove(it.min, it.max, it);
+        //            //out.println("REMOVED: " + it + " " + removed);
         //
-        //			Assert.assertEquals(i, t.count());
-        //		}
-        //		Assert.assertEquals(0, t.count());
+        //            Assert.assertEquals(i, t.count());
+        //        }
+        //        Assert.assertEquals(0, t.count());
     }
 
     @Test
@@ -220,22 +220,22 @@ public class RTreeTest {
 
         Assert.assertEquals(10000, t.size());
 
-		/*SearchCb<RTreeTest.Item> cb = new SearchCb<RTreeTest.Item>() {
+        /*SearchCb<RTreeTest.Item> cb = new SearchCb<RTreeTest.Item>() {
             @Override
-			public boolean call(Item item, Object context) {
-				//out.println("found: " + item);
-				//results.add(item);
-				return true;
-			}
-		};
+            public boolean call(Item item, Object context) {
+                //out.println("found: " + item);
+                //results.add(item);
+                return true;
+            }
+        };
 
-		int counter = 0;
+        int counter = 0;
 
-		for (int i = 0; i < 10000; i++) {
-			counter += t.search(min, max, cb, null);
-		}
+        for (int i = 0; i < 10000; i++) {
+            counter += t.search(min, max, cb, null);
+        }
 
-		System.out.println("found: " + counter);*/
+        System.out.println("found: " + counter);*/
     }
 
     @Test

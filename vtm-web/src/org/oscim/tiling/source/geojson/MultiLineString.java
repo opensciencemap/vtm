@@ -23,10 +23,10 @@ public class MultiLineString extends Geometry<LineString> {
 
     public final native LineString getGeometryN(int i) /*-{
         return this[i];
-	}-*/;
+    }-*/;
 
     public final native int getNumGeometries() /*-{
         return this.length;
-	}-*/;
+    }-*/;
 
 }

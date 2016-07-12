@@ -54,7 +54,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
 
         int diff = (v.pos.zoomLevel - mZoomMin);
 
-		/* if below min zoom or already faded out */
+        /* if below min zoom or already faded out */
         if (diff < -1) {
             mAlpha = 0;
             mShow = false;
@@ -100,12 +100,12 @@ public class BuildingRenderer extends ExtrusionRenderer {
         MapTile[] tiles = mTileSet.tiles;
         TileDistanceSort.sort(tiles, 0, mTileSet.cnt);
 
-		/* keep a list of tiles available for rendering */
+        /* keep a list of tiles available for rendering */
         int maxTiles = mTileSet.cnt * 4;
         if (mExtrusionBucketSet.length < maxTiles)
             mExtrusionBucketSet = new ExtrusionBuckets[maxTiles];
 
-		/* compile one tile max per frame */
+        /* compile one tile max per frame */
         boolean compiled = false;
 
         int activeTiles = 0;
@@ -134,9 +134,9 @@ public class BuildingRenderer extends ExtrusionRenderer {
                 if (t == null)
                     continue;
 
-                //	for (MapTile c : mTiles)
-                //		if (c == t)
-                //			continue O;
+                //    for (MapTile c : mTiles)
+                //        if (c == t)
+                //            continue O;
 
                 ExtrusionBuckets ebs = getBuckets(t);
                 if (ebs == null)
@@ -151,7 +151,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
                 }
             }
         } else if (zoom == mZoomMin - 1) {
-			/* check if proxy children are ready */
+            /* check if proxy children are ready */
             for (int i = 0; i < mTileSet.cnt; i++) {
                 MapTile t = tiles[i];
                 for (byte j = 0; j < 4; j++) {
@@ -169,7 +169,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
             }
         }
 
-		/* load more tiles on next frame */
+        /* load more tiles on next frame */
         if (compiled)
             MapRenderer.animate();
 
@@ -189,7 +189,7 @@ public class BuildingRenderer extends ExtrusionRenderer {
     public void render(GLViewport v) {
         super.render(v);
 
-		/* release lock on tile data */
+        /* release lock on tile data */
         mTileRenderer.releaseTiles(mTileSet);
     }
 

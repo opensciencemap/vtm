@@ -63,13 +63,13 @@ public class MapView extends GLSurfaceView {
     public MapView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
-		/* Not sure if this makes sense */
+        /* Not sure if this makes sense */
         this.setWillNotDraw(true);
         this.setClickable(true);
         this.setFocusable(true);
         this.setFocusableInTouchMode(true);
 
-		/* Setup android backedn */
+        /* Setup android backedn */
         AndroidGraphics.init();
         AndroidAssets.init(context);
         GLAdapter.init(new AndroidGL());
@@ -77,10 +77,10 @@ public class MapView extends GLSurfaceView {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
 
-		/* Initialize the Map */
+        /* Initialize the Map */
         mMap = new AndroidMap(this);
 
-		/* Initialize Renderer */
+        /* Initialize Renderer */
         setEGLConfigChooser(new GlConfigChooser());
         setEGLContextClientVersion(2);
 

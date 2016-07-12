@@ -111,7 +111,7 @@ class S3DBTileLoader extends TileLoader {
 
         boolean isRoof = element.tags.containsKey(ROOF_KEY);
         //if (isRoof)
-        //	log.debug(element.tags.toString());
+        //    log.debug(element.tags.toString());
 
         int c = 0;
         if (element.tags.containsKey(COLOR_KEY)) {

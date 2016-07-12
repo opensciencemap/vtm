@@ -75,14 +75,14 @@ public class HairLineTest extends GdxMap {
                     //g.translate(10, 10);
                     //l1.addLine(g);
 
-                    //		int o = 0;
-                    //		for (int k = 0; k < g.index.length && g.index[k] >= 0; k++) {
+                    //        int o = 0;
+                    //        for (int k = 0; k < g.index.length && g.index[k] >= 0; k++) {
                     //
-                    //			for (int j = 0; j < g.index[k];)
-                    //				ll.addPoint(g.points[o + j++], g.points[o + j++]);
+                    //            for (int j = 0; j < g.index[k];)
+                    //                ll.addPoint(g.points[o + j++], g.points[o + j++]);
                     //
-                    //			o += g.index[k];
-                    //		}
+                    //            o += g.index[k];
+                    //        }
                 }
                 g = new GeometryBuffer(4, 2);
                 g.clear();

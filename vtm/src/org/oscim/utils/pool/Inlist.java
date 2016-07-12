@@ -72,7 +72,7 @@ public class Inlist<T extends Inlist<T>> {
                 /* keep next */
                 tmp = itr.next;
 
-				/* push itr onto new list */
+                /* push itr onto new list */
                 itr.next = head;
                 head = itr;
 
@@ -311,7 +311,7 @@ public class Inlist<T extends Inlist<T>> {
                 break;
             }
             //else if (it.next == other) {
-            //	throw new IllegalArgumentException("'other' already in 'list'");
+            //    throw new IllegalArgumentException("'other' already in 'list'");
             //}
         }
 

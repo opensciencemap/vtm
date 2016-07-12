@@ -27,9 +27,9 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 public class TileRenderTest extends GdxMapApp {
 
     static boolean loadOneTile = true;
-    //	static int tileX = 34365 >> 2;
-    //	static int tileY = 21333 >> 2;
-    //	static byte tileZ = 14;
+    //    static int tileX = 34365 >> 2;
+    //    static int tileY = 21333 >> 2;
+    //    static byte tileZ = 14;
 
     static int tileX = 68747 >> 3;
     static int tileY = 42648 >> 3;
@@ -62,7 +62,7 @@ public class TileRenderTest extends GdxMapApp {
             tile.node.parent = tile.node;
             tile.node.parent.parent = tile.node;
 
-			/* setup TileSet contatining one tile */
+            /* setup TileSet contatining one tile */
             final TileSet tiles = new TileSet();
             tiles.cnt = 1;
             tiles.tiles[0] = tile;
@@ -74,7 +74,7 @@ public class TileRenderTest extends GdxMapApp {
             tileManager = new TileManager(mMap, 100);
         }
 
-		/* get the loader created by VectorTileLayer ... */
+        /* get the loader created by VectorTileLayer ... */
         final TestTileLoader[] tileLoader = {null};
 
         TestVectorTileLayer tileLayer = new TestVectorTileLayer(mMap, tileManager);
@@ -89,7 +89,7 @@ public class TileRenderTest extends GdxMapApp {
         //tileLayer.setRenderTheme(theme);
         //tileLayer.setRenderTheme(new DebugTheme());
 
-		/* need to create the labellayer here to get the tileloaded event */
+        /* need to create the labellayer here to get the tileloaded event */
         LabelLayer labelLayer = new LabelLayer(mMap, tileLayer);
 
         //mMap.layers().add(tileLayer);
@@ -169,7 +169,7 @@ public class TileRenderTest extends GdxMapApp {
 
         @Override
         public void onMapEvent(Event event, MapPosition mapPosition) {
-			/* ignore map events */
+            /* ignore map events */
             if (event != Map.CLEAR_EVENT)
                 return;
 

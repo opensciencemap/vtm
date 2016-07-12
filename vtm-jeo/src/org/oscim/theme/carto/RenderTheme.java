@@ -214,7 +214,7 @@ public class RenderTheme implements IRenderTheme {
             //RGB c = r.color(f, CartoCSS.MARKER_FILL, RGB.black);
             //out.println(c);
             //return new RenderInstruction[] {
-            //		new Caption(color(c), width)
+            //        new Caption(color(c), width)
             //};
         }
 

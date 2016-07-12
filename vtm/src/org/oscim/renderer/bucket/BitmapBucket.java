@@ -36,7 +36,7 @@ import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
 public class BitmapBucket extends TextureBucket {
     // TODO share layers.vbo() between BitmapTileLayers
 
-    //	static final Logger log = LoggerFactory.getLogger(BitmapLayer.class);
+    //    static final Logger log = LoggerFactory.getLogger(BitmapLayer.class);
     private Bitmap mBitmap;
     private final boolean mReuseBitmap;
     private final short[] mVertices;
@@ -90,7 +90,7 @@ public class BitmapBucket extends TextureBucket {
         short texMin = 0;
         short texMax = 1;
 
-        //	putSprite(buf, pos, tx, ty, x1, y1, x2, y2, u1, v1, u2, v2);
+        //    putSprite(buf, pos, tx, ty, x1, y1, x2, y2, u1, v1, u2, v2);
         int pos = 0;
 
         // top-left

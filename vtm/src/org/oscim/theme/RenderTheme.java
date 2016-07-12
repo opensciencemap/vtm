@@ -114,10 +114,10 @@ public class RenderTheme implements IRenderTheme {
     @Override
     public RenderStyle[] matchElement(GeometryType geometryType, TagSet tags, int zoomLevel) {
 
-		/* list of items in cache */
+        /* list of items in cache */
         RenderStyleItem ris = null;
 
-		/* the item matching tags and zoomlevel */
+        /* the item matching tags and zoomlevel */
         RenderStyleItem ri = null;
 
         int type = geometryType.nativeInt;
@@ -128,7 +128,7 @@ public class RenderTheme implements IRenderTheme {
 
         RenderStyleCache cache = mStyleCache[type - 1];
 
-		/* NOTE: maximum zoom level supported is 32 */
+        /* NOTE: maximum zoom level supported is 32 */
         int zoomMask = 1 << zoomLevel;
 
         synchronized (cache) {
@@ -146,12 +146,12 @@ public class RenderTheme implements IRenderTheme {
             }
 
             if (ri == null) {
-				/* get instruction for current cacheKey */
+                /* get instruction for current cacheKey */
                 ris = cache.getRenderInstructions();
 
                 for (ri = ris; ri != null; ri = ri.next) {
                     if ((ri.zoom & zoomMask) != 0) {
-						/* cache hit */
+                        /* cache hit */
 
                         //log.debug(hitCount.incrementAndGet()
                         //       + "/" + sameCount + "/" + missCount
@@ -162,7 +162,7 @@ public class RenderTheme implements IRenderTheme {
             }
 
             if (ri == null) {
-				/* cache miss */
+                /* cache miss */
                 //missCount.incrementAndGet();
 
                 List<RenderStyle> matches = cache.instructionList;
@@ -187,13 +187,13 @@ public class RenderTheme implements IRenderTheme {
                         }
                     }
                 }
-				/* check if same instructions are used in another level */
+                /* check if same instructions are used in another level */
                 for (ri = ris; ri != null; ri = ri.next) {
                     if (size == 0) {
                         if (ri.list != null)
                             continue;
 
-						/* both matchinglists are empty */
+                        /* both matchinglists are empty */
                         break;
                     }
 
@@ -210,20 +210,20 @@ public class RenderTheme implements IRenderTheme {
                         i++;
                     }
                     if (i == size)
-						/* both matching lists contain the same items */
+                        /* both matching lists contain the same items */
                         break;
                 }
 
                 if (ri != null) {
-					/* we found a same matchting list on another zoomlevel add
-					 * this zoom level to the existing RenderInstructionItem. */
+                    /* we found a same matchting list on another zoomlevel add
+                     * this zoom level to the existing RenderInstructionItem. */
                     ri.zoom |= zoomMask;
 
                     //log.debug(zoomLevel + " same instructions " + size + " "
-                    //				+ Arrays.deepToString(tags));
+                    //                + Arrays.deepToString(tags));
                 } else {
                     //log.debug(zoomLevel + " new instructions " + size + " "
-                    //				+ Arrays.deepToString(tags));
+                    //                + Arrays.deepToString(tags));
 
                     ri = new RenderStyleItem();
                     ri.zoom = zoomMask;
@@ -233,7 +233,7 @@ public class RenderTheme implements IRenderTheme {
                         matches.toArray(ri.list);
                     }
 
-					/* attach this list to the one found for MatchingKey */
+                    /* attach this list to the one found for MatchingKey */
                     if (ris != null) {
                         ri.next = ris.next;
                         ri.key = ris.key;

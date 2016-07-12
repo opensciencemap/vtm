@@ -10,9 +10,9 @@ public class LngLat extends JavaScriptObject {
 
     public final native double getLongitude() /*-{
         return this[0];
-	}-*/;
+    }-*/;
 
     public final native double getLatitude() /*-{
         return this[1];
-	}-*/;
+    }-*/;
 }

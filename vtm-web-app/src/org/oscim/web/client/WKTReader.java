@@ -220,21 +220,21 @@ public class WKTReader {
         return neg ? -val : val;
     }
 
-    //	public static void main(String[] args) {
-    //		WKTReader r = new WKTReader();
-    //		GeometryBuffer geom = new GeometryBuffer(10, 10);
-    //		try {
-    //			String wkt = "MULTIPOINT(0 0,1 0)";
-    //			r.parse(wkt, geom);
-    //			for (int i = 0; i < geom.index.length; i++) {
-    //				int len = geom.index[i];
-    //				if (len < 0)
-    //					break;
-    //				for (int p = 0; p < len; p += 2)
-    //					System.out.println(len + ": " + geom.points[p] + "," + geom.points[p + 1]);
-    //			}
-    //		} catch (Exception e) {
-    //			e.printStackTrace();
-    //		}
-    //	}
+    //    public static void main(String[] args) {
+    //        WKTReader r = new WKTReader();
+    //        GeometryBuffer geom = new GeometryBuffer(10, 10);
+    //        try {
+    //            String wkt = "MULTIPOINT(0 0,1 0)";
+    //            r.parse(wkt, geom);
+    //            for (int i = 0; i < geom.index.length; i++) {
+    //                int len = geom.index[i];
+    //                if (len < 0)
+    //                    break;
+    //                for (int p = 0; p < len; p += 2)
+    //                    System.out.println(len + ": " + geom.points[p] + "," + geom.points[p + 1]);
+    //            }
+    //        } catch (Exception e) {
+    //            e.printStackTrace();
+    //        }
+    //    }
 }

@@ -75,10 +75,10 @@ public class GwtLauncher extends GwtApplication {
 
     private static native int getWindowWidth() /*-{
         return $wnd.innerWidth;
-	}-*/;
+    }-*/;
 
     private static native int getWindowHeight() /*-{
         return $wnd.innerHeight;
-	}-*/;
+    }-*/;
 
 }

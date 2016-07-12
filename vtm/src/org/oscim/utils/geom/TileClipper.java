@@ -134,10 +134,10 @@ public class TileClipper {
             }
 
             //if (out.index[i] < 6) {
-            //	out.index[i] = 0;
-            //	//if (out.indexPos > 0)
-            //	//	out.indexPos--;
-            //	// TODO if outer skip holes
+            //    out.index[i] = 0;
+            //    //if (out.indexPos > 0)
+            //    //    out.indexPos--;
+            //    // TODO if outer skip holes
             //}
 
             pointPos += len;
@@ -161,16 +161,16 @@ public class TileClipper {
                     /* previous was inside */
                     out.addPoint(cx, cy);
                 } else {
-					/* previous was outside, add edge point */
+                    /* previous was outside, add edge point */
                     out.addPoint(xmin, py + (cy - py) * (xmin - px) / (cx - px));
                     out.addPoint(cx, cy);
                 }
             } else {
                 if (px > xmin) {
-					/* previous was inside, add edge point */
+                    /* previous was inside, add edge point */
                     out.addPoint(xmin, py + (cy - py) * (xmin - px) / (cx - px));
                 }
-				/* else skip point */
+                /* else skip point */
             }
             px = cx;
             py = cy;

@@ -88,7 +88,7 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
         Envelope e = geometry.getEnvelopeInternal();
         Box bbox = new Box(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMaxY());
         //if ("Point".equals(geometry.getGeometryType())){
-        //	bbox.
+        //    bbox.
         //}
 
         bbox.scale(1E6);
@@ -158,15 +158,15 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
         if (Double.isNaN(bbox.xmin))
             return;
 
-        //	mEnvelope = new GeomBuilder()
-        //	    .point(bbox.xmin, bbox.ymin)
-        //	    .point(bbox.xmin, bbox.ymax)
-        //	    .point(bbox.xmax, bbox.ymax)
-        //	    .point(bbox.xmax, bbox.ymin)
-        //	    .point(bbox.xmin, bbox.ymin)
-        //	    .toPolygon();
+        //    mEnvelope = new GeomBuilder()
+        //        .point(bbox.xmin, bbox.ymin)
+        //        .point(bbox.xmin, bbox.ymax)
+        //        .point(bbox.xmax, bbox.ymax)
+        //        .point(bbox.xmax, bbox.ymin)
+        //        .point(bbox.xmin, bbox.ymin)
+        //        .toPolygon();
 
-		/* reduce lines points min distance */
+        /* reduce lines points min distance */
         mMinX = ((bbox.xmax - bbox.xmin) / mMap.getWidth());
         mMinY = ((bbox.ymax - bbox.ymin) / mMap.getHeight());
 
@@ -177,7 +177,7 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
         int level = 0;
         Style lastStyle = null;
 
-		/* go through features, find the matching style and draw */
+        /* go through features, find the matching style and draw */
         synchronized (this) {
             tmpDrawables.clear();
             mDrawables.search(bbox, tmpDrawables);
@@ -294,13 +294,13 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
         double x = (longitudeToX(px) - pos.x) * scale;
         double y = (latitudeToY(py) - pos.y) * scale;
 
-		/* TODO in the next line I was only able to interpolate a function
+        /* TODO in the next line I was only able to interpolate a function
          * that makes up for the zoom level. The circle should not grow, it
-		 * should stickto the map. 0.01 / (1 << startLvl) makes it retain
-		 * its size. Correction? */
+         * should stickto the map. 0.01 / (1 << startLvl) makes it retain
+         * its size. Correction? */
         int zoomScale = (1 << style.scalingZoomLevel);
 
-		/* Keep the circle's size constant in relation to the underlying map */
+        /* Keep the circle's size constant in relation to the underlying map */
         double radius = style.buffer;
 
         if (pos.scale > zoomScale)

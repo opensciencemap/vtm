@@ -65,7 +65,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         // TODO this is redundant - use tile ids
         public int x1, x2, y1, y2;
 
-		/* inherits BoxItem<E> item; */
+        /* inherits BoxItem<E> item; */
 
         @Override
         public String toString() {
@@ -160,7 +160,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         if (!isPowerOfTwo(extents))
             throw new IllegalArgumentException("Extents must be power of two!");
 
-		/* size is -extents to +extents */
+        /* size is -extents to +extents */
         this.root.x1 = -extents;
         this.root.y1 = -extents;
         this.root.x2 = extents;
@@ -210,7 +210,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
 
             n = stack.pop();
 
-			/* process overlapping items from cur node */
+            /* process overlapping items from cur node */
             for (BoxItem<E> it = n.item; it != null; it = it.next) {
                 if (it.overlaps(box)) {
                     if (!cb.call(it.item, ctxt)) {
@@ -222,7 +222,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
 
             BoxNode<T> p = n.parent;
 
-			/* push next node on same level onto stack */
+            /* push next node on same level onto stack */
             switch (n.id) {
                 case 0:
                     if (overlaps(p.child01, box)) {
@@ -275,7 +275,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         while (!stack.empty()) {
             n = stack.pop();
 
-			/* process overlapping items from cur node */
+            /* process overlapping items from cur node */
             for (BoxItem<E> it = n.item; it != null; it = it.next) {
                 if (it.overlaps(box)) {
                     @SuppressWarnings("unchecked")
@@ -289,7 +289,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
 
             BoxNode<T> p = n.parent;
 
-			/* push next node on same level onto stack */
+            /* push next node on same level onto stack */
             switch (n.id) {
                 case 0:
                     if (overlaps(p.child01, box)) {
@@ -310,7 +310,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
                     break;
             }
 
-			/* push next level child onto stack */
+            /* push next level child onto stack */
             if (overlaps(n.child00, box))
                 stack.push(n.child00);
 
@@ -346,12 +346,12 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         while (!stack.empty()) {
             n = stack.pop();
 
-			/* process overlapping items from cur node */
+            /* process overlapping items from cur node */
             cb.call(n);
 
             BoxNode<T> p = n.parent;
 
-			/* push next node on same level onto stack */
+            /* push next node on same level onto stack */
             switch (n.id) {
                 case 0:
                     if (p.child01 != null) {
@@ -372,7 +372,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
                     break;
             }
 
-			/* push next level child onto stack */
+            /* push next level child onto stack */
             if (n.child00 != null)
                 stack.push(n.child00);
             else if (n.child01 != null)
@@ -439,10 +439,10 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         for (int level = 0; level <= maxDepth; level++) {
             cur.refs++;
 
-			/* half size of tile at current level */
+            /* half size of tile at current level */
             int hsize = (cur.x2 - cur.x1) >> 1;
 
-			/* center of tile */
+            /* center of tile */
             int cx = cur.x1 + hsize;
             int cy = cur.y1 + hsize;
 
@@ -497,10 +497,10 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         int y2 = box.y2;
 
         for (int level = 0; level <= maxDepth; level++) {
-			/* half size of tile at current level */
+            /* half size of tile at current level */
             int hsize = (cur.x2 - cur.x1) >> 1;
 
-			/* center of tile */
+            /* center of tile */
             int cx = cur.x1 + hsize;
             int cy = cur.y1 + hsize;
 
@@ -569,10 +569,10 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         for (int level = 0; level <= maxDepth; level++) {
             cur.refs++;
 
-			/* half size of tile at current z */
+            /* half size of tile at current z */
             int hsize = (cur.x2 - cur.x1) >> 1;
 
-			/* center of tile (shift by -extents) */
+            /* center of tile (shift by -extents) */
             int cx = cur.x1 + hsize;
             int cy = cur.y1 + hsize;
 
@@ -618,7 +618,7 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
         BoxNode<T> node = root;
 
         while (true) {
-			/* traverse down */
+            /* traverse down */
             if (node.child00 != null) {
                 node = node.child00;
                 continue;
@@ -639,10 +639,10 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
             if (node == root)
                 break;
 
-			/* traverse up */
+            /* traverse up */
             BoxNode<T> parent = node.parent;
 
-			/* unlink from parent */
+            /* unlink from parent */
             switch (node.id) {
                 case 0:
                     parent.child00 = null;
@@ -658,15 +658,15 @@ public class BoxTree<T extends BoxItem<E>, E> extends TileIndex<BoxNode<T>, T> {
                     break;
             }
 
-			/* release items */
+            /* release items */
             node.item = null;
             node.refs = 0;
 
-			/* add n back to pool */
+            /* add n back to pool */
             node.parent = pool;
             pool = node;
 
-			/* continue with parent node */
+            /* continue with parent node */
             node = parent;
         }
 

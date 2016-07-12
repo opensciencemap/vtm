@@ -117,30 +117,30 @@ public class BitmapTileLayer extends TileLayer {
      */
     final TexturePool pool = new TexturePool(POOL_FILL) {
 
-        //		int sum = 0;
+        //        int sum = 0;
         //
-        //		public TextureItem release(TextureItem item) {
-        //			log.debug(getFill() + " " + sum + " release tex " + item.id);
-        //			return super.release(item);
-        //		};
+        //        public TextureItem release(TextureItem item) {
+        //            log.debug(getFill() + " " + sum + " release tex " + item.id);
+        //            return super.release(item);
+        //        };
         //
-        //		public synchronized TextureItem get() {
-        //			log.debug(getFill() + " " + sum + " get tex ");
+        //        public synchronized TextureItem get() {
+        //            log.debug(getFill() + " " + sum + " get tex ");
         //
-        //			return super.get();
-        //		};
+        //            return super.get();
+        //        };
         //
-        //		protected TextureItem createItem() {
-        //			log.debug(getFill() + " " + (sum++) + " create tex ");
+        //        protected TextureItem createItem() {
+        //            log.debug(getFill() + " " + (sum++) + " create tex ");
         //
-        //			return super.createItem();
-        //		};
+        //            return super.createItem();
+        //        };
         //
-        //		protected void freeItem(TextureItem t) {
-        //			log.debug(getFill() + " " + (sum--) + " free tex ");
-        //			super.freeItem(t);
+        //        protected void freeItem(TextureItem t) {
+        //            log.debug(getFill() + " " + (sum--) + " free tex ");
+        //            super.freeItem(t);
         //
-        //		};
+        //        };
     };
 
 }

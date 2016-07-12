@@ -28,7 +28,7 @@ import org.oscim.core.Tile;
  * <p/>
  * <pre>
  * Viewport.getMapViewProjection(box)
- * 	ScanBox sb = new ScanBox(){
+ *     ScanBox sb = new ScanBox(){
  *          protected void setVisible(int y, int x1, int x2) {
  *          }
  *    };
@@ -58,7 +58,7 @@ public abstract class ScanBox {
         return mBox;
     }
 
-	/* ported from Polymaps: Layer.js */
+    /* ported from Polymaps: Layer.js */
 
     static class Edge {
         float x0, y0, x1, y1, dx, dy;

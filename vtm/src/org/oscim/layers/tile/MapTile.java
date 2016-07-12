@@ -247,7 +247,7 @@ public class MapTile extends Tile {
                 node.child(i).refs--;
         }
 
-		/* removed all proxy references for this tile */
+        /* removed all proxy references for this tile */
         proxy = 0;
 
         if (state == DEADBEEF) {
@@ -411,9 +411,9 @@ public class MapTile extends Tile {
         if (state == newState)
             return;
 
-		/* Renderer could have uploaded the tile while the layer
-		 * was cleared. This prevents to set tile to READY state. */
-		/* All other state changes are on the main-thread. */
+        /* Renderer could have uploaded the tile while the layer
+         * was cleared. This prevents to set tile to READY state. */
+        /* All other state changes are on the main-thread. */
         if (state == DEADBEEF)
             return;
 

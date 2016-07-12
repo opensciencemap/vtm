@@ -79,7 +79,7 @@ public class Rule {
                 /* only add first matching rule and when-matched rules iff a
                  * previous rule matched */
                 for (Rule r : subRules) {
-					/* continue if matched xor selectWhenMatch */
+                    /* continue if matched xor selectWhenMatch */
                     if (matched ^ r.selectWhenMatched)
                         continue;
 
@@ -87,8 +87,8 @@ public class Rule {
                         matched = true;
                 }
             } else {
-				/* add all rules and when-matched rules iff a previous rule
-				 * matched */
+                /* add all rules and when-matched rules iff a previous rule
+                 * matched */
                 for (Rule r : subRules) {
                     if (r.selectWhenMatched && !matched)
                         continue;
@@ -100,14 +100,14 @@ public class Rule {
         }
 
         if (styles == EMPTY_STYLE)
-			/* matched if styles where added */
+            /* matched if styles where added */
             return matched;
 
-		/* add instructions for this rule */
+        /* add instructions for this rule */
         for (RenderStyle ri : styles)
             result.add(ri);
 
-		/* this rule did match */
+        /* this rule did match */
         return true;
     }
 
@@ -283,15 +283,15 @@ public class Rule {
         public final String[] keys;
         public final String[] values;
 
-		/* (-) 'exclusive negation' matches when either KEY is not present
-		 * or KEY is present and any VALUE is NOT present
-		 * 
-		 * (\) 'except negation' matches when KEY is present
-		 * none items of VALUE is present (TODO).
-		 * (can be emulated by <m k="a"><m k=a v="-|b|c">...</m></m>)
-		 * 
-		 * (~) 'non-exclusive negation' matches when either KEY is not present
-		 * or KEY is present and any VALUE is present */
+        /* (-) 'exclusive negation' matches when either KEY is not present
+         * or KEY is present and any VALUE is NOT present
+         *
+         * (\) 'except negation' matches when KEY is present
+         * none items of VALUE is present (TODO).
+         * (can be emulated by <m k="a"><m k=a v="-|b|c">...</m></m>)
+         *
+         * (~) 'non-exclusive negation' matches when either KEY is not present
+         * or KEY is present and any VALUE is present */
 
         public final boolean exclusive;
 

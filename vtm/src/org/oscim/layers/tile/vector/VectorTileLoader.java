@@ -119,13 +119,13 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
         //mTileLayer.getLoaderHooks();
 
-		/* account for area changes with latitude */
+        /* account for area changes with latitude */
         double lat = MercatorProjection.toLatitude(tile.y);
         mLineScale = (float) Math.pow(STROKE_INCREASE, tile.zoomLevel - STROKE_MIN_ZOOM);
         if (mLineScale < 1)
             mLineScale = 1;
 
-		/* scale line width relative to latitude + PI * thumb */
+        /* scale line width relative to latitude + PI * thumb */
         mLineScale *= 0.4f + 0.6f * ((float) Math.sin(Math.abs(lat) * (Math.PI / 180)));
         mBuckets = new RenderBuckets();
         tile.data = mBuckets;
@@ -150,7 +150,7 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
         mTileLayer.callHooksComplete(mTile, ok);
 
-		/* finish buckets- tessellate and cleanup on worker-thread */
+        /* finish buckets- tessellate and cleanup on worker-thread */
         mBuckets.prepare();
         clearState();
 
@@ -205,7 +205,7 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
         mElement = element;
 
-		/* get and apply render instructions */
+        /* get and apply render instructions */
         if (element.type == GeometryType.POINT) {
             renderNode(renderTheme.matchElement(element.type, tags, mTile.zoomLevel));
         } else {
@@ -265,7 +265,7 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
 
             lb.addLine(mElement);
 
-			/* keep reference for outline layer(s) */
+            /* keep reference for outline layer(s) */
             mCurLineBucket = lb;
 
         } else {

@@ -47,7 +47,7 @@ public class VectorTileRenderer extends TileRenderer {
     @Override
     public synchronized void render(GLViewport v) {
 
-		/* discard depth projection from tilt, depth buffer
+        /* discard depth projection from tilt, depth buffer
          * is used for clipping */
         mClipProj.copy(v.proj);
         mClipProj.setValue(10, 0);
@@ -71,9 +71,9 @@ public class VectorTileRenderer extends TileRenderer {
                 gl.depthMask(true);
                 gl.clear(GL.DEPTH_BUFFER_BIT);
 
-				/* always write depth for non-proxy tiles
+                /* always write depth for non-proxy tiles
                  * this is used in drawProxies pass to not
-				 * draw where tiles were already drawn */
+                 * draw where tiles were already drawn */
                 gl.depthFunc(GL.ALWAYS);
 
                 mClipMode = PolygonBucket.CLIP_DEPTH;
@@ -83,24 +83,24 @@ public class VectorTileRenderer extends TileRenderer {
             }
         }
 
-		/* draw visible tiles */
+        /* draw visible tiles */
         for (int i = 0; i < tileCnt; i++) {
             MapTile t = tiles[i];
             if (t.isVisible && t.state(READY))
                 drawTile(t, v, 0);
         }
 
-		/* draw parent or children as proxy for visibile tiles that dont
-		 * have data yet. Proxies are clipped to the region where nothing
-		 * was drawn to depth buffer.
-		 * TODO draw proxies for placeholder */
+        /* draw parent or children as proxy for visibile tiles that dont
+         * have data yet. Proxies are clipped to the region where nothing
+         * was drawn to depth buffer.
+         * TODO draw proxies for placeholder */
         if (!drawProxies)
             return;
 
-		/* only draw where no other tile is drawn */
+        /* only draw where no other tile is drawn */
         gl.depthFunc(GL.LESS);
 
-		/* draw child or parent proxies */
+        /* draw child or parent proxies */
         boolean preferParent = (v.pos.getZoomScale() < 1.5)
                 || (v.pos.zoomLevel < tiles[0].zoomLevel);
 
@@ -127,7 +127,7 @@ public class VectorTileRenderer extends TileRenderer {
             }
         }
 
-		/* draw grandparents */
+        /* draw grandparents */
         for (int i = 0; i < tileCnt; i++) {
             MapTile t = tiles[i];
             if ((!t.isVisible) || (t.lastDraw == mDrawSerial))
@@ -137,19 +137,19 @@ public class VectorTileRenderer extends TileRenderer {
 
         gl.depthMask(false);
 
-		/* make sure stencil buffer write is disabled */
+        /* make sure stencil buffer write is disabled */
         //GL.stencilMask(0x00);
     }
 
     private void drawTile(MapTile tile, GLViewport v, int proxyLevel) {
 
-		/* ensure to draw parents only once */
+        /* ensure to draw parents only once */
         if (tile.lastDraw == mDrawSerial)
             return;
 
         tile.lastDraw = mDrawSerial;
 
-		/* use holder proxy when it is set */
+        /* use holder proxy when it is set */
         RenderBuckets buckets = (tile.holder == null)
                 ? tile.getBuckets()
                 : tile.holder.getBuckets();
@@ -160,14 +160,14 @@ public class VectorTileRenderer extends TileRenderer {
         }
 
         MapPosition pos = v.pos;
-		/* place tile relative to map position */
+        /* place tile relative to map position */
         int z = tile.zoomLevel;
         float div = FastMath.pow(z - pos.zoomLevel);
         double tileScale = Tile.SIZE * pos.scale;
         float x = (float) ((tile.x - pos.x) * tileScale);
         float y = (float) ((tile.y - pos.y) * tileScale);
 
-		/* scale relative to zoom-level of this tile */
+        /* scale relative to zoom-level of this tile */
         float scale = (float) (pos.scale / (1 << z));
 
         v.mvp.setTransScale(x, y, scale / COORD_SCALE);
@@ -186,7 +186,7 @@ public class VectorTileRenderer extends TileRenderer {
                 case POLYGON:
                     b = PolygonBucket.Renderer.draw(b, v, div, first);
                     first = false;
-					/* set test for clip to tile region */
+                    /* set test for clip to tile region */
                     gl.stencilFunc(GL.EQUAL, 0x80, 0x80);
                     break;
                 case LINE:
@@ -205,13 +205,13 @@ public class VectorTileRenderer extends TileRenderer {
                     b = BitmapBucket.Renderer.draw(b, v, 1, mLayerAlpha);
                     break;
                 default:
-					/* just in case */
+                    /* just in case */
                     log.error("unknown layer {}", b.type);
                     b = b.next;
                     break;
             }
 
-			/* make sure buffers are bound again */
+            /* make sure buffers are bound again */
             buckets.bind();
         }
 
@@ -231,7 +231,7 @@ public class VectorTileRenderer extends TileRenderer {
             if (tile.holder == null) {
                 fadeTime = getMinFade(tile, proxyLevel);
             } else {
-				/* need to use time from original tile */
+                /* need to use time from original tile */
                 fadeTime = tile.holder.fadeTime;
                 if (fadeTime == 0)
                     fadeTime = getMinFade(tile.holder, proxyLevel);

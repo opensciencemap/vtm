@@ -157,11 +157,11 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
             if (cur == null)
                 throw new IllegalStateException("Item not in index");
 
-			/* keep pointer to parent */
+            /* keep pointer to parent */
             T next = cur.parent;
             cur.refs--;
 
-			/* if current node has no children */
+            /* if current node has no children */
             if (cur.refs == 0) {
                 /* unhook from parent */
                 switch (cur.id) {
@@ -179,7 +179,7 @@ public abstract class TileIndex<T extends TreeNode<T, E>, E> {
                         break;
                 }
 
-				/* add item back to pool */
+                /* add item back to pool */
                 cur.parent = pool;
                 pool = cur;
             }

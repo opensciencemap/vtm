@@ -70,7 +70,7 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
     protected void onResume() {
         super.onResume();
 
-		/* ignore saved position */
+        /* ignore saved position */
         mMap.setMapPosition(0, 0, 1 << 2);
     }
 

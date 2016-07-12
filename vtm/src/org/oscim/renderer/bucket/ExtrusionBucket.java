@@ -170,7 +170,7 @@ public class ExtrusionBucket extends RenderBucket {
                 if (index[k] < 0)
                     break;
 
-				/* FIXME: workaround: dont overflow max index id. */
+                /* FIXME: workaround: dont overflow max index id. */
                 if (vertexCnt >= 1 << 16)
                     break;
 
@@ -205,9 +205,9 @@ public class ExtrusionBucket extends RenderBucket {
                 double len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 
                 // packing the normal in two bytes
-                //	int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
-                //	int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
-                //	short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
+                //    int mx = FastMath.clamp(127 + (int) ((cx / len) * 128), 0, 0xff);
+                //    int my = FastMath.clamp(127 + (int) ((cy / len) * 128), 0, 0xff);
+                //    short normal = (short) ((my << 8) | (mx & NORMAL_DIR_MASK) | (cz > 0 ? 1 : 0));
 
                 double p = Math.sqrt((cz / len) * 8.0 + 8.0);
                 int mx = FastMath.clamp(127 + (int) ((cx / len / p) * 128), 0, 255);
@@ -278,66 +278,66 @@ public class ExtrusionBucket extends RenderBucket {
         numIndices++;
     }
 
-    //	private void encodeNormal(float v[], int offset) {
-    //	    var p = Math.sqrt(cartesian.z * 8.0 + 8.0);
-    //	    var result = new Cartesian2();
-    //	    result.x = cartesian.x / p + 0.5;
-    //	    result.y = cartesian.y / p + 0.5;
-    //	    return result;
-    //	}
+    //    private void encodeNormal(float v[], int offset) {
+    //        var p = Math.sqrt(cartesian.z * 8.0 + 8.0);
+    //        var result = new Cartesian2();
+    //        result.x = cartesian.x / p + 0.5;
+    //        result.y = cartesian.y / p + 0.5;
+    //        return result;
+    //    }
     //
     //public void addNoNormal(MapElement element) {
-    //	if (element.type != GeometryType.TRIS)
-    //		return;
+    //    if (element.type != GeometryType.TRIS)
+    //        return;
     //
-    //	short[] index = element.index;
-    //	float[] points = element.points;
+    //    short[] index = element.index;
+    //    float[] points = element.points;
     //
-    //	/* current vertex id */
-    //	int startVertex = sumVertices;
+    //    /* current vertex id */
+    //    int startVertex = sumVertices;
     //
-    //	/* roof indices for convex shapes */
-    //	int i = mCurIndices[IND_MESH].used;
-    //	short[] indices = mCurIndices[IND_MESH].vertices;
+    //    /* roof indices for convex shapes */
+    //    int i = mCurIndices[IND_MESH].used;
+    //    short[] indices = mCurIndices[IND_MESH].vertices;
     //
-    //	int first = startVertex;
+    //    int first = startVertex;
     //
-    //	for (int k = 0, n = index.length; k < n;) {
-    //		if (index[k] < 0)
-    //			break;
+    //    for (int k = 0, n = index.length; k < n;) {
+    //        if (index[k] < 0)
+    //            break;
     //
-    //		if (i == VertexItem.SIZE) {
-    //			mCurIndices[IND_MESH] = VertexItem.getNext(mCurIndices[IND_MESH]);
-    //			indices = mCurIndices[IND_MESH].vertices;
-    //			i = 0;
-    //		}
-    //		indices[i++] = (short) (first + index[k++]);
-    //		indices[i++] = (short) (first + index[k++]);
-    //		indices[i++] = (short) (first + index[k++]);
-    //	}
-    //	mCurIndices[IND_MESH].used = i;
+    //        if (i == VertexItem.SIZE) {
+    //            mCurIndices[IND_MESH] = VertexItem.getNext(mCurIndices[IND_MESH]);
+    //            indices = mCurIndices[IND_MESH].vertices;
+    //            i = 0;
+    //        }
+    //        indices[i++] = (short) (first + index[k++]);
+    //        indices[i++] = (short) (first + index[k++]);
+    //        indices[i++] = (short) (first + index[k++]);
+    //    }
+    //    mCurIndices[IND_MESH].used = i;
     //
-    //	short[] vertices = mCurVertices.vertices;
-    //	int v = mCurVertices.used;
+    //    short[] vertices = mCurVertices.vertices;
+    //    int v = mCurVertices.used;
     //
-    //	int vertexCnt = element.pointPos;
+    //    int vertexCnt = element.pointPos;
     //
-    //	for (int j = 0; j < vertexCnt;) {
-    //		/* add bottom and top vertex for each point */
-    //		if (v == VertexItem.SIZE) {
-    //			mCurVertices = VertexItem.getNext(mCurVertices);
-    //			vertices = mCurVertices.vertices;
-    //			v = 0;
-    //		}
-    //		/* set coordinate */
-    //		vertices[v++] = (short) (points[j++] * S);
-    //		vertices[v++] = (short) (points[j++] * S);
-    //		vertices[v++] = (short) (points[j++] * S);
-    //		v++;
-    //	}
+    //    for (int j = 0; j < vertexCnt;) {
+    //        /* add bottom and top vertex for each point */
+    //        if (v == VertexItem.SIZE) {
+    //            mCurVertices = VertexItem.getNext(mCurVertices);
+    //            vertices = mCurVertices.vertices;
+    //            v = 0;
+    //        }
+    //        /* set coordinate */
+    //        vertices[v++] = (short) (points[j++] * S);
+    //        vertices[v++] = (short) (points[j++] * S);
+    //        vertices[v++] = (short) (points[j++] * S);
+    //        v++;
+    //    }
     //
-    //	mCurVertices.used = v;
-    //	sumVertices += (vertexCnt / 3);
+    //    mCurVertices.used = v;
+    //    sumVertices += (vertexCnt / 3);
     //}
 
     public void add(MapElement element, float height, float minHeight) {
@@ -345,30 +345,30 @@ public class ExtrusionBucket extends RenderBucket {
         int[] index = element.index;
         float[] points = element.points;
 
-		/* 10 cm steps */
+        /* 10 cm steps */
         float sfactor = 1 / 10f;
         height *= sfactor;
         minHeight *= sfactor;
 
-		/* match height with ground resultion (meter per pixel) */
+        /* match height with ground resultion (meter per pixel) */
         height /= mGroundResolution;
         minHeight /= mGroundResolution;
 
         boolean complexOutline = false;
         boolean simpleOutline = true;
 
-		/* current vertex id */
+        /* current vertex id */
         int startVertex = numVertices;
         int length = 0, ipos = 0, ppos = 0;
 
         for (int n = index.length; ipos < n; ipos++, ppos += length) {
             length = index[ipos];
 
-			/* end marker */
+            /* end marker */
             if (length < 0)
                 break;
 
-			/* start next polygon */
+            /* start next polygon */
             if (length == 0) {
                 startVertex = numVertices;
                 simpleOutline = true;
@@ -376,7 +376,7 @@ public class ExtrusionBucket extends RenderBucket {
                 continue;
             }
 
-			/* check: drop last point from explicitly closed rings */
+            /* check: drop last point from explicitly closed rings */
             int len = length;
             if (points[ppos] == points[ppos + len - 2]
                     && points[ppos + 1] == points[ppos + len - 1]) {
@@ -384,11 +384,11 @@ public class ExtrusionBucket extends RenderBucket {
                 log.debug("explicit closed poly " + len);
             }
 
-			/* need at least three points */
+            /* need at least three points */
             if (len < 6)
                 continue;
 
-			/* check if polygon contains inner rings */
+            /* check if polygon contains inner rings */
             if (simpleOutline && (ipos < n - 1) && (index[ipos + 1] > 0))
                 simpleOutline = false;
 
@@ -429,7 +429,7 @@ public class ExtrusionBucket extends RenderBucket {
         int numPoints = 0;
         int numRings = 0;
 
-		/* get sum of points in polygon */
+        /* get sum of points in polygon */
         for (int i = ipos, n = index.length; i < n && index[i] > 0; i++) {
             numPoints += index[i];
             numRings++;
@@ -444,7 +444,7 @@ public class ExtrusionBucket extends RenderBucket {
     private boolean extrudeOutline(float[] points, int pos, int len,
                                    float minHeight, float height, boolean convex) {
 
-		/* add two vertices for last face to make zigzag indices work */
+        /* add two vertices for last face to make zigzag indices work */
         boolean addFace = (len % 4 != 0);
         int vertexCnt = len + (addFace ? 2 : 0);
 
@@ -453,7 +453,7 @@ public class ExtrusionBucket extends RenderBucket {
         float nx = points[pos + 0];
         float ny = points[pos + 1];
 
-		/* vector to next point */
+        /* vector to next point */
         float vx = nx - cx;
         float vy = ny - cy;
         /* vector from previous point */
@@ -469,7 +469,7 @@ public class ExtrusionBucket extends RenderBucket {
         int even = 0;
         int changeX = 0, changeY = 0, angleSign = 0;
 
-		/* vertex offset for all vertices in layer */
+        /* vertex offset for all vertices in layer */
         int vOffset = numVertices;
 
         mClipper.clipStart((int) nx, (int) ny);
@@ -481,7 +481,7 @@ public class ExtrusionBucket extends RenderBucket {
             ux = vx;
             uy = vy;
 
-			/* get direction to next point */
+            /* get direction to next point */
             if (i < len) {
                 nx = points[pos + i + 0];
                 ny = points[pos + i + 1];
@@ -501,7 +501,7 @@ public class ExtrusionBucket extends RenderBucket {
             vx = nx - cx;
             vy = ny - cy;
 
-			/* set lighting (by direction) */
+            /* set lighting (by direction) */
             a = (float) Math.sqrt(vx * vx + vy * vy);
             color2 = (short) ((1 + vx / a) * 127);
 
@@ -511,16 +511,16 @@ public class ExtrusionBucket extends RenderBucket {
             else
                 c = (short) (color2 | color1 << 8);
 
-			/* add bottom and top vertex for each point */
+            /* add bottom and top vertex for each point */
             vertexItems.add((short) (cx * S), (short) (cy * S), mh, c);
             vertexItems.add((short) (cx * S), (short) (cy * S), h, c);
 
             color1 = color2;
 
-			/* check if polygon is convex */
+            /* check if polygon is convex */
             if (convex) {
-				/* TODO simple polys with only one concave arc
-				 * could be handled without special triangulation */
+                /* TODO simple polys with only one concave arc
+                 * could be handled without special triangulation */
                 if ((ux < 0 ? 1 : -1) != (vx < 0 ? 1 : -1))
                     changeX++;
                 if ((uy < 0 ? 1 : -1) != (vy < 0 ? 1 : -1))
@@ -542,20 +542,20 @@ public class ExtrusionBucket extends RenderBucket {
                 }
             }
 
-			/* check if face is within tile */
+            /* check if face is within tile */
             if (mClipper.clipNext((int) nx, (int) ny) == 0) {
                 even = ++even % 2;
                 continue;
             }
 
-			/* add ZigZagQuadIndices(tm) for sides */
+            /* add ZigZagQuadIndices(tm) for sides */
             short vert = (short) (vOffset + (i - 2));
             short s0 = vert++;
             short s1 = vert++;
             short s2 = vert++;
             short s3 = vert++;
 
-			/* connect last to first (when number of faces is even) */
+            /* connect last to first (when number of faces is even) */
             if (!addFace && i == len) {
                 s2 -= len;
                 s3 -= len;
@@ -565,10 +565,10 @@ public class ExtrusionBucket extends RenderBucket {
             mIndices[even].add(s1, s2, s3);
             numIndices += 6;
 
-			/* flipp even-odd */
+            /* flipp even-odd */
             even = ++even % 2;
 
-			/* add roof outline indices */
+            /* add roof outline indices */
             mIndices[IND_OUTLINE].add(s1, s3);
             numIndices += 2;
         }

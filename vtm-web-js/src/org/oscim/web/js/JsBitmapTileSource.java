@@ -19,9 +19,9 @@ public class JsBitmapTileSource extends BitmapTileSource implements
     public ITileDataSource getDataSource() {
         return null;
     }
-    //	@ExportConstructor
-    //	public static BitmapTileSource constructor(String url, int zoomMin, int zoomMax) {
-    //		return new JsBitmapTileSource(url, zoomMin, zoomMax);
-    //	}
+    //    @ExportConstructor
+    //    public static BitmapTileSource constructor(String url, int zoomMin, int zoomMax) {
+    //        return new JsBitmapTileSource(url, zoomMin, zoomMax);
+    //    }
 
 }

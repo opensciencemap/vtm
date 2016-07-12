@@ -65,12 +65,12 @@ public class GeoJsonTileDecoder implements ITileDecoder {
             mapElement.clear();
             mapElement.tags.clear();
 
-			/* add tag information */
+            /* add tag information */
             mTileSource.decodeTags(mapElement, f.getProperties(mProperties));
             if (mapElement.tags.numTags == 0)
                 continue;
 
-			/* add geometry information */
+            /* add geometry information */
             decodeGeometry(f.getGeometry());
 
             if (mapElement.type == GeometryType.NONE)

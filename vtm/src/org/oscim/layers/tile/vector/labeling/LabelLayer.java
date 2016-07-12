@@ -103,22 +103,22 @@ public class LabelLayer extends Layer implements Map.UpdateListener, TileManager
             mWorker.submit(MAX_RELABEL_DELAY);
     }
 
-    //	@Override
-    //	public void onMotionEvent(MotionEvent e) {
-    //		//	int action = e.getAction() & MotionEvent.ACTION_MASK;
-    //		//	if (action == MotionEvent.ACTION_POINTER_DOWN) {
-    //		//		multi++;
-    //		//		mTextRenderer.hold(true);
-    //		//	} else if (action == MotionEvent.ACTION_POINTER_UP) {
-    //		//		multi--;
-    //		//		if (multi == 0)
-    //		//			mTextRenderer.hold(false);
-    //		//	} else if (action == MotionEvent.ACTION_CANCEL) {
-    //		//		multi = 0;
-    //		//		log.debug("cancel " + multi);
-    //		//		mTextRenderer.hold(false);
-    //		//	}
-    //	}
+    //    @Override
+    //    public void onMotionEvent(MotionEvent e) {
+    //        //    int action = e.getAction() & MotionEvent.ACTION_MASK;
+    //        //    if (action == MotionEvent.ACTION_POINTER_DOWN) {
+    //        //        multi++;
+    //        //        mTextRenderer.hold(true);
+    //        //    } else if (action == MotionEvent.ACTION_POINTER_UP) {
+    //        //        multi--;
+    //        //        if (multi == 0)
+    //        //            mTextRenderer.hold(false);
+    //        //    } else if (action == MotionEvent.ACTION_CANCEL) {
+    //        //        multi = 0;
+    //        //        log.debug("cancel " + multi);
+    //        //        mTextRenderer.hold(false);
+    //        //    }
+    //    }
 
     @Override
     public void onTileManagerEvent(Event e, MapTile tile) {

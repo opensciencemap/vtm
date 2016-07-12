@@ -177,11 +177,11 @@ public class LabelPlacement {
             if (ti.text.caption)
                 continue;
 
-			/* acquire a TextItem to add to TextLayer */
+            /* acquire a TextItem to add to TextLayer */
             if (l == null)
                 l = getLabel();
 
-			/* check if path at current scale is long enough */
+            /* check if path at current scale is long enough */
             if (!dbg && ti.width > ti.length * scale)
                 continue;
 
@@ -277,7 +277,7 @@ public class LabelPlacement {
 
     boolean updateLabels(LabelTask work) {
 
-		/* get current tiles */
+        /* get current tiles */
         boolean changedTiles = mTileRenderer.getVisibleTiles(mTileSet);
 
         if (mTileSet.cnt == 0) {
@@ -287,7 +287,7 @@ public class LabelPlacement {
         MapPosition pos = work.pos;
         boolean changedPos = mMap.viewport().getMapPosition(pos);
 
-		/* do not loop! */
+        /* do not loop! */
         if (!changedTiles && !changedPos)
             return false;
 
@@ -296,12 +296,12 @@ public class LabelPlacement {
         MapTile[] tiles = mTileSet.tiles;
         int zoom = tiles[0].zoomLevel;
 
-		/* estimation for visible area to be labeled */
+        /* estimation for visible area to be labeled */
         int mw = (mMap.getWidth() + Tile.SIZE) / 2;
         int mh = (mMap.getHeight() + Tile.SIZE) / 2;
         mSquareRadius = mw * mw + mh * mh;
 
-		/* scale of tiles zoom-level relative to current position */
+        /* scale of tiles zoom-level relative to current position */
         double scale = pos.scale / (1 << zoom);
 
         double angle = Math.toRadians(pos.bearing);
@@ -317,14 +317,14 @@ public class LabelPlacement {
         double tileX = (pos.x * (Tile.SIZE << zoom));
         double tileY = (pos.y * (Tile.SIZE << zoom));
 
-		/* put current label to previous label */
+        /* put current label to previous label */
         Label prevLabels = mLabels;
 
-		/* new labels */
+        /* new labels */
         mLabels = null;
         Label l = null;
 
-		/* add currently active labels first */
+        /* add currently active labels first */
         for (l = prevLabels; l != null; ) {
 
             if (l.text.caption) {
@@ -381,7 +381,7 @@ public class LabelPlacement {
             l = mPool.releaseAndGetNext(l);
         }
 
-		/* add way labels */
+        /* add way labels */
         for (int i = 0, n = mTileSet.cnt; i < n; i++) {
             MapTile t = tiles[i];
             if (!t.state(READY | NEW_DATA))
@@ -394,7 +394,7 @@ public class LabelPlacement {
             l = addWayLabels(t, l, dx, dy, scale);
         }
 
-		/* add caption */
+        /* add caption */
         for (int i = 0, n = mTileSet.cnt; i < n; i++) {
             MapTile t = tiles[i];
             if (!t.state(READY | NEW_DATA))
@@ -421,7 +421,7 @@ public class LabelPlacement {
                 continue;
             }
 
-			/* flip way label orientation */
+            /* flip way label orientation */
             if (cos * (ti.x2 - ti.x1) - sin * (ti.y2 - ti.y1) < 0) {
                 float tmp = ti.x1;
                 ti.x1 = ti.x2;
@@ -433,7 +433,7 @@ public class LabelPlacement {
             }
         }
 
-		/* add symbol items */
+        /* add symbol items */
         for (int i = 0, n = mTileSet.cnt; i < n; i++) {
             MapTile t = tiles[i];
             if (!t.state(READY | NEW_DATA))
@@ -466,15 +466,15 @@ public class LabelPlacement {
             }
         }
 
-		/* temporary used Label */
+        /* temporary used Label */
         l = (Label) mPool.release(l);
 
-		/* draw text to bitmaps and create vertices */
+        /* draw text to bitmaps and create vertices */
         work.textLayer.labels = groupLabels(mLabels);
         work.textLayer.prepare();
         work.textLayer.labels = null;
 
-		/* remove tile locks */
+        /* remove tile locks */
         mTileRenderer.releaseTiles(mTileSet);
 
         return true;
@@ -495,7 +495,7 @@ public class LabelPlacement {
             TextStyle t = cur.text;
             float w = cur.width;
 
-			/* iterate through following */
+            /* iterate through following */
             for (Label l = (Label) cur.next; l != null; l = (Label) l.next) {
 
                 if (w != l.width || t != l.text || !cur.string.equals(l.string)) {
@@ -508,18 +508,18 @@ public class LabelPlacement {
                 }
                 l.string = cur.string;
 
-				/* insert l after cur */
+                /* insert l after cur */
                 Label tmp = (Label) cur.next;
                 cur.next = l;
 
-				/* continue outer loop at l */
+                /* continue outer loop at l */
                 cur = l;
 
-				/* remove l from previous place */
+                /* remove l from previous place */
                 p.next = l.next;
                 l.next = tmp;
 
-				/* continue from previous */
+                /* continue from previous */
                 l = p;
             }
         }

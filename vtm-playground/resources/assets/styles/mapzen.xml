@@ -66,7 +66,7 @@
     <style-text style="italic" fill="#666666" id="street-label-sm-i" k="name" priority="3" size="18"
         stroke="#e4e9cc" stroke-width="1.0" />
 
-    <!-- 	<style-text id="poi-label" k="name" size="16" fill="#000000" stroke="#e8ecd3" stroke-width="0.5" dy="2" dx="2" text-align="center" /> -->
+    <!--     <style-text id="poi-label" k="name" size="16" fill="#000000" stroke="#e8ecd3" stroke-width="0.5" dy="2" dx="2" text-align="center" /> -->
     <style-area fill="#afcfa2" id="park" />
     <style-area id="park-2" src="patterns/park_texture_2.png" />
 

@@ -60,17 +60,17 @@ public class TextBucket extends TextureBucket {
                         && item.text == it.next.text
                         /* check same string instance */
                         && item.string != it.string
-				        /* check same string */
+                        /* check same string */
                         && !item.string.equals(it.string))
                     it = it.next;
 
-				/* unify duplicate string
-				 * // Note: this is required for 'packing test' in prepare to
-				 * work! */
+                /* unify duplicate string
+                 * // Note: this is required for 'packing test' in prepare to
+                 * work! */
                 if (item.string != it.string && item.string.equals(it.string))
                     item.string = it.string;
 
-				/* insert after text of same type and/or before same string */
+                /* insert after text of same type and/or before same string */
                 item.next = it.next;
                 it.next = item;
                 return;
@@ -138,7 +138,7 @@ public class TextBucket extends TextureBucket {
             while (it != null) {
                 addItem(it, width, height, x, y);
 
-				/* six indices to draw the four vertices */
+                /* six indices to draw the four vertices */
                 numIndices += TextureBucket.INDICES_PER_SPRITE;
                 numVertices += 4;
 
@@ -160,7 +160,7 @@ public class TextBucket extends TextureBucket {
 
     protected void addItem(TextItem it,
                            float width, float height, float x, float y) {
-		/* texture coordinates */
+        /* texture coordinates */
         short u1 = (short) (COORD_SCALE * x);
         short v1 = (short) (COORD_SCALE * y);
         short u2 = (short) (COORD_SCALE * (x + width));
@@ -190,21 +190,21 @@ public class TextBucket extends TextureBucket {
             vx *= hw;
             vy *= hw;
 
-			/* top-left */
+            /* top-left */
             x1 = (short) (COORD_SCALE * (vx - ux));
             y1 = (short) (COORD_SCALE * (vy - uy));
-			/* top-right */
+            /* top-right */
             x2 = (short) (COORD_SCALE * (-vx - ux));
             y2 = (short) (COORD_SCALE * (-vy - uy));
-			/* bot-right */
+            /* bot-right */
             x4 = (short) (COORD_SCALE * (-vx + ux2));
             y4 = (short) (COORD_SCALE * (-vy + uy2));
-			/* bot-left */
+            /* bot-left */
             x3 = (short) (COORD_SCALE * (vx + ux2));
             y3 = (short) (COORD_SCALE * (vy + uy2));
         }
 
-		/* add vertices */
+        /* add vertices */
         int tmp = (int) (COORD_SCALE * it.x) & LBIT_MASK;
         short tx = (short) (tmp | (it.text.caption ? 1 : 0));
         short ty = (short) (COORD_SCALE * it.y);

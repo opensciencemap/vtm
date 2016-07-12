@@ -41,8 +41,8 @@ public class Style {
      * <p/>
      * <pre>
      * {
-     * 	Style style = Style.builder()
-     * 	    .strokeWidth(1f).strokeColor(Color.BLACK).build();
+     *     Style style = Style.builder()
+     *         .strokeWidth(1f).strokeColor(Color.BLACK).build();
      * }
      * </pre>
      */

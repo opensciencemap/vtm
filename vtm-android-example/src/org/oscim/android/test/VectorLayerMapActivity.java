@@ -37,39 +37,39 @@ public class VectorLayerMapActivity extends BaseMapActivity {
 
         VectorLayer vectorLayer = new VectorLayer(mMap);
 
-        //	Geometry g = new GeomBuilder()
-        //	    .point(8.8, 53.1)
-        //	    .point()
-        //	    .buffer(1)
-        //	    .get();
+        //    Geometry g = new GeomBuilder()
+        //        .point(8.8, 53.1)
+        //        .point()
+        //        .buffer(1)
+        //        .get();
         //
-        //	vectorLayer.add(new PolygonDrawable(g, defaultStyle()));
+        //    vectorLayer.add(new PolygonDrawable(g, defaultStyle()));
         //
-        //	vectorLayer.add(new PointDrawable(53.1, 8.8, Style.builder()
-        //	    .setBuffer(0.5)
-        //	    .setFillColor(Color.RED)
-        //	    .setFillAlpha(0.2)
-        //	    .build()));
+        //    vectorLayer.add(new PointDrawable(53.1, 8.8, Style.builder()
+        //        .setBuffer(0.5)
+        //        .setFillColor(Color.RED)
+        //        .setFillAlpha(0.2)
+        //        .build()));
         //
-        //	Style.Builder sb = Style.builder()
-        //	    .setBuffer(0.5)
-        //	    .setFillColor(Color.RED)
-        //	    .setFillAlpha(0.2);
+        //    Style.Builder sb = Style.builder()
+        //        .setBuffer(0.5)
+        //        .setFillColor(Color.RED)
+        //        .setFillAlpha(0.2);
         //
-        //	Style style = sb.setFillAlpha(0.2).build();
+        //    Style style = sb.setFillAlpha(0.2).build();
         //
-        //	int tileSize = 5;
-        //	for (int x = -180; x < 180; x += tileSize) {
-        //		for (int y = -90; y < 90; y += tileSize) {
-        //			//	Style style = sb.setFillAlpha(FastMath.clamp(FastMath.length(x, y) / 180, 0.2, 1))
-        //			//		    .build();
+        //    int tileSize = 5;
+        //    for (int x = -180; x < 180; x += tileSize) {
+        //        for (int y = -90; y < 90; y += tileSize) {
+        //            //    Style style = sb.setFillAlpha(FastMath.clamp(FastMath.length(x, y) / 180, 0.2, 1))
+        //            //            .build();
         //
-        //			vectorLayer.add(new RectangleDrawable(FastMath.clamp(y, -85, 85), x,
-        //			                                      FastMath.clamp(y + tileSize - 0.1, -85, 85),
-        //			                                      x + tileSize - 0.1, style));
+        //            vectorLayer.add(new RectangleDrawable(FastMath.clamp(y, -85, 85), x,
+        //                                                  FastMath.clamp(y + tileSize - 0.1, -85, 85),
+        //                                                  x + tileSize - 0.1, style));
         //
-        //		}
-        //	}
+        //        }
+        //    }
 
         Style.Builder sb = Style.builder()
                 .buffer(0.5)

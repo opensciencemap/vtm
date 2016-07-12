@@ -126,7 +126,7 @@ public final class LineBucket extends RenderBucket {
         else if (line.cap == Cap.SQUARE)
             squared = true;
 
-		/* Note: just a hack to save some vertices, when there are
+        /* Note: just a hack to save some vertices, when there are
          * more than 200 lines per type. FIXME make optional! */
         if (rounded && index != null) {
             int cnt = 0;
@@ -159,24 +159,24 @@ public final class LineBucket extends RenderBucket {
             if (index != null)
                 length = index[i];
 
-			/* check end-marker in indices */
+            /* check end-marker in indices */
             if (length < 0)
                 break;
 
             int ipos = pos;
             pos += length;
 
-			/* need at least two points */
+            /* need at least two points */
             if (length < 4)
                 continue;
 
-			/* start an enpoint are equal */
+            /* start an enpoint are equal */
             if (length == 4 &&
                     points[ipos] == points[ipos + 2] &&
                     points[ipos + 1] == points[ipos + 3])
                 continue;
 
-			/* avoid simple 180 degree angles */
+            /* avoid simple 180 degree angles */
             if (length == 6 &&
                     points[ipos] == points[ipos + 4] &&
                     points[ipos + 1] == points[ipos + 5])
@@ -195,7 +195,7 @@ public final class LineBucket extends RenderBucket {
         float ux = vNextX + vPrevX;
         float uy = vNextY + vPrevY;
 
-		/* vPrev times perpendicular of sum(vNext, vPrev) */
+        /* vPrev times perpendicular of sum(vNext, vPrev) */
         double a = uy * vPrevX - ux * vPrevY;
 
         if (a < 0.01 && a > -0.01) {
@@ -231,10 +231,10 @@ public final class LineBucket extends RenderBucket {
         float nextX, nextY;
         double a;
 
-		/* amount of vertices used
+        /* amount of vertices used
          * + 2 for drawing triangle-strip
-		 * + 4 for round caps
-		 * + 2 for closing polygons */
+         * + 4 for round caps
+         * + 2 for closing polygons */
         numVertices += length + (rounded ? 6 : 2) + (closed ? 2 : 0);
 
         int ipos = start;
@@ -244,28 +244,28 @@ public final class LineBucket extends RenderBucket {
         nextX = points[ipos++];
         nextY = points[ipos++];
 
-		/* Unit vector to next node */
+        /* Unit vector to next node */
         vPrevX = nextX - curX;
         vPrevY = nextY - curY;
         a = (float) Math.sqrt(vPrevX * vPrevX + vPrevY * vPrevY);
         vPrevX /= a;
         vPrevY /= a;
 
-		/* perpendicular on the first segment */
+        /* perpendicular on the first segment */
         ux = -vPrevY;
         uy = vPrevX;
 
         int ddx, ddy;
 
-		/* vertex point coordinate */
+        /* vertex point coordinate */
         short ox = (short) (curX * COORD_SCALE);
         short oy = (short) (curY * COORD_SCALE);
 
-		/* vertex extrusion vector, last two bit
-		 * encode texture coord. */
+        /* vertex extrusion vector, last two bit
+         * encode texture coord. */
         short dx, dy;
 
-		/* when the endpoint is outside the tile region omit round caps. */
+        /* when the endpoint is outside the tile region omit round caps. */
         boolean outside = (curX < tmin || curX > tmax || curY < tmin || curY > tmax);
 
         if (rounded && !outside) {
@@ -284,7 +284,7 @@ public final class LineBucket extends RenderBucket {
                     (short) (2 | ddx & DIR_MASK),
                     (short) (2 | ddy & DIR_MASK));
 
-			/* Start of line */
+            /* Start of line */
             ddx = (int) (ux * DIR_SCALE);
             ddy = (int) (uy * DIR_SCALE);
 
@@ -296,9 +296,9 @@ public final class LineBucket extends RenderBucket {
                     (short) (2 | -ddx & DIR_MASK),
                     (short) (1 | -ddy & DIR_MASK));
         } else {
-			/* outside means line is probably clipped
-			 * TODO should align ending with tile boundary
-			 * for now, just extend the line a little */
+            /* outside means line is probably clipped
+             * TODO should align ending with tile boundary
+             * for now, just extend the line a little */
             float tx = vPrevX;
             float ty = vPrevY;
 
@@ -313,7 +313,7 @@ public final class LineBucket extends RenderBucket {
             if (rounded)
                 numVertices -= 2;
 
-			/* add first vertex twice */
+            /* add first vertex twice */
             ddx = (int) ((ux - tx) * DIR_SCALE);
             ddy = (int) ((uy - ty) * DIR_SCALE);
             dx = (short) (0 | ddx & DIR_MASK);
@@ -333,11 +333,11 @@ public final class LineBucket extends RenderBucket {
         curX = nextX;
         curY = nextY;
 
-		/* Unit vector pointing back to previous node */
+        /* Unit vector pointing back to previous node */
         vPrevX *= -1;
         vPrevY *= -1;
 
-        //		vertexItem.used = opos + 4;
+        //        vertexItem.used = opos + 4;
 
         for (int end = start + length; ; ) {
 
@@ -345,18 +345,18 @@ public final class LineBucket extends RenderBucket {
                 nextX = points[ipos++];
                 nextY = points[ipos++];
             } else if (closed && ipos < end + 2) {
-				/* add startpoint == endpoint */
+                /* add startpoint == endpoint */
                 nextX = points[start];
                 nextY = points[start + 1];
                 ipos += 2;
             } else
                 break;
 
-			/* unit vector pointing forward to next node */
+            /* unit vector pointing forward to next node */
             vNextX = nextX - curX;
             vNextY = nextY - curY;
             a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
-			/* skip too short segmets */
+            /* skip too short segmets */
             if (a < mMinDist) {
                 numVertices -= 2;
                 continue;
@@ -368,7 +368,7 @@ public final class LineBucket extends RenderBucket {
 
             //log.debug("acos " + dotp);
             if (dotp > 0.65) {
-				/* add bevel join to avoid miter going to infinity */
+                /* add bevel join to avoid miter going to infinity */
                 numVertices += 2;
 
                 //dotp = FastMath.clamp(dotp, -1, 1);
@@ -378,12 +378,12 @@ public final class LineBucket extends RenderBucket {
 
                 float px, py;
                 if (dotp > 0.999) {
-					/* 360 degree angle, set points aside */
+                    /* 360 degree angle, set points aside */
                     ux = vPrevX + vNextX;
                     uy = vPrevY + vNextY;
                     a = vNextX * uy - vNextY * ux;
                     if (a < 0.1 && a > -0.1) {
-						/* Almost straight */
+                        /* Almost straight */
                         ux = -vNextY;
                         uy = vNextX;
                     } else {
@@ -397,15 +397,15 @@ public final class LineBucket extends RenderBucket {
                     curY = curY + uy * BEVEL_MIN;
                 } else {
                     //log.debug("back");
-					/* go back by min dist */
+                    /* go back by min dist */
                     px = curX + vPrevX * BEVEL_MIN;
                     py = curY + vPrevY * BEVEL_MIN;
-					/* go forward by min dist */
+                    /* go forward by min dist */
                     curX = curX + vNextX * BEVEL_MIN;
                     curY = curY + vNextY * BEVEL_MIN;
                 }
 
-				/* unit vector pointing forward to next node */
+                /* unit vector pointing forward to next node */
                 vNextX = curX - px;
                 vNextY = curY - py;
                 a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
@@ -414,11 +414,11 @@ public final class LineBucket extends RenderBucket {
 
                 addVertex(vertices, px, py, vPrevX, vPrevY, vNextX, vNextY);
 
-				/* flip unit vector to point back */
+                /* flip unit vector to point back */
                 vPrevX = -vNextX;
                 vPrevY = -vNextY;
 
-				/* unit vector pointing forward to next node */
+                /* unit vector pointing forward to next node */
                 vNextX = nextX - curX;
                 vNextY = nextY - curY;
                 a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
@@ -431,7 +431,7 @@ public final class LineBucket extends RenderBucket {
             curX = nextX;
             curY = nextY;
 
-			/* flip vector to point back */
+            /* flip vector to point back */
             vPrevX = -vNextX;
             vPrevY = -vNextY;
         }
@@ -456,7 +456,7 @@ public final class LineBucket extends RenderBucket {
                     (short) (2 | -ddx & DIR_MASK),
                     (short) (1 | -ddy & DIR_MASK));
 
-			/* For rounded line edges */
+            /* For rounded line edges */
             ddx = (int) ((ux - vPrevX) * DIR_SCALE);
             ddy = (int) ((uy - vPrevY) * DIR_SCALE);
 
@@ -464,7 +464,7 @@ public final class LineBucket extends RenderBucket {
                     (short) (0 | ddx & DIR_MASK),
                     (short) (0 | ddy & DIR_MASK));
 
-			/* last vertex */
+            /* last vertex */
             ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
             ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
             dx = (short) (2 | ddx & DIR_MASK);
@@ -489,14 +489,14 @@ public final class LineBucket extends RenderBucket {
                     (short) (0 | ddx & DIR_MASK),
                     (short) (1 | ddy & DIR_MASK));
 
-			/* last vertex */
+            /* last vertex */
             ddx = (int) (-(ux + vPrevX) * DIR_SCALE);
             ddy = (int) (-(uy + vPrevY) * DIR_SCALE);
             dx = (short) (2 | ddx & DIR_MASK);
             dy = (short) (1 | ddy & DIR_MASK);
         }
 
-		/* add last vertex twice */
+        /* add last vertex twice */
         vertices.add(ox, oy, (short) dx, (short) dy);
         vertices.add(ox, oy, (short) dx, (short) dy);
     }
@@ -527,8 +527,8 @@ public final class LineBucket extends RenderBucket {
     }
 
     public static final class Renderer {
-		/* TODO:
-		 * http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html */
+        /* TODO:
+         * http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter22.html */
 
         /* factor to normalize extrusion vector and scale to coord scale */
         private final static float COORD_SCALE_BY_DIR_SCALE =
@@ -549,8 +549,8 @@ public final class LineBucket extends RenderBucket {
             shaders[0] = new Shader("line_aa_proj");
             shaders[1] = new Shader("line_aa");
 
-			/* create lookup table as texture for 'length(0..1,0..1)'
-			 * using mirrored wrap mode for 'length(-1..1,-1..1)' */
+            /* create lookup table as texture for 'length(0..1,0..1)'
+             * using mirrored wrap mode for 'length(-1..1,-1..1)' */
             byte[] pixel = new byte[128 * 128];
 
             for (int x = 0; x < 128; x++) {
@@ -574,8 +574,8 @@ public final class LineBucket extends RenderBucket {
         public static RenderBucket draw(RenderBucket b, GLViewport v,
                                         float scale, RenderBuckets buckets) {
 
-			/* simple line shader does not take forward shortening into
-			 * account. only used when tilt is 0. */
+            /* simple line shader does not take forward shortening into
+             * account. only used when tilt is 0. */
             int mode = v.pos.tilt < 1 ? 1 : 0;
 
             Shader s = shaders[mode];
@@ -583,10 +583,10 @@ public final class LineBucket extends RenderBucket {
 
             GLState.blend(true);
 
-			/* Somehow we loose the texture after an indefinite
-			 * time, when label/symbol textures are used.
-			 * Debugging gl on Desktop is most fun imaginable,
-			 * so for now: */
+            /* Somehow we loose the texture after an indefinite
+             * time, when label/symbol textures are used.
+             * Debugging gl on Desktop is most fun imaginable,
+             * so for now: */
             if (!GLAdapter.GDX_DESKTOP_QUIRKS)
                 GLState.bindTex2D(mTexID);
 
@@ -601,14 +601,14 @@ public final class LineBucket extends RenderBucket {
 
             v.mvp.setAsUniform(s.uMVP);
 
-			/* Line scale factor for non fixed lines: Within a zoom-
-			 * level lines would be scaled by the factor 2 by view-matrix.
-			 * Though lines should only scale by sqrt(2). This is achieved
-			 * by inverting scaling of extrusion vector with: width/sqrt(s). */
+            /* Line scale factor for non fixed lines: Within a zoom-
+             * level lines would be scaled by the factor 2 by view-matrix.
+             * Though lines should only scale by sqrt(2). This is achieved
+             * by inverting scaling of extrusion vector with: width/sqrt(s). */
             double variableScale = Math.sqrt(scale);
 
-			/* scale factor to map one pixel on tile to one pixel on screen:
-			 * used with orthographic projection, (shader mode == 1) */
+            /* scale factor to map one pixel on tile to one pixel on screen:
+             * used with orthographic projection, (shader mode == 1) */
             double pixel = (mode == SHADER_PROJ) ? 0.0001 : 1.5 / scale;
 
             gl.uniform1f(uLineFade, (float) pixel);
@@ -647,10 +647,10 @@ public final class LineBucket extends RenderBucket {
                     blur = false;
                 }
 
-				/* draw LineLayer */
+                /* draw LineLayer */
                 if (!line.outline) {
-					/* invert scaling of extrusion vectors so that line
-					 * width stays the same. */
+                    /* invert scaling of extrusion vectors so that line
+                     * width stays the same. */
                     if (line.fixed) {
                         width = Math.max(line.width, 1) / scale;
                     } else {
@@ -660,7 +660,7 @@ public final class LineBucket extends RenderBucket {
                     gl.uniform1f(uLineWidth,
                             (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
-					/* Line-edge fade */
+                    /* Line-edge fade */
                     if (line.blur > 0) {
                         gl.uniform1f(uLineFade, line.blur);
                         blur = true;
@@ -669,7 +669,7 @@ public final class LineBucket extends RenderBucket {
                         //GL.uniform1f(uLineScale, (float)(pixel / (ll.width / s)));
                     }
 
-					/* Cap mode */
+                    /* Cap mode */
                     if (lb.scale < 1.5 /* || ll.line.fixed */) {
 
                         if (capMode != CAP_THIN) {
@@ -692,7 +692,7 @@ public final class LineBucket extends RenderBucket {
                     continue;
                 }
 
-				/* draw LineLayers references by this outline */
+                /* draw LineLayers references by this outline */
 
                 for (LineBucket ref = lb.outlines; ref != null; ref = ref.outlines) {
                     LineStyle core = ref.line.current();
@@ -713,7 +713,7 @@ public final class LineBucket extends RenderBucket {
                     gl.uniform1f(uLineWidth,
                             (float) (width * COORD_SCALE_BY_DIR_SCALE));
 
-					/* Line-edge fade */
+                    /* Line-edge fade */
                     if (line.blur > 0) {
                         gl.uniform1f(uLineFade, line.blur);
                         blur = true;
@@ -721,7 +721,7 @@ public final class LineBucket extends RenderBucket {
                         gl.uniform1f(uLineFade, (float) (pixel / width));
                     }
 
-					/* Cap mode */
+                    /* Cap mode */
                     if (ref.roundCap) {
 
                         if (capMode != CAP_ROUND) {

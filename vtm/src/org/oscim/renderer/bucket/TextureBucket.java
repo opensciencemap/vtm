@@ -70,7 +70,7 @@ public class TextureBucket extends RenderBucket {
         for (TextureItem t = textures; t != null; t = t.next)
             t.upload();
 
-		/* add vertices to vbo */
+        /* add vertices to vbo */
         compileVertexItems(vboData);
     }
 
@@ -112,7 +112,7 @@ public class TextureBucket extends RenderBucket {
         static void init() {
             shader = new Shader();
 
-			/* FIXME pool should be disposed on exit... */
+            /* FIXME pool should be disposed on exit... */
             pool.init(0);
         }
 
@@ -137,7 +137,7 @@ public class TextureBucket extends RenderBucket {
                         1f / (t.height * COORD_SCALE));
                 t.bind();
 
-				/* draw up to maxVertices in each iteration */
+                /* draw up to maxVertices in each iteration */
                 for (int i = 0; i < t.indices; i += MAX_INDICES) {
                     /* to.offset * (24(shorts) * 2(short-bytes)
                      * / 6(indices) == 8) */

@@ -37,13 +37,13 @@ public class ViewController extends Viewport {
         mHeight = height;
         mWidth = width;
 
-		/* setup projection matrix:
+        /* setup projection matrix:
          * 0. scale to window coordinates
-		 * 1. translate to VIEW_DISTANCE
-		 * 2. apply projection
-		 * setup inverse projection:
-		 * 0. invert projection
-		 * 1. invert translate to VIEW_DISTANCE */
+         * 1. translate to VIEW_DISTANCE
+         * 2. apply projection
+         * setup inverse projection:
+         * 0. invert projection
+         * 1. invert translate to VIEW_DISTANCE */
 
         float ratio = (mHeight / mWidth) * VIEW_SCALE;
 
@@ -55,14 +55,14 @@ public class ViewController extends Viewport {
         mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
         mProjMatrix.multiplyRhs(mTmpMatrix);
 
-		/* set inverse projection matrix (without scaling) */
+        /* set inverse projection matrix (without scaling) */
         mProjMatrix.get(mat);
         GLMatrix.invertM(mat, 0, mat, 0);
         mProjMatrixInverse.set(mat);
 
         mProjMatrixUnscaled.copy(mProjMatrix);
 
-		/* scale to window coordinates */
+        /* scale to window coordinates */
         mTmpMatrix.setScale(1 / mWidth, 1 / mWidth, 1 / mWidth);
         mProjMatrix.multiplyRhs(mTmpMatrix);
 
@@ -97,16 +97,16 @@ public class ViewController extends Viewport {
         mPos.x = x;
         mPos.y = y;
 
-		/* clamp latitude */
+        /* clamp latitude */
         mPos.y = FastMath.clamp(mPos.y, 0, 1);
 
-		/* wrap longitude */
+        /* wrap longitude */
         while (mPos.x > 1)
             mPos.x -= 1;
         while (mPos.x < 0)
             mPos.x += 1;
 
-		/* limit longitude */
+        /* limit longitude */
         if (mPos.x > mMaxX)
             mPos.x = mMaxX;
         else if (mPos.x < mMinX)
@@ -228,24 +228,24 @@ public class ViewController extends Viewport {
         mPos.copy(mapPosition);
         limitPosition(mPos);
 
-        //	mPos.scale = clamp(mapPosition.scale, mMinScale, mMaxScale);
-        //	mPos.x = mapPosition.x;
-        //	mPos.y = mapPosition.y;
-        //	mPos.tilt = limitTilt(mapPosition.tilt);
-        //	mPos.bearing = mapPosition.bearing;
+        //    mPos.scale = clamp(mapPosition.scale, mMinScale, mMaxScale);
+        //    mPos.x = mapPosition.x;
+        //    mPos.y = mapPosition.y;
+        //    mPos.tilt = limitTilt(mapPosition.tilt);
+        //    mPos.bearing = mapPosition.bearing;
 
         updateMatrices();
     }
 
     private void updateMatrices() {
-		/* - view matrix:
-		 * 0. apply rotate
-		 * 1. apply tilt */
+        /* - view matrix:
+         * 0. apply rotate
+         * 1. apply tilt */
 
         mRotationMatrix.setRotation(mPos.bearing, 0, 0, 1);
         mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
-		/* apply first rotation, then tilt */
+        /* apply first rotation, then tilt */
         mRotationMatrix.multiplyLhs(mTmpMatrix);
 
         mViewMatrix.copy(mRotationMatrix);

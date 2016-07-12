@@ -23,14 +23,14 @@ public class InlistTest {
         list.push(new Thing(4));
         list.push(new Thing(5));
 
-		/* iterate items */
+        /* iterate items */
         int i = 5;
         for (Thing it : list)
             assertEquals(it.value, i--);
 
         assertEquals(i, 0);
 
-		/* iterate with insertion order */
+        /* iterate with insertion order */
         list.reverse();
         i = 1;
         for (Thing it : list)
@@ -42,7 +42,7 @@ public class InlistTest {
 
         List<Thing> list2 = new List<Thing>();
 
-		/* pop list and append to list2 */
+        /* pop list and append to list2 */
         for (int j = 5; j > 0; j--) {
             Thing t = list.pop();
             assertEquals(t.value, j);
@@ -51,7 +51,7 @@ public class InlistTest {
             list2.append(t);
         }
 
-		/* check nothing to iterate */
+        /* check nothing to iterate */
         for (Thing t : list)
             assert (t == null && t != null);
 
@@ -60,7 +60,7 @@ public class InlistTest {
 
         list.push(new Thing(6));
 
-		/* move items from list2 to list */
+        /* move items from list2 to list */
         list.appendList(list2.clear());
 
         assertNull(list2.head());

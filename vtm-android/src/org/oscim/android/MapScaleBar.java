@@ -42,8 +42,8 @@ public class MapScaleBar extends Layer implements UpdateListener {
     private static final int BITMAP_HEIGHT = 64;
     private static final int BITMAP_WIDTH = 128;
     private static final double LATITUDE_REDRAW_THRESHOLD = 0.2;
-    //	private static final int MARGIN_BOTTOM = 5;
-    //	private static final int MARGIN_LEFT = 5;
+    //    private static final int MARGIN_BOTTOM = 5;
+    //    private static final int MARGIN_LEFT = 5;
 
     private static final double METER_FOOT_RATIO = 0.3048;
     private static final int ONE_KILOMETER = 1000;

@@ -87,7 +87,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         if (v != null)
             minHeight = Integer.parseInt(v);
 
-		/* 12m default */
+        /* 12m default */
         if (height == 0)
             height = 12 * 100;
 
@@ -130,27 +130,27 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
             get(tile).setBuckets(null);
     }
 
-    //	private int multi;
-    //	@Override
-    //	public void onInputEvent(Event event, MotionEvent e) {
-    //		int action = e.getAction() & MotionEvent.ACTION_MASK;
-    //		if (action == MotionEvent.ACTION_POINTER_DOWN) {
-    //			multi++;
-    //		} else if (action == MotionEvent.ACTION_POINTER_UP) {
-    //			multi--;
-    //			if (!mActive && mAlpha > 0) {
-    //				// finish hiding
-    //				//log.debug("add multi hide timer " + mAlpha);
-    //				addShowTimer(mFadeTime * mAlpha, false);
-    //			}
-    //		} else if (action == MotionEvent.ACTION_CANCEL) {
-    //			multi = 0;
-    //			log.debug("cancel " + multi);
-    //			if (mTimer != null) {
-    //				mTimer.cancel();
-    //				mTimer = null;
-    //			}
-    //		}
-    //	}
+    //    private int multi;
+    //    @Override
+    //    public void onInputEvent(Event event, MotionEvent e) {
+    //        int action = e.getAction() & MotionEvent.ACTION_MASK;
+    //        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+    //            multi++;
+    //        } else if (action == MotionEvent.ACTION_POINTER_UP) {
+    //            multi--;
+    //            if (!mActive && mAlpha > 0) {
+    //                // finish hiding
+    //                //log.debug("add multi hide timer " + mAlpha);
+    //                addShowTimer(mFadeTime * mAlpha, false);
+    //            }
+    //        } else if (action == MotionEvent.ACTION_CANCEL) {
+    //            multi = 0;
+    //            log.debug("cancel " + multi);
+    //            if (mTimer != null) {
+    //                mTimer.cancel();
+    //                mTimer = null;
+    //            }
+    //        }
+    //    }
 
 }

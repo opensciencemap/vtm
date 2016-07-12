@@ -383,7 +383,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             return;
         }
 
-		/* not a leaf node */
+        /* not a leaf node */
         Branch<Node>[] children = node.children();
         for (int idx = 0; idx < node.count; idx++) {
             countRec(children[idx].node, count);
@@ -411,7 +411,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 
         if (!node.isLeaf()) {
             Branch<Node>[] children = node.children();
-			/* This is an internal node in the tree */
+            /* This is an internal node in the tree */
             for (int idx = 0; idx < node.count; idx++) {
                 removeAllRec(children[idx].node);
             }
@@ -457,13 +457,13 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
         //assert (level >= 0 && level <= node.level);
 
         if (node.level > level) {
-			/* Still above level for insertion, go down tree recursively */
+            /* Still above level for insertion, go down tree recursively */
             int idx = pickBranch(node, rect);
             Branch<Node>[] children = node.children();
 
             Node newNode = insertRectRec(rect, item, children[idx].node, level);
             if (newNode != null) {
-				/* Child was split */
+                /* Child was split */
                 node.branch[idx].setCover(children[idx].node);
                 Branch<Node> branch = new Branch<Node>();
                 branch.node = newNode;
@@ -473,19 +473,19 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
                 }
                 return null;
             } else {
-				/* Child was not split */
+                /* Child was not split */
                 node.branch[idx].add(rect);
                 return null;
             }
         }
 
-		/* Have reached level for insertion. Add rect, split if necessary */
+        /* Have reached level for insertion. Add rect, split if necessary */
         assert (node.level == level);
         Branch<T> branch = new Branch<T>();
         branch.set(rect);
         branch.node = item;
 
-		/* Child field of leaves contains id of data record */
+        /* Child field of leaves contains id of data record */
         if (node.addBranch(branch)) {
             return splitNode(node, branch);
         }
@@ -541,16 +541,16 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
      * InsertRect2 does the recursion.
      */
     public boolean insertRect(Rect rect, T item, int level) {
-        //		if (DEBUG) {
-        //			assert (rect != null && root != null);
-        //			assert (level >= 0 && level <= root.level);
-        //		}
+        //        if (DEBUG) {
+        //            assert (rect != null && root != null);
+        //            assert (level >= 0 && level <= root.level);
+        //        }
 
         Node root = mRoot;
         Node newNode = insertRectRec(rect, item, root, level);
 
         if (newNode != null) {
-			/* Root split, Grow tree taller and new root */
+            /* Root split, Grow tree taller and new root */
             Node newRoot = allocNode();
             newRoot.level = root.level + 1;
 
@@ -581,8 +581,8 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
         assert (node != null && (idx >= 0) && (idx < MAXNODES));
         assert (node.count > 0);
 
-		/* Remove element by swapping with the last element to
-		 * prevent gaps in array */
+        /* Remove element by swapping with the last element to
+         * prevent gaps in array */
         node.count--;
 
         if (node.count != idx) {
@@ -603,15 +603,15 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
 
         Partition partition = mLocalVars.clear();
 
-		/* Load all the branches into a buffer, initialize old node */
+        /* Load all the branches into a buffer, initialize old node */
         int level = node.level;
         partition.getBranches(node, branch);
 
-		/* Find partition */
+        /* Find partition */
         partition.choosePartition();
 
-		/* Put branches from buffer into 2 nodes according to
-		 * chosen partition */
+        /* Put branches from buffer into 2 nodes according to
+         * chosen partition */
         Node newNode = allocNode();
         newNode.level = node.level = level;
         partition.loadNodes(node, newNode);
@@ -645,8 +645,8 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
         ArrayList<Node> reInsertList = mReinsertNodes;
 
         if (removeRectRec(rect, item, root, reInsertList)) {
-			/* Found and deleted a data item
-			 * Reinsert any branches from eliminated nodes */
+            /* Found and deleted a data item
+             * Reinsert any branches from eliminated nodes */
             for (Node node : reInsertList) {
                 for (int idx = 0; idx < node.count; idx++) {
                     insertRect((node.branch[idx]),
@@ -657,7 +657,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             }
             reInsertList.clear();
 
-			/* Check for redundant root (not leaf, 1 child) and eliminate */
+            /* Check for redundant root (not leaf, 1 child) and eliminate */
             if (root.count == 1 && !root.isLeaf()) {
 
                 Node tempNode = root.children()[0].node;
@@ -685,7 +685,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
         if (node.isLeaf()) {
             for (int idx = 0; idx < node.count; idx++) {
                 if (node.branch[idx].node == item) {
-					/* Must return after this call as count has changed */
+                    /* Must return after this call as count has changed */
                     disconnectBranch(node, idx);
                     return true;
                 }
@@ -693,7 +693,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             return false;
         }
 
-		/* not a leaf node */
+        /* not a leaf node */
         for (int idx = 0; idx < node.count; idx++) {
 
             if (!rect.overlap(node.branch[idx]))
@@ -702,14 +702,14 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             Branch<Node>[] children = node.children();
             if (removeRectRec(rect, item, children[idx].node, removed)) {
                 if (children[idx].node.count >= MINNODES) {
-					/* child removed, just resize parent rect */
+                    /* child removed, just resize parent rect */
                     children[idx].setCover(children[idx].node);
                 } else {
-					/* child removed, not enough entries in node,
-					 * eliminate node */
+                    /* child removed, not enough entries in node,
+                     * eliminate node */
                     removed.add(children[idx].node);
 
-					/* Must return after this call as count has changed */
+                    /* Must return after this call as count has changed */
                     disconnectBranch(node, idx);
                 }
                 return true;
@@ -718,90 +718,90 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
         return false;
     }
 
-    //	/**
-    //	 * Search in an index tree or subtree for all data retangles that overlap
-    //	 * the argument rectangle.
-    //	 */
-    //	public boolean search(Node node, Rect rect, int[] found, SearchCallback<T> cb,
-    //	        Object context) {
-    //		if (DEBUG) {
-    //			assert (node != null);
-    //			assert (node.level >= 0);
-    //			assert (rect != null);
-    //		}
+    //    /**
+    //     * Search in an index tree or subtree for all data retangles that overlap
+    //     * the argument rectangle.
+    //     */
+    //    public boolean search(Node node, Rect rect, int[] found, SearchCallback<T> cb,
+    //            Object context) {
+    //        if (DEBUG) {
+    //            assert (node != null);
+    //            assert (node.level >= 0);
+    //            assert (rect != null);
+    //        }
     //
-    //		if (!node.isLeaf()) {
-    //			Branch<Node>[] children = node.children();
-    //			/* This is an internal node in the tree */
-    //			for (int idx = 0; idx < node.count; idx++) {
+    //        if (!node.isLeaf()) {
+    //            Branch<Node>[] children = node.children();
+    //            /* This is an internal node in the tree */
+    //            for (int idx = 0; idx < node.count; idx++) {
     //
-    //				if (rect.overlap(children[idx])) {
-    //					if (!search(children[idx].node, rect, found, cb, context)) {
-    //						/* Stop searching */
-    //						return false;
-    //					}
-    //				}
-    //			}
-    //			/* Continue searching */
-    //			return true;
-    //		}
+    //                if (rect.overlap(children[idx])) {
+    //                    if (!search(children[idx].node, rect, found, cb, context)) {
+    //                        /* Stop searching */
+    //                        return false;
+    //                    }
+    //                }
+    //            }
+    //            /* Continue searching */
+    //            return true;
+    //        }
     //
-    //		/* This is a leaf node */
-    //		for (int idx = 0; idx < node.count; idx++) {
-    //			if (rect.overlap(node.branch[idx])) {
-    //				@SuppressWarnings("unchecked")
-    //				T item = (T) node.branch[idx].node;
+    //        /* This is a leaf node */
+    //        for (int idx = 0; idx < node.count; idx++) {
+    //            if (rect.overlap(node.branch[idx])) {
+    //                @SuppressWarnings("unchecked")
+    //                T item = (T) node.branch[idx].node;
     //
-    //				/* NOTE: There are different ways to return results. Here's
-    //				 * where to modify */
-    //				found[0]++;
-    //				if (!cb.call(item, context)) {
-    //					/* Stop searching */
-    //					return false;
-    //				}
-    //			}
-    //		}
+    //                /* NOTE: There are different ways to return results. Here's
+    //                 * where to modify */
+    //                found[0]++;
+    //                if (!cb.call(item, context)) {
+    //                    /* Stop searching */
+    //                    return false;
+    //                }
+    //            }
+    //        }
     //
-    //		/* Continue searching */
-    //		return true;
-    //	}
+    //        /* Continue searching */
+    //        return true;
+    //    }
     //
-    //	public boolean search(Node node, Rect rect, List<T> results) {
-    //		if (DEBUG) {
-    //			assert (node != null);
-    //			assert (node.level >= 0);
-    //			assert (rect != null);
-    //		}
+    //    public boolean search(Node node, Rect rect, List<T> results) {
+    //        if (DEBUG) {
+    //            assert (node != null);
+    //            assert (node.level >= 0);
+    //            assert (rect != null);
+    //        }
     //
-    //		if (!node.isLeaf()) {
-    //			Branch<Node>[] children = node.children();
-    //			/* This is an internal node in the tree */
-    //			for (int idx = 0; idx < node.count; idx++) {
+    //        if (!node.isLeaf()) {
+    //            Branch<Node>[] children = node.children();
+    //            /* This is an internal node in the tree */
+    //            for (int idx = 0; idx < node.count; idx++) {
     //
-    //				if (rect.overlap(children[idx])) {
-    //					if (!search(children[idx].node, rect, results)) {
-    //						/* Stop searching */
-    //						return false;
-    //					}
-    //				}
-    //			}
-    //			/* Continue searching */
-    //			return true;
-    //		}
+    //                if (rect.overlap(children[idx])) {
+    //                    if (!search(children[idx].node, rect, results)) {
+    //                        /* Stop searching */
+    //                        return false;
+    //                    }
+    //                }
+    //            }
+    //            /* Continue searching */
+    //            return true;
+    //        }
     //
-    //		/* This is a leaf node */
-    //		for (int idx = 0; idx < node.count; idx++) {
-    //			if (rect.overlap(node.branch[idx])) {
-    //				@SuppressWarnings("unchecked")
-    //				T item = (T) node.branch[idx].node;
+    //        /* This is a leaf node */
+    //        for (int idx = 0; idx < node.count; idx++) {
+    //            if (rect.overlap(node.branch[idx])) {
+    //                @SuppressWarnings("unchecked")
+    //                T item = (T) node.branch[idx].node;
     //
-    //				results.add(item);
-    //			}
-    //		}
+    //                results.add(item);
+    //            }
+    //        }
     //
-    //		/* Continue searching */
-    //		return true;
-    //	}
+    //        /* Continue searching */
+    //        return true;
+    //    }
 
     public void searchStack(Rect rect, SearchCb<T> cb, Object context) {
         Stack stack = stackPool.get();
@@ -813,7 +813,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             Node node = stack.node();
 
             if (node.level == 0) {
-				/* is leaf node */
+                /* is leaf node */
                 for (int idx = 0; idx < node.count; idx++) {
                     @SuppressWarnings("unchecked")
                     Branch<T> branch[] = (Branch<T>[]) node.branch;
@@ -826,9 +826,9 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             } else {
                 int idx = stack.branchIndex();
 
-				/* Push sibling on stack for future tree walk.
-				 * This is the 'fall back' node when we finish with
-				 * the current level */
+                /* Push sibling on stack for future tree walk.
+                 * This is the 'fall back' node when we finish with
+                 * the current level */
                 for (int i = idx + 1; i < node.count; i++) {
                     if (rect.overlap(node.branch[i])) {
                         stack.push(node, i);
@@ -836,8 +836,8 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
                     }
                 }
 
-				/* Push first of next level to get deeper into
-				 * the tree */
+                /* Push first of next level to get deeper into
+                 * the tree */
                 node = (Node) node.branch[idx].node;
                 for (int i = 0; i < node.count; i++) {
                     if (rect.overlap(node.branch[i])) {
@@ -863,7 +863,7 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
             Node node = stack.node();
 
             if (node.level == 0) {
-				/* is leaf node */
+                /* is leaf node */
                 for (int idx = 0; idx < node.count; idx++) {
                     if (rect.overlap(node.branch[idx])) {
                         out.add(node.branch[idx].node);
@@ -871,9 +871,9 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
                 }
             } else {
                 int idx = stack.branchIndex();
-				/* Push sibling on stack for future tree walk.
-				 * This is the 'fall back' node when we finish with
-				 * the current level */
+                /* Push sibling on stack for future tree walk.
+                 * This is the 'fall back' node when we finish with
+                 * the current level */
                 for (int i = idx + 1; i < node.count; i++) {
                     if (rect.overlap(node.branch[i])) {
                         stack.push(node, i);
@@ -881,8 +881,8 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
                     }
                 }
 
-				/* Push first of next level* to get deeper into
-				 * the tree */
+                /* Push first of next level* to get deeper into
+                 * the tree */
                 node = (Node) node.branch[idx].node;
                 for (int i = 0; i < node.count; i++) {
                     if (rect.overlap(node.branch[i])) {
@@ -1024,36 +1024,36 @@ public class RTree<T> implements SpatialIndex<T>, Iterable<T> {
                 if (tos <= 0)
                     return false;
 
-				/* Copy stack top cause it may change as we use it */
+                /* Copy stack top cause it may change as we use it */
                 StackElement curTos = pop();
 
                 if (curTos.node.isLeaf()) {
-					/* Keep walking through data while we can */
+                    /* Keep walking through data while we can */
                     if (curTos.branchIndex < curTos.node.count) {
 
-						/* There is more data, just point to the next one */
+                        /* There is more data, just point to the next one */
                         push(curTos.node, curTos.branchIndex);
                         return true;
                     }
                     continue;
                 }
                 int idx = curTos.branchIndex;
-				/* No more data, so it will fall back to previous level */
+                /* No more data, so it will fall back to previous level */
                 if (idx + 1 < curTos.node.count) {
-					/* Push sibling on stack for future tree walk.
-					 * This is the 'fall back' node when we finish with
-					 * the current level */
+                    /* Push sibling on stack for future tree walk.
+                     * This is the 'fall back' node when we finish with
+                     * the current level */
                     push(curTos.node, idx + 1);
                 }
 
-				/* Since cur node is not a leaf, push first of next level
-				 * to get deeper into the tree */
+                /* Since cur node is not a leaf, push first of next level
+                 * to get deeper into the tree */
                 Node nextLevelnode = (Node) curTos.node.branch[idx].node;
 
                 push(nextLevelnode, 0);
 
-				/* If we pushed on a new leaf, exit as the data is ready
-				 * at TOS */
+                /* If we pushed on a new leaf, exit as the data is ready
+                 * at TOS */
                 if (nextLevelnode.isLeaf())
                     return true;
             }
@@ -1178,20 +1178,20 @@ class Partition {
         assert (branch != null);
         assert (node.count == node.branch.length);
 
-		/* Load the branch buffer */
+        /* Load the branch buffer */
         for (int idx = 0; idx < node.count; idx++)
             branchBuf[idx] = (Branch<Object>) node.branch[idx];
 
         branchBuf[node.count] = (Branch<Object>) branch;
 
-		/* Calculate rect containing all in the set */
+        /* Calculate rect containing all in the set */
         coverSplit.set(branchBuf[0]);
         for (int idx = 1, n = branchBuf.length; idx < n; idx++) {
             coverSplit.add(branchBuf[idx]);
         }
         coverSplitArea = coverSplit.calcRectVolume();
 
-		/* init node - FIXME needed? */
+        /* init node - FIXME needed? */
         node.count = 0;
         node.level = -1;
     }
@@ -1297,7 +1297,7 @@ class Partition {
             classify(chosen, betterGroup);
         }
 
-		/* If one group too full, put remaining rects in the other */
+        /* If one group too full, put remaining rects in the other */
         if ((count[0] + count[1]) < total) {
             if (count[0] >= total - minFill) {
                 group = 1;
@@ -1317,94 +1317,94 @@ class Partition {
 
 }
 
-//	/** Minimal bounding rectangle (n-dimensional) */
-//	static class Rect {
+//    /** Minimal bounding rectangle (n-dimensional) */
+//    static class Rect {
 //
-//		/** dimensions of bounding box */
-//		double bounds[] = new double[NUMDIMS * 2];
+//        /** dimensions of bounding box */
+//        double bounds[] = new double[NUMDIMS * 2];
 //
-//		//double xmin, ymin, xmax, ymax;
+//        //double xmin, ymin, xmax, ymax;
 //
-//		public Rect() {
-//		}
+//        public Rect() {
+//        }
 //
-//		public Rect(double[] min, double[] max) {
+//        public Rect(double[] min, double[] max) {
 //
-//			if (DEBUG) {
-//				for (int index = 0; index < NUMDIMS; index++) {
-//					assert (min[index] <= max[index]);
-//				}
-//			}
+//            if (DEBUG) {
+//                for (int index = 0; index < NUMDIMS; index++) {
+//                    assert (min[index] <= max[index]);
+//                }
+//            }
 //
-//			for (int axis = 0; axis < NUMDIMS; axis++) {
-//				this.bounds[axis] = min[axis];
-//				this.bounds[NUMDIMS + axis] = max[axis];
-//			}
-//		}
+//            for (int axis = 0; axis < NUMDIMS; axis++) {
+//                this.bounds[axis] = min[axis];
+//                this.bounds[NUMDIMS + axis] = max[axis];
+//            }
+//        }
 //
-//		/**
-//		 * Calculate the n-dimensional volume of a rectangle
-//		 */
-//		public double calcRectVolume() {
-//			double volume = (double) 1;
+//        /**
+//         * Calculate the n-dimensional volume of a rectangle
+//         */
+//        public double calcRectVolume() {
+//            double volume = (double) 1;
 //
-//			for (int idx = 0; idx < NUMDIMS; idx++) {
-//				volume *= bounds[NUMDIMS + idx] - bounds[idx];
-//			}
+//            for (int idx = 0; idx < NUMDIMS; idx++) {
+//                volume *= bounds[NUMDIMS + idx] - bounds[idx];
+//            }
 //
-//			assert (volume >= 0);
-//			return volume;
-//		}
+//            assert (volume >= 0);
+//            return volume;
+//        }
 //
-//		/**
-//		 * Decide whether two rectangles overlap.
-//		 */
-//		public boolean overlap(Rect other) {
-//			assert (other != null);
+//        /**
+//         * Decide whether two rectangles overlap.
+//         */
+//        public boolean overlap(Rect other) {
+//            assert (other != null);
 //
-//			for (int idx = 0; idx < NUMDIMS; idx++) {
-//				if (bounds[idx] > other.bounds[NUMDIMS + idx] ||
-//				        other.bounds[idx] > bounds[NUMDIMS + idx]) {
-//					return false;
-//				}
-//			}
-//			return true;
-//		}
+//            for (int idx = 0; idx < NUMDIMS; idx++) {
+//                if (bounds[idx] > other.bounds[NUMDIMS + idx] ||
+//                        other.bounds[idx] > bounds[NUMDIMS + idx]) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        }
 //
-//		/**
-//		 * Combine two rectangles into larger one containing both
-//		 */
-//		public Rect(Rect rectA, Rect rectB) {
-//			assert (rectA != null && rectB != null);
-//			for (int min = 0, max = NUMDIMS; min < NUMDIMS; min++, max++) {
-//				bounds[min] = Math.min(rectA.bounds[min], rectB.bounds[min]);
-//				bounds[max] = Math.max(rectA.bounds[max], rectB.bounds[max]);
-//			}
-//		}
+//        /**
+//         * Combine two rectangles into larger one containing both
+//         */
+//        public Rect(Rect rectA, Rect rectB) {
+//            assert (rectA != null && rectB != null);
+//            for (int min = 0, max = NUMDIMS; min < NUMDIMS; min++, max++) {
+//                bounds[min] = Math.min(rectA.bounds[min], rectB.bounds[min]);
+//                bounds[max] = Math.max(rectA.bounds[max], rectB.bounds[max]);
+//            }
+//        }
 //
-//		public void add(Rect rect) {
-//			for (int min = 0, max = NUMDIMS; min < NUMDIMS; min++, max++) {
-//				bounds[min] = Math.min(bounds[min], rect.bounds[min]);
-//				bounds[max] = Math.max(bounds[max], rect.bounds[max]);
-//			}
-//		}
+//        public void add(Rect rect) {
+//            for (int min = 0, max = NUMDIMS; min < NUMDIMS; min++, max++) {
+//                bounds[min] = Math.min(bounds[min], rect.bounds[min]);
+//                bounds[max] = Math.max(bounds[max], rect.bounds[max]);
+//            }
+//        }
 //
-//		public void set(Rect rect) {
-//			for (int idx = 0; idx < NUMDIMS * 2; idx++) {
-//				bounds[idx] = rect.bounds[idx];
-//			}
-//		}
+//        public void set(Rect rect) {
+//            for (int idx = 0; idx < NUMDIMS * 2; idx++) {
+//                bounds[idx] = rect.bounds[idx];
+//            }
+//        }
 //
-//		/**
-//		 * Find the smallest rectangle that includes all rectangles in branches
-//		 * of a node.
-//		 */
-//		void setCover(Node node) {
-//			assert (node != null);
+//        /**
+//         * Find the smallest rectangle that includes all rectangles in branches
+//         * of a node.
+//         */
+//        void setCover(Node node) {
+//            assert (node != null);
 //
-//			set(node.branch[0]);
-//			for (int idx = 1; idx < node.count; idx++) {
-//				add(node.branch[idx]);
-//			}
-//		}
-//	}
+//            set(node.branch[0]);
+//            for (int idx = 1; idx < node.count; idx++) {
+//                add(node.branch[idx]);
+//            }
+//        }
+//    }

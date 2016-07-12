@@ -69,9 +69,9 @@ public class SimplifyVW {
 
         Item last = push(geom.pointPos - 2, Float.MAX_VALUE);
 
-        //		sorter.doSort(heap, DistanceComparator, 0, size);
-        //		for (int i = 0; i < size; i++)
-        //			heap[i].index = i;
+        //        sorter.doSort(heap, DistanceComparator, 0, size);
+        //        for (int i = 0; i < size; i++)
+        //            heap[i].index = i;
 
         last.prev = prev;
         prev.next = last;
@@ -186,11 +186,11 @@ public class SimplifyVW {
         Item obj = heap[--size];
         heap[size] = null;
 
-		/* if min obj was popped */
+        /* if min obj was popped */
         if (i == size)
             return i;
 
-		/* else put min obj in place of the removed item */
+        /* else put min obj in place of the removed item */
         obj.index = i;
         heap[i] = obj;
 

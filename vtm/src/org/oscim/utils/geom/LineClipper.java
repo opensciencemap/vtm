@@ -143,30 +143,30 @@ public class LineClipper {
                 /* Bitwise AND is not 0. Trivially reject and get out of loop */
                 break;
             } else {
-				/* failed both tests, so calculate the line segment to clip
-				 * from an outside point to an intersection with clip edge */
+                /* failed both tests, so calculate the line segment to clip
+                 * from an outside point to an intersection with clip edge */
                 float x = 0;
                 float y = 0;
 
-				/* At least one endpoint is outside the clip rectangle; pick it. */
+                /* At least one endpoint is outside the clip rectangle; pick it. */
                 int outcodeOut = (outcode0 == 0) ? outcode1 : outcode0;
-				/* Now find the intersection point;
-				 * use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope)
-				 * * (y - y0) */
+                /* Now find the intersection point;
+                 * use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope)
+                 * * (y - y0) */
                 if ((outcodeOut & TOP) != 0) {
-					/* point is above the clip rectangle */
+                    /* point is above the clip rectangle */
                     x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
                     y = ymax;
                 } else if ((outcodeOut & BOTTOM) != 0) {
-					/* point is below the clip rectangle */
+                    /* point is below the clip rectangle */
                     x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
                     y = ymin;
                 } else if ((outcodeOut & RIGHT) != 0) {
-					/* point is to the right of clip rectangle */
+                    /* point is to the right of clip rectangle */
                     y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
                     x = xmax;
                 } else if ((outcodeOut & LEFT) != 0) {
-					/* point is to the left of clip rectangle */
+                    /* point is to the left of clip rectangle */
                     y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
                     x = xmin;
                 }
@@ -181,8 +181,8 @@ public class LineClipper {
                 else if (y > ymax)
                     outcode |= TOP;
 
-				/* Now we move outside point to intersection point to clip
-				 * and get ready for next pass. */
+                /* Now we move outside point to intersection point to clip
+                 * and get ready for next pass. */
                 if (outcodeOut == outcode0) {
                     x0 = x;
                     y0 = y;
@@ -248,23 +248,23 @@ public class LineClipper {
             }
 
             while (inPos < end) {
-				/* get the current way point coordinates */
+                /* get the current way point coordinates */
                 x = in.points[inPos++];
                 y = in.points[inPos++];
 
                 int clip = clipNext(x, y);
                 if (clip == 0) {
-					/* current segment is fully outside */
+                    /* current segment is fully outside */
                     inside = false; // needed?
                 } else if (clip == 1) {
-					/* current segment is fully within */
+                    /* current segment is fully within */
                     out.addPoint(x, y);
                 } else { /* clip == -1 */
                     if (inside) {
-						/* previous was inside */
+                        /* previous was inside */
                         out.addPoint(outX2, outY2);
                     } else {
-						/* previous was outside */
+                        /* previous was outside */
                         out.startLine();
                         numLines++;
                         out.addPoint(outX1, outY1);

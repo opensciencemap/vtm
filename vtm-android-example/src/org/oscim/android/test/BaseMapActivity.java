@@ -61,7 +61,7 @@ public class BaseMapActivity extends MapActivity {
         }
         mBaseLayer = mMap.setBaseMap(mTileSource);
 
-		/* set initial position on first run */
+        /* set initial position on first run */
         MapPosition pos = new MapPosition();
         mMap.getMapPosition(pos);
         if (pos.x == 0.5 && pos.y == 0.5)

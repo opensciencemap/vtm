@@ -212,18 +212,18 @@ public class GeometryBuffer {
     public GeometryBuffer startLine() {
         setOrCheckMode(GeometryType.LINE);
 
-		/* ignore */
+        /* ignore */
         if (index[indexPos] > 0) {
 
-			/* start next */
+            /* start next */
             if ((index[0] >= 0) && (++indexPos >= index.length))
                 ensureIndexSize(indexPos, true);
 
-			/* initialize with zero points */
+            /* initialize with zero points */
             index[indexPos] = 0;
         }
 
-		/* set new end marker */
+        /* set new end marker */
         if (index.length > indexPos + 1)
             index[indexPos + 1] = -1;
         return this;
@@ -243,14 +243,14 @@ public class GeometryBuffer {
             /* end polygon */
             index[++indexPos] = 0;
 
-			/* next polygon start */
+            /* next polygon start */
             indexPos++;
         }
 
-		/* initialize with zero points */
+        /* initialize with zero points */
         index[indexPos] = 0;
 
-		/* set new end marker */
+        /* set new end marker */
         if (index.length > indexPos + 1)
             index[indexPos + 1] = -1;
 
@@ -266,10 +266,10 @@ public class GeometryBuffer {
         if ((indexPos + 2) > index.length)
             ensureIndexSize(indexPos + 1, true);
 
-		/* initialize with zero points */
+        /* initialize with zero points */
         index[++indexPos] = 0;
 
-		/* set new end marker */
+        /* set new end marker */
         if (index.length > indexPos + 1)
             index[indexPos + 1] = -1;
     }
@@ -378,7 +378,7 @@ public class GeometryBuffer {
             float px = points[inPos++];
             float py = points[inPos++];
 
-			/* add first point */
+            /* add first point */
             points[outPos++] = px;
             points[outPos++] = py;
             int cnt = 2;

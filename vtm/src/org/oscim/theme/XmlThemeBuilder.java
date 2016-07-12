@@ -407,7 +407,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                     if (!isOutline)
                         validateNonNegative("width", b.strokeWidth);
                 } else {
-					/* use stroke width relative to 'line' */
+                    /* use stroke width relative to 'line' */
                     b.strokeWidth += line.width;
                     if (b.strokeWidth <= 0)
                         b.strokeWidth = 1;

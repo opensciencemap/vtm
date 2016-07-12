@@ -66,7 +66,7 @@ public class MapRenderer {
         mViewport = new GLViewport();
         mBufferPool = new NativeBufferPool();
 
-		/* FIXME should be done in 'destroy' method
+        /* FIXME should be done in 'destroy' method
          * clear all previous vbo refs */
         BufferObject.clear();
         setBackgroundColor(Color.DKGRAY);
@@ -115,13 +115,13 @@ public class MapRenderer {
 
         if (GLAdapter.debugView) {
             /* modify this to scale only the view, to see
-			 * which tiles are rendered */
+             * which tiles are rendered */
             mViewport.mvp.setScale(0.5f, 0.5f, 1);
             mViewport.viewproj.multiplyLhs(mViewport.mvp);
             mViewport.proj.multiplyLhs(mViewport.mvp);
         }
 
-		/* update layers */
+        /* update layers */
         LayerRenderer[] layers = mMap.layers().getLayerRenderer();
 
         for (int i = 0, n = layers.length; i < n; i++) {

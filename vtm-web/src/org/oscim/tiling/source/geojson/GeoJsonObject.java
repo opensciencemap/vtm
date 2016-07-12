@@ -26,9 +26,9 @@ public abstract class GeoJsonObject extends JavaScriptObject {
 
     public final native double[] getBbox()/*-{
         return bbox;
-	}-*/;
+    }-*/;
 
     public final native void setBbox(double[] bbox) /*-{
         this.bbox = bbox;
-	}-*/;
+    }-*/;
 }

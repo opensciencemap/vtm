@@ -206,7 +206,7 @@ public class Triangulator {
 
         int[] V = new int[n];
 
-		/* we want a counter-clockwise polygon in V */
+        /* we want a counter-clockwise polygon in V */
 
         if (0.0f < area(contour)) {
             for (int v = 0; v < n; v++)
@@ -218,7 +218,7 @@ public class Triangulator {
 
         int nv = n;
 
-		/* remove nv-2 Vertices, creating 1 triangle every time */
+        /* remove nv-2 Vertices, creating 1 triangle every time */
         int count = 2 * nv; /* error detection */
 
         //for (int m = 0, v = nv - 1; nv > 2;) {
@@ -229,7 +229,7 @@ public class Triangulator {
                 return false;
             }
 
-			/* three consecutive vertices in current polygon, <u,v,w> */
+            /* three consecutive vertices in current polygon, <u,v,w> */
             int u = v;
             if (nv <= u)
                 u = 0; /* previous */
@@ -243,25 +243,25 @@ public class Triangulator {
             if (snip(contour, u, v, w, nv, V)) {
                 int a, b, c, s, t;
 
-				/* true names of the vertices */
+                /* true names of the vertices */
                 a = V[u];
                 b = V[v];
                 c = V[w];
 
-				/* output Triangle */
+                /* output Triangle */
                 result.add(contour.get(a));
                 result.add(contour.get(b));
                 result.add(contour.get(c));
 
                 //m++;
 
-				/* remove v from remaining polygon */
+                /* remove v from remaining polygon */
                 for (s = v, t = v + 1; t < nv; s++, t++) {
                     V[s] = V[t];
                 }
                 nv--;
 
-				/* resest error detection counter */
+                /* resest error detection counter */
                 count = 2 * nv;
             }
         }
@@ -355,7 +355,7 @@ public class Triangulator {
         // * @param point The point to remove
         // */
         //public void remove(Point point) {
-        //	points.remove(point);
+        //    points.remove(point);
         //}
 
         /**

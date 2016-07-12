@@ -101,7 +101,7 @@ public class MarkerRenderer extends BucketRenderer {
         float cos = (float) Math.cos(angle);
         float sin = (float) Math.sin(angle);
 
-		/* check visibility */
+        /* check visibility */
         for (InternalItem it : mItems) {
             it.changes = false;
             it.x = (float) ((it.px - mx) * scale);
@@ -131,10 +131,10 @@ public class MarkerRenderer extends BucketRenderer {
 
         //log.debug(numVisible + " " + changedVisible + " " + changesInvisible);
 
-		/* only update when zoomlevel changed, new items are visible
+        /* only update when zoomlevel changed, new items are visible
          * or more than 10 of the current items became invisible */
         //if ((numVisible == 0) && (changedVisible == 0 && changesInvisible < 10))
-        //	return;
+        //    return;
         buckets.clear();
 
         if (numVisible == 0) {
@@ -182,7 +182,7 @@ public class MarkerRenderer extends BucketRenderer {
             tmp[i] = it;
             it.item = mMarkerLayer.createItem(i);
 
-			/* pre-project points */
+            /* pre-project points */
             MercatorProjection.project(it.item.getPoint(), mMapPoint);
             it.px = mMapPoint.x;
             it.py = mMapPoint.y;
@@ -228,24 +228,24 @@ public class MarkerRenderer extends BucketRenderer {
         }
     };
 
-    //	/**
-    //	 * Returns the Item at the given index.
-    //	 *
-    //	 * @param position
-    //	 *            the position of the item to return
-    //	 * @return the Item of the given index.
-    //	 */
-    //	public final Item getItem(int position) {
+    //    /**
+    //     * Returns the Item at the given index.
+    //     *
+    //     * @param position
+    //     *            the position of the item to return
+    //     * @return the Item of the given index.
+    //     */
+    //    public final Item getItem(int position) {
     //
-    //		synchronized (lock) {
-    //			InternalItem item = mItems;
-    //			for (int i = mSize - position - 1; i > 0 && item != null; i--)
-    //				item = item.next;
+    //        synchronized (lock) {
+    //            InternalItem item = mItems;
+    //            for (int i = mSize - position - 1; i > 0 && item != null; i--)
+    //                item = item.next;
     //
-    //			if (item != null)
-    //				return item.item;
+    //            if (item != null)
+    //                return item.item;
     //
-    //			return null;
-    //		}
-    //	}
+    //            return null;
+    //        }
+    //    }
 }

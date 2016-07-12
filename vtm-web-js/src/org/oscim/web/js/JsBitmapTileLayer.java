@@ -15,8 +15,8 @@ public class JsBitmapTileLayer extends BitmapTileLayer implements ExportOverlay<
         super(map, tileSource);
     }
 
-    //	@ExportConstructor
-    //	public static BitmapTileLayer constructor(Map map, TileSource tileSource) {
-    //		return new JsBitmapTileLayer(map, tileSource);
-    //	}
+    //    @ExportConstructor
+    //    public static BitmapTileLayer constructor(Map map, TileSource tileSource) {
+    //        return new JsBitmapTileLayer(map, tileSource);
+    //    }
 }

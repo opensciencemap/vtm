@@ -43,7 +43,7 @@ public final class SymbolBucket extends TextureBucket {
     /* TODO move sorting items to 'prepare' */
     public void addSymbol(SymbolItem item) {
 
-		/* needed to calculate 'sbuf' size for compile */
+        /* needed to calculate 'sbuf' size for compile */
         numVertices += VERTICES_PER_SPRITE;
 
         for (SymbolItem it : mSymbols) {
@@ -65,7 +65,7 @@ public final class SymbolBucket extends TextureBucket {
 
     @Override
     protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
-		/* offset of layer data in vbo */
+        /* offset of layer data in vbo */
         this.vertexOffset = vboData.position() * 2; //SHORT_BYTES;
 
         int numIndices = 0;
@@ -80,10 +80,10 @@ public final class SymbolBucket extends TextureBucket {
             int y = 0;
 
             if (it.texRegion != null) {
-				/* FIXME this work only with one TextureAtlas per SymbolLayer */
+                /* FIXME this work only with one TextureAtlas per SymbolLayer */
                 if (textures == null) {
-					/* clone TextureItem to use same texID with
-					 * multiple TextureItem */
+                    /* clone TextureItem to use same texID with
+                     * multiple TextureItem */
                     t = TextureItem.clone(it.texRegion.texture);
                     textures = Inlist.appendItem(textures, t);
                 }
@@ -119,7 +119,7 @@ public final class SymbolBucket extends TextureBucket {
             PointF prevOffset = null;
             short x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-			/* add symbol items referencing the same bitmap */
+            /* add symbol items referencing the same bitmap */
             for (SymbolItem prev = it; it != null; it = it.next) {
 
                 if (prev.bitmap != null && prev.bitmap != it.bitmap)
@@ -148,7 +148,7 @@ public final class SymbolBucket extends TextureBucket {
                     }
                 }
 
-				/* add vertices */
+                /* add vertices */
                 short tx = (short) ((int) (SCALE * it.x) & LBIT_MASK
                         | (it.billboard ? 1 : 0));
 
@@ -159,7 +159,7 @@ public final class SymbolBucket extends TextureBucket {
                 vertexItems.add(tx, ty, x2, y1, u2, v2);
                 vertexItems.add(tx, ty, x2, y2, u2, v1);
 
-				/* six elements used to draw the four vertices */
+                /* six elements used to draw the four vertices */
                 t.indices += TextureBucket.INDICES_PER_SPRITE;
             }
             numIndices += t.indices;

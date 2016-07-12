@@ -114,19 +114,19 @@ public final class LineTexBucket extends RenderBucket {
         if (vertexItems.empty()) {
             /* HACK add one vertex offset when compiling
              * buffer otherwise one cant use the full
-			 * VertexItem (see Layers.compile)
-			 * add the two 'x' at front and end */
+             * VertexItem (see Layers.compile)
+             * add the two 'x' at front and end */
             //numVertices = 2;
 
-			/* the additional end vertex to make sure
-			 * not to read outside allocated memory */
+            /* the additional end vertex to make sure
+             * not to read outside allocated memory */
             numVertices = 1;
         }
         VertexData vi = vertexItems;
 
         boolean even = evenSegment;
 
-		/* reset offset to last written position */
+        /* reset offset to last written position */
         if (!even)
             vi.seek(-12);
 
@@ -144,11 +144,11 @@ public final class LineTexBucket extends RenderBucket {
             if (index != null)
                 length = index[i];
 
-			/* check end-marker in indices */
+            /* check end-marker in indices */
             if (length < 0)
                 break;
 
-			/* need at least two points */
+            /* need at least two points */
             if (length < 4) {
                 pos += length;
                 continue;
@@ -158,24 +158,24 @@ public final class LineTexBucket extends RenderBucket {
             float x = points[pos++] * COORD_SCALE;
             float y = points[pos++] * COORD_SCALE;
 
-			/* randomize a bit */
+            /* randomize a bit */
             float lineLength = mRandomizeOffset ? (x * x + y * y) % 80 : 0;
 
             while (pos < end) {
                 float nx = points[pos++] * COORD_SCALE;
                 float ny = points[pos++] * COORD_SCALE;
 
-				/* Calculate triangle corners for the given width */
+                /* Calculate triangle corners for the given width */
                 float vx = nx - x;
                 float vy = ny - y;
 
                 float a = (float) Math.sqrt(vx * vx + vy * vy);
 
-				/* normal vector */
+                /* normal vector */
                 vx /= a;
                 vy /= a;
 
-				/* perpendicular to line segment */
+                /* perpendicular to line segment */
                 float ux = -vy;
                 float uy = vx;
 
@@ -201,18 +201,18 @@ public final class LineTexBucket extends RenderBucket {
                 y = ny;
 
                 if (even) {
-					/* go to second segment */
+                    /* go to second segment */
                     vi.seek(-12);
                     even = false;
 
-					/* vertex 0 and 2 were added */
+                    /* vertex 0 and 2 were added */
                     numVertices += 3;
                     evenQuads++;
                 } else {
-					/* go to next block */
+                    /* go to next block */
                     even = true;
 
-					/* vertex 1 and 3 were added */
+                    /* vertex 1 and 3 were added */
                     numVertices += 1;
                     oddQuads++;
                 }
@@ -221,7 +221,7 @@ public final class LineTexBucket extends RenderBucket {
 
         evenSegment = even;
 
-		/* advance offset to last written position */
+        /* advance offset to last written position */
         if (!even)
             vi.seek(12);
     }
@@ -229,7 +229,7 @@ public final class LineTexBucket extends RenderBucket {
     @Override
     protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
         compileVertexItems(vboData);
-		/* add additional vertex for interleaving, see TexLineLayer. */
+        /* add additional vertex for interleaving, see TexLineLayer. */
         vboData.position(vboData.position() + 6);
     }
 
@@ -276,7 +276,7 @@ public final class LineTexBucket extends RenderBucket {
             int[] vboIds = GLUtils.glGenBuffers(1);
             mVertexFlipID = vboIds[0];
 
-			/* bytes: 0, 1, 0, 1, 0, ... */
+            /* bytes: 0, 1, 0, 1, 0, ... */
             byte[] flip = new byte[MapRenderer.MAX_QUADS * 4];
             for (int i = 0; i < flip.length; i++)
                 flip[i] = (byte) (i % 2);
@@ -294,11 +294,11 @@ public final class LineTexBucket extends RenderBucket {
                     GL.STATIC_DRAW);
             GLState.bindVertexBuffer(0);
 
-            //		mTexID = new int[10];
-            //		byte[] stipple = new byte[2];
-            //		stipple[0] = 32;
-            //		stipple[1] = 32;
-            //		mTexID[0] = GlUtils.loadStippleTexture(stipple);
+            //        mTexID = new int[10];
+            //        byte[] stipple = new byte[2];
+            //        stipple[0] = 32;
+            //        stipple[1] = 32;
+            //        mTexID[0] = GlUtils.loadStippleTexture(stipple);
         }
 
         private final static int STRIDE = 12;
@@ -308,7 +308,7 @@ public final class LineTexBucket extends RenderBucket {
                                         float div, RenderBuckets buckets) {
 
             //if (shader == 0)
-            //	return curLayer.next;
+            //    return curLayer.next;
 
             GLState.blend(true);
             //GLState.useProgram(shader);
@@ -361,21 +361,21 @@ public final class LineTexBucket extends RenderBucket {
                 gl.uniform1f(shader.uPatternWidth, line.stippleWidth);
                 //GL.uniform1f(hScale, scale);
 
-				/* keep line width fixed */
+                /* keep line width fixed */
                 gl.uniform1f(shader.uWidth, lb.width / s * COORD_SCALE_BY_DIR_SCALE);
 
-				/* add offset vertex */
+                /* add offset vertex */
                 int vOffset = -STRIDE;
 
                 // TODO interleave 1. and 2. pass to improve vertex cache usage?
-				/* first pass */
+                /* first pass */
                 int allIndices = (lb.evenQuads * 6);
                 for (int i = 0; i < allIndices; i += MAX_INDICES) {
                     int numIndices = allIndices - i;
                     if (numIndices > MAX_INDICES)
                         numIndices = MAX_INDICES;
 
-					/* i / 6 * (24 shorts per block * 2 short bytes) */
+                    /* i / 6 * (24 shorts per block * 2 short bytes) */
                     int add = (b.vertexOffset + i * 8) + vOffset;
 
                     gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,
@@ -394,13 +394,13 @@ public final class LineTexBucket extends RenderBucket {
                             GL.UNSIGNED_SHORT, 0);
                 }
 
-				/* second pass */
+                /* second pass */
                 allIndices = (lb.oddQuads * 6);
                 for (int i = 0; i < allIndices; i += MAX_INDICES) {
                     int numIndices = allIndices - i;
                     if (numIndices > MAX_INDICES)
                         numIndices = MAX_INDICES;
-					/* i / 6 * (24 shorts per block * 2 short bytes) */
+                    /* i / 6 * (24 shorts per block * 2 short bytes) */
                     int add = (b.vertexOffset + i * 8) + vOffset;
 
                     gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,

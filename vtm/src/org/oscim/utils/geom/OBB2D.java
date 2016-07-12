@@ -163,29 +163,29 @@ public class OBB2D {
         originY = Vec2.dot(vec, CORNER_0, AXIS_2);
     }
 
-    //	public OBB2D(float cx, float cy, float w, float h, float angle) {
-    //		float rcos = (float) Math.cos(angle);
-    //		float rsin = (float) Math.sin(angle);
+    //    public OBB2D(float cx, float cy, float w, float h, float angle) {
+    //        float rcos = (float) Math.cos(angle);
+    //        float rsin = (float) Math.sin(angle);
     //
-    //		float[] tmp = new float[4 * 2];
-    //		Vec2.set(tmp, 0, rcos, rsin);
-    //		Vec2.set(tmp, 1, -rsin, rcos);
+    //        float[] tmp = new float[4 * 2];
+    //        Vec2.set(tmp, 0, rcos, rsin);
+    //        Vec2.set(tmp, 1, -rsin, rcos);
     //
-    //		Vec2.mul(tmp, 0, w / 2);
-    //		Vec2.mul(tmp, 1, h / 2);
+    //        Vec2.mul(tmp, 0, w / 2);
+    //        Vec2.mul(tmp, 1, h / 2);
     //
-    //		Vec2.add(tmp, 2, tmp, 0, tmp, 1);
-    //		Vec2.sub(tmp, 3, tmp, 0, tmp, 1);
+    //        Vec2.add(tmp, 2, tmp, 0, tmp, 1);
+    //        Vec2.sub(tmp, 3, tmp, 0, tmp, 1);
     //
-    //		Vec2.set(tmp, 0, cx, cy);
+    //        Vec2.set(tmp, 0, cx, cy);
     //
-    //		Vec2.sub(origin, CORNER_X + 0, tmp, 0, tmp, 3);
-    //		Vec2.add(origin, CORNER_X + 2, tmp, 0, tmp, 3);
-    //		Vec2.add(origin, CORNER_X + 4, tmp, 0, tmp, 2);
-    //		Vec2.sub(origin, CORNER_X + 6, tmp, 0, tmp, 2);
+    //        Vec2.sub(origin, CORNER_X + 0, tmp, 0, tmp, 3);
+    //        Vec2.add(origin, CORNER_X + 2, tmp, 0, tmp, 3);
+    //        Vec2.add(origin, CORNER_X + 4, tmp, 0, tmp, 2);
+    //        Vec2.sub(origin, CORNER_X + 6, tmp, 0, tmp, 2);
     //
-    //		computeAxes();
-    //	}
+    //        computeAxes();
+    //    }
     //
     public OBB2D() {
 

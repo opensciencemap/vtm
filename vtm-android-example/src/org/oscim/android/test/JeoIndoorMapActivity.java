@@ -62,9 +62,9 @@ public class JeoIndoorMapActivity extends BaseMapActivity {
                 showToast("load data");
                 InputStream is = null;
                 try {
-                    //	File file = new File(Environment.getExternalStorageDirectory()
-                    //	    .getAbsolutePath(), "osmindoor.json");
-                    //	is = new FileInputStream(file);
+                    //    File file = new File(Environment.getExternalStorageDirectory()
+                    //        .getAbsolutePath(), "osmindoor.json");
+                    //    is = new FileInputStream(file);
 
                     URL url = new URL(PATH);
                     URLConnection conn = url.openConnection();
@@ -83,11 +83,11 @@ public class JeoIndoorMapActivity extends BaseMapActivity {
         mMap.layers().add(new BuildingLayer(mMap, mBaseLayer));
         mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
 
-        //	mMap.layers().add(new TileGridLayer(mMap));
-        //	String file = Environment.getExternalStorageDirectory().getAbsolutePath();
-        //	VectorDataset data = (VectorDataset) JeoTest.getJsonData(file + "/states.json", true);
-        //	Style style = JeoTest.getStyle();
-        //	mMap.layers().add(new JeoVectorLayer(mMap, data, style));
+        //    mMap.layers().add(new TileGridLayer(mMap));
+        //    String file = Environment.getExternalStorageDirectory().getAbsolutePath();
+        //    VectorDataset data = (VectorDataset) JeoTest.getJsonData(file + "/states.json", true);
+        //    Style style = JeoTest.getStyle();
+        //    mMap.layers().add(new JeoVectorLayer(mMap, data, style));
     }
 
     void loadJson(InputStream is) {
@@ -171,7 +171,7 @@ public class JeoIndoorMapActivity extends BaseMapActivity {
     protected void onResume() {
         super.onResume();
 
-		/* ignore saved position */
+        /* ignore saved position */
         //mMap.setMapPosition(49.417, 8.673, 1 << 17);
         mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
     }

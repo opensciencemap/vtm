@@ -108,13 +108,13 @@ public class VectorTileLayer extends TileLayer {
     public void setRenderTheme(IRenderTheme theme) {
         /* wait for loaders to finish all current jobs to
          * not change theme instance hold by loader instance
-		 * while running */
+         * while running */
         pauseLoaders(true);
         mTileManager.clearJobs();
 
         mTheme = theme;
-        //	for (TileLoader l : mTileLoader)
-        //	((VectorTileLoader) l).setRenderTheme(theme);
+        //    for (TileLoader l : mTileLoader)
+        //    ((VectorTileLoader) l).setRenderTheme(theme);
 
         tileRenderer().setOverdrawColor(theme.getMapBackground());
 
@@ -203,8 +203,8 @@ public class VectorTileLayer extends TileLayer {
     }
 
     public void callHooksComplete(MapTile tile, boolean success) {
-		/* NB: cannot use internal iterater as this function
-		 * is called concurently by TileLoaders */
+        /* NB: cannot use internal iterater as this function
+         * is called concurently by TileLoaders */
 
         LList<TileLoaderThemeHook> th = mLoaderThemeHooks.head();
         while (th != null) {

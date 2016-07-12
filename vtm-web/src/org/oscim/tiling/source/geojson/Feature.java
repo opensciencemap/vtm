@@ -27,15 +27,15 @@ public class Feature extends GeoJsonObject {
 
     public final native Geometry<?> getGeometry() /*-{
         return this.geometry;
-	}-*/;
+    }-*/;
 
     public final native String getId() /*-{
         return this.id;
-	}-*/;
+    }-*/;
 
     public final native void setId(String id) /*-{
-		this.id = id;
-	}-*/;
+        this.id = id;
+    }-*/;
 
     public final Map<String, Object> getProperties(HashMap<String, Object> map) {
         map.clear();
@@ -45,8 +45,8 @@ public class Feature extends GeoJsonObject {
     }
 
     public final native void fromJavascriptObject(HashMap<String, Object> s) /*-{
-		for(var key in this.properties) {
-		     s.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, Object(this.properties[key]));
-		}
-	}-*/;
+        for(var key in this.properties) {
+             s.@java.util.HashMap::put(Ljava/lang/Object;Ljava/lang/Object;)(key, Object(this.properties[key]));
+        }
+    }-*/;
 }

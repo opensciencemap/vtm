@@ -103,31 +103,31 @@ public class SearchBox {
         public final native String getId()
         /*-{
             return this.osm_id;
-		}-*/;
+        }-*/;
 
         public final native String name() /*-{
-			return this.display_name;
-		}-*/;
+            return this.display_name;
+        }-*/;
 
         public final native BBox getBBox() /*-{
-			return this.boundingbox
-		}-*/;
+            return this.boundingbox
+        }-*/;
 
         public final native String getWkt() /*-{
-			return this.geotext;
-		}-*/;
+            return this.geotext;
+        }-*/;
 
         private final native String latitude() /*-{
-			return this.lat;
-		}-*/;
+            return this.lat;
+        }-*/;
 
         private final native String longitude() /*-{
-			return this.lon;
-		}-*/;
+            return this.lon;
+        }-*/;
 
         public final native String getIcon() /*-{
-			return this.icon;
-		}-*/;
+            return this.icon;
+        }-*/;
 
         @Override
         public double getLatitude() {
@@ -248,7 +248,7 @@ public class SearchBox {
                 mOverlay.clearPath();
 
                 //log.debug("selected " + d.getName() + " " + d.getLatitude() + " "
-                //		+ d.getLongitude());
+                //        + d.getLongitude());
 
                 BoundingBox b = d.getBoundingBox();
                 if (b != null) {

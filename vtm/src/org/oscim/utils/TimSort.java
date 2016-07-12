@@ -211,28 +211,28 @@ public class TimSort<T> {
                 : INITIAL_TMP_STORAGE_LENGTH];
         tmp = newArray;
 
-		/*
+        /*
          * Allocate runs-to-be-merged stack (which cannot be expanded). The
-		 * stack length requirements are described in listsort.txt.
-		 * The C version always uses the same stack length (85), but this was
-		 * measured to be too expensive when sorting "mid-sized"
-		 * arrays (e.g., 100 elements) in Java. Therefore, we use smaller (but
-		 * sufficiently large) stack lengths for smaller arrays.
-		 * The "magic numbers" in the computation below must be changed if
-		 * MIN_MERGE is decreased. See the MIN_MERGE declaration
-		 * above for more information.
-		 */
+         * stack length requirements are described in listsort.txt.
+         * The C version always uses the same stack length (85), but this was
+         * measured to be too expensive when sorting "mid-sized"
+         * arrays (e.g., 100 elements) in Java. Therefore, we use smaller (but
+         * sufficiently large) stack lengths for smaller arrays.
+         * The "magic numbers" in the computation below must be changed if
+         * MIN_MERGE is decreased. See the MIN_MERGE declaration
+         * above for more information.
+         */
         int stackLen = (len < 120 ? 5 : len < 1542 ? 10 : len < 119151 ? 19 : 40);
         runBase = new int[stackLen];
         runLen = new int[stackLen];
     }
 
-	/*
+    /*
      * The next two methods (which are package private and static) constitute
-	 * the entire API of this class. Each of these methods
-	 * obeys the contract of the public method with the same signature in
-	 * java.util.Arrays.
-	 */
+     * the entire API of this class. Each of these methods
+     * obeys the contract of the public method with the same signature in
+     * java.util.Arrays.
+     */
 
     static <T> void sort(T[] a, Comparator<? super T> c) {
         sort(a, 0, a.length, c);
@@ -324,10 +324,10 @@ public class TimSort<T> {
             int right = start;
             if (DEBUG)
                 assert left <= right;
-			/*
-			 * Invariants: pivot >= all in [lo, left). pivot < all in [right,
-			 * start).
-			 */
+            /*
+             * Invariants: pivot >= all in [lo, left). pivot < all in [right,
+             * start).
+             */
             while (left < right) {
                 int mid = (left + right) >>> 1;
                 if (c.compare(pivot, a[mid]) < 0)
@@ -338,13 +338,13 @@ public class TimSort<T> {
             if (DEBUG)
                 assert left == right;
 
-			/*
-			 * The invariants still hold: pivot >= all in [lo, left) and pivot <
-			 * all in [left, start), so pivot belongs at left. Note
-			 * that if there are elements equal to pivot, left points to the
-			 * first slot after them -- that's why this sort is stable.
-			 * Slide elements over to make room to make room for pivot.
-			 */
+            /*
+             * The invariants still hold: pivot >= all in [lo, left) and pivot <
+             * all in [left, start), so pivot belongs at left. Note
+             * that if there are elements equal to pivot, left points to the
+             * first slot after them -- that's why this sort is stable.
+             * Slide elements over to make room to make room for pivot.
+             */
             int n = start - left; // The number of elements to move
             // Switch is just an optimization for arraycopy in default case
             switch (n) {
@@ -526,11 +526,11 @@ public class TimSort<T> {
         if (DEBUG)
             assert base1 + len1 == base2;
 
-		/*
-		 * Record the length of the combined runs; if i is the 3rd-last run now,
-		 * also slide over the last run (which isn't involved
-		 * in this merge). The current run (i+1) goes away in any case.
-		 */
+        /*
+         * Record the length of the combined runs; if i is the 3rd-last run now,
+         * also slide over the last run (which isn't involved
+         * in this merge). The current run (i+1) goes away in any case.
+         */
         runLen[i] = len1 + len2;
         if (i == stackSize - 3) {
             runBase[i + 1] = runBase[i + 2];
@@ -538,11 +538,11 @@ public class TimSort<T> {
         }
         stackSize--;
 
-		/*
-		 * Find where the first element of run2 goes in run1. Prior elements in
-		 * run1 can be ignored (because they're already in
-		 * place).
-		 */
+        /*
+         * Find where the first element of run2 goes in run1. Prior elements in
+         * run1 can be ignored (because they're already in
+         * place).
+         */
         int k = gallopRight(a[base2], a, base1, len1, 0, c);
         if (DEBUG)
             assert k >= 0;
@@ -551,11 +551,11 @@ public class TimSort<T> {
         if (len1 == 0)
             return;
 
-		/*
-		 * Find where the last element of run1 goes in run2. Subsequent elements
-		 * in run2 can be ignored (because they're already in
-		 * place).
-		 */
+        /*
+         * Find where the last element of run1 goes in run2. Subsequent elements
+         * in run2 can be ignored (because they're already in
+         * place).
+         */
         len2 = gallopLeft(a[base1 + len1 - 1], a, base2, len2, len2 - 1, c);
         if (DEBUG)
             assert len2 >= 0;
@@ -629,12 +629,12 @@ public class TimSort<T> {
         if (DEBUG)
             assert -1 <= lastOfs && lastOfs < ofs && ofs <= len;
 
-		/*
-		 * Now a[base+lastOfs] < key <= a[base+ofs], so key belongs somewhere to
-		 * the right of lastOfs but no farther right than ofs.
-		 * Do a binary search, with invariant a[base + lastOfs - 1] < key <=
-		 * a[base + ofs].
-		 */
+        /*
+         * Now a[base+lastOfs] < key <= a[base+ofs], so key belongs somewhere to
+         * the right of lastOfs but no farther right than ofs.
+         * Do a binary search, with invariant a[base + lastOfs - 1] < key <=
+         * a[base + ofs].
+         */
         lastOfs++;
         while (lastOfs < ofs) {
             int m = lastOfs + ((ofs - lastOfs) >>> 1);
@@ -706,12 +706,12 @@ public class TimSort<T> {
         if (DEBUG)
             assert -1 <= lastOfs && lastOfs < ofs && ofs <= len;
 
-		/*
-		 * Now a[b + lastOfs] <= key < a[b + ofs], so key belongs somewhere to
-		 * the right of lastOfs but no farther right than ofs.
-		 * Do a binary search, with invariant a[b + lastOfs - 1] <= key < a[b +
-		 * ofs].
-		 */
+        /*
+         * Now a[b + lastOfs] <= key < a[b + ofs], so key belongs somewhere to
+         * the right of lastOfs but no farther right than ofs.
+         * Do a binary search, with invariant a[b + lastOfs - 1] <= key < a[b +
+         * ofs].
+         */
         lastOfs++;
         while (lastOfs < ofs) {
             int m = lastOfs + ((ofs - lastOfs) >>> 1);
@@ -775,10 +775,10 @@ public class TimSort<T> {
             int count1 = 0; // Number of times in a row that first run won
             int count2 = 0; // Number of times in a row that second run won
 
-			/*
-			 * Do the straightforward thing until (if ever) one run starts
-			 * winning consistently.
-			 */
+            /*
+             * Do the straightforward thing until (if ever) one run starts
+             * winning consistently.
+             */
             do {
                 if (DEBUG)
                     assert len1 > 1 && len2 > 0;
@@ -797,11 +797,11 @@ public class TimSort<T> {
                 }
             } while ((count1 | count2) < minGallop);
 
-			/*
-			 * One run is winning so consistently that galloping may be a huge
-			 * win. So try that, and continue galloping until (if
-			 * ever) neither run appears to be winning consistently anymore.
-			 */
+            /*
+             * One run is winning so consistently that galloping may be a huge
+             * win. So try that, and continue galloping until (if
+             * ever) neither run appears to be winning consistently anymore.
+             */
             do {
                 if (DEBUG)
                     assert len1 > 1 && len2 > 0;
@@ -899,10 +899,10 @@ public class TimSort<T> {
             int count1 = 0; // Number of times in a row that first run won
             int count2 = 0; // Number of times in a row that second run won
 
-			/*
-			 * Do the straightforward thing until (if ever) one run appears to
-			 * win consistently.
-			 */
+            /*
+             * Do the straightforward thing until (if ever) one run appears to
+             * win consistently.
+             */
             do {
                 if (DEBUG)
                     assert len1 > 0 && len2 > 1;
@@ -921,11 +921,11 @@ public class TimSort<T> {
                 }
             } while ((count1 | count2) < minGallop);
 
-			/*
-			 * One run is winning so consistently that galloping may be a huge
-			 * win. So try that, and continue galloping until (if
-			 * ever) neither run appears to be winning consistently anymore.
-			 */
+            /*
+             * One run is winning so consistently that galloping may be a huge
+             * win. So try that, and continue galloping until (if
+             * ever) neither run appears to be winning consistently anymore.
+             */
             do {
                 if (DEBUG)
                     assert len1 > 0 && len2 > 1;

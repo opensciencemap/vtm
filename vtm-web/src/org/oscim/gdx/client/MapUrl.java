@@ -59,10 +59,10 @@ public class MapUrl extends Timer {
                     rotation = Float.parseFloat(p.substring(4));
                 else if (p.startsWith("tilt="))
                     tilt = Float.parseFloat(p.substring(5));
-                    //	else if (p.startsWith("theme="))
-                    //		themeName = p.substring(6);
-                    //	else if (p.startsWith("map="))
-                    //		mapName = p.substring(4);
+                    //    else if (p.startsWith("theme="))
+                    //        themeName = p.substring(6);
+                    //    else if (p.startsWith("map="))
+                    //        mapName = p.substring(4);
                 else {
                     String[] opt = p.split("=");
                     if (opt.length > 1)

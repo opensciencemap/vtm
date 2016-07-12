@@ -27,9 +27,9 @@ public abstract class Geometry<T extends JavaScriptObject> extends JsArray<T> {
 
     public final native String type()/*-{
         return this.type
-	}-*/;
+    }-*/;
 
     public final native JsArray<T> getCoordinates() /*-{
         return this.coordinates;
-	}-*/;
+    }-*/;
 }

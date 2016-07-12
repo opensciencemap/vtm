@@ -37,7 +37,7 @@ class MatchingCacheKey {
     boolean set(TagSet tags, MatchingCacheKey compare) {
         int numTags = tags.numTags;
 
-		/* Test if tags are equal to previous query */
+        /* Test if tags are equal to previous query */
         if (compare != null && numTags == compare.mTags.length) {
             int i = 0;
             for (; i < numTags; i++) {
@@ -51,9 +51,9 @@ class MatchingCacheKey {
                 return true;
         }
 
-		/* Clone tags as they belong to TileDataSource.
+        /* Clone tags as they belong to TileDataSource.
          * Also needed for comparison if previous tags
-		 * were equal. */
+         * were equal. */
         mTags = new Tag[numTags];
 
         int result = 7;

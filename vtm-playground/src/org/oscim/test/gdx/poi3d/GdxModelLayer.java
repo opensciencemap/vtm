@@ -21,24 +21,24 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
 
     public GdxModelLayer(Map map) {
         super(map);
-        //		tileLayer.addHook(new TileLoaderProcessHook() {
+        //        tileLayer.addHook(new TileLoaderProcessHook() {
         //
-        //			@Override
-        //			public boolean process(MapTile tile, ElementLayers layers, MapElement element) {
+        //            @Override
+        //            public boolean process(MapTile tile, ElementLayers layers, MapElement element) {
         //
-        //				if (!element.tags.contains(TREE_TAG))
-        //					return false;
+        //                if (!element.tags.contains(TREE_TAG))
+        //                    return false;
         //
-        //				Poi3DTileData td = get(tile);
-        //				PointF p = element.getPoint(0);
-        //				SymbolItem s = SymbolItem.pool.get();
-        //				s.x = p.x;
-        //				s.y = p.y;
-        //				td.symbols.push(s);
+        //                Poi3DTileData td = get(tile);
+        //                PointF p = element.getPoint(0);
+        //                SymbolItem s = SymbolItem.pool.get();
+        //                s.x = p.x;
+        //                s.y = p.y;
+        //                td.symbols.push(s);
         //
-        //				return true;
-        //			}
-        //		});
+        //                return true;
+        //            }
+        //        });
         //mTileLayer = tileLayer;
 
         mRenderer = g3d = new GdxRenderer3D(mMap);
@@ -57,11 +57,11 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         loading = true;
     }
 
-    //	TileSet mTileSet = new TileSet();
-    //	TileSet mPrevTiles = new TileSet();
+    //    TileSet mTileSet = new TileSet();
+    //    TileSet mPrevTiles = new TileSet();
     //
-    //	LinkedHashMap<Tile, Array<SharedModel>> mTileMap =
-    //	        new LinkedHashMap<Tile, Array<SharedModel>>();
+    //    LinkedHashMap<Tile, Array<SharedModel>> mTileMap =
+    //            new LinkedHashMap<Tile, Array<SharedModel>>();
 
     boolean loading;
     Model mModel;
@@ -92,14 +92,14 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
     @Override
     public void onMapEvent(Event ev, MapPosition pos) {
 
-        //		if (ev == Map.CLEAR_EVENT) {
-        //			mTileSet = new TileSet();
-        //			mPrevTiles = new TileSet();
-        //			mTileMap = new LinkedHashMap<Tile, Array<SharedModel>>();
-        //			synchronized (g3d) {
-        //				g3d.instances.clear();
-        //			}
-        //		}
+        //        if (ev == Map.CLEAR_EVENT) {
+        //            mTileSet = new TileSet();
+        //            mPrevTiles = new TileSet();
+        //            mTileMap = new LinkedHashMap<Tile, Array<SharedModel>>();
+        //            synchronized (g3d) {
+        //                g3d.instances.clear();
+        //            }
+        //        }
         //
         if (loading && assets.update()) {
             doneLoading();
@@ -122,116 +122,116 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         g3d.cam.setMapPosition(x * scale - pos.x, y * scale - pos.y, scale / pos.scale);
 
         //
-        //		// log.debug("update");
+        //        // log.debug("update");
         //
-        //		mTileLayer.tileRenderer().getVisibleTiles(mTileSet);
+        //        mTileLayer.tileRenderer().getVisibleTiles(mTileSet);
         //
-        //		if (mTileSet.cnt == 0) {
-        //			mTileSet.releaseTiles();
-        //			return;
-        //		}
+        //        if (mTileSet.cnt == 0) {
+        //            mTileSet.releaseTiles();
+        //            return;
+        //        }
         //
-        //		boolean changed = false;
+        //        boolean changed = false;
         //
-        //		Array<SharedModel> added = new Array<SharedModel>();
-        //		Array<SharedModel> removed = new Array<SharedModel>();
+        //        Array<SharedModel> added = new Array<SharedModel>();
+        //        Array<SharedModel> removed = new Array<SharedModel>();
 
-        //		for (int i = 0; i < mTileSet.cnt; i++) {
-        //			MapTile t = mTileSet.tiles[i];
-        //			if (mPrevTiles.contains(t))
-        //				continue;
+        //        for (int i = 0; i < mTileSet.cnt; i++) {
+        //            MapTile t = mTileSet.tiles[i];
+        //            if (mPrevTiles.contains(t))
+        //                continue;
         //
-        //			Array<SharedModel> instances = new Array<SharedModel>();
+        //            Array<SharedModel> instances = new Array<SharedModel>();
         //
-        //			Poi3DTileData ld = (Poi3DTileData) t.getData(POI_DATA);
-        //			if (ld == null)
-        //				continue;
+        //            Poi3DTileData ld = (Poi3DTileData) t.getData(POI_DATA);
+        //            if (ld == null)
+        //                continue;
         //
-        //			for (SymbolItem it : ld.symbols) {
+        //            for (SymbolItem it : ld.symbols) {
         //
-        //				SharedModel inst = new SharedModel(mModel);
-        //				inst.userData = it;
-        //				// float r = 0.5f + 0.5f * (float) Math.random();
-        //				// float g = 0.5f + 0.5f * (float) Math.random();
-        //				// float b = 0.5f + 0.5f * (float) Math.random();
+        //                SharedModel inst = new SharedModel(mModel);
+        //                inst.userData = it;
+        //                // float r = 0.5f + 0.5f * (float) Math.random();
+        //                // float g = 0.5f + 0.5f * (float) Math.random();
+        //                // float b = 0.5f + 0.5f * (float) Math.random();
         //
-        //				// inst.transform.setTranslation(new Vector3(it.x, it.y,
-        //				// 10));
-        //				// inst.materials.get(0).set(ColorAttribute.createDiffuse(r,
-        //				// g, b, 0.8f));
-        //				instances.add(inst);
-        //				added.add(inst);
-        //			}
+        //                // inst.transform.setTranslation(new Vector3(it.x, it.y,
+        //                // 10));
+        //                // inst.materials.get(0).set(ColorAttribute.createDiffuse(r,
+        //                // g, b, 0.8f));
+        //                instances.add(inst);
+        //                added.add(inst);
+        //            }
         //
-        //			if (instances.size == 0)
-        //				continue;
+        //            if (instances.size == 0)
+        //                continue;
         //
-        //			log.debug("add " + t + " " + instances.size);
+        //            log.debug("add " + t + " " + instances.size);
         //
-        //			changed = true;
+        //            changed = true;
         //
-        //			mTileMap.put(t, instances);
-        //		}
+        //            mTileMap.put(t, instances);
+        //        }
         //
-        //		for (int i = 0; i < mPrevTiles.cnt; i++) {
-        //			MapTile t = mPrevTiles.tiles[i];
-        //			if (mTileSet.contains(t))
-        //				continue;
+        //        for (int i = 0; i < mPrevTiles.cnt; i++) {
+        //            MapTile t = mPrevTiles.tiles[i];
+        //            if (mTileSet.contains(t))
+        //                continue;
         //
-        //			Array<SharedModel> instances = mTileMap.get(t);
-        //			if (instances == null)
-        //				continue;
+        //            Array<SharedModel> instances = mTileMap.get(t);
+        //            if (instances == null)
+        //                continue;
         //
-        //			changed = true;
+        //            changed = true;
         //
-        //			removed.addAll(instances);
-        //			mTileMap.remove(t);
-        //			log.debug("remove " + t);
-        //		}
+        //            removed.addAll(instances);
+        //            mTileMap.remove(t);
+        //            log.debug("remove " + t);
+        //        }
         //
-        //		mPrevTiles.releaseTiles();
+        //        mPrevTiles.releaseTiles();
         //
-        //		int zoom = mTileSet.tiles[0].zoomLevel;
+        //        int zoom = mTileSet.tiles[0].zoomLevel;
         //
-        //		TileSet tmp = mPrevTiles;
-        //		mPrevTiles = mTileSet;
-        //		mTileSet = tmp;
+        //        TileSet tmp = mPrevTiles;
+        //        mPrevTiles = mTileSet;
+        //        mTileSet = tmp;
         //
-        //		if (!changed)
-        //			return;
+        //        if (!changed)
+        //            return;
         //
-        //		// scale aka tree height
-        //		float scale = (float) (1f / (1 << (17 - zoom))) * 8;
+        //        // scale aka tree height
+        //        float scale = (float) (1f / (1 << (17 - zoom))) * 8;
         //
-        //		double tileX = (pos.x * (Tile.SIZE << zoom));
-        //		double tileY = (pos.y * (Tile.SIZE << zoom));
+        //        double tileX = (pos.x * (Tile.SIZE << zoom));
+        //        double tileY = (pos.y * (Tile.SIZE << zoom));
         //
-        //		synchronized (g3d) {
+        //        synchronized (g3d) {
         //
-        //			for (Entry<Tile, Array<SharedModel>> e : mTileMap.entrySet()) {
-        //				Tile t = e.getKey();
+        //            for (Entry<Tile, Array<SharedModel>> e : mTileMap.entrySet()) {
+        //                Tile t = e.getKey();
         //
-        //				float dx = (float) (t.tileX * Tile.SIZE - tileX);
-        //				float dy = (float) (t.tileY * Tile.SIZE - tileY);
+        //                float dx = (float) (t.tileX * Tile.SIZE - tileX);
+        //                float dy = (float) (t.tileY * Tile.SIZE - tileY);
         //
-        //				for (SharedModel inst : e.getValue()) {
-        //					SymbolItem it = (SymbolItem) inst.userData;
+        //                for (SharedModel inst : e.getValue()) {
+        //                    SymbolItem it = (SymbolItem) inst.userData;
         //
-        //					// variable height
-        //					float s = scale + (it.x * it.y) % 3;
-        //					float r = (it.x * it.y) % 360;
+        //                    // variable height
+        //                    float s = scale + (it.x * it.y) % 3;
+        //                    float r = (it.x * it.y) % 360;
         //
-        //					inst.transform.idt();
-        //					inst.transform.scale(s, s, s);
-        //					inst.transform.translate((dx + it.x) / s, (dy + it.y) / s, 0);
-        //					inst.transform.rotate(0, 0, 1, r);
+        //                    inst.transform.idt();
+        //                    inst.transform.scale(s, s, s);
+        //                    inst.transform.translate((dx + it.x) / s, (dy + it.y) / s, 0);
+        //                    inst.transform.rotate(0, 0, 1, r);
         //
-        //					// inst.transform.setToTranslationAndScaling((dx +
-        //					// it.x), (dy + it.y),
-        //					// 0, s, s, s);
+        //                    // inst.transform.setToTranslationAndScaling((dx +
+        //                    // it.x), (dy + it.y),
+        //                    // 0, s, s, s);
         //
-        //				}
-        //			}
+        //                }
+        //            }
 
     }
 }

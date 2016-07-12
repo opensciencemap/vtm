@@ -23,14 +23,14 @@ public class Polygon extends Geometry<LineString> {
 
     public final native LineString getExteriorRing()/*-{
         return this[0];
-	}-*/;
+    }-*/;
 
     public final native LineString getRing(int i) /*-{
         return this[i];
-	}-*/;
+    }-*/;
 
     public final native int getNumRings() /*-{
-		return this.length;
-	}-*/;
+        return this.length;
+    }-*/;
 
 }

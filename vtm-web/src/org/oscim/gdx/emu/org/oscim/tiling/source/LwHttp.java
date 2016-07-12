@@ -118,8 +118,8 @@ public class LwHttp implements HttpEngine {
 
     @Override
     public boolean requestCompleted(boolean success) {
-        //	mHttpRequest.clearOnReadyStateChange();
-        //	mHttpRequest = null;
+        //    mHttpRequest.clearOnReadyStateChange();
+        //    mHttpRequest = null;
         return true;
     }
 

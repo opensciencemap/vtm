@@ -116,10 +116,10 @@ public class JtsPathLayer extends VectorLayer {
     public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint) {
         synchronized (mPoints) {
 
-			/* get the great circle path length in meters */
+            /* get the great circle path length in meters */
             double length = startPoint.distanceTo(endPoint);
 
-			/* add one point for every 100kms of the great circle path */
+            /* add one point for every 100kms of the great circle path */
             int numberOfPoints = (int) (length / 100000);
 
             addGreatCircle(startPoint, endPoint, numberOfPoints);
@@ -137,12 +137,12 @@ public class JtsPathLayer extends VectorLayer {
                                final int numberOfPoints) {
         /* adapted from page
          * http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map
-		 * -in.html
-		 * which was adapted from page http://maps.forum.nu/gm_flight_path.html */
+         * -in.html
+         * which was adapted from page http://maps.forum.nu/gm_flight_path.html */
 
         GeomBuilder gb = new GeomBuilder();
 
-		/* convert to radians */
+        /* convert to radians */
         double lat1 = startPoint.getLatitude() * Math.PI / 180;
         double lon1 = startPoint.getLongitude() * Math.PI / 180;
         double lat2 = endPoint.getLatitude() * Math.PI / 180;
