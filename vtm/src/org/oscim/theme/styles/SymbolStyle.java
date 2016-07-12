@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +18,7 @@
  */
 package org.oscim.theme.styles;
 
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureRegion;
 
 /**
@@ -24,7 +26,12 @@ import org.oscim.renderer.atlas.TextureRegion;
  */
 public final class SymbolStyle extends RenderStyle {
 
-    public final TextureRegion texture;
+    public Bitmap bitmap;
+    public TextureRegion texture;
+
+    public SymbolStyle(Bitmap symbol) {
+        this.bitmap = symbol;
+    }
 
     public SymbolStyle(TextureRegion symbol) {
         this.texture = symbol;
@@ -32,6 +39,8 @@ public final class SymbolStyle extends RenderStyle {
 
     @Override
     public void dispose() {
+        if (bitmap != null)
+            bitmap.recycle();
     }
 
     @Override

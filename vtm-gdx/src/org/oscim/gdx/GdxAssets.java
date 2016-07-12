@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,10 +22,14 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import org.oscim.backend.AssetAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
 public class GdxAssets extends AssetAdapter {
+    private static final Logger log = LoggerFactory.getLogger(GdxAssets.class);
+
     static String pathPrefix = "";
 
     private GdxAssets(String path) {
@@ -40,7 +45,7 @@ public class GdxAssets extends AssetAdapter {
         try {
             return file.read();
         } catch (GdxRuntimeException e) {
-            e.printStackTrace();
+            log.debug(e.getMessage());
             return null;
         }
     }

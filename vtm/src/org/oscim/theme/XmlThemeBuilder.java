@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Stack;
 
 import static java.lang.Boolean.parseBoolean;
@@ -234,7 +235,8 @@ public class XmlThemeBuilder extends DefaultHandler {
             } else if ("symbol".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
                 SymbolStyle symbol = createSymbol(localName, attributes);
-                mCurrentRule.addStyle(symbol);
+                if (symbol != null)
+                    mCurrentRule.addStyle(symbol);
 
             } else if ("outline".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -825,6 +827,16 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         validateExists("src", src, elementName);
 
+        if (src.toLowerCase(Locale.ENGLISH).endsWith(".png")) {
+            try {
+                Bitmap bitmap = CanvasAdapter.getBitmapAsset(src);
+                if (bitmap != null)
+                    return new SymbolStyle(bitmap);
+            } catch (Exception e) {
+                log.debug(e.getMessage());
+            }
+            return null;
+        }
         return new SymbolStyle(getAtlasRegion(src));
     }
 

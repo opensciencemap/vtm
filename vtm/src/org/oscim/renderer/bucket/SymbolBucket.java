@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -79,8 +80,9 @@ public final class SymbolBucket extends TextureBucket {
             int x = 0;
             int y = 0;
 
+            // FIXME Use simultaneously TextureAtlas and external symbols
             if (it.texRegion != null) {
-                /* FIXME this work only with one TextureAtlas per SymbolLayer */
+                /* FIXME This work only with one TextureAtlas per SymbolBucket */
                 if (textures == null) {
                     /* clone TextureItem to use same texID with
                      * multiple TextureItem */
