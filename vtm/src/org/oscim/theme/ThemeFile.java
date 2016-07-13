@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -22,6 +23,11 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 public interface ThemeFile extends Serializable {
+    /**
+     * @return the prefix for all relative resource paths.
+     */
+    String getRelativePathPrefix();
+
     /**
      * @return an InputStream to read the render theme data from.
      * @throws FileNotFoundException if the render theme file cannot be found.

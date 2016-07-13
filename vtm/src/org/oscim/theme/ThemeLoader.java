@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.theme;
 
 import org.oscim.backend.CanvasAdapter;
@@ -44,7 +44,7 @@ public class ThemeLoader {
 
         try {
             InputStream is = theme.getRenderThemeAsStream();
-            return load(is);
+            return load(theme.getRelativePathPrefix(), is);
         } catch (FileNotFoundException e) {
             log.error(e.getMessage());
         }
@@ -53,9 +53,13 @@ public class ThemeLoader {
     }
 
     public static IRenderTheme load(InputStream inputStream) throws ThemeException {
+        return load("", inputStream);
+    }
+
+    public static IRenderTheme load(String relativePathPrefix, InputStream inputStream) throws ThemeException {
 
         try {
-            IRenderTheme t = XmlThemeBuilder.read(inputStream);
+            IRenderTheme t = XmlThemeBuilder.read(relativePathPrefix, inputStream);
             if (t != null)
                 t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
             return t;

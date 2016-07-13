@@ -56,9 +56,9 @@ public final class AndroidGraphics extends CanvasAdapter {
     }
 
     @Override
-    public Bitmap loadBitmapAssetImpl(String fileName) {
+    public Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         try {
-            return createBitmap(fileName);
+            return createBitmap(relativePathPrefix, src);
         } catch (IOException e) {
             e.printStackTrace();
         }

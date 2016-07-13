@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -21,6 +22,7 @@ import org.oscim.backend.canvas.Paint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -61,9 +63,10 @@ public class IosGraphics extends CanvasAdapter {
     }
 
     @Override
-    protected Bitmap loadBitmapAssetImpl(String fileName) {
+    protected Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         try {
-            return new IosBitmap(fileName);
+            String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix + File.separatorChar) + src;
+            return new IosBitmap(pathName);
         } catch (IOException e) {
             log.error("loadBitmapAssetImpl", e);
             return null;

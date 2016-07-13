@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -24,6 +25,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Paint;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class GwtGdxGraphics extends CanvasAdapter {
@@ -52,8 +54,9 @@ public class GwtGdxGraphics extends CanvasAdapter {
     }
 
     @Override
-    public Bitmap loadBitmapAssetImpl(String fileName) {
-        return new GwtBitmap(fileName);
+    public Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
+        String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix + File.separatorChar) + src;
+        return new GwtBitmap(pathName);
     }
 
     @Override

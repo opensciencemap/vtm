@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -36,7 +37,7 @@ public class ExternalRenderTheme implements ThemeFile {
 
     /**
      * @param fileName the path to the XML render theme file.
-     * @throws FileNotFoundException if the file does not exist or cannot be read.
+     * @throws ThemeException if the file does not exist or cannot be read.
      */
     public ExternalRenderTheme(String fileName) {
 
@@ -72,6 +73,11 @@ public class ExternalRenderTheme implements ThemeFile {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getRelativePathPrefix() {
+        return new File(mPath).getParent();
     }
 
     @Override

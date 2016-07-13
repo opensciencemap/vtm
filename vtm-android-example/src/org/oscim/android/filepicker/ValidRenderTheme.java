@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -40,7 +41,7 @@ public final class ValidRenderTheme implements ValidFileFilter {
 
         try {
             inputStream = new FileInputStream(file);
-            XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
+            XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(file.getParent());
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             xmlReader.setContentHandler(renderThemeHandler);
             xmlReader.parse(new InputSource(inputStream));

@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,8 +34,13 @@ public enum VtmThemes implements ThemeFile {
 
     private final String mPath;
 
-    private VtmThemes(String path) {
+    VtmThemes(String path) {
         mPath = path;
+    }
+
+    @Override
+    public String getRelativePathPrefix() {
+        return "";
     }
 
     @Override

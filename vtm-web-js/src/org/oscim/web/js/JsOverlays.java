@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.web.js;
 
 import org.oscim.core.MapPosition;
@@ -13,7 +29,7 @@ import org.oscim.map.Map;
 import org.oscim.renderer.LayerRenderer;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.geojson.HighroadJsonTileSource;
+import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportOverlay;
@@ -90,7 +106,7 @@ public class JsOverlays implements Exportable {
     @ExportPackage("vtm")
     @Export("HighroadJsonTileSource")
     public static class XHighroadJsonTileSource implements
-            ExportOverlay<HighroadJsonTileSource> {
+            ExportOverlay<OsmRoadLineJsonTileSource> {
         public XHighroadJsonTileSource() {
         }
     }

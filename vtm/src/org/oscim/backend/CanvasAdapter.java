@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,7 +20,11 @@ package org.oscim.backend;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,6 +32,7 @@ import java.io.InputStream;
  * The Class CanvasAdapter.
  */
 public abstract class CanvasAdapter {
+    private static final Logger log = LoggerFactory.getLogger(CanvasAdapter.class);
 
     /**
      * The instance provided by backend
@@ -94,24 +100,35 @@ public abstract class CanvasAdapter {
     /**
      * Create {@link Bitmap} from bundled assets.
      *
-     * @param fileName the file name
+     * @param relativePathPrefix the prefix for relative resource path
+     * @param src                the resource
      * @return the bitmap
      */
-    protected abstract Bitmap loadBitmapAssetImpl(String fileName);
+    protected abstract Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src);
 
-    public static Bitmap getBitmapAsset(String fileName) {
-        return g.loadBitmapAssetImpl(fileName);
+    public static Bitmap getBitmapAsset(String relativePathPrefix, String src) {
+        return g.loadBitmapAssetImpl(relativePathPrefix, src);
     }
 
-    protected static Bitmap createBitmap(String src) throws IOException {
+    protected static Bitmap createBitmap(String relativePathPrefix, String src) throws IOException {
         if (src == null || src.length() == 0) {
             // no image source defined
             return null;
         }
 
-        InputStream inputStream = AssetAdapter.g.openFileAsStream(src);
+        String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix) + File.separatorChar + src;
+
+        InputStream inputStream = null;
+
+        File file = new File(pathName);
+        if (file.exists() && file.isFile() && file.canRead())
+            inputStream = new FileInputStream(file);
+
+        if (inputStream == null)
+            inputStream = AssetAdapter.g.openFileAsStream(pathName);
+
         if (inputStream == null) {
-            //log.error("invalid bitmap source: " + src);
+            log.error("invalid resource: " + pathName);
             return null;
         }
 

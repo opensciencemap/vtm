@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,7 +34,7 @@ public class SymbolRenderLayer extends BucketRenderer {
         it.billboard = false;
 
         try {
-            it.bitmap = CanvasAdapter.getBitmapAsset("jar:symbols/cafe.png");
+            it.bitmap = CanvasAdapter.getBitmapAsset("", "jar:symbols/cafe.png");
         } catch (Exception e) {
             e.printStackTrace();
 

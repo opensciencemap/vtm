@@ -80,16 +80,17 @@ public class XmlThemeBuilder extends DefaultHandler {
     private static final String AREA_STYLE = "A";
 
     /**
-     * @param inputStream an input stream containing valid render theme XML data.
+     * @param relativePathPrefix the prefix for all relative resource paths.
+     * @param inputStream        an input stream containing valid render theme XML data.
      * @return a new RenderTheme which is created by parsing the XML data from
      * the input stream.
      * @throws ThemeException if an error occurs while parsing the render theme XML.
      * @throws IOException    if an I/O error occurs while reading from the input stream.
      */
-    public static IRenderTheme read(InputStream inputStream)
+    public static IRenderTheme read(String relativePathPrefix, InputStream inputStream)
             throws ThemeException {
 
-        XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder();
+        XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(relativePathPrefix);
 
         try {
             new XMLReaderAdapter().parse(renderThemeHandler, inputStream);
@@ -134,7 +135,12 @@ public class XmlThemeBuilder extends DefaultHandler {
     private int mMapBackground = 0xffffffff;
     private float mTextScale = 1;
 
+    private final String mRelativePathPrefix;
     private RenderTheme mRenderTheme;
+
+    public XmlThemeBuilder(String relativePathPrefix) {
+        mRelativePathPrefix = relativePathPrefix;
+    }
 
     @Override
     public void endDocument() {
@@ -522,7 +528,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         if (src != null) {
             try {
-                Bitmap bitmap = CanvasAdapter.getBitmapAsset(src);
+                Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, src);
                 if (bitmap != null)
                     b.texture = new TextureItem(bitmap, true);
             } catch (Exception e) {
@@ -557,11 +563,15 @@ public class XmlThemeBuilder extends DefaultHandler {
         }
         validateExists("img", img, elementName);
 
-        Bitmap bitmap = CanvasAdapter.getBitmapAsset(img);
-        mTextureAtlas = new TextureAtlas(bitmap);
+        Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, img);
+        if (bitmap != null)
+            mTextureAtlas = new TextureAtlas(bitmap);
     }
 
     private void createTextureRegion(String elementName, Attributes attributes) {
+        if (mTextureAtlas == null)
+            return;
+
         String regionName = null;
         Rect r = null;
 
@@ -829,7 +839,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         if (src.toLowerCase(Locale.ENGLISH).endsWith(".png")) {
             try {
-                Bitmap bitmap = CanvasAdapter.getBitmapAsset(src);
+                Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, src);
                 if (bitmap != null)
                     return new SymbolStyle(bitmap);
             } catch (Exception e) {
