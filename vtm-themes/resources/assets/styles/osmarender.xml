@@ -17,7 +17,7 @@
     <style-text style="bold" id="highway-track" k="name" size="16" stroke="#fff2de"
         stroke-width="2.0" />
 
-    <atlas img="styles/osmarender.png">
+    <atlas img="icons/osmarender.png">
         <rect id="airport" pos="226 38 24 24" />
         <rect id="alpine_hut" pos="198 41 26 21" />
         <rect id="atm" pos="279 2 14 16" />

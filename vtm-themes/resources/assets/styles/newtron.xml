@@ -79,7 +79,7 @@
     <style-line cap="butt" fix="true" id="building" stroke="#303030" width="1.0" />
     <style-area fade="15" fill="#ee202020" id="building" />
 
-    <atlas img="styles/osmarender.png">
+    <atlas img="icons/osmarender.png">
         <rect id="airport" pos="226 38 24 24" />
         <rect id="alpine_hut" pos="198 41 26 21" />
         <rect id="atm" pos="279 2 14 16" />

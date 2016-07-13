@@ -74,9 +74,6 @@ public class XmlThemeBuilder extends DefaultHandler {
     private static final String ELEMENT_NAME_MATCH = "m";
     private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
-    //private static final String IMG_PATH = "styles/";
-    private static final String IMG_PATH = "";
-
     private static final String LINE_STYLE = "L";
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
@@ -558,7 +555,7 @@ public class XmlThemeBuilder extends DefaultHandler {
         }
         validateExists("img", img, elementName);
 
-        Bitmap bitmap = CanvasAdapter.getBitmapAsset(IMG_PATH + img);
+        Bitmap bitmap = CanvasAdapter.getBitmapAsset(img);
         mTextureAtlas = new TextureAtlas(bitmap);
     }
 

@@ -110,8 +110,7 @@
     <style-line fade="15" id="building" stroke="#eeb7b6b3" use="fix" />
     <style-area fade="15" fill="#f2f0eb" id="building" stroke="#b7b6b3" stroke-width="1.0" />
 
-
-    <atlas img="styles/osm.png">
+    <atlas img="icons/osm.png">
         <rect id="airport" pos="1 40 16 16" />
         <rect id="atm" pos="19 40 16 16" />
         <rect id="bar" pos="1 80 20 20" />

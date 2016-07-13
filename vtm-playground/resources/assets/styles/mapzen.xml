@@ -2,7 +2,7 @@
     version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme ../../rendertheme.xsd">
     <!-- icons 32 -->
-    <atlas img="styles/poi_icons_32.png">
+    <atlas img="icons/poi_icons_32.png">
         <rect id="1_airport" pos="0 0 32 32" />
         <rect id="2_taxi " pos="0 37 32 32" />
         <rect id="3_train" pos="0 74 32 32" />
