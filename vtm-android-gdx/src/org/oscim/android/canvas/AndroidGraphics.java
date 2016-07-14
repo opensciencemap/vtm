@@ -56,6 +56,16 @@ public final class AndroidGraphics extends CanvasAdapter {
     }
 
     @Override
+    public Bitmap decodeSvgBitmapImpl(InputStream inputStream) {
+        try {
+            return new AndroidSvgBitmap(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         try {
             return createBitmap(relativePathPrefix, src);

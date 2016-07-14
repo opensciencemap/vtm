@@ -63,6 +63,12 @@ public class IosGraphics extends CanvasAdapter {
     }
 
     @Override
+    protected Bitmap decodeSvgBitmapImpl(InputStream inputStream) {
+        // TODO
+        return null;
+    }
+
+    @Override
     protected Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         try {
             String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix + File.separatorChar) + src;

@@ -101,6 +101,16 @@ public class AwtGraphics extends CanvasAdapter {
     }
 
     @Override
+    public Bitmap decodeSvgBitmapImpl(InputStream inputStream) {
+        try {
+            return new AwtSvgBitmap(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         try {
             return createBitmap(relativePathPrefix, src);

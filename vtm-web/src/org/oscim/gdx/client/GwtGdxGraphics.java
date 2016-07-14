@@ -54,6 +54,11 @@ public class GwtGdxGraphics extends CanvasAdapter {
     }
 
     @Override
+    public Bitmap decodeSvgBitmapImpl(InputStream in) {
+        return null;
+    }
+
+    @Override
     public Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
         String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix + File.separatorChar) + src;
         return new GwtBitmap(pathName);

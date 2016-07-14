@@ -3,6 +3,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     compile project(':vtm')
+    compile 'com.caverock:androidsvg:1.2.2-beta-1'
 }
 
 android {

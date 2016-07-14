@@ -837,7 +837,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         validateExists("src", src, elementName);
 
-        if (src.toLowerCase(Locale.ENGLISH).endsWith(".png")) {
+        String lowSrc = src.toLowerCase(Locale.ENGLISH);
+        if (lowSrc.endsWith(".png") || lowSrc.endsWith(".svg")) {
             try {
                 Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, src);
                 if (bitmap != null)

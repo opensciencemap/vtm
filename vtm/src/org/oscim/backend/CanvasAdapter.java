@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 /**
  * The Class CanvasAdapter.
@@ -101,6 +102,18 @@ public abstract class CanvasAdapter {
     }
 
     /**
+     * Create SVG {@link Bitmap} from InputStream.
+     *
+     * @param inputStream the input stream
+     * @return the SVG bitmap
+     */
+    protected abstract Bitmap decodeSvgBitmapImpl(InputStream inputStream);
+
+    public static Bitmap decodeSvgBitmap(InputStream inputStream) {
+        return g.decodeSvgBitmapImpl(inputStream);
+    }
+
+    /**
      * Create {@link Bitmap} from bundled assets.
      *
      * @param relativePathPrefix the prefix for relative resource path
@@ -138,7 +151,11 @@ public abstract class CanvasAdapter {
             return null;
         }
 
-        Bitmap bitmap = decodeBitmap(inputStream);
+        Bitmap bitmap;
+        if (src.toLowerCase(Locale.ENGLISH).endsWith(".svg"))
+            bitmap = decodeSvgBitmap(inputStream);
+        else
+            bitmap = decodeBitmap(inputStream);
         inputStream.close();
         return bitmap;
     }
