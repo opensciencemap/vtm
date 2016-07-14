@@ -34,6 +34,9 @@ import java.io.InputStream;
 public abstract class CanvasAdapter {
     private static final Logger log = LoggerFactory.getLogger(CanvasAdapter.class);
 
+    private static final String PREFIX_ASSETS = "assets:";
+    private static final String PREFIX_FILE = "file:";
+
     /**
      * The instance provided by backend
      */
@@ -116,25 +119,58 @@ public abstract class CanvasAdapter {
             return null;
         }
 
-        String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix) + File.separatorChar + src;
+        InputStream inputStream;
+        if (src.startsWith(PREFIX_ASSETS)) {
+            src = src.substring(PREFIX_ASSETS.length());
+            inputStream = inputStreamFromAssets(relativePathPrefix, src);
+        } else if (src.startsWith(PREFIX_FILE)) {
+            src = src.substring(PREFIX_FILE.length());
+            inputStream = inputStreamFromFile(relativePathPrefix, src);
+        } else {
+            inputStream = inputStreamFromFile(relativePathPrefix, src);
 
-        InputStream inputStream = null;
-
-        File file = new File(pathName);
-        if (file.exists() && file.isFile() && file.canRead())
-            inputStream = new FileInputStream(file);
-
-        if (inputStream == null)
-            inputStream = AssetAdapter.g.openFileAsStream(pathName);
+            if (inputStream == null)
+                inputStream = inputStreamFromAssets(relativePathPrefix, src);
+        }
 
         if (inputStream == null) {
-            log.error("invalid resource: " + pathName);
+            log.error("invalid resource: " + src);
             return null;
         }
 
         Bitmap bitmap = decodeBitmap(inputStream);
         inputStream.close();
         return bitmap;
+    }
+
+    private static InputStream inputStreamFromAssets(String relativePathPrefix, String src) throws IOException {
+        String pathName = (relativePathPrefix == null || relativePathPrefix.length() == 0 ? "" : relativePathPrefix + File.separatorChar) + src;
+        return AssetAdapter.g.openFileAsStream(pathName);
+    }
+
+    private static InputStream inputStreamFromFile(String relativePathPrefix, String src) throws IOException {
+        File file = getFile(relativePathPrefix, src);
+        if (!file.exists()) {
+            if (src.length() > 0 && src.charAt(0) == File.separatorChar) {
+                file = getFile(relativePathPrefix, src.substring(1));
+            }
+            if (!file.exists()) {
+                file = null;
+            }
+        } else if (!file.isFile() || !file.canRead()) {
+            file = null;
+        }
+        if (file != null) {
+            return new FileInputStream(file);
+        }
+        return null;
+    }
+
+    private static File getFile(String parentPath, String pathName) {
+        if (pathName.charAt(0) == File.separatorChar) {
+            return new File(pathName);
+        }
+        return new File(parentPath, pathName);
     }
 
     protected static void init(CanvasAdapter adapter) {
