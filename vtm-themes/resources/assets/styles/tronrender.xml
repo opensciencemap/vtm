@@ -3,7 +3,7 @@
     version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
 
-    <style-text style="bold" caption="true" dy="12" fill="#4040ff" id="caption-small-blue" k="name"
+    <style-text style="bold" caption="true" dy="20" fill="#4040ff" id="caption-small-blue" k="name"
         size="16" stroke="#ffffff" stroke-width="2.0" />
 
     <style-text style="bold" fill="#eeffee" id="road" k="name" size="18" stroke="#606050"
@@ -78,67 +78,6 @@
 
     <style-line cap="butt" fix="true" id="building" stroke="#dd888888" width="1.5" />
     <style-area fade="15" fill="#ee202020" id="building" />
-
-    <atlas img="icons/osmarender.png">
-        <rect id="airport" pos="226 38 24 24" />
-        <rect id="alpine_hut" pos="198 41 26 21" />
-        <rect id="atm" pos="279 2 14 16" />
-        <rect id="bakery" pos="305 46 22 16" />
-        <rect id="bank" pos="395 43 19 19" />
-        <rect id="bench" pos="213 29 8 10" />
-        <rect id="bicycle_rental" pos="295 2 13 16" />
-        <rect id="bus" pos="130 32 23 9" />
-        <rect id="bus_sta" pos="36 30 31 32" />
-        <rect id="cable_car" pos="2 2 29 26" />
-        <rect id="cafe" pos="216 2 14 14" />
-        <rect id="campSite" pos="329 42 20 20" />
-        <rect id="cave_entrance" pos="297 23 16 10" />
-        <rect id="chair_lift" pos="130 2 13 28" />
-        <rect id="church" pos="61 9 9 19" />
-        <rect id="cinema" pos="145 8 16 22" />
-        <rect id="drinking_water" pos="416 43 19 19" />
-        <rect id="fastfood" pos="351 42 20 20" />
-        <rect id="firebrigade" pos="130 43 36 19" />
-        <rect id="florist" pos="342 24 12 16" />
-        <rect id="fountain" pos="500 46 10 16" />
-        <rect id="gondola" pos="252 38 21 24" />
-        <rect id="helipad" pos="69 31 31 31" />
-        <rect id="hospital" pos="437 43 19 19" />
-        <rect id="hostel" pos="168 44 28 18" />
-        <rect id="hotel" pos="93 11 18 17" />
-        <rect id="information" pos="458 43 19 19" />
-        <rect id="kindergarten" pos="184 2 14 19" />
-        <rect id="library" pos="372 22 9 18" />
-        <rect id="mosque" pos="248 2 17 15" />
-        <rect id="oneway" pos="275 38 25 7" />
-        <rect id="parking" pos="373 42 20 20" />
-        <rect id="peak" pos="267 9 9 8" />
-        <rect id="petrolStation" pos="263 19 14 17" />
-        <rect id="pharmacy" pos="479 43 19 19" />
-        <rect id="playground" pos="223 18 18 18" />
-        <rect id="postbox" pos="232 2 14 14" />
-        <rect id="postoffice" pos="172 23 19 19" />
-        <rect id="pub" pos="326 26 14 14" />
-        <rect id="railway-crossing" pos="275 47 28 15" />
-        <rect id="railway-crossing-small" pos="155 32 15 9" />
-        <rect id="recycling" pos="72 11 19 18" />
-        <rect id="restaurant" pos="356 28 14 12" />
-        <rect id="school" pos="200 2 14 19" />
-        <rect id="shelter" pos="33 4 26 24" />
-        <rect id="soccer-borderless" pos="102 30 26 32" />
-        <rect id="supermarket" pos="193 23 18 16" />
-        <rect id="synagogue" pos="113 11 15 17" />
-        <rect id="telephone" pos="383 21 7 19" />
-        <rect id="tennis" pos="2 30 32 32" />
-        <rect id="theatre" pos="243 19 18 17" />
-        <rect id="toilets" pos="163 2 19 19" />
-        <rect id="traffic_signal" pos="392 21 7 19" />
-        <rect id="tree" pos="145 2 4 4" />
-        <rect id="university" pos="302 35 19 9" />
-        <rect id="viewpoint" pos="279 20 16 16" />
-        <rect id="vulcan" pos="315 25 9 8" />
-        <rect id="windmill" pos="310 2 13 19" />
-    </atlas>
 
     <m e="way" k="natural" v="issea|sea">
         <area use="water" />
@@ -563,9 +502,9 @@
             </m>
             <!-- <m zoom-min="17">
               <caption k="name" style="bold" size="10" fill="#4040ff"
-              stroke="#ffffff" stroke-width="2.0" />
+              priority="9" stroke="#ffffff" stroke-width="2.0" />
               <caption k="addr:housenumber" style="bold" size="10" fill="#606060"
-              stroke="#ffffff" stroke-width="2.0" />
+              priority="10" stroke="#ffffff" stroke-width="2.0" />
               </m> -->
         </m>
 
@@ -896,9 +835,9 @@
         <!-- aerial ways -->
         <!-- <m k="aerialway"> <line stroke="#202020" width="0.4"
           cap="butt" /> <m k="aerialway" v="cable_car"> <lineSymbol
-          src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/cable_car.png"
-          /> </m> <m k="aerialway" v="chair_lift"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/chair_lift_2.png"
-          /> </m> <m k="aerialway" v="gondola"> <lineSymbol src="jar:/org/mapsforge/android/maps/rendertheme/osmarender/symbols/gondola.png"
+          src="assets:symbols/cable_car.svg"
+          /> </m> <m k="aerialway" v="chair_lift"> <lineSymbol src="assets:symbols/chair_lift_2.svg"
+          /> </m> <m k="aerialway" v="gondola"> <lineSymbol src="assets:symbols/gondola.svg"
           /> </m> <m zoom-min="14"> <text k="name" style="bold"
           size="10" fill="#606060" stroke="#ffffff" width="2.0" /> </m>
           </m> -->
@@ -1037,10 +976,12 @@
       <circle radius="1.4" scale-radius="true" fill="#ffffff" /> </m> </m>
 
       historic
-      <m k="historic"> <circle radius="3" fill="#4040ff" stroke="#606060"
-      stroke-width="1.5" /> <m zoom-min="17"> <caption
-      k="name" dy="-10" style="bold" size="10" fill="#4040ff" stroke="#ffffff"
-      width="2.0" /> </m> </m>
+      <m k="historic">
+      <symbol src="assets:symbols/tourist/monument.svg" />
+      <m zoom-min="17">
+      <caption k="name" dy="-10" style="bold" size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
+      </m>
+      </m>
 
       house numbers
       <m k="addr:housenumber" zoom-min="18"> <caption
@@ -1071,13 +1012,13 @@
       railway
       <m k="railway">
       <m v="station" zoom-min="14">
-      <circle radius="6" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
-      <caption k="name" dy="-10" style="bold" size="13" fill="#ec2d2d"
+      <symbol src="assets:symbols/transport/train_station.svg" />
+      <caption k="name" dy="-15" style="bold" size="14" fill="#ec2d2d"
       stroke="#ffffff" stroke-width="2.0" />
       </m>
       <m v="halt|tram_stop" zoom-min="17">
-      <circle radius="4" fill="#ec2d2d" stroke="#606060" stroke-width="1.5" />
-      <caption k="name" dy="-15" style="bold" size="11" fill="#ec2d2d"
+      <symbol src="assets:symbols/transport/train_station2.svg" />
+      <caption k="name" dy="-15" style="bold" size="13" fill="#ec2d2d"
       stroke="#ffffff" stroke-width="2.0" />
       </m>
       </m>
@@ -1093,109 +1034,109 @@
 
         <m k="aeroway">
             <m k="aeroway" v="helipad" zoom-min="17">
-                <symbol src="helipad" />
+                <symbol src="assets:symbols/transport/helicopter_pad.svg" />
             </m>
             <m k="aeroway" v="aerodrome|airport" zoom-max="13">
-                <symbol src="airport" />
+                <symbol src="assets:symbols/transport/airport.svg" />
             </m>
         </m>
 
         <m k="amenity">
             <m select="first">
                 <m v="atm" zoom-min="17">
-                    <symbol src="atm" />
+                    <symbol src="assets:symbols/money/atm2.svg" />
                 </m>
                 <m v="bank" zoom-min="17">
-                    <symbol src="bank" />
+                    <symbol src="assets:symbols/money/bank2.svg" />
                 </m>
                 <m v="bench" zoom-min="17">
-                    <symbol src="bench" />
+                    <symbol src="assets:symbols/amenity/bench.svg" />
                 </m>
                 <m v="bicycle_rental" zoom-min="17">
-                    <symbol src="bicycle_rental" />
+                    <symbol src="assets:symbols/transport/rental_bicycle.svg" />
                 </m>
                 <m v="bus_station" zoom-min="17">
-                    <symbol src="bus_sta" />
+                    <symbol src="assets:symbols/transport/bus_station.svg" />
                 </m>
                 <m v="cafe" zoom-min="17">
-                    <symbol src="cafe" />
+                    <symbol src="assets:symbols/food/cafe.svg" />
                 </m>
                 <m v="cinema" zoom-min="17">
-                    <symbol src="cinema" />
+                    <symbol src="assets:symbols/tourist/cinema2.svg" />
                 </m>
                 <m v="drinking_water" zoom-min="17">
-                    <symbol src="drinking_water" />
+                    <symbol src="assets:symbols/food/drinkingtap.svg" />
                 </m>
                 <m v="fast_food" zoom-min="17">
-                    <symbol src="fastfood" />
+                    <symbol src="assets:symbols/food/fastfood.svg" />
                 </m>
                 <m v="fire_station" zoom-min="17">
-                    <symbol src="firebrigade" />
+                    <symbol src="assets:symbols/amenity/firestation3.svg" />
                 </m>
                 <m v="fountain" zoom-min="17">
-                    <symbol src="fountain" />
+                    <symbol src="assets:symbols/amenity/fountain.svg" />
                 </m>
                 <m v="fuel" zoom-min="17">
-                    <symbol src="petrolStation" />
+                    <symbol src="assets:symbols/transport/fuel.svg" />
                 </m>
                 <m v="hospital" zoom-min="15">
-                    <symbol src="hospital" />
+                    <symbol src="assets:symbols/health/hospital.svg" />
                 </m>
                 <m v="kindergarten" zoom-min="17">
-                    <symbol src="kindergarten" />
+                    <symbol src="assets:symbols/education/nursery2.svg" />
                 </m>
                 <m v="library" zoom-min="17">
-                    <symbol src="library" />
+                    <symbol src="assets:symbols/amenity/library.svg" />
                 </m>
                 <m v="parking" zoom-min="17">
-                    <symbol src="parking" />
+                    <symbol src="assets:symbols/transport/parking.svg" />
                 </m>
                 <m v="pharmacy" zoom-min="17">
-                    <symbol src="pharmacy" />
+                    <symbol src="assets:symbols/health/pharmacy.svg" />
                 </m>
                 <m v="place_of_worship" zoom-min="17">
                     <m k="denomination|religion" v="jewish">
-                        <symbol src="synagogue" />
+                        <symbol src="assets:symbols/place_of_worship/jewish3.svg" />
                     </m>
                     <m k="denomination|religion" v="muslim|moslem">
-                        <symbol src="mosque" />
+                        <symbol src="assets:symbols/place_of_worship/islamic3.svg" />
                     </m>
                     <m k="denomination|religion" v="christian">
-                        <symbol src="church" />
+                        <symbol src="assets:symbols/place_of_worship/christian3.svg" />
                     </m>
                 </m>
                 <m v="post_box" zoom-min="17">
-                    <symbol src="postbox" />
+                    <symbol src="assets:symbols/amenity/post_box.svg" />
                 </m>
                 <m v="post_office" zoom-min="17">
-                    <symbol src="postoffice" />
+                    <symbol src="assets:symbols/amenity/post_office.svg" />
                 </m>
                 <m v="pub|bar" zoom-min="17">
-                    <symbol src="pub" />
+                    <symbol src="assets:symbols/food/bar.svg" />
                 </m>
                 <m v="recycling" zoom-min="17">
-                    <symbol src="recycling" />
+                    <symbol src="assets:symbols/amenity/recycling.svg" />
                 </m>
                 <m v="restaurant" zoom-min="17">
-                    <symbol src="restaurant" />
+                    <symbol src="assets:symbols/food/restaurant.svg" />
                 </m>
                 <m v="school" zoom-min="17">
-                    <symbol src="school" />
+                    <symbol src="assets:symbols/education/school.svg" />
                 </m>
                 <m v="shelter" zoom-min="17">
-                    <symbol src="shelter" />
+                    <symbol src="assets:symbols/accommodation/shelter2.svg" />
                 </m>
                 <m v="telephone" zoom-min="17">
-                    <symbol src="telephone" />
+                    <symbol src="assets:symbols/amenity/telephone.svg" />
                 </m>
                 <m v="theatre" zoom-min="17">
-                    <symbol src="theatre" />
+                    <symbol src="assets:symbols/tourist/theatre.svg" />
                 </m>
                 <m v="toilets" zoom-min="17">
-                    <symbol src="toilets" />
+                    <symbol src="assets:symbols/amenity/toilets.svg" />
                 </m>
                 <m v="university|college" zoom-min="17">
-                    <symbol src="university" />
+                    <symbol src="assets:symbols/education/university.svg" />
                 </m>
             </m>
             <m zoom-min="17">
@@ -1210,10 +1151,10 @@
 
         <m k="highway">
             <m k="highway" v="bus_stop" zoom-min="16">
-                <symbol src="bus" />
+                <symbol src="assets:symbols/transport/bus_stop.svg" />
             </m>
             <m k="highway" v="traffic_signals" zoom-min="17">
-                <symbol src="traffic_signal" />
+                <symbol src="assets:symbols/traffic_signal.svg" />
             </m>
             <m k="highway" v="turning_circle">
                 <circle fill="#ffffff" radius="1.4" scale-radius="true" />
@@ -1222,7 +1163,7 @@
 
 
         <m k="historic">
-            <circle fill="#4040ff" radius="3" stroke="#606060" stroke-width="1.5" />
+            <symbol src="assets:symbols/tourist/monument.svg" />
 
             <m zoom-min="17">
                 <text use="caption-small-blue" />
@@ -1237,30 +1178,30 @@
 
 
         <m k="leisure" v="playground" zoom-min="17">
-            <symbol src="playground" />
+            <symbol src="assets:symbols/amenity/playground.svg" />
         </m>
 
 
         <m k="man_made" v="windmill" zoom-min="17">
-            <symbol src="windmill" />
+            <symbol src="assets:symbols/tourist/windmill.svg" />
         </m>
 
 
         <m k="natural">
             <m select="first">
                 <m v="cave_entrance" zoom-min="15">
-                    <symbol src="cave_entrance" />
+                    <symbol src="assets:symbols/poi/cave.svg" />
                 </m>
                 <m v="peak" zoom-min="12">
-                    <symbol src="peak" />
-                    <caption style="bold" dy="20" fill="#000000" k="ele" size="12" stroke="#ffffff"
+                    <symbol src="assets:symbols/peak1.svg" />
+                    <caption style="bold" dy="12" fill="#000000" k="ele" size="12" stroke="#ffffff"
                         stroke-width="2.0" />
                 </m>
                 <m v="tree" zoom-min="16">
-                    <symbol src="tree" />
+                    <circle radius="10" />
                 </m>
                 <m v="volcano" zoom-min="12">
-                    <symbol src="vulcan" />
+                    <symbol src="assets:symbols/volcano.svg" />
                 </m>
             </m>
             <m zoom-min="17">
@@ -1296,20 +1237,20 @@
 
         <m k="railway">
             <m k="railway" v="crossing" zoom-min="16">
-                <symbol src="railway-crossing-small" />
+                <symbol src="assets:symbols/railway-crossing-small.svg" />
             </m>
             <!-- in Bremen this is also used for crossings between tram-lines and roads... -->
             <m k="railway" v="level_crossing" zoom-min="14">
-                <symbol src="railway-crossing" />
+                <symbol src="assets:symbols/railway-crossing.svg" />
             </m>
             <m k="railway" v="station" zoom-min="14">
-                <circle fill="#ec2d2d" radius="6" stroke="#606060" stroke-width="1.5" />
-                <caption style="bold" dy="-10" fill="#ec2d2d" k="name" size="13" stroke="#ffffff"
+                <symbol src="assets:symbols/transport/train_station.svg" />
+                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m k="railway" v="halt|tram_stop" zoom-min="15">
-                <circle fill="#ec2d2d" radius="4" stroke="#606060" stroke-width="1.5" />
-                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="12" stroke="#ffffff"
+                <symbol src="assets:symbols/transport/train_station2.svg" />
+                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="13" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
         </m>
@@ -1317,13 +1258,13 @@
 
         <m k="shop">
             <m v="bakery" zoom-min="17">
-                <symbol src="bakery" />
+                <symbol src="assets:symbols/shopping/bakery.svg" />
             </m>
             <m v="florist" zoom-min="17">
-                <symbol src="florist" />
+                <symbol src="assets:symbols/shopping/florist.svg" />
             </m>
             <m v="supermarket|organic" zoom-min="17">
-                <symbol src="supermarket" />
+                <symbol src="assets:symbols/shopping/supermarket.svg" />
             </m>
 
             <m zoom-min="17">
@@ -1334,22 +1275,22 @@
 
         <m k="tourism" select="first">
             <m v="alpine_hut" zoom-min="16">
-                <symbol src="alpine_hut" />
+                <symbol src="assets:symbols/accommodation/alpinehut.svg" />
             </m>
             <m v="camp_site" zoom-min="17">
-                <symbol src="campSite" />
+                <symbol src="assets:symbols/accommodation/camping.svg" />
             </m>
             <m v="hostel" zoom-min="17">
-                <symbol src="hostel" />
+                <symbol src="assets:symbols/accommodation/hostel.svg" />
             </m>
             <m v="hotel" zoom-min="17">
-                <symbol src="hotel" />
+                <symbol src="assets:symbols/accommodation/hotel2.svg" />
             </m>
             <!--  <m v="information" zoom-min="17">
-               <symbol src="information" />
+               <symbol src="assets:symbols/tourist/information.svg" />
              </m> -->
             <m v="viewpoint" zoom-min="15">
-                <symbol src="viewpoint" />
+                <symbol src="assets:symbols/tourist/viewpoint.svg" />
             </m>
 
             <m select="when-matched" zoom-min="17">
