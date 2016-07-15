@@ -761,7 +761,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             else if ("dy".equals(name))
                 // NB: minus..
-                b.dy = -Float.parseFloat(value);
+                b.dy = -Float.parseFloat(value) * CanvasAdapter.dpi / 160;
 
             else if ("symbol".equals(name))
                 b.texture = getAtlasRegion(value);
