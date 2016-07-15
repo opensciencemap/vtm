@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * iOS specific implementation of {@link CanvasAdapter}<br>
- * <br>
- * Created by Longri on 25.06.16.
+ * iOS specific implementation of {@link CanvasAdapter}.
  */
 public class IosGraphics extends CanvasAdapter {
 

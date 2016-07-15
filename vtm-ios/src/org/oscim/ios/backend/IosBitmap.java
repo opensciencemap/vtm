@@ -39,9 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * iOS specific implementation of {@link Bitmap}<br>
- * <br>
- * Created by Longri on 25.06.16.
+ * iOS specific implementation of {@link Bitmap}.
  */
 public class IosBitmap implements Bitmap {
 

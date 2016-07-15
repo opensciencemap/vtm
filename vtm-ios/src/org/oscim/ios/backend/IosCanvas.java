@@ -23,9 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * iOS specific implementation of {@link Canvas}<br>
- * <br>
- * Created by Longri on 25.06.16.
+ * iOS specific implementation of {@link Canvas}.
  */
 public class IosCanvas implements Canvas {
 

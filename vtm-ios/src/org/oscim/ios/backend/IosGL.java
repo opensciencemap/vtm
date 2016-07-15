@@ -23,9 +23,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
- * iOS specific implementation of {@link GL}<br>
- * <br>
- * Created by Longri on 25.06.16.
+ * iOS specific implementation of {@link GL}.
  */
 public class IosGL implements GL {
 

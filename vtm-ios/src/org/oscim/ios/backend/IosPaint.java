@@ -31,11 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-
 /**
- * iOS specific implementation of {@link Paint}<br>
- * <br>
- * Created by Longri on 25.06.16.
+ * iOS specific implementation of {@link Paint}.
  */
 public class IosPaint implements Paint {
     private static final Logger log = LoggerFactory.getLogger(IosPaint.class);
