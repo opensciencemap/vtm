@@ -426,9 +426,12 @@ public class LabelPlacement {
         for (Label ti = mLabels; ti != null; ti = (Label) ti.next) {
             /* add caption symbols */
             if (ti.text.caption) {
-                if (ti.text.texture != null) {
+                if (ti.text.bitmap != null || ti.text.texture != null) {
                     SymbolItem s = SymbolItem.pool.get();
-                    s.texRegion = ti.text.texture;
+                    if (ti.text.bitmap != null)
+                        s.bitmap = ti.text.bitmap;
+                    else
+                        s.texRegion = ti.text.texture;
                     s.x = ti.x;
                     s.y = ti.y;
                     s.billboard = true;

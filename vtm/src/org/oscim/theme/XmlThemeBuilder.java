@@ -763,9 +763,17 @@ public class XmlThemeBuilder extends DefaultHandler {
                 // NB: minus..
                 b.dy = -Float.parseFloat(value) * CanvasAdapter.dpi / 160;
 
-            else if ("symbol".equals(name))
-                b.texture = getAtlasRegion(value);
-            else if ("use".equals(name))
+            else if ("symbol".equals(name)) {
+                String lowValue = value.toLowerCase(Locale.ENGLISH);
+                if (lowValue.endsWith(".png") || lowValue.endsWith(".svg")) {
+                    try {
+                        b.bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, value);
+                    } catch (Exception e) {
+                        log.debug(e.getMessage());
+                    }
+                } else
+                    b.texture = getAtlasRegion(value);
+            } else if ("use".equals(name))
                 ;/* ignore */
             else
                 logUnknownAttribute(elementName, name, value, i);

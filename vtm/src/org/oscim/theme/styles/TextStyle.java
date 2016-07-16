@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +18,7 @@
 package org.oscim.theme.styles;
 
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Align;
@@ -34,6 +36,7 @@ public final class TextStyle extends RenderStyle {
         public boolean caption;
         public float dy;
         public int priority;
+        public Bitmap bitmap;
         public TextureRegion texture;
         public FontFamily fontFamily;
         public FontStyle fontStyle;
@@ -46,6 +49,7 @@ public final class TextStyle extends RenderStyle {
             fontSize = 0;
             caption = false;
             priority = Integer.MAX_VALUE;
+            bitmap = null;
             texture = null;
             fillColor = Color.BLACK;
             strokeColor = Color.BLACK;
@@ -94,6 +98,11 @@ public final class TextStyle extends RenderStyle {
             return self();
         }
 
+        public T bitmap(Bitmap bitmap) {
+            this.bitmap = bitmap;
+            return self();
+        }
+
         public T texture(TextureRegion texture) {
             this.texture = texture;
             return self();
@@ -117,6 +126,7 @@ public final class TextStyle extends RenderStyle {
             fontSize = other.fontSize;
             caption = other.caption;
             priority = other.priority;
+            bitmap = other.bitmap;
             texture = other.texture;
             fillColor = other.fillColor;
             strokeColor = other.strokeColor;
@@ -131,6 +141,7 @@ public final class TextStyle extends RenderStyle {
             this.caption = style.caption;
             this.dy = style.dy;
             this.priority = style.priority;
+            this.bitmap = style.bitmap;
             this.texture = style.texture;
             this.fillColor = style.paint.getColor();
             this.fontFamily = FontFamily.DEFAULT;
@@ -148,6 +159,7 @@ public final class TextStyle extends RenderStyle {
         this.caption = tb.caption;
         this.dy = tb.dy;
         this.priority = tb.priority;
+        this.bitmap = tb.bitmap;
         this.texture = tb.texture;
 
         paint = CanvasAdapter.newPaint();
@@ -185,7 +197,14 @@ public final class TextStyle extends RenderStyle {
     public float fontHeight;
     public float fontDescent;
 
+    public final Bitmap bitmap;
     public final TextureRegion texture;
+
+    @Override
+    public void dispose() {
+        if (bitmap != null)
+            bitmap.recycle();
+    }
 
     @Override
     public void renderNode(Callback cb) {
