@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,7 +22,7 @@ import org.oscim.core.PointF;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 
 public class MarkerSymbol {
-    final Bitmap[] mBitmap;
+    final Bitmap mBitmap;
     /**
      * Hotspot offset
      */
@@ -33,8 +34,7 @@ public class MarkerSymbol {
     }
 
     public MarkerSymbol(Bitmap bitmap, float relX, float relY, boolean billboard) {
-        mBitmap = new Bitmap[1];
-        mBitmap[0] = bitmap;
+        mBitmap = bitmap;
         mOffset = new PointF(relX, relY);
         mBillboard = billboard;
     }
@@ -74,8 +74,7 @@ public class MarkerSymbol {
                 mOffset = new PointF(0.5f, 0.5f);
         }
 
-        mBitmap = new Bitmap[1];
-        mBitmap[0] = bitmap;
+        mBitmap = bitmap;
         mBillboard = billboard;
     }
 
@@ -88,13 +87,13 @@ public class MarkerSymbol {
     }
 
     public Bitmap getBitmap() {
-        return mBitmap[0];
+        return mBitmap;
     }
 
     public boolean isInside(float dx, float dy) {
         /* TODO handle no-billboard */
-        int w = mBitmap[0].getWidth();
-        int h = mBitmap[0].getHeight();
+        int w = mBitmap.getWidth();
+        int h = mBitmap.getHeight();
         float ox = -w * mOffset.x;
         float oy = -h * (1 - mOffset.y);
 
