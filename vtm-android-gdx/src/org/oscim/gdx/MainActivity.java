@@ -18,12 +18,14 @@
 package org.oscim.gdx;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 import org.oscim.android.canvas.AndroidGraphics;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.tiling.TileSource;
@@ -39,6 +41,9 @@ public class MainActivity extends AndroidApplication {
         GdxAssets.init("");
         GLAdapter.init(new AndroidGL());
         Tile.SIZE = 400;
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.stencil = 8;
