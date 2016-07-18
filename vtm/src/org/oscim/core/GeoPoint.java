@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -190,5 +191,24 @@ public class GeoPoint implements Comparable<GeoPoint> {
         double tt = Math.acos(t1 + t2 + t3);
 
         return (RADIUS_EARTH_METERS * tt);
+    }
+
+    public double bearingTo(GeoPoint other) {
+        return bearing(latitudeE6 / 1E6,
+                longitudeE6 / 1E6,
+                other.latitudeE6 / 1E6,
+                other.longitudeE6 / 1E6);
+    }
+
+    public static double bearing(double lat1, double lon1, double lat2, double lon2) {
+        double deltaLon = DEG2RAD * (lon2 - lon1);
+
+        double a1 = DEG2RAD * lat1;
+        double b1 = DEG2RAD * lat2;
+
+        double y = Math.sin(deltaLon) * Math.cos(b1);
+        double x = Math.cos(a1) * Math.sin(b1) - Math.sin(a1) * Math.cos(b1) * Math.cos(deltaLon);
+        double result = RAD2DEG * Math.atan2(y, x);
+        return (result + 360.0) % 360.0;
     }
 }
