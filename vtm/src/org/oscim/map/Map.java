@@ -71,6 +71,11 @@ public abstract class Map implements TaskQueue {
     public static final Event POSITION_EVENT = new Event();
 
     /**
+     * UpdateListener event. Map was moved by user.
+     */
+    public static final Event MOVE_EVENT = new Event();
+
+    /**
      * UpdateLister event. Delivered on main-thread when updateMap() was called
      * and no CLEAR_EVENT or POSITION_EVENT was triggered.
      */
