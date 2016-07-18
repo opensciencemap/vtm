@@ -27,7 +27,10 @@ import java.io.InputStream;
 import java.net.URI;
 
 public class AwtSvgBitmap extends AwtBitmap {
-    private static final float DEFAULT_SIZE = 400f;
+    /**
+     * Default size is 20x20px.
+     */
+    public static float DEFAULT_SIZE = 400f;
 
     private static BufferedImage getResourceBitmap(InputStream inputStream) throws IOException {
         synchronized (SVGCache.getSVGUniverse()) {

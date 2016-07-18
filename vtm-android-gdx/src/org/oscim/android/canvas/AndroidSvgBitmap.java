@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class AndroidSvgBitmap extends AndroidBitmap {
-    private static final float DEFAULT_SIZE = 400f;
+    /**
+     * Default size is 20x20px at baseline mdpi (160dpi).
+     */
+    public static float DEFAULT_SIZE = 400f;
 
     private static android.graphics.Bitmap getResourceBitmap(InputStream inputStream) throws IOException {
         synchronized (SVG.getVersion()) {
