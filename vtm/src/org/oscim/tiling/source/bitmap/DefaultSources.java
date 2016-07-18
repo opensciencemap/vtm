@@ -56,10 +56,20 @@ public class DefaultSources {
             .zoomMax(13);
 
     public static Builder<?> HD_HILLSHADE = BitmapTileSource.builder()
-            .url("http://129.206.74.245:8004/tms_hs.ashx")
+            .url("http://korona.geog.uni-heidelberg.de/tiles/asterh/")
             .tilePath("?x={X}&y={Y}&z={Z}")
             .zoomMin(2)
             .zoomMax(16);
+
+    public static Builder<?> HIKEBIKE = BitmapTileSource.builder()
+            .url("http://tiles.wmflabs.org/hikebike")
+            .tilePath("/{Z}/{X}/{Y}.png")
+            .zoomMax(17);
+
+    public static Builder<?> HIKEBIKE_HILLSHADE = BitmapTileSource.builder()
+            .url("http://tiles.wmflabs.org/hillshading")
+            .tilePath("/{Z}/{X}/{Y}.png")
+            .zoomMax(14);
 
     /**
      * https://github.com/opensciencemap/vtm/issues/18
