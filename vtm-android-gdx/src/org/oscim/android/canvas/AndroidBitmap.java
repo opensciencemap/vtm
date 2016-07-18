@@ -1,5 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,6 +22,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+
+import org.oscim.utils.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -42,13 +46,6 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
     @Override
     public boolean isValid() {
         return mBitmap != null;
-    }
-
-    @Override
-    public byte[] getPngEncodedData() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        this.mBitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
-        return outputStream.toByteArray();
     }
 
     /**
@@ -107,5 +104,17 @@ public class AndroidBitmap implements org.oscim.backend.canvas.Bitmap {
             return;
 
         mBitmap.recycle();
+    }
+
+    @Override
+    public byte[] getPngEncodedData() {
+        ByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = new ByteArrayOutputStream();
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            IOUtils.closeQuietly(outputStream);
+        }
     }
 }

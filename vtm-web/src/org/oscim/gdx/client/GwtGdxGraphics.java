@@ -55,6 +55,7 @@ public class GwtGdxGraphics extends CanvasAdapter {
 
     @Override
     public Bitmap decodeSvgBitmapImpl(InputStream in) {
+        // TODO
         return null;
     }
 

@@ -189,14 +189,6 @@ public class IosBitmap implements Bitmap {
         return this.cgBitmapContext != null;
     }
 
-    @Override
-    public byte[] getPngEncodedData() {
-        UIImage uiImage = new UIImage(cgBitmapContext.toImage());
-        NSData data = uiImage.toPNGData();
-        return data.getBytes();
-    }
-
-
     /**
      * Returns a ByteArray from InputStream
      *
@@ -227,5 +219,12 @@ public class IosBitmap implements Bitmap {
                 Color.b(color),
                 Color.r(color))
                 .getCGColor();
+    }
+
+    @Override
+    public byte[] getPngEncodedData() {
+        UIImage uiImage = new UIImage(cgBitmapContext.toImage());
+        NSData data = uiImage.toPNGData();
+        return data.getBytes();
     }
 }

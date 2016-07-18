@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -23,6 +24,9 @@ import com.badlogic.gdx.utils.BufferUtils;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.bucket.TextureBucket;
+import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -34,6 +38,8 @@ import java.nio.IntBuffer;
 import javax.imageio.ImageIO;
 
 public class AwtBitmap implements Bitmap {
+    private static final Logger log = LoggerFactory.getLogger(AwtBitmap.class);
+
     BufferedImage bitmap;
     int width;
     int height;
@@ -154,13 +160,17 @@ public class AwtBitmap implements Bitmap {
     }
 
     @Override
-    public byte[] getPngEncodedData(){
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    public byte[] getPngEncodedData() {
+        ByteArrayOutputStream outputStream = null;
         try {
+            outputStream = new ByteArrayOutputStream();
             ImageIO.write(this.bitmap, "png", outputStream);
+            return outputStream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(outputStream);
         }
-        return outputStream.toByteArray();
+        return null;
     }
 }
