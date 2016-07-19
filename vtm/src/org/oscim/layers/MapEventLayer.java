@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +18,7 @@
  */
 package org.oscim.layers;
 
+import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
 import org.oscim.event.Gesture;
@@ -87,6 +89,8 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
     protected static final float FLING_MIN_THREHSHOLD = 100;
 
     private final VelocityTracker mTracker;
+
+    private final MapPosition mapPosition = new MapPosition();
 
     public MapEventLayer(Map map) {
         super(map);
@@ -266,7 +270,8 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
             mViewport.moveMap(mx, my);
             mTracker.update(x1, y1, e.getTime());
             mMap.updateMap(true);
-            mMap.events.fire(Map.MOVE_EVENT, mMap.getMapPosition());
+            mMap.viewport().getMapPosition(mapPosition);
+            mMap.events.fire(Map.MOVE_EVENT, mapPosition);
             return;
         }
         mStartMove = -1;
