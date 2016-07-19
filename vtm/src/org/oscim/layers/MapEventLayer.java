@@ -266,6 +266,7 @@ public class MapEventLayer extends Layer implements InputListener, GestureListen
             mViewport.moveMap(mx, my);
             mTracker.update(x1, y1, e.getTime());
             mMap.updateMap(true);
+            mMap.events.fire(Map.MOVE_EVENT, mMap.getMapPosition());
             return;
         }
         mStartMove = -1;
