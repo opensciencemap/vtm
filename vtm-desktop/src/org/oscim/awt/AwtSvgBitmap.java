@@ -28,7 +28,7 @@ import java.net.URI;
 
 public class AwtSvgBitmap extends AwtBitmap {
     /**
-     * Default size is 20x20px (400px).
+     * Default size is 20x20px (400px) at 240dpi.
      */
     public static float DEFAULT_SIZE = 400f;
 
