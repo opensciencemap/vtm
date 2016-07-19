@@ -16,14 +16,14 @@
  */
 package org.oscim.android.test;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
 import org.oscim.map.Map;
 
-public abstract class MapActivity extends AppCompatActivity {
+public class MapActivity extends Activity {
     MapView mMapView;
     Map mMap;
     MapPreferences mPrefs;
@@ -64,5 +64,4 @@ public abstract class MapActivity extends AppCompatActivity {
         mMapView.onPause();
         mPrefs.save(mMapView.map());
     }
-
 }
