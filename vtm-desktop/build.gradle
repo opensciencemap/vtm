@@ -4,7 +4,6 @@ apply plugin: 'application'
 
 dependencies {
     compile project(':vtm-gdx')
-    compile project(':vtm-themes')
     compile files('natives')
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
@@ -23,8 +22,17 @@ task nativesJar(type: Jar) {
     from('natives')
 }
 
+task fatJar(type: Jar, dependsOn: classes) {
+    classifier = 'jar-with-dependencies'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from('natives')
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    with jar
+}
+
 artifacts {
     archives nativesJar
+    archives fatJar
 }
 
 mainClassName = 'org.oscim.gdx.GdxMapApp'

@@ -62,8 +62,17 @@ task nativesJar(type: Jar) {
     from('natives')
 }
 
+task fatJar(type: Jar, dependsOn: classes) {
+    classifier = 'jar-with-dependencies'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from('natives')
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    with jar
+}
+
 artifacts {
     archives nativesJar
+    archives fatJar
 }
 
 // Automated Gradle project deployment to Sonatype OSSRH
