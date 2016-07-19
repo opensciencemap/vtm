@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,25 +34,25 @@ public class BoundingBox {
      * The maximum latitude value of this BoundingBox in microdegrees (degrees *
      * 10^6).
      */
-    public final int maxLatitudeE6;
+    public int maxLatitudeE6;
 
     /**
      * The maximum longitude value of this BoundingBox in microdegrees (degrees
      * * 10^6).
      */
-    public final int maxLongitudeE6;
+    public int maxLongitudeE6;
 
     /**
      * The minimum latitude value of this BoundingBox in microdegrees (degrees *
      * 10^6).
      */
-    public final int minLatitudeE6;
+    public int minLatitudeE6;
 
     /**
      * The minimum longitude value of this BoundingBox in microdegrees (degrees
      * * 10^6).
      */
-    public final int minLongitudeE6;
+    public int minLongitudeE6;
 
     /**
      * @param minLatitudeE6  the minimum latitude in microdegrees (degrees * 10^6).
