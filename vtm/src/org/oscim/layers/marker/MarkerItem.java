@@ -3,8 +3,9 @@
  * Copyright 2012 Nicolas Gramlich
  * Copyright 2012 Theodore Hong
  * Copyright 2012 Fred Eisele
- * 
+ *
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,7 +20,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.layers.marker;
 
 import org.oscim.core.GeoPoint;
@@ -46,9 +46,9 @@ public class MarkerItem {
     }
 
     public final Object uid;
-    public final String title;
-    public final String description;
-    public final GeoPoint geoPoint;
+    public String title;
+    public String description;
+    public GeoPoint geoPoint;
     protected MarkerSymbol mMarker;
 
     /**
