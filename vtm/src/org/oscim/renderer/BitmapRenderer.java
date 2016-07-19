@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -31,6 +32,9 @@ public class BitmapRenderer extends BucketRenderer {
     private int mHeight;
     private boolean initialized;
     private boolean mUpdateBitmap;
+    private boolean center;
+    private int xOffset;
+    private int yOffset;
 
     /**
      * @param bitmap    with dimension being power of two
@@ -44,6 +48,12 @@ public class BitmapRenderer extends BucketRenderer {
         mHeight = targetHeight;
         mBitmap = bitmap;
         initialized = false;
+    }
+
+    public synchronized void setDrawOffset(boolean center, int xOffset, int yOffset) {
+        this.center = center;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
     }
 
     public synchronized void updateBitmap() {
@@ -80,7 +90,7 @@ public class BitmapRenderer extends BucketRenderer {
 
     @Override
     public synchronized void render(GLViewport v) {
-        v.useScreenCoordinates(false, 8);
+        v.setScreenOffset(center, xOffset, yOffset, 8);
         BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
     }
 }
