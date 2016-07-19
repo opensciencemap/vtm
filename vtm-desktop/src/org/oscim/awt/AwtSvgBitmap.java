@@ -28,38 +28,62 @@ import java.net.URI;
 
 public class AwtSvgBitmap extends AwtBitmap {
     /**
-     * Default size is 20x20px.
+     * Default size is 20x20px (400px).
      */
     public static float DEFAULT_SIZE = 400f;
 
-    private static BufferedImage getResourceBitmap(InputStream inputStream) throws IOException {
-        synchronized (SVGCache.getSVGUniverse()) {
-            try {
-                URI uri = SVGCache.getSVGUniverse().loadSVG(inputStream, Integer.toString(inputStream.hashCode()));
-                SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(uri);
+    public static BufferedImage getResourceBitmap(InputStream inputStream, float scaleFactor, float defaultSize, int width, int height, int percent) throws IOException {
+        try {
+            URI uri = SVGCache.getSVGUniverse().loadSVG(inputStream, Integer.toString(inputStream.hashCode()));
+            SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(uri);
 
-                float scaleFactor = CanvasAdapter.dpi / 240;
-                double scale = scaleFactor / Math.sqrt((diagram.getHeight() * diagram.getWidth()) / DEFAULT_SIZE);
+            double scale = scaleFactor / Math.sqrt((diagram.getHeight() * diagram.getWidth()) / defaultSize);
 
-                float bitmapWidth = (float) (diagram.getWidth() * scale);
-                float bitmapHeight = (float) (diagram.getHeight() * scale);
+            float bitmapWidth = (float) (diagram.getWidth() * scale);
+            float bitmapHeight = (float) (diagram.getHeight() * scale);
 
-                SVGIcon icon = new SVGIcon();
-                icon.setAntiAlias(true);
-                icon.setPreferredSize(new Dimension((int) bitmapWidth, (int) bitmapHeight));
-                icon.setScaleToFit(true);
-                icon.setSvgURI(uri);
-                BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-                icon.paintIcon(null, bufferedImage.createGraphics(), 0, 0);
+            float aspectRatio = diagram.getWidth() / diagram.getHeight();
 
-                return bufferedImage;
-            } catch (Exception e) {
-                throw new IOException(e);
+            if (width != 0 && height != 0) {
+                // both width and height set, override any other setting
+                bitmapWidth = width;
+                bitmapHeight = height;
+            } else if (width == 0 && height != 0) {
+                // only width set, calculate from aspect ratio
+                bitmapWidth = height * aspectRatio;
+                bitmapHeight = height;
+            } else if (width != 0 && height == 0) {
+                // only height set, calculate from aspect ratio
+                bitmapHeight = width / aspectRatio;
+                bitmapWidth = width;
             }
+
+            if (percent != 100) {
+                bitmapWidth *= percent / 100f;
+                bitmapHeight *= percent / 100f;
+            }
+
+            SVGIcon icon = new SVGIcon();
+            icon.setAntiAlias(true);
+            icon.setPreferredSize(new Dimension((int) bitmapWidth, (int) bitmapHeight));
+            icon.setScaleToFit(true);
+            icon.setSvgURI(uri);
+            BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+            icon.paintIcon(null, bufferedImage.createGraphics(), 0, 0);
+
+            return bufferedImage;
+        } catch (Exception e) {
+            throw new IOException(e);
         }
     }
 
-    AwtSvgBitmap(InputStream inputStream) throws IOException {
-        super(getResourceBitmap(inputStream));
+    private static BufferedImage getResourceBitmapImpl(InputStream inputStream) throws IOException {
+        synchronized (SVGCache.getSVGUniverse()) {
+            return getResourceBitmap(inputStream, CanvasAdapter.dpi / 240, DEFAULT_SIZE, 0, 0, 100);
+        }
+    }
+
+    public AwtSvgBitmap(InputStream inputStream) throws IOException {
+        super(getResourceBitmapImpl(inputStream));
     }
 }

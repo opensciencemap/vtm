@@ -28,35 +28,59 @@ import java.io.InputStream;
 
 public class AndroidSvgBitmap extends AndroidBitmap {
     /**
-     * Default size is 20x20px at baseline mdpi (160dpi).
+     * Default size is 20x20px (400px) at baseline mdpi (160dpi).
      */
     public static float DEFAULT_SIZE = 400f;
 
-    private static android.graphics.Bitmap getResourceBitmap(InputStream inputStream) throws IOException {
-        synchronized (SVG.getVersion()) {
-            try {
-                SVG svg = SVG.getFromInputStream(inputStream);
-                Picture picture = svg.renderToPicture();
+    public static android.graphics.Bitmap getResourceBitmap(InputStream inputStream, float scaleFactor, float defaultSize, int width, int height, int percent) throws IOException {
+        try {
+            SVG svg = SVG.getFromInputStream(inputStream);
+            Picture picture = svg.renderToPicture();
 
-                float scaleFactor = CanvasAdapter.dpi / 160;
-                double scale = scaleFactor / Math.sqrt((picture.getHeight() * picture.getWidth()) / DEFAULT_SIZE);
+            double scale = scaleFactor / Math.sqrt((picture.getHeight() * picture.getWidth()) / defaultSize);
 
-                float bitmapWidth = (float) (picture.getWidth() * scale);
-                float bitmapHeight = (float) (picture.getHeight() * scale);
+            float bitmapWidth = (float) (picture.getWidth() * scale);
+            float bitmapHeight = (float) (picture.getHeight() * scale);
 
-                android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap((int) Math.ceil(bitmapWidth),
-                        (int) Math.ceil(bitmapHeight), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawPicture(picture, new RectF(0, 0, bitmapWidth, bitmapHeight));
+            float aspectRatio = (1f * picture.getWidth()) / picture.getHeight();
 
-                return bitmap;
-            } catch (Exception e) {
-                throw new IOException(e);
+            if (width != 0 && height != 0) {
+                // both width and height set, override any other setting
+                bitmapWidth = width;
+                bitmapHeight = height;
+            } else if (width == 0 && height != 0) {
+                // only width set, calculate from aspect ratio
+                bitmapWidth = height * aspectRatio;
+                bitmapHeight = height;
+            } else if (width != 0 && height == 0) {
+                // only height set, calculate from aspect ratio
+                bitmapHeight = width / aspectRatio;
+                bitmapWidth = width;
             }
+
+            if (percent != 100) {
+                bitmapWidth *= percent / 100f;
+                bitmapHeight *= percent / 100f;
+            }
+
+            android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap((int) Math.ceil(bitmapWidth),
+                    (int) Math.ceil(bitmapHeight), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawPicture(picture, new RectF(0, 0, bitmapWidth, bitmapHeight));
+
+            return bitmap;
+        } catch (Exception e) {
+            throw new IOException(e);
         }
     }
 
-    AndroidSvgBitmap(InputStream inputStream) throws IOException {
-        super(getResourceBitmap(inputStream));
+    private static android.graphics.Bitmap getResourceBitmapImpl(InputStream inputStream) throws IOException {
+        synchronized (SVG.getVersion()) {
+            return getResourceBitmap(inputStream, CanvasAdapter.dpi / 160, DEFAULT_SIZE, 0, 0, 100);
+        }
+    }
+
+    public AndroidSvgBitmap(InputStream inputStream) throws IOException {
+        super(getResourceBitmapImpl(inputStream));
     }
 }

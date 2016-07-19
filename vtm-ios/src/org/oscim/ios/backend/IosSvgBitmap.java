@@ -33,7 +33,10 @@ import svg.SVGRenderer;
 public class IosSvgBitmap extends IosBitmap {
     private static final Logger log = LoggerFactory.getLogger(IosSvgBitmap.class);
 
-    private static final float DEFAULT_SIZE = 400f;
+    /**
+     * Default size is 20x20px (400px).
+     */
+    public static float DEFAULT_SIZE = 400f;
 
     private static String getStringFromInputStream(InputStream is) {
         StringBuilder sb = new StringBuilder();
@@ -52,21 +55,45 @@ public class IosSvgBitmap extends IosBitmap {
         return sb.toString();
     }
 
-    private static UIImage getUIImage(InputStream inputStream) {
+    public static UIImage getResourceBitmap(InputStream inputStream, float scaleFactor, float defaultSize, int width, int height, int percent) {
         String svg = getStringFromInputStream(inputStream);
         SVGRenderer renderer = new SVGRenderer(svg);
         CGRect viewRect = renderer.getViewRect();
 
-        float scaleFactor = CanvasAdapter.dpi / 240;
-        double scale = scaleFactor / Math.sqrt((viewRect.getHeight() * viewRect.getWidth()) / DEFAULT_SIZE);
+        double scale = scaleFactor / Math.sqrt((viewRect.getHeight() * viewRect.getWidth()) / defaultSize);
 
         float bitmapWidth = (float) (viewRect.getWidth() * scale);
         float bitmapHeight = (float) (viewRect.getHeight() * scale);
 
+        float aspectRatio = (float) (viewRect.getWidth() / viewRect.getHeight());
+
+        if (width != 0 && height != 0) {
+            // both width and height set, override any other setting
+            bitmapWidth = width;
+            bitmapHeight = height;
+        } else if (width == 0 && height != 0) {
+            // only width set, calculate from aspect ratio
+            bitmapWidth = height * aspectRatio;
+            bitmapHeight = height;
+        } else if (width != 0 && height == 0) {
+            // only height set, calculate from aspect ratio
+            bitmapHeight = width / aspectRatio;
+            bitmapWidth = width;
+        }
+
+        if (percent != 100) {
+            bitmapWidth *= percent / 100f;
+            bitmapHeight *= percent / 100f;
+        }
+
         return renderer.asImageWithSize(new CGSize(bitmapWidth, bitmapHeight), 1);
     }
 
+    private static UIImage getResourceBitmapImpl(InputStream inputStream) {
+        return getResourceBitmap(inputStream, CanvasAdapter.dpi / 240, DEFAULT_SIZE, 0, 0, 100);
+    }
+
     public IosSvgBitmap(InputStream inputStream) throws IOException {
-        super(getUIImage(inputStream));
+        super(getResourceBitmapImpl(inputStream));
     }
 }
