@@ -123,10 +123,11 @@ public class IosBitmap implements Bitmap {
     }
 
     /**
-     * protected constructor for create IosBitmap from IosSvgBitmap
+     * Protected constructor for create IosBitmap from IosSvgBitmap.
+     *
      * @param image
      */
-    protected IosBitmap(UIImage image){
+    protected IosBitmap(UIImage image) {
         CGImage cgiIimage = image.getCGImage();
         this.width = (int) cgiIimage.getWidth();
         this.height = (int) cgiIimage.getHeight();
@@ -138,7 +139,6 @@ public class IosBitmap implements Bitmap {
         // can dispose helper images for release memory
         image.dispose();
         cgiIimage.dispose();
-
     }
 
 

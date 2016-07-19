@@ -20,7 +20,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
   - bitmap: any quadtree-scheme tiles as texture
 - Backends:
   - Android (optional libGDX)
-  - iOS (using libGDX/RoboVM)
+  - iOS (using libGDX/RoboVM) ([instructions](docs/ios.md))
   - Desktop (using libGDX/JGLFW)
   - HTML5/WebGL (using libGDX/GWT)
 
@@ -35,7 +35,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 - **vtm-web** HTML5/GWT backend
 - **vtm-web-app** HTML5/GWT application
 
-The libGDX backends for iOS and GWT are experimental.
+The libGDX backend for GWT is experimental.
 
 ## Master build downloads
 - [Latest jars and Samples applications](http://ci.mapsforge.org/job/vtm/)

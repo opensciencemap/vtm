@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,34 +15,43 @@
  */
 package org.oscim.ios.backend;
 
-
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.utils.IOUtils;
 import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.coregraphics.CGSize;
 import org.robovm.apple.uikit.UIImage;
-import svg.SVGRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-/**
- * Created by Longri on 17.07.16.
- */
+import svg.SVGRenderer;
+
 public class IosSvgBitmap extends IosBitmap {
+    private static final Logger log = LoggerFactory.getLogger(IosSvgBitmap.class);
+
     private static final float DEFAULT_SIZE = 400f;
 
-    /**
-     * Constructor<br>
-     * @param inputStream
-     * @throws IOException
-     */
-    public IosSvgBitmap(InputStream inputStream) throws IOException {
-        super(getUIImage(inputStream));
+    private static String getStringFromInputStream(InputStream is) {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = null;
+        String line;
+        try {
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(br);
+        }
+        return sb.toString();
     }
 
-    //get UIImage from SVG file
     private static UIImage getUIImage(InputStream inputStream) {
         String svg = getStringFromInputStream(inputStream);
         SVGRenderer renderer = new SVGRenderer(svg);
@@ -56,32 +66,7 @@ public class IosSvgBitmap extends IosBitmap {
         return renderer.asImageWithSize(new CGSize(bitmapWidth, bitmapHeight), 1);
     }
 
-
-    // convert InputStream to String
-    private static String getStringFromInputStream(InputStream is) {
-
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        try {
-
-            br = new BufferedReader(new InputStreamReader(is));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return sb.toString();
+    public IosSvgBitmap(InputStream inputStream) throws IOException {
+        super(getUIImage(inputStream));
     }
 }

@@ -66,7 +66,7 @@ public class IosGraphics extends CanvasAdapter {
         try {
             return new IosSvgBitmap(inputStream);
         } catch (IOException e) {
-            log.error("decodeSvgImpl", e);
+            log.error("decodeSvgBitmapImpl", e);
             return null;
         }
     }
