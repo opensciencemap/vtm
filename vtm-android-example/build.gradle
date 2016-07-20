@@ -31,7 +31,9 @@ android {
             resources.srcDirs = ['src', 'assets']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
-            jniLibs.srcDirs = ["${rootDir}/vtm-android/natives/lib"]
+            file("${rootDir}/vtm-android/natives").eachDir() { dir ->
+                jniLibs.srcDirs += "${dir.path}/lib"
+            }
         }
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
