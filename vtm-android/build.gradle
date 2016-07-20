@@ -42,37 +42,24 @@ android.libraryVariants.all { variant ->
         print "Skipping debug jar"
         return; // Skip debug builds.
     }
-    def task = project.tasks.create "jar${name.capitalize()}", Jar
-    task.dependsOn variant.javaCompile
-    task.from variant.javaCompile.destinationDir
-    artifacts.add('archives', task);
-}
 
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    if (name.equals("debug")) {
-        print "Skipping debug jar"
-        return; // Skip debug builds.
-    }
-    def task = project.tasks.create "nativesJar${name.capitalize()}", Jar
-    task.classifier = 'natives'
-    task.from('natives')
-    artifacts.add('archives', task);
-}
+    def taskJar = project.tasks.create "jar${name.capitalize()}", Jar
+    taskJar.dependsOn variant.javaCompile
+    taskJar.from variant.javaCompile.destinationDir
+    artifacts.add('archives', taskJar);
 
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    if (name.equals("debug")) {
-        print "Skipping debug jar"
-        return; // Skip debug builds.
-    }
-    def task = project.tasks.create "fatJar${name.capitalize()}", Jar
-    task.classifier = 'jar-with-dependencies'
-    task.dependsOn variant.javaCompile
-    task.from variant.javaCompile.destinationDir
-    task.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    task.from('natives')
-    artifacts.add('archives', task);
+    def taskNatives = project.tasks.create "nativesJar${name.capitalize()}", Jar
+    taskNatives.classifier = 'natives'
+    taskNatives.from('natives')
+    artifacts.add('archives', taskNatives);
+
+    def taskFat = project.tasks.create "fatJar${name.capitalize()}", Jar
+    taskFat.classifier = 'jar-with-dependencies'
+    taskFat.dependsOn variant.javaCompile
+    taskFat.from variant.javaCompile.destinationDir
+    taskFat.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    taskFat.from('natives')
+    artifacts.add('archives', taskFat);
 }
 
 // Automated Gradle project deployment to Sonatype OSSRH
