@@ -19,7 +19,11 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.android.MapScaleBar;
+import org.oscim.android.scalebar.DefaultMapScaleBar;
+import org.oscim.android.scalebar.ImperialUnitAdapter;
+import org.oscim.android.scalebar.MapScaleBar;
+import org.oscim.android.scalebar.MapScaleBarLayer;
+import org.oscim.android.scalebar.MetricUnitAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
@@ -33,6 +37,7 @@ import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 
 public class SimpleMapActivity extends BaseMapActivity {
+    private DefaultMapScaleBar mapScaleBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,12 +47,26 @@ public class SimpleMapActivity extends BaseMapActivity {
         layers.add(new BuildingLayer(mMap, mBaseLayer));
         layers.add(new LabelLayer(mMap, mBaseLayer));
 
-        MapScaleBar mapScaleBar = new MapScaleBar(mMapView);
-        ((BitmapRenderer) mapScaleBar.getRenderer()).setPosition(GLViewport.Position.BOTTOM_LEFT);
-        ((BitmapRenderer) mapScaleBar.getRenderer()).setOffset(5 * CanvasAdapter.dpi / 160, 0);
-        layers.add(mapScaleBar);
+        mapScaleBar = new DefaultMapScaleBar(mMap);
+        mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
+        mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
+        mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
+        mapScaleBar.setScaleBarPosition(MapScaleBar.ScaleBarPosition.BOTTOM_LEFT);
+
+        MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
+        BitmapRenderer renderer = (BitmapRenderer) mapScaleBarLayer.getRenderer();
+        renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
+        renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
+        layers.add(mapScaleBarLayer);
 
         mMap.setTheme(VtmThemes.DEFAULT);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mapScaleBar.destroy();
+
+        super.onDestroy();
     }
 
     void runTheMonkey() {

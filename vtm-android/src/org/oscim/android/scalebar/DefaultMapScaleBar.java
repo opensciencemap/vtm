@@ -1,0 +1,350 @@
+/*
+ * Copyright 2010, 2011, 2012, 2013 mapsforge.org
+ * Copyright 2014 Ludwig M Brinckmann
+ * Copyright 2014-2016 devemux86
+ * Copyright 2014 Erik Duisters
+ * Copyright 2014 Christian Pesch
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.oscim.android.scalebar;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.map.Map;
+
+/**
+ * Displays the default MapScaleBar
+ */
+public class DefaultMapScaleBar extends MapScaleBar {
+    private static final int BITMAP_HEIGHT = 40;
+    private static final int BITMAP_WIDTH = 120;
+    private static final int SCALE_BAR_MARGIN = 10;
+    private static final float STROKE_EXTERNAL = 4;
+    private static final float STROKE_INTERNAL = 2;
+    private static final int TEXT_MARGIN = 1;
+
+    public static enum ScaleBarMode {BOTH, SINGLE}
+
+    private final float scale;
+    private ScaleBarMode scaleBarMode;
+    private DistanceUnitAdapter secondaryDistanceUnitAdapter;
+
+    private final Paint paintScaleBar;
+    private final Paint paintScaleBarStroke;
+    private final Paint paintScaleText;
+    private final Paint paintScaleTextStroke;
+
+    private final Rect rect = new Rect();
+
+    public DefaultMapScaleBar(Map map) {
+        super(map, (int) (BITMAP_WIDTH * CanvasAdapter.dpi / 160), (int) (BITMAP_HEIGHT * CanvasAdapter.dpi / 160));
+
+        this.scale = CanvasAdapter.dpi / 160;
+        this.scaleBarMode = ScaleBarMode.BOTH;
+        this.secondaryDistanceUnitAdapter = ImperialUnitAdapter.INSTANCE;
+
+        this.paintScaleBar = createScaleBarPaint(Color.BLACK, STROKE_INTERNAL, Paint.Style.FILL);
+        this.paintScaleBarStroke = createScaleBarPaint(Color.WHITE, STROKE_EXTERNAL, Paint.Style.STROKE);
+        this.paintScaleText = createTextPaint(Color.BLACK, 0, Paint.Style.FILL);
+        this.paintScaleTextStroke = createTextPaint(Color.WHITE, 2, Paint.Style.STROKE);
+    }
+
+    /**
+     * @return the secondary {@link DistanceUnitAdapter} in use by this MapScaleBar
+     */
+    public DistanceUnitAdapter getSecondaryDistanceUnitAdapter() {
+        return this.secondaryDistanceUnitAdapter;
+    }
+
+    /**
+     * Set the secondary {@link DistanceUnitAdapter} for the MapScaleBar
+     *
+     * @param distanceUnitAdapter The secondary {@link DistanceUnitAdapter} to be used by this {@link MapScaleBar}
+     */
+    public void setSecondaryDistanceUnitAdapter(DistanceUnitAdapter distanceUnitAdapter) {
+        if (distanceUnitAdapter == null) {
+            throw new IllegalArgumentException("adapter must not be null");
+        }
+        this.secondaryDistanceUnitAdapter = distanceUnitAdapter;
+        this.redrawNeeded = true;
+    }
+
+    public ScaleBarMode getScaleBarMode() {
+        return this.scaleBarMode;
+    }
+
+    public void setScaleBarMode(ScaleBarMode scaleBarMode) {
+        this.scaleBarMode = scaleBarMode;
+        this.redrawNeeded = true;
+    }
+
+    private Paint createScaleBarPaint(int color, float strokeWidth, Paint.Style style) {
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStyle(Paint.Style.FILL);
+
+        paint.setColor(color);
+        paint.setStrokeWidth(strokeWidth * this.scale);
+        paint.setStyle(style);
+        paint.setStrokeCap(Paint.Cap.SQUARE);
+        return paint;
+    }
+
+    private Paint createTextPaint(int color, float strokeWidth, Paint.Style style) {
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStyle(Paint.Style.FILL);
+
+        paint.setColor(color);
+        paint.setStrokeWidth(strokeWidth * this.scale);
+        paint.setStyle(style);
+        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        paint.setTextSize(12 * this.scale);
+
+        return paint;
+    }
+
+    @Override
+    protected void redraw(Canvas canvas) {
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+        ScaleBarLengthAndValue lengthAndValue = this.calculateScaleBarLengthAndValue();
+        ScaleBarLengthAndValue lengthAndValue2;
+
+        if (this.scaleBarMode == ScaleBarMode.BOTH) {
+            lengthAndValue2 = this.calculateScaleBarLengthAndValue(this.secondaryDistanceUnitAdapter);
+        } else {
+            lengthAndValue2 = new ScaleBarLengthAndValue(0, 0);
+        }
+
+        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBarStroke, scale);
+        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBar, scale);
+
+        String scaleText1 = this.distanceUnitAdapter.getScaleText(lengthAndValue.scaleBarValue);
+        String scaleText2 = this.scaleBarMode == ScaleBarMode.BOTH ? this.secondaryDistanceUnitAdapter.getScaleText(lengthAndValue2.scaleBarValue) : "";
+
+        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleTextStroke, scale);
+        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleText, scale);
+    }
+
+    private void drawScaleBar(Canvas canvas, int scaleBarLength1, int scaleBarLength2, Paint paint, float scale) {
+        int maxScaleBarLength = Math.max(scaleBarLength1, scaleBarLength2);
+
+        switch (scaleBarPosition) {
+            case BOTTOM_CENTER:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale),
+                            Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                } else {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+            case BOTTOM_LEFT:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                } else {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+            case BOTTOM_RIGHT:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                } else {
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+            case TOP_CENTER:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round((canvas.getWidth() - maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round((canvas.getWidth() + maxScaleBarLength) * 0.5f), Math.round(canvas.getHeight() * 0.5f), paint);
+                } else {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+            case TOP_LEFT:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                } else {
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(STROKE_EXTERNAL * scale * 0.5f + scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+            case TOP_RIGHT:
+                if (scaleBarLength2 == 0) {
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                } else {
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - maxScaleBarLength), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength1), Math.round(SCALE_BAR_MARGIN * scale),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength1), Math.round(canvas.getHeight() * 0.5f), paint);
+                    canvas.drawLine(Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength2), Math.round(canvas.getHeight() * 0.5f),
+                            Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale * 0.5f - scaleBarLength2), Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale), paint);
+                }
+                break;
+        }
+    }
+
+    private void drawScaleText(Canvas canvas, String scaleText1, String scaleText2, Paint paint, float scale) {
+        switch (scaleBarPosition) {
+            case BOTTOM_CENTER:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - getTextWidth(this.paintScaleTextStroke, scaleText1)) * 0.5f),
+                            Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+            case BOTTOM_LEFT:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+            case BOTTOM_RIGHT:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                            Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText2)),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+            case TOP_CENTER:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - getTextWidth(this.paintScaleTextStroke, scaleText1)) * 0.5f),
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+            case TOP_LEFT:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+            case TOP_RIGHT:
+                if (scaleText2.length() == 0) {
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                } else {
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                            Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
+                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText2)),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                }
+                break;
+        }
+    }
+
+    private int getTextHeight(Paint paint, String text) {
+        paint.getTextBounds(text, 0, text.length(), rect);
+        return rect.height();
+    }
+
+    private int getTextWidth(Paint paint, String text) {
+        return (int) paint.measureText(text);
+    }
+}
