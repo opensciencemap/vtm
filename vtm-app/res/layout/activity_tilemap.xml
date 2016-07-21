@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:windowActionBarOverlay="true">
+
+    <org.oscim.android.MapView
+        android:id="@+id/mapView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <RelativeLayout
+        android:id="@+id/route_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="25dip"
+        android:background="#dd000000"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/route_bar_distance_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/plane" />
+
+        <TextView
+            android:id="@+id/route_bar_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/route_bar_distance_icon"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/route_bar_route_length_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/route_bar_distance"
+            android:src="@drawable/car" />
+
+        <TextView
+            android:id="@+id/route_bar_route_length"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/route_bar_route_length_icon"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/route_bar_travel_time_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/route_bar_route_length"
+            android:src="@drawable/time" />
+
+        <TextView
+            android:id="@+id/route_bar_travel_time"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/route_bar_travel_time_icon"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/route_bar_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:clickable="true"
+            android:src="@drawable/no" />
+    </RelativeLayout>
+
+    <ToggleButton
+        android:id="@+id/snapToLocationView"
+        android:layout_width="57dp"
+        android:layout_height="72dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="10dip"
+        android:layout_marginRight="10dip"
+        android:textOff=""
+        android:textOn=""
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/mapInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginLeft="70dip"
+        android:layout_marginTop="25dip"
+        android:background="@drawable/info_window"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:maxEms="17"
+        android:onClick="onClick"
+        android:textColor="#404040"
+        android:visibility="invisible" />
+
+    <!-- android:background="@drawable/snap_to_position" -->
+
+
+    <!--
+          <ImageView
+         android:id="@+id/imageView1"
+         android:layout_width="64px"
+         android:layout_height="64px"
+         android:layout_alignParentLeft="true"
+         android:layout_alignTop="@+id/mapInfo"
+         android:src="@drawable/compass_bg" />
+    -->
+
+    <ImageView
+        android:id="@+id/compass"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignBottom="@+id/mapInfo"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="24dp"
+        android:onClick="toggleLocation"
+        android:src="@drawable/compass" />
+
+</RelativeLayout>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:oscim_app="http://app.oscim.org"
+    android:title="@string/menu_preferences">
+
+    <!--    <PreferenceCategory android:title="@string/preferences_map" > -->
+    <!--
+               <CheckBoxPreference
+              android:key="showScaleBar"
+              android:summary="@string/preferences_show_scale_bar_desc"
+              android:title="@string/preferences_show_scale_bar" />
+               <ListPreference
+              android:defaultValue="@string/preferences_scale_bar_unit_default"
+              android:dependency="showScaleBar"
+              android:entries="@array/preferences_scale_bar_unit_values"
+              android:entryValues="@array/preferences_scale_bar_unit_keys"
+              android:key="scaleBarUnit"
+              android:summary="@string/preferences_scale_bar_unit_desc"
+              android:title="@string/preferences_scale_bar_unit" />
+    -->
+
+
+    <ListPreference
+        android:defaultValue="@string/preferences_map_database_default"
+        android:entries="@array/preferences_map_generator_values"
+        android:entryValues="@array/preferences_map_database_keys"
+        android:key="mapDatabase"
+        android:summary="@string/preferences_map_view_mode_desc"
+        android:title="@string/preferences_map_view_mode" />
+
+
+    <!--
+               <ListPreference
+              android:defaultValue="@string/preferences_text_scale_default"
+              android:entries="@array/preferences_text_scale_values"
+              android:entryValues="@array/preferences_text_scale_keys"
+              android:key="textScale"
+              android:summary="@string/preferences_text_scale_desc"
+              android:title="@string/preferences_text_scale" />
+    -->
+    <!--  </PreferenceCategory> -->
+
+    <PreferenceCategory android:title="@string/preferences_theme_title">
+        <ListPreference
+            android:defaultValue="@string/preferences_map_theme_default"
+            android:entries="@array/preferences_map_theme_values"
+            android:entryValues="@array/preferences_map_theme_keys"
+            android:key="theme"
+            android:summary="@string/preferences_theme_summary"
+            android:title="@string/preferences_theme" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="User Interface">
+        <CheckBoxPreference
+            android:title="Distance Touch"
+            android:summary="Show Route between two Points"
+            android:key="distanceTouch" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Cache">
+        <org.oscim.app.preferences.CacheSizePreference
+            android:defaultValue="30"
+            android:key="cacheSize"
+            android:max="50"
+            android:summary="Set tile cache size"
+            android:title="Cache Size"
+            oscim_app:min="1"
+            oscim_app:unitsLeft=""
+            oscim_app:unitsRight="MB" />
+
+        <!-- http://stackoverflow.com/questions/5298370/how-to-add-a-button-to-a-preferencescreen-android?rq=1 -->
+        <Preference
+            android:key="clear_cache"
+            android:summary="Delete all cached tiles"
+            android:title="Clear Cache" />
+    </PreferenceCategory>
+
+    <!--
+      <PreferenceCategory android:title="@string/preferences_general" >
+          <CheckBoxPreference
+              android:key="fullscreen"
+              android:summary="@string/preferences_fullscreen_desc"
+              android:title="@string/preferences_fullscreen" />
+          <CheckBoxPreference
+              android:key="fixOrientation"
+              android:summary="@string/preferences_fix_orientation"
+              android:title="@string/preferences_fix_orientation_desc" />
+          <CheckBoxPreference
+              android:key="wakeLock"
+              android:summary="@string/preferences_wake_lock_desc"
+              android:title="@string/preferences_wake_lock" />
+        <CheckBoxPreference android:title="@string/preferences_cache_persistence" android:summary="@string/preferences_cache_persistence_desc"
+              android:key="cachePersistence" />
+          <de.sfb.pampa.preferences.CacheSizePreference
+              android:title="@string/preferences_cache_size" android:summary="@string/preferences_cache_size_desc" android:key="cacheSize" />
+          <de.sfb.pampa.preferences.MoveSpeedPreference
+              android:title="@string/preferences_move_speed" android:summary="@string/preferences_move_speed_desc" android:key="moveSpeed" />
+      </PreferenceCategory>
+    -->
+
+
+    <!--
+      <PreferenceCategory android:title="@string/preferences_debug" >
+
+             <CheckBoxPreference android:title="@string/preferences_show_fps_counter" android:summary="@string/preferences_show_fps_counter_desc"
+              android:key="showFpsCounter" />
+          <CheckBoxPreference
+              android:key="drawTileFrames"
+              android:summary="@string/preferences_show_tile_frames_desc"
+              android:title="@string/preferences_show_tile_frames" />
+          <CheckBoxPreference
+              android:key="drawUnmatchedWays"
+              android:summary="@string/preferences_show_unmatched_ways"
+              android:title="@string/preferences_show_unmatched_ways" />
+          <CheckBoxPreference
+              android:key="disablePolygons"
+              android:summary="@string/preferences_disable_polygons"
+              android:title="@string/preferences_disable_polygons" />
+          <CheckBoxPreference
+              android:key="debugLabels"
+              android:summary="@string/preferences_debug_labels"
+              android:title="@string/preferences_debug_labels" />
+      </PreferenceCategory>
+    -->
+
+</PreferenceScreen>

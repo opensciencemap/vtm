@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>About this software</title>
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+	</head>
+	<body style="padding: 0.5em;">
+		<p style="text-align: center;"><img src="file:///android_asset/globe2.png" style="width: 72px; height: 72px;" /><br />Version 0.6.0</p>
+		<p> 
+		    <li><a href="http://www.opensciencemap.org">OpenScienceMap</a> is 
+		        distributed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL3</a>. 
+		    Please report any  bugs, problems or feature requests via our 
+		    <a href="https://github.com/opensciencemap/vtm/issues">issue tracker</a></li></p>
+		<p></p>
+		<p></p>    		    
+		
+		<p> <li>Map data for 'OpenScienceMap' source © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors, 
+		 licensed under the Open Data Commons Open Database License (ODbL).</li></p>
+		
+        <p> <li> This software contains fragments of <a href="https://code.google.com/p/mapsforge">mapsforge</a> 
+        library and <a href="http://code.google.com/p/osmdroid">osmdroid</a>.</li></p>
+        
+	</body>
+</html>

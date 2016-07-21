@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <string-array name="preferences_map_database_keys">
+        <item>OPENSCIENCEMAP1</item>
+        <item>OPENSCIENCEMAP2</item>
+        <item>OPENSCIENCEMAP4</item>
+        <item>MAPNIK_VECTOR</item>
+        <item>MAPSFORGE</item>
+        <!-- <item>POSTGIS_READER</item> -->
+    </string-array>
+    <string-array name="preferences_map_generator_values">
+        <item>OpenScienceMap1</item>
+        <item>OpenScienceMap2</item>
+        <item>OpenScienceMap4</item>
+        <item>Mapnik-Vector</item>
+        <item>Mapsforge File</item>
+        <!-- <item>PostGIS</item> -->
+    </string-array>
+
+    <string name="preferences_map_database_default">OSCIMAP_READER</string>
+
+    <string-array name="preferences_map_theme_keys">
+        <item>DEFAULT</item>
+        <item>TRONRENDER</item>
+        <item>OSMARENDER</item>
+        <!--  <item>MAPNIK</item> -->
+    </string-array>
+    <string-array name="preferences_map_theme_values">
+        <item>Default</item>
+        <item>Tubes</item>
+        <item>Osmarender</item>
+        <!-- <item>Mapnik</item> -->
+    </string-array>
+
+    <string name="preferences_map_theme_default">OSMARENDER</string>
+    <string name="preferences_debug">Debug settings</string>
+    <string name="preferences_theme_title">Theme settings</string>
+    <string name="preferences_theme">Theme</string>
+    <string name="preferences_theme_summary">Change the theme of the map</string>
+    <string name="preferences_about">About</string>
+    <string name="preferences_about_summary">Show us!</string>
+    <string name="preferences_general">General settings</string>
+    <string name="preferences_cache_persistence">Cache persistence</string>
+    <string name="preferences_cache_persistence_desc">Keep cached images on exit</string>
+    <string name="preferences_cache_size">External storage</string>
+    <string name="preferences_cache_size_desc">Adjust the size of the cache</string>
+    <string name="preferences_cache_size_value">%.1f MB</string>
+    <string name="preferences_fullscreen">Full screen mode</string>
+    <string name="preferences_fullscreen_desc">Hide the status bar</string>
+    <string name="preferences_fix_orientation">Fix screen orientation</string>
+    <string name="preferences_fix_orientation_desc">Fix screen orientation</string>
+    <string name="preferences_map">Map settings</string>
+    <string name="preferences_map_view_mode">Map source</string>
+    <string name="preferences_map_view_mode_desc">Select map data source</string>
+    <string name="preferences_move_speed">Move speed</string>
+    <string name="preferences_move_speed_desc">Adjust the move speed of the map</string>
+    <string name="preferences_move_speed_value">%d %% move speed</string>
+    <string name="preferences_scale_bar_unit">Scale bar unit</string>
+    <string name="preferences_scale_bar_unit_desc">Select the unit for the map scale bar</string>
+    <string name="preferences_show_fps_counter">Frame rate</string>
+    <string name="preferences_show_fps_counter_desc">Enable frames per second counter</string>
+    <string name="preferences_show_scale_bar">Map scale bar</string>
+    <string name="preferences_show_scale_bar_desc">Show the scale of the map</string>
+    <string name="preferences_show_tile_coordinates">Tile coordinates</string>
+    <string name="preferences_show_tile_coordinates_desc">Show coordinates on tiles</string>
+    <string name="preferences_show_unmatched_ways">Draw unmatched ways</string>
+    <string name="preferences_show_tile_frames">Tile boundaries</string>
+    <string name="preferences_show_tile_frames_desc">Draw tile boundaries</string>
+    <string name="preferences_disable_polygons">Disable Polygon rendering</string>
+    <string name="preferences_debug_labels">Debug Labels</string>
+    <string name="preferences_show_water_tiles_desc">Highlight tiles which have the water flag set</string>
+    <string name="preferences_text_scale">Font size</string>
+    <string name="preferences_text_scale_desc">Select the text size of map labels</string>
+    <string name="preferences_wake_lock">Stay awake</string>
+    <string name="preferences_wake_lock_desc">Stop the screen from dimming</string>
+
+    <!--
+     <string-array name="view_sections">
+        <item>Map</item>
+        <item>Routes</item>
+        <item>Overlays</item>
+        <item>etc</item>
+    </string-array>
+
+    <string-array name="preferences_scale_bar_unit_keys">
+        <item>imperial</item>
+        <item>metric</item>
+    </string-array>
+    <string-array name="preferences_scale_bar_unit_values">
+        <item>Imperial</item>
+        <item>Metric</item>
+    </string-array>
+
+    <string name="preferences_scale_bar_unit_default">metric</string>
+
+    <string-array name="preferences_text_scale_keys">
+        <item>0.7</item>
+        <item>0.85</item>
+        <item>1.0</item>
+        <item>1.3</item>
+        <item>1.6</item>
+    </string-array>
+    <string-array name="preferences_text_scale_values">
+        <item>tiny</item>
+        <item>small</item>
+        <item>normal</item>
+        <item>large</item>
+        <item>huge</item>
+    </string-array>
+
+    <string name="preferences_text_scale_default">1.0</string>
+    -->
+
+</resources>

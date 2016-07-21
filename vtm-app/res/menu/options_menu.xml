@@ -1,0 +1,106 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_position"
+        android:icon="@drawable/ic_menu_mylocation"
+        android:showAsAction="always"
+        android:title="@string/menu_position">
+        <menu>
+            <item
+                android:id="@+id/menu_poi_nearby"
+                android:title="@string/menu_find" />
+            <item
+                android:id="@+id/menu_position_my_location_enable"
+                android:checkable="true"
+                android:title="@string/menu_position_my_location_enable" />
+            <item
+                android:id="@+id/menu_position_follow_location"
+                android:checkable="true"
+                android:title="@string/menu_position_follow_location" />
+            <item
+                android:id="@+id/menu_compass_2d"
+                android:checkable="true"
+                android:title="@string/menu_compass_2d" />
+            <item
+                android:id="@+id/menu_compass_3d"
+                android:checkable="true"
+                android:title="@string/menu_compass_3d" />
+
+            <!--
+                       <item
+                      android:id="@+id/menu_compass_enable"
+                      android:checkable="true"
+                      android:title="@string/menu_compass_enable"/>
+            -->
+            <item
+                android:id="@+id/menu_position_enter_coordinates"
+                android:title="@string/menu_position_enter_coordinates" />
+
+            <!--
+              <item
+              android:id="@+id/menu_position_last_known"
+              android:title="@string/menu_position_last_known"/>
+            -->
+
+            <item
+                android:id="@+id/menu_position_map_center"
+                android:title="@string/menu_position_map_file_center" />
+        </menu>
+    </item>
+    <!--
+      <item
+      android:id="@+id/menu_options"
+      android:icon="@drawable/ic_menu_options"
+      android:showAsAction="always"
+      android:title="@string/menu_options">
+      <menu>
+    -->
+    <!-- android:icon="@drawable/ic_menu_preferences" -->
+    <item
+        android:id="@+id/menu_preferences"
+        android:icon="@drawable/ic_menu_options"
+        android:showAsAction="never"
+        android:title="@string/menu_settings" />
+
+    <!-- android:icon="@drawable/ic_menu_mapmode" -->
+    <!-- android:icon="@drawable/ic_menu_archive" -->
+    <!--
+      <item
+      android:id="@+id/menu_mapfile"
+      android:showAsAction="never"
+      android:title="@string/menu_mapfile"/>
+    -->
+    <!--
+      <item
+      android:id="@+id/menu_info_map_file"
+      android:title="@string/menu_info_map_file"/>
+    -->
+    <!--
+      </menu>
+      </item>
+    -->
+    <item
+        android:id="@+id/menu_info_about"
+        android:icon="@drawable/info"
+        android:title="@string/menu_info_about" />
+    <item
+        android:id="@+id/menu_layers"
+        android:icon="@drawable/ic_layers"
+        android:title="@string/menu_layers">
+        <menu>
+            <item
+                android:id="@+id/menu_layer_naturalearth"
+                android:checkable="true"
+                android:title="@string/menu_layer_naturalearth" />
+            <item
+                android:id="@+id/menu_layer_openstreetmap"
+                android:checkable="true"
+                android:title="@string/menu_layer_openstreetmap" />
+            <item
+                android:id="@+id/menu_layer_grid"
+                android:checkable="true"
+                android:title="@string/menu_layer_grid" />
+        </menu>
+    </item>
+
+</menu>

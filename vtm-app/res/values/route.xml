@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="route_lookup_error">Route search failed</string>
+</resources>
