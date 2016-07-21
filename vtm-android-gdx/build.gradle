@@ -51,30 +51,30 @@ android.applicationVariants.all { variant ->
         return; // Skip debug builds.
     }
 
-    def taskJar = project.tasks.create "jar${name.capitalize()}", Jar
-    taskJar.dependsOn variant.javaCompile
-    taskJar.from variant.javaCompile.destinationDir
-    taskJar.exclude 'android-logger.properties'
-    artifacts.add('archives', taskJar);
+    def jar = project.tasks.create "jar${name.capitalize()}", Jar
+    jar.dependsOn variant.javaCompile
+    jar.from variant.javaCompile.destinationDir
+    jar.exclude 'android-logger.properties'
+    artifacts.add('archives', jar);
 
     file('natives').eachDir() { dir ->
-        def taskNatives = project.tasks.create "natives_${dir.name}_Jar${name.capitalize()}", Jar
-        taskNatives.classifier = "natives-${dir.name}"
-        taskNatives.from(dir.path)
-        artifacts.add('archives', taskNatives);
+        def nativesJar = project.tasks.create "nativesJar${name.capitalize()}-${dir.name}", Jar
+        nativesJar.classifier = "natives-${dir.name}"
+        nativesJar.from(dir.path)
+        artifacts.add('archives', nativesJar);
     }
 
-    def taskFat = project.tasks.create "fatJar${name.capitalize()}", Jar
-    taskFat.classifier = 'jar-with-dependencies'
-    taskFat.dependsOn variant.javaCompile
-    taskFat.from variant.javaCompile.destinationDir
-    taskFat.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    def fatJar = project.tasks.create "fatJar${name.capitalize()}", Jar
+    fatJar.classifier = 'jar-with-dependencies'
+    fatJar.dependsOn variant.javaCompile
+    fatJar.from variant.javaCompile.destinationDir
+    fatJar.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     file('natives').eachDir() { dir ->
-        taskFat.from(dir.path)
-        taskFat.from("${rootProject.projectDir}/vtm-android/natives/${dir.name}")
+        fatJar.from(dir.path)
+        fatJar.from("${rootProject.projectDir}/vtm-android/natives/${dir.name}")
     }
-    taskFat.exclude 'android-logger.properties'
-    artifacts.add('archives', taskFat);
+    fatJar.exclude 'android-logger.properties'
+    artifacts.add('archives', fatJar);
 }
 
 afterEvaluate {

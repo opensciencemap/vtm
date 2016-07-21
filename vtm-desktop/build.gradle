@@ -4,7 +4,9 @@ apply plugin: 'application'
 
 dependencies {
     compile project(':vtm-gdx')
-    compile files('natives')
+    file('natives').eachDir() { dir ->
+        compile files(dir.path)
+    }
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
     compile 'com.kitfox.svg:svg-salamander:1.0'
@@ -16,21 +18,29 @@ sourceSets {
     }
 }
 
-task nativesJar(type: Jar) {
-    classifier = 'natives'
-    from('natives')
+file('natives').eachDir() { dir ->
+    task("nativesJar-${dir.name}", type: Jar) {
+        classifier = "natives-${dir.name}"
+        from(dir.path)
+    }
+
+    artifacts {
+        archives tasks["nativesJar-${dir.name}"]
+    }
 }
 
 task fatJar(type: Jar, dependsOn: classes) {
     classifier = 'jar-with-dependencies'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    from('natives')
+    // Natives come from compile configuration
+    /*file('natives').eachDir() { dir ->
+        fatJar.from(dir.path)
+    }*/
     exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
     with jar
 }
 
 artifacts {
-    archives nativesJar
     archives fatJar
 }
 
