@@ -68,7 +68,8 @@ public class GLViewport extends Viewport {
     }
 
     /**
-     * Set MVP offset in screen pixel coordinates
+     * Set MVP so that coordinates are in screen pixel coordinates with 0,0
+     * being center
      */
     public void useScreenCoordinates(int width, int height, Position position, float xOffset, float yOffset, float scale) {
         float invScale = 1f / scale;
