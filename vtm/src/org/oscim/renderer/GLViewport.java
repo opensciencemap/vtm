@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 Andrey Novikov
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.renderer;
 
 import org.oscim.core.MapPosition;
@@ -42,6 +59,17 @@ public class GLViewport extends Viewport {
         else
             mvp.setTransScale(-mWidth / 2, -mHeight / 2, invScale);
 
+        mvp.multiplyLhs(proj);
+    }
+
+    /**
+     * Set MVP offset in screen pixel coordinates
+     */
+    public void setScreenOffset(boolean center, int xOffset, int yOffset, float scale) {
+        float invScale = 1f / scale;
+        float x = center ? xOffset : -mWidth / 2 + xOffset;
+        float y = center ? yOffset : -mHeight / 2 + yOffset;
+        mvp.setTransScale(x, y, invScale);
         mvp.multiplyLhs(proj);
     }
 
