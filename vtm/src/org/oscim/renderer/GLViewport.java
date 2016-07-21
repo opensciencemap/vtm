@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -22,6 +23,10 @@ import org.oscim.map.Map;
 import org.oscim.map.Viewport;
 
 public class GLViewport extends Viewport {
+
+    public enum Position {
+        TOP_LEFT, TOP_CENTER, TOP_RIGHT, CENTER_LEFT, CENTER, CENTER_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+    }
 
     /**
      * Do not modify!
@@ -65,10 +70,48 @@ public class GLViewport extends Viewport {
     /**
      * Set MVP offset in screen pixel coordinates
      */
-    public void setScreenOffset(boolean center, int xOffset, int yOffset, float scale) {
+    public void useScreenCoordinates(int width, int height, Position position, float xOffset, float yOffset, float scale) {
         float invScale = 1f / scale;
-        float x = center ? xOffset : -mWidth / 2 + xOffset;
-        float y = center ? yOffset : -mHeight / 2 + yOffset;
+        float x = 0;
+        float y = 0;
+        switch (position) {
+            case TOP_LEFT:
+                x = -mWidth * 0.5f + xOffset;
+                y = -mHeight * 0.5f + yOffset;
+                break;
+            case TOP_CENTER:
+                x = -width * 0.5f + xOffset;
+                y = -mHeight * 0.5f + yOffset;
+                break;
+            case TOP_RIGHT:
+                x = mWidth * 0.5f - width - xOffset;
+                y = -mHeight * 0.5f + yOffset;
+                break;
+            case CENTER_LEFT:
+                x = -mWidth * 0.5f + xOffset;
+                y = -height * 0.5f + yOffset;
+                break;
+            case CENTER:
+                x = -width * 0.5f + xOffset;
+                y = -height * 0.5f + yOffset;
+                break;
+            case CENTER_RIGHT:
+                x = mWidth * 0.5f - width - xOffset;
+                y = -height * 0.5f + yOffset;
+                break;
+            case BOTTOM_LEFT:
+                x = -mWidth * 0.5f + xOffset;
+                y = mHeight * 0.5f - height - yOffset;
+                break;
+            case BOTTOM_CENTER:
+                x = -width * 0.5f + xOffset;
+                y = mHeight * 0.5f - height - yOffset;
+                break;
+            case BOTTOM_RIGHT:
+                x = mWidth * 0.5f - width - xOffset;
+                y = mHeight * 0.5f - height - yOffset;
+                break;
+        }
         mvp.setTransScale(x, y, invScale);
         mvp.multiplyLhs(proj);
     }

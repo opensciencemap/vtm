@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -32,26 +33,26 @@ public class BitmapRenderer extends BucketRenderer {
     private int mHeight;
     private boolean initialized;
     private boolean mUpdateBitmap;
-    private boolean center;
-    private int xOffset;
-    private int yOffset;
+    private GLViewport.Position position = GLViewport.Position.TOP_LEFT;
+    private float xOffset, yOffset;
 
     /**
-     * @param bitmap    with dimension being power of two
-     * @param srcWidth  TODO width used
-     * @param srcHeight TODO height used
+     * @param bitmap with dimension being power of two
+     * @param width  width used
+     * @param height height used
      */
-    public synchronized void setBitmap(Bitmap bitmap,
-                                       int srcWidth, int srcHeight,
-                                       int targetWidth, int targetHeight) {
-        mWidth = targetWidth;
-        mHeight = targetHeight;
+    public synchronized void setBitmap(Bitmap bitmap, int width, int height) {
         mBitmap = bitmap;
+        mWidth = width;
+        mHeight = height;
         initialized = false;
     }
 
-    public synchronized void setDrawOffset(boolean center, int xOffset, int yOffset) {
-        this.center = center;
+    public synchronized void setPosition(GLViewport.Position position) {
+        this.position = position;
+    }
+
+    public synchronized void setOffset(float xOffset, float yOffset) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
     }
@@ -90,7 +91,7 @@ public class BitmapRenderer extends BucketRenderer {
 
     @Override
     public synchronized void render(GLViewport v) {
-        v.setScreenOffset(center, xOffset, yOffset, 8);
+        v.useScreenCoordinates(mWidth, mHeight, position, xOffset, yOffset, 8);
         BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
     }
 }

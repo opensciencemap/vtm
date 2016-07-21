@@ -1,8 +1,7 @@
-package org.oscim.android;
-
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,6 +14,7 @@ package org.oscim.android;
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package org.oscim.android;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -95,11 +95,7 @@ public class MapScaleBar extends Layer implements UpdateListener {
         mRedrawNeeded = true;
         mRenderer = mBitmapLayer = new BitmapRenderer();
         mLayerBitmap = new AndroidBitmap(mBitmap);
-        mBitmapLayer.setBitmap(mLayerBitmap,
-                BITMAP_WIDTH,
-                BITMAP_HEIGHT,
-                (int) (BITMAP_WIDTH * 1.2f),
-                (int) (BITMAP_HEIGHT * 1.2f));
+        mBitmapLayer.setBitmap(mLayerBitmap, BITMAP_WIDTH, BITMAP_HEIGHT);
     }
 
     @Override
