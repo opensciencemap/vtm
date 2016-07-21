@@ -4,6 +4,7 @@ if (project.hasProperty("android")) { // Android libraries
     task sourcesJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.srcDirs
+        exclude 'android-logger.properties'
     }
 
     task javadoc(type: Javadoc) {

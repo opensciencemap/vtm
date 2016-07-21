@@ -54,6 +54,7 @@ android.applicationVariants.all { variant ->
     def taskJar = project.tasks.create "jar${name.capitalize()}", Jar
     taskJar.dependsOn variant.javaCompile
     taskJar.from variant.javaCompile.destinationDir
+    taskJar.exclude 'android-logger.properties'
     artifacts.add('archives', taskJar);
 
     file('natives').eachDir() { dir ->
@@ -72,6 +73,7 @@ android.applicationVariants.all { variant ->
         taskFat.from(dir.path)
         taskFat.from("${rootProject.projectDir}/vtm-android/natives/${dir.name}")
     }
+    taskFat.exclude 'android-logger.properties'
     artifacts.add('archives', taskFat);
 }
 
