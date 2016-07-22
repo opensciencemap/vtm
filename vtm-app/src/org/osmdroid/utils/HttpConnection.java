@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * connection.doGet("http://www.google.com");
  * InputStream stream = connection.getStream();
  * if (stream != null) {
- * 	//use this stream, for buffer reading, or XML SAX parsing, or whatever...
+ *     //use this stream, for buffer reading, or XML SAX parsing, or whatever...
  * }
  * connection.close();</pre>
  */

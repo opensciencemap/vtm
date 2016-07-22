@@ -27,7 +27,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            resources.srcDirs = ['src', 'assets']
+            resources.srcDirs = ['src']
             aidl.srcDirs = ['src', 'assets']
             renderscript.srcDirs = ['src', 'assets']
             res.srcDirs = ['res']
