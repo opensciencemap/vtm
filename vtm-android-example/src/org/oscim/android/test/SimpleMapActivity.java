@@ -27,9 +27,9 @@ import org.oscim.android.scalebar.MetricUnitAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
+import org.oscim.layers.GroupLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.map.Layers;
 import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.theme.IRenderTheme;
@@ -43,9 +43,10 @@ public class SimpleMapActivity extends BaseMapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Layers layers = mMap.layers();
-        layers.add(new BuildingLayer(mMap, mBaseLayer));
-        layers.add(new LabelLayer(mMap, mBaseLayer));
+        GroupLayer groupLayer = new GroupLayer(mMap);
+        groupLayer.layers.add(new BuildingLayer(mMap, mBaseLayer));
+        groupLayer.layers.add(new LabelLayer(mMap, mBaseLayer));
+        mMap.layers().add(groupLayer);
 
         mapScaleBar = new DefaultMapScaleBar(mMap);
         mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
@@ -57,7 +58,7 @@ public class SimpleMapActivity extends BaseMapActivity {
         BitmapRenderer renderer = (BitmapRenderer) mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
         renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
-        layers.add(mapScaleBarLayer);
+        mMap.layers().add(mapScaleBarLayer);
 
         mMap.setTheme(VtmThemes.DEFAULT);
     }

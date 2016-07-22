@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +20,7 @@ package org.oscim.map;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
+import org.oscim.layers.GroupLayer;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map.InputListener;
 import org.oscim.map.Map.UpdateListener;
@@ -38,7 +40,7 @@ public final class Layers extends AbstractList<Layer> {
 
     Layers(Map map) {
         mMap = map;
-        mLayerList = new CopyOnWriteArrayList<Layer>();
+        mLayerList = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -56,11 +58,22 @@ public final class Layers extends AbstractList<Layer> {
         if (mLayerList.contains(layer))
             throw new IllegalArgumentException("layer added twice");
 
+        // bind added layer
         if (layer instanceof UpdateListener)
             mMap.events.bind((UpdateListener) layer);
-
         if (layer instanceof InputListener)
             mMap.input.bind((InputListener) layer);
+
+        // bind added group layer
+        if (layer instanceof GroupLayer) {
+            GroupLayer groupLayer = (GroupLayer) layer;
+            for (Layer gl : groupLayer.layers) {
+                if (gl instanceof UpdateListener)
+                    mMap.events.bind((UpdateListener) gl);
+                if (gl instanceof InputListener)
+                    mMap.input.bind((InputListener) gl);
+            }
+        }
 
         mLayerList.add(index, layer);
         mDirtyLayers = true;
@@ -72,10 +85,22 @@ public final class Layers extends AbstractList<Layer> {
 
         Layer remove = mLayerList.remove(index);
 
+        // unbind removed layer
         if (remove instanceof UpdateListener)
             mMap.events.unbind((UpdateListener) remove);
         if (remove instanceof InputListener)
             mMap.input.unbind((InputListener) remove);
+
+        // unbind removed group layer
+        if (remove instanceof GroupLayer) {
+            GroupLayer groupLayer = (GroupLayer) remove;
+            for (Layer gl : groupLayer.layers) {
+                if (gl instanceof UpdateListener)
+                    mMap.events.unbind((UpdateListener) gl);
+                if (gl instanceof InputListener)
+                    mMap.input.unbind((InputListener) gl);
+            }
+        }
 
         return remove;
     }
@@ -93,6 +118,17 @@ public final class Layers extends AbstractList<Layer> {
             mMap.events.unbind((UpdateListener) remove);
         if (remove instanceof InputListener)
             mMap.input.unbind((InputListener) remove);
+
+        // unbind replaced group layer
+        if (remove instanceof GroupLayer) {
+            GroupLayer groupLayer = (GroupLayer) remove;
+            for (Layer gl : groupLayer.layers) {
+                if (gl instanceof UpdateListener)
+                    mMap.events.unbind((UpdateListener) gl);
+                if (gl instanceof InputListener)
+                    mMap.input.unbind((InputListener) gl);
+            }
+        }
 
         return remove;
     }
@@ -121,10 +157,20 @@ public final class Layers extends AbstractList<Layer> {
         if (mDirtyLayers)
             updateLayers();
 
-        for (Layer o : mLayers)
+        for (Layer o : mLayers) {
             if (o instanceof GestureListener)
                 if (((GestureListener) o).onGesture(g, e))
                     return true;
+
+            if (o instanceof GroupLayer) {
+                GroupLayer groupLayer = (GroupLayer) o;
+                for (Layer gl : groupLayer.layers) {
+                    if (gl instanceof GestureListener)
+                        if (((GestureListener) gl).onGesture(g, e))
+                            return true;
+                }
+            }
+        }
 
         return false;
     }
@@ -139,6 +185,14 @@ public final class Layers extends AbstractList<Layer> {
             if (o.getRenderer() != null)
                 numRenderLayers++;
 
+            if (o instanceof GroupLayer) {
+                GroupLayer groupLayer = (GroupLayer) o;
+                for (Layer gl : groupLayer.layers) {
+                    if (gl.getRenderer() != null)
+                        numRenderLayers++;
+                }
+            }
+
             mLayers[n - i - 1] = o;
         }
 
@@ -149,6 +203,15 @@ public final class Layers extends AbstractList<Layer> {
             LayerRenderer l = o.getRenderer();
             if (l != null)
                 mLayerRenderer[cnt++] = l;
+
+            if (o instanceof GroupLayer) {
+                GroupLayer groupLayer = (GroupLayer) o;
+                for (Layer gl : groupLayer.layers) {
+                    l = gl.getRenderer();
+                    if (l != null)
+                        mLayerRenderer[cnt++] = l;
+                }
+            }
         }
 
         mDirtyLayers = false;
