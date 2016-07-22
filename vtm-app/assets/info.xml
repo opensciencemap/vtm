@@ -11,15 +11,15 @@
 		    <li><a href="http://www.opensciencemap.org">OpenScienceMap</a> is 
 		        distributed under the <a href="http://www.gnu.org/licenses/lgpl.html">LGPL3</a>. 
 		    Please report any  bugs, problems or feature requests via our 
-		    <a href="https://github.com/opensciencemap/vtm/issues">issue tracker</a></li></p>
+		    <a href="https://github.com/mapsforge/vtm/issues">issue tracker</a></li></p>
 		<p></p>
 		<p></p>    		    
 		
 		<p> <li>Map data for 'OpenScienceMap' source © <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors, 
 		 licensed under the Open Data Commons Open Database License (ODbL).</li></p>
 		
-        <p> <li> This software contains fragments of <a href="https://code.google.com/p/mapsforge">mapsforge</a> 
-        library and <a href="http://code.google.com/p/osmdroid">osmdroid</a>.</li></p>
+        <p> <li> This software contains fragments of <a href="https://github.com/mapsforge/mapsforge">mapsforge</a>
+        library and <a href="https://github.com/osmdroid/osmdroid">osmdroid</a>.</li></p>
         
 	</body>
 </html>
