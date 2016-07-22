@@ -53,9 +53,13 @@ public class DefaultMapScaleBar extends MapScaleBar {
     private final Rect rect = new Rect();
 
     public DefaultMapScaleBar(Map map) {
-        super(map, (int) (BITMAP_WIDTH * CanvasAdapter.dpi / 160), (int) (BITMAP_HEIGHT * CanvasAdapter.dpi / 160));
+        this(map, CanvasAdapter.dpi / 160);
+    }
 
-        this.scale = CanvasAdapter.dpi / 160;
+    public DefaultMapScaleBar(Map map, float scale) {
+        super(map, (int) (BITMAP_WIDTH * scale), (int) (BITMAP_HEIGHT * scale));
+
+        this.scale = scale;
         this.scaleBarMode = ScaleBarMode.BOTH;
         this.secondaryDistanceUnitAdapter = ImperialUnitAdapter.INSTANCE;
 
@@ -137,14 +141,14 @@ public class DefaultMapScaleBar extends MapScaleBar {
             lengthAndValue2 = new ScaleBarLengthAndValue(0, 0);
         }
 
-        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBarStroke, scale);
-        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBar, scale);
+        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBarStroke, this.scale);
+        drawScaleBar(canvas, lengthAndValue.scaleBarLength, lengthAndValue2.scaleBarLength, this.paintScaleBar, this.scale);
 
         String scaleText1 = this.distanceUnitAdapter.getScaleText(lengthAndValue.scaleBarValue);
         String scaleText2 = this.scaleBarMode == ScaleBarMode.BOTH ? this.secondaryDistanceUnitAdapter.getScaleText(lengthAndValue2.scaleBarValue) : "";
 
-        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleTextStroke, scale);
-        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleText, scale);
+        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleTextStroke, this.scale);
+        drawScaleText(canvas, scaleText1, scaleText2, this.paintScaleText, this.scale);
     }
 
     private void drawScaleBar(Canvas canvas, int scaleBarLength1, int scaleBarLength2, Paint paint, float scale) {
