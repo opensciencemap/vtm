@@ -540,7 +540,7 @@
 
         <!-- building -->
         <m k="building">
-            <m zoom-max="16" zoom-min="14">
+            <m zoom-min="14">
                 <m closed="yes">
                     <area fade="14" use="building" />
                 </m>
