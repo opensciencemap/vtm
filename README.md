@@ -8,7 +8,7 @@ VTM was developed within the [OpenScienceMap](http://opensciencemap.org) project
 
 **This fork is for continue VTM development. And make it compatible with latest [Mapsforge](https://github.com/mapsforge/mapsforge).**
 
-See the [integration guide](docs/Integration.md). If you have any questions or problems, don't hesitate to ask our public [mailing list](https://groups.google.com/group/mapsforge-dev) for help. You can also report bugs and improvement requests via our [issue tracker](https://github.com/mapsforge/vtm/issues). And read through [how to contribute](.github/CONTRIBUTING.md) guidelines.
+See the [integration guide](docs/Integration.md) and [changelog](docs/Changelog.md). If you have any questions or problems, don't hesitate to ask our public [mailing list](https://groups.google.com/group/mapsforge-dev) for help. You can also report bugs and improvement requests via our [issue tracker](https://github.com/mapsforge/vtm/issues). And read through [how to contribute](.github/CONTRIBUTING.md) guidelines.
 
 ## Features
 - Java map library
