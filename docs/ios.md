@@ -1,13 +1,13 @@
 ### iOS implementation
 
 RoboVm needs the native libs / frameworks to create a build.
-Copy those files from `vtm-ios-0.6.0-SNAPSHOT-natives.jar` into a temp folder.
+Copy those files from `vtm-ios-[CURRENT-VERSION]-natives.jar` into a temp folder.
 
 Create a copy task into your **build.gradle**.
 
 ```groovy
 task copyFrameWorks(type: Copy) {
-    from(zipTree("./libs/vtm-ios-0.6.0-SNAPSHOT-natives.jar"))
+    from(zipTree("./libs/vtm-ios-[CURRENT-VERSION]-natives.jar"))
     into("${buildDir}/native")
 }
 
