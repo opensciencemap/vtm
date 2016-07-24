@@ -1,4 +1,4 @@
-### Implementation example
+### iOS implementation
 
 RoboVm needs the native libs / frameworks to create a build.
 Copy those files from `vtm-ios-0.6.0-SNAPSHOT-natives.jar` into a temp folder.

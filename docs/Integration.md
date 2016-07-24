@@ -21,6 +21,10 @@ compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
 compile 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
+### iOS
+
+Detailed iOS instructions can be found [here](ios.md).
+
 ### Java
 ```groovy
 compile 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
