@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
+    compile project(':vtm-android')
     compile project(':vtm-gdx')
     compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    compile 'com.caverock:androidsvg:1.2.2-beta-1'
     compile 'com.noveogroup.android:android-logger:1.3.6'
 }
 
