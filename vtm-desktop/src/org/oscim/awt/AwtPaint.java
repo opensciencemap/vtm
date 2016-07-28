@@ -92,14 +92,12 @@ public class AwtPaint implements Paint {
     }
 
     static final Font defaultFont;
+    private static final Map<Attribute, Object> textAttributes = new HashMap<>();
 
     static {
-        Map<Attribute, Object> textAttributes = new HashMap<>();
         textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-        textAttributes.put(TextAttribute.FAMILY, "Arial");
-        textAttributes.put(TextAttribute.SIZE, 14);
 
-        defaultFont = Font.getFont(textAttributes);
+        defaultFont = new Font("Arial", Font.PLAIN, 14).deriveFont(textAttributes);
     }
 
     Color color = new Color(0.1f, 0.1f, 0.1f, 1);
@@ -171,9 +169,7 @@ public class AwtPaint implements Paint {
     public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
         this.fontName = getFontName(fontFamily);
         this.fontStyle = getFontStyle(fontStyle);
-        Map<Attribute, Object> textAttributes = new HashMap<>();
-        textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(textAttributes);
+        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(this.textAttributes);
     }
 
     @Override
