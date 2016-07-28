@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,21 +20,27 @@ import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Paint;
 import org.robovm.apple.coregraphics.CGBitmapContext;
 import org.robovm.apple.coregraphics.CGRect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * iOS specific implementation of {@link Canvas}.
  */
 public class IosCanvas implements Canvas {
 
-    static final Logger log = LoggerFactory.getLogger(IosCanvas.class);
-
     CGBitmapContext cgBitmapContext;
 
     @Override
     public void setBitmap(Bitmap bitmap) {
         cgBitmapContext = ((IosBitmap) bitmap).cgBitmapContext;
+    }
+
+    @Override
+    public void drawText(String string, float x, float y, Paint paint) {
+
+        //flip Y-axis
+        y = this.cgBitmapContext.getHeight() - y;
+
+        IosPaint iosPaint = (IosPaint) paint;
+        iosPaint.drawLine(this.cgBitmapContext, string, x, y);
     }
 
     @Override
@@ -58,5 +65,25 @@ public class IosCanvas implements Canvas {
         this.cgBitmapContext.drawImage(new CGRect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
                 ((IosBitmap) bitmap).cgBitmapContext.toImage());
         this.cgBitmapContext.restoreGState();
+    }
+
+    @Override
+    public void drawLine(int x1, int y1, int x2, int y2, Paint paint) {
+        // TODO
+    }
+
+    @Override
+    public void fillColor(int color) {
+        // TODO
+    }
+
+    @Override
+    public int getHeight() {
+        return this.cgBitmapContext != null ? (int) this.cgBitmapContext.getHeight() : 0;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.cgBitmapContext != null ? (int) this.cgBitmapContext.getWidth() : 0;
     }
 }

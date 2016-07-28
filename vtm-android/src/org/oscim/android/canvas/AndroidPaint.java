@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,21 +18,23 @@
 package org.oscim.android.canvas;
 
 import android.graphics.Paint.FontMetrics;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 
 import org.oscim.backend.canvas.Paint;
 
 class AndroidPaint implements Paint {
+
     private static int getStyle(org.oscim.backend.canvas.Paint.FontStyle fontStyle) {
         switch (fontStyle) {
             case BOLD:
-                return 1;
+                return Typeface.BOLD;
             case BOLD_ITALIC:
-                return 3;
+                return Typeface.BOLD_ITALIC;
             case ITALIC:
-                return 2;
+                return Typeface.ITALIC;
             case NORMAL:
-                return 0;
+                return Typeface.NORMAL;
         }
 
         throw new IllegalArgumentException("unknown font style: " + fontStyle);
@@ -56,6 +59,8 @@ class AndroidPaint implements Paint {
 
     final android.graphics.Paint mPaint;
 
+    private final Rect rect = new Rect();
+
     AndroidPaint() {
         mPaint = new android.graphics.Paint(
                 android.graphics.Paint.ANTI_ALIAS_FLAG);
@@ -73,9 +78,14 @@ class AndroidPaint implements Paint {
 
     @Override
     public void setStrokeCap(Cap cap) {
-        android.graphics.Paint.Cap androidCap = android.graphics.Paint.Cap
-                .valueOf(cap.name());
+        android.graphics.Paint.Cap androidCap = android.graphics.Paint.Cap.valueOf(cap.name());
         mPaint.setStrokeCap(androidCap);
+    }
+
+    @Override
+    public void setStrokeJoin(Join join) {
+        android.graphics.Paint.Join androidJoin = android.graphics.Paint.Join.valueOf(join.name());
+        mPaint.setStrokeJoin(androidJoin);
     }
 
     @Override
@@ -90,6 +100,7 @@ class AndroidPaint implements Paint {
 
     @Override
     public void setTextAlign(Align align) {
+        // Align text in text layer
         //mPaint.setTextAlign(android.graphics.Paint.Align.valueOf(align.name()));
     }
 
@@ -121,5 +132,16 @@ class AndroidPaint implements Paint {
         FontMetrics fm = mPaint.getFontMetrics();
         // //fontDescent = (float) Math.ceil(Math.abs(fm.descent));
         return Math.abs(fm.bottom);
+    }
+
+    @Override
+    public float getTextHeight(String text) {
+        mPaint.getTextBounds(text, 0, text.length(), rect);
+        return rect.height();
+    }
+
+    @Override
+    public float getTextWidth(String text) {
+        return measureText(text);
     }
 }

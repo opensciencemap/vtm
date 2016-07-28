@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,21 +20,30 @@ package org.oscim.awt;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
+import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint;
 
 import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 public class AwtCanvas implements Canvas {
 
-    Graphics2D canvas;
+    private static final java.awt.Color TRANSPARENT = new java.awt.Color(0, 0, 0, 0);
+
+    private BufferedImage bitmap;
+    public Graphics2D canvas;
 
     public AwtCanvas() {
+    }
 
+    public AwtCanvas(BufferedImage bitmap) {
+        this.bitmap = bitmap;
     }
 
     @Override
@@ -41,25 +51,50 @@ public class AwtCanvas implements Canvas {
         if (canvas != null)
             canvas.dispose();
 
-        AwtBitmap awtBitamp = (AwtBitmap) bitmap;
+        AwtBitmap awtBitmap = (AwtBitmap) bitmap;
 
-        canvas = awtBitamp.bitmap.createGraphics();
+        this.bitmap = awtBitmap.bitmap;
+        canvas = awtBitmap.bitmap.createGraphics();
 
         canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0));
         canvas.fillRect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
         canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
-        //canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-        //                        RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        canvas.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
+        canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        canvas.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        canvas.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        canvas.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        canvas.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     }
 
     private final AffineTransform tx = new AffineTransform();
+
+    @Override
+    public void drawText(String text, float x, float y, Paint paint) {
+
+        AwtPaint awtPaint = (AwtPaint) paint;
+
+        if (awtPaint.stroke == null) {
+            canvas.setColor(awtPaint.color);
+            canvas.setFont(awtPaint.font);
+            canvas.drawString(text, x, y);
+        } else {
+            canvas.setColor(awtPaint.color);
+            canvas.setStroke(awtPaint.stroke);
+
+            TextLayout tl = new TextLayout(text, awtPaint.font,
+                    canvas.getFontRenderContext());
+            tx.setToIdentity();
+            tx.translate(x, y);
+
+            Shape s = tl.getOutline(tx);
+
+            canvas.draw(s);
+            canvas.setColor(awtPaint.color);
+            canvas.fill(s);
+        }
+    }
 
     @Override
     public void drawText(String text, float x, float y, Paint fill, Paint stroke) {
@@ -69,7 +104,7 @@ public class AwtCanvas implements Canvas {
         if (stroke == null) {
             canvas.setColor(fillPaint.color);
             canvas.setFont(fillPaint.font);
-            canvas.drawString(text, x + AwtPaint.TEXT_OFFSET, y);
+            canvas.drawString(text, x, y);
         } else {
             AwtPaint strokePaint = (AwtPaint) stroke;
 
@@ -91,6 +126,35 @@ public class AwtCanvas implements Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
-        throw new UnknownError("not implemented");
+        this.canvas.drawImage(((AwtBitmap) bitmap).bitmap, (int) x, (int) y, null);
+    }
+
+    @Override
+    public void drawLine(int x1, int y1, int x2, int y2, Paint paint) {
+        AwtPaint awtPaint = (AwtPaint) paint;
+        this.canvas.setColor(awtPaint.color);
+        if (awtPaint.stroke != null)
+            this.canvas.setStroke(awtPaint.stroke);
+        this.canvas.drawLine(x1, y1, x2, y2);
+    }
+
+    @Override
+    public void fillColor(int color) {
+        java.awt.Color awtColor = color == Color.TRANSPARENT ? TRANSPARENT : new java.awt.Color(color);
+        Composite originalComposite = this.canvas.getComposite();
+        this.canvas.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
+        this.canvas.setColor(awtColor);
+        this.canvas.fillRect(0, 0, getWidth(), getHeight());
+        this.canvas.setComposite(originalComposite);
+    }
+
+    @Override
+    public int getHeight() {
+        return this.bitmap != null ? this.bitmap.getHeight() : 0;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.bitmap != null ? this.bitmap.getWidth() : 0;
     }
 }

@@ -9,6 +9,7 @@
 - Group layer implementation [#99](https://github.com/mapsforge/vtm/issues/99)
 - Map scale bar new Android implementation [#88](https://github.com/mapsforge/vtm/issues/88)
 - Render themes area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
+- Graphics API platform enhancements [#92](https://github.com/mapsforge/vtm/issues/92)
 - vtm-jts create module [#53](https://github.com/mapsforge/vtm/issues/53)
 - Internal render themes various enhancements
 - Revive VTM library

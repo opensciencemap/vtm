@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.backend.canvas;
 
 /**
@@ -24,29 +24,29 @@ public interface Canvas {
 
     /**
      * Sets the backing {@link Bitmap}.
-     *
-     * @param bitmap the new bitmap
      */
     void setBitmap(Bitmap bitmap);
 
     /**
      * Draw text to Canvas.
-     *
-     * @param string the String
-     * @param x
-     * @param y
-     * @param stroke the stroke
-     * @param
+     */
+    void drawText(String string, float x, float y, Paint paint);
+
+    /**
+     * Draw text to Canvas.
      */
     void drawText(String string, float x, float y, Paint fill, Paint stroke);
 
     /**
      * Draw Bitmap to Canvas.
-     *
-     * @param bitmap the Bitmap
-     * @param x
-     * @param y
      */
     void drawBitmap(Bitmap bitmap, float x, float y);
 
+    void drawLine(int x1, int y1, int x2, int y2, Paint paint);
+
+    void fillColor(int color);
+
+    int getHeight();
+
+    int getWidth();
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,6 +20,7 @@ import org.robovm.apple.coregraphics.CGAffineTransform;
 import org.robovm.apple.coregraphics.CGBitmapContext;
 import org.robovm.apple.coregraphics.CGBlendMode;
 import org.robovm.apple.coregraphics.CGLineCap;
+import org.robovm.apple.coregraphics.CGLineJoin;
 import org.robovm.apple.coretext.CTFont;
 import org.robovm.apple.coretext.CTLine;
 import org.robovm.apple.foundation.NSAttributedString;
@@ -26,8 +28,6 @@ import org.robovm.apple.uikit.NSAttributedStringAttributes;
 import org.robovm.apple.uikit.UIColor;
 import org.robovm.apple.uikit.UIFont;
 import org.robovm.apple.uikit.UIFontWeight;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
@@ -35,7 +35,30 @@ import java.util.HashMap;
  * iOS specific implementation of {@link Paint}.
  */
 public class IosPaint implements Paint {
-    private static final Logger log = LoggerFactory.getLogger(IosPaint.class);
+
+    private static CGLineCap getLineCap(Cap cap) {
+        switch (cap) {
+            case BUTT:
+                return CGLineCap.Butt;
+            case ROUND:
+                return CGLineCap.Round;
+            case SQUARE:
+                return CGLineCap.Square;
+        }
+        return CGLineCap.Butt;
+    }
+
+    private static CGLineJoin getLineJoin(Join join) {
+        switch (join) {
+            case MITER:
+                return CGLineJoin.Miter;
+            case ROUND:
+                return CGLineJoin.Round;
+            case BEVEL:
+                return CGLineJoin.Bevel;
+        }
+        return CGLineJoin.Miter;
+    }
 
     private static final String DEFAULT_FONT_NAME = UIFont.getSystemFont(1, UIFontWeight.Semibold).getFontDescriptor().getPostscriptName();
     private static final String DEFAULT_FONT_NAME_BOLD = UIFont.getSystemFont(1, UIFontWeight.Bold).getFontDescriptor().getPostscriptName();
@@ -43,6 +66,7 @@ public class IosPaint implements Paint {
 
     private final NSAttributedStringAttributes attribs = new NSAttributedStringAttributes();
     private CGLineCap cap = CGLineCap.Butt;
+    private CGLineJoin join = CGLineJoin.Miter;
     private Style style;
     private float textSize;
     private FontFamily fontFamily;
@@ -95,6 +119,10 @@ public class IosPaint implements Paint {
         this.cap = getLineCap(cap);
     }
 
+    @Override
+    public void setStrokeJoin(Join join) {
+        this.join = getLineJoin(join);
+    }
 
     @Override
     public void setStrokeWidth(float width) {
@@ -110,7 +138,8 @@ public class IosPaint implements Paint {
 
     @Override
     public void setTextAlign(Align align) {
-// TODO: set Align
+        // Align text in text layer
+        //this.align = align;
     }
 
     @Override
@@ -306,15 +335,14 @@ public class IosPaint implements Paint {
         return descent;
     }
 
-    private CGLineCap getLineCap(Cap cap) {
-        switch (cap) {
-            case BUTT:
-                return CGLineCap.Butt;
-            case ROUND:
-                return CGLineCap.Round;
-            case SQUARE:
-                return CGLineCap.Square;
-        }
-        return CGLineCap.Butt;
+    @Override
+    public float getTextHeight(String text) {
+        // TODO
+        return 0;
+    }
+
+    @Override
+    public float getTextWidth(String text) {
+        return measureText(text);
     }
 }

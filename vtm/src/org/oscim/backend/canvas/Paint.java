@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -22,24 +23,28 @@ package org.oscim.backend.canvas;
  */
 public interface Paint {
 
-    public static enum Align {
-        CENTER, LEFT, RIGHT;
+    enum Align {
+        CENTER, LEFT, RIGHT
     }
 
-    public enum Cap {
-        BUTT, ROUND, SQUARE;
+    enum Cap {
+        BUTT, ROUND, SQUARE
     }
 
-    public enum Style {
+    enum Join {
+        MITER, ROUND, BEVEL
+    }
+
+    enum Style {
         FILL, STROKE
     }
 
-    public enum FontFamily {
-        DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF;
+    enum FontFamily {
+        DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF
     }
 
-    public enum FontStyle {
-        BOLD, BOLD_ITALIC, ITALIC, NORMAL;
+    enum FontStyle {
+        BOLD, BOLD_ITALIC, ITALIC, NORMAL
     }
 
     int getColor();
@@ -47,6 +52,8 @@ public interface Paint {
     void setColor(int color);
 
     void setStrokeCap(Cap cap);
+
+    void setStrokeJoin(Join join);
 
     void setStrokeWidth(float width);
 
@@ -63,4 +70,8 @@ public interface Paint {
     float getFontHeight();
 
     float getFontDescent();
+
+    float getTextHeight(String text);
+
+    float getTextWidth(String text);
 }

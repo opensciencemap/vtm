@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -26,7 +27,6 @@ public class GwtPaint implements Paint {
     boolean stroke;
 
     float strokeWidth;
-    Align mAlign;
 
     float fontSize = 12;
 
@@ -35,8 +35,6 @@ public class GwtPaint implements Paint {
 
     //String font = "12px sans-serif";
     String font = "13px Helvetica";
-
-    //private int cap;
 
     @Override
     public int getColor() {
@@ -59,6 +57,11 @@ public class GwtPaint implements Paint {
     }
 
     @Override
+    public void setStrokeJoin(Join join) {
+        stroke = true;
+    }
+
+    @Override
     public void setStrokeWidth(float width) {
         stroke = true;
         strokeWidth = width;
@@ -66,11 +69,13 @@ public class GwtPaint implements Paint {
 
     @Override
     public void setStyle(Style style) {
+        // TODO
     }
 
     @Override
     public void setTextAlign(Align align) {
-        mAlign = align;
+        // Align text in text layer
+        //this.align = align;
     }
 
     @Override
@@ -117,5 +122,16 @@ public class GwtPaint implements Paint {
 
         this.font = sb.toString();
 
+    }
+
+    @Override
+    public float getTextHeight(String text) {
+        // TODO
+        return 0;
+    }
+
+    @Override
+    public float getTextWidth(String text) {
+        return measureText(text);
     }
 }

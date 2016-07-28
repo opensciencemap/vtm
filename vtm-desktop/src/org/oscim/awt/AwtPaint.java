@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -23,15 +24,15 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.font.TextAttribute;
+import java.awt.image.BufferedImage;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AwtPaint implements Paint {
-
-    final static float TEXT_OFFSET = 2;
 
     private static int getCap(Cap cap) {
         switch (cap) {
@@ -46,10 +47,54 @@ public class AwtPaint implements Paint {
         throw new IllegalArgumentException("unknown cap: " + cap);
     }
 
+    private static String getFontName(FontFamily fontFamily) {
+        switch (fontFamily) {
+            case MONOSPACE:
+                return Font.MONOSPACED;
+            case DEFAULT:
+            case DEFAULT_BOLD:
+                return null;
+            case SANS_SERIF:
+                return Font.SANS_SERIF;
+            case SERIF:
+                return Font.SERIF;
+        }
+
+        throw new IllegalArgumentException("unknown fontFamily: " + fontFamily);
+    }
+
+    private static int getFontStyle(FontStyle fontStyle) {
+        switch (fontStyle) {
+            case BOLD:
+                return Font.BOLD;
+            case BOLD_ITALIC:
+                return Font.BOLD | Font.ITALIC;
+            case ITALIC:
+                return Font.ITALIC;
+            case NORMAL:
+                return Font.PLAIN;
+        }
+
+        throw new IllegalArgumentException("unknown fontStyle: " + fontStyle);
+    }
+
+    private static int getJoin(Join join) {
+        switch (join) {
+            case ROUND:
+                return BasicStroke.JOIN_ROUND;
+            case BEVEL:
+                return BasicStroke.JOIN_BEVEL;
+            case MITER:
+                return BasicStroke.JOIN_MITER;
+        }
+
+        throw new IllegalArgumentException("unknown cap: " + join);
+    }
+
     static final Font defaultFont;
 
     static {
-        Map<Attribute, Object> textAttributes = new HashMap<Attribute, Object>();
+        Map<Attribute, Object> textAttributes = new HashMap<>();
         textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
         textAttributes.put(TextAttribute.FAMILY, "Arial");
         textAttributes.put(TextAttribute.SIZE, 14);
@@ -57,15 +102,19 @@ public class AwtPaint implements Paint {
         defaultFont = Font.getFont(textAttributes);
     }
 
+    Color color = new Color(0.1f, 0.1f, 0.1f, 1);
+    FontMetrics fm;
     Font font = defaultFont; // new Font("Default", Font.PLAIN, 13);
     Stroke stroke;
-    FontMetrics fm;
-    Color color = new Color(0.1f, 0.1f, 0.1f, 1);
-
-    private int cap;
+    Style style = Style.FILL;
+    private int cap = getCap(Cap.BUTT);
+    private String fontName = defaultFont.getFontName();
+    private int fontStyle = defaultFont.getStyle();
+    private int join = getJoin(Join.MITER);
     private float strokeWidth;
+    private float textSize = defaultFont.getSize();
 
-    //private Align mAlign;
+    private final BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 
     @Override
     public int getColor() {
@@ -87,38 +136,44 @@ public class AwtPaint implements Paint {
     }
 
     @Override
+    public void setStrokeJoin(Join join) {
+        this.join = getJoin(join);
+        createStroke();
+    }
+
+    @Override
     public void setStrokeWidth(float width) {
-        strokeWidth = width + 1;
+        strokeWidth = width;
         createStroke();
 
         // int size = font.getSize();
         // font = font.deriveFont(size + width * 4);
-
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void setStyle(Style style) {
-        // TODO Auto-generated method stub
-
+        this.style = style;
     }
 
     @Override
     public void setTextAlign(Align align) {
-        //mAlign = align;
+        // Align text in text layer
+        //this.align = align;
     }
 
     @Override
     public void setTextSize(float textSize) {
-        font = font.deriveFont(textSize);
-
+        this.textSize = textSize;
+        this.font = this.font.deriveFont(textSize);
     }
 
     @Override
     public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
-        // TODO Auto-generated method stub
-
+        this.fontName = getFontName(fontFamily);
+        this.fontStyle = getFontStyle(fontStyle);
+        Map<Attribute, Object> textAttributes = new HashMap<>();
+        textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(textAttributes);
     }
 
     @Override
@@ -158,6 +213,22 @@ public class AwtPaint implements Paint {
         if (strokeWidth <= 0) {
             return;
         }
-        stroke = new BasicStroke(strokeWidth, cap, BasicStroke.JOIN_MITER, 1, null, 0);
+        stroke = new BasicStroke(strokeWidth, cap, join, join == BasicStroke.JOIN_MITER ? 1.0f : 0, null, 0);
+    }
+
+    @Override
+    public float getTextHeight(String text) {
+        Graphics2D graphics2d = bufferedImage.createGraphics();
+        FontMetrics fontMetrics = graphics2d.getFontMetrics(this.font);
+        graphics2d.dispose();
+        return (float) this.font.createGlyphVector(fontMetrics.getFontRenderContext(), text).getVisualBounds().getHeight();
+    }
+
+    @Override
+    public float getTextWidth(String text) {
+        Graphics2D graphics2d = bufferedImage.createGraphics();
+        FontMetrics fontMetrics = graphics2d.getFontMetrics(this.font);
+        graphics2d.dispose();
+        return fontMetrics.stringWidth(text);
     }
 }
