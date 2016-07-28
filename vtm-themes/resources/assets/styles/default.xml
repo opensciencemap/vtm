@@ -1098,9 +1098,9 @@
                 <m k="amenity" v="bank">
                     <symbol src="assets:symbols/money/bank2.svg" />
                 </m>
-                <m k="amenity" v="bench">
+                <!--<m k="amenity" v="bench">
                     <symbol src="assets:symbols/amenity/bench.svg" />
-                </m>
+                </m>-->
                 <m k="amenity" v="bicycle_rental">
                     <symbol src="assets:symbols/transport/rental_bicycle.svg" />
                 </m>
@@ -1171,12 +1171,12 @@
                 <m v="bakery">
                     <symbol src="assets:symbols/shopping/bakery.svg" />
                 </m>
-                <m v="florist">
+                <!--<m v="florist">
                     <symbol src="assets:symbols/shopping/florist.svg" />
-                </m>
-                <m v="hairdresser" zoom-min="16">
+                </m>-->
+                <!--<m v="hairdresser" zoom-min="16">
                     <symbol src="assets:symbols/shopping/hairdresser.svg" />
-                </m>
+                </m>-->
                 <m v="supermarket|organic">
                     <symbol src="assets:symbols/shopping/supermarket.svg" />
                 </m>

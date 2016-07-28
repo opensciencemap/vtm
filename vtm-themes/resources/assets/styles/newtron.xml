@@ -1056,9 +1056,9 @@
                 <m v="bank" zoom-min="17">
                     <symbol src="assets:symbols/money/bank2.svg" />
                 </m>
-                <m v="bench" zoom-min="17">
+                <!--<m v="bench" zoom-min="17">
                     <symbol src="assets:symbols/amenity/bench.svg" />
-                </m>
+                </m>-->
                 <m v="bicycle_rental" zoom-min="17">
                     <symbol src="assets:symbols/transport/rental_bicycle.svg" />
                 </m>
@@ -1265,9 +1265,9 @@
             <m v="bakery" zoom-min="17">
                 <symbol src="assets:symbols/shopping/bakery.svg" />
             </m>
-            <m v="florist" zoom-min="17">
+            <!--<m v="florist" zoom-min="17">
                 <symbol src="assets:symbols/shopping/florist.svg" />
-            </m>
+            </m>-->
             <m v="supermarket|organic" zoom-min="17">
                 <symbol src="assets:symbols/shopping/supermarket.svg" />
             </m>
