@@ -19,11 +19,6 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.android.scalebar.DefaultMapScaleBar;
-import org.oscim.android.scalebar.ImperialUnitAdapter;
-import org.oscim.android.scalebar.MapScaleBar;
-import org.oscim.android.scalebar.MapScaleBarLayer;
-import org.oscim.android.scalebar.MetricUnitAdapter;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
@@ -32,6 +27,11 @@ import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
+import org.oscim.scalebar.DefaultMapScaleBar;
+import org.oscim.scalebar.ImperialUnitAdapter;
+import org.oscim.scalebar.MapScaleBar;
+import org.oscim.scalebar.MapScaleBarLayer;
+import org.oscim.scalebar.MetricUnitAdapter;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
@@ -48,14 +48,14 @@ public class SimpleMapActivity extends BaseMapActivity {
         groupLayer.layers.add(new LabelLayer(mMap, mBaseLayer));
         mMap.layers().add(groupLayer);
 
-        mapScaleBar = new DefaultMapScaleBar(mMap);
+        mapScaleBar = new DefaultMapScaleBar(mMap, CanvasAdapter.dpi / 160);
         mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
         mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
         mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
         mapScaleBar.setScaleBarPosition(MapScaleBar.ScaleBarPosition.BOTTOM_LEFT);
 
         MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
-        BitmapRenderer renderer = (BitmapRenderer) mapScaleBarLayer.getRenderer();
+        BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
         renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
         mMap.layers().add(mapScaleBarLayer);

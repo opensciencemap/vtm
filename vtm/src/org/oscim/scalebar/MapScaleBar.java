@@ -15,12 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.scalebar;
+package org.oscim.scalebar;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Bitmap;
+import org.oscim.backend.canvas.Canvas;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.map.Map;
@@ -29,18 +28,15 @@ import org.oscim.map.Map;
  * A MapScaleBar displays the ratio of a distance on the map to the corresponding distance on the ground.
  */
 public abstract class MapScaleBar {
-    public static enum ScaleBarPosition {BOTTOM_CENTER, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_CENTER, TOP_LEFT, TOP_RIGHT}
+    public enum ScaleBarPosition {BOTTOM_CENTER, BOTTOM_LEFT, BOTTOM_RIGHT, TOP_CENTER, TOP_LEFT, TOP_RIGHT}
 
     /**
      * Default position of the scale bar.
      */
     private static final ScaleBarPosition DEFAULT_SCALE_BAR_POSITION = ScaleBarPosition.BOTTOM_LEFT;
 
-    private static final int DEFAULT_HORIZONTAL_MARGIN = 5;
-    private static final int DEFAULT_VERTICAL_MARGIN = 0;
     private static final double LATITUDE_REDRAW_THRESHOLD = 0.2;
 
-    protected final Paint bitmapPaint = new Paint();
     private final MapPosition currentMapPosition = new MapPosition();
     protected DistanceUnitAdapter distanceUnitAdapter;
     protected final Map map;
@@ -68,16 +64,11 @@ public abstract class MapScaleBar {
 
     public MapScaleBar(Map map, int width, int height) {
         this.map = map;
-        this.mapScaleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        this.mapScaleBitmap = CanvasAdapter.newBitmap(width, height, 0);
 
-        this.bitmapPaint.setAntiAlias(true);
-        this.bitmapPaint.setFilterBitmap(true);
-
-        this.marginHorizontal = DEFAULT_HORIZONTAL_MARGIN;
-        this.marginVertical = DEFAULT_VERTICAL_MARGIN;
         this.scaleBarPosition = DEFAULT_SCALE_BAR_POSITION;
 
-        this.mapScaleCanvas = new Canvas();
+        this.mapScaleCanvas = CanvasAdapter.newCanvas();
         this.mapScaleCanvas.setBitmap(this.mapScaleBitmap);
         this.distanceUnitAdapter = MetricUnitAdapter.INSTANCE;
         this.visible = true;
@@ -212,8 +203,8 @@ public abstract class MapScaleBar {
         int scaleBarLength = 0;
         int mapScaleValue = 0;
 
-        for (int i = 0; i < scaleBarValues.length; ++i) {
-            mapScaleValue = scaleBarValues[i];
+        for (int scaleBarValue : scaleBarValues) {
+            mapScaleValue = scaleBarValue;
             scaleBarLength = (int) (mapScaleValue / groundResolution);
             if (scaleBarLength < (this.mapScaleBitmap.getWidth() - 10)) {
                 break;
@@ -252,7 +243,14 @@ public abstract class MapScaleBar {
         int positionLeft = calculatePositionLeft(0, this.map.getWidth(), this.mapScaleBitmap.getWidth());
         int positionTop = calculatePositionTop(0, this.map.getHeight(), this.mapScaleBitmap.getHeight());
 
-        canvas.drawBitmap(this.mapScaleBitmap, positionLeft, positionTop, this.bitmapPaint);
+        canvas.drawBitmap(this.mapScaleBitmap, positionLeft, positionTop);
+    }
+
+    /**
+     * The scalebar is redrawn now.
+     */
+    public void drawScaleBar() {
+        draw(mapScaleCanvas);
     }
 
     /**

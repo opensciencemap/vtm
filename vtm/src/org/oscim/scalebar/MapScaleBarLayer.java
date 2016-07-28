@@ -12,9 +12,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.scalebar;
+package org.oscim.scalebar;
 
-import org.oscim.android.canvas.AndroidBitmap;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.layers.Layer;
@@ -24,16 +23,18 @@ import org.oscim.renderer.BitmapRenderer;
 public class MapScaleBarLayer extends Layer implements Map.UpdateListener {
     private final MapScaleBar mapScaleBar;
     private final BitmapRenderer bitmapRenderer;
-    // Passed to BitmapRenderer - need to sync on this object
-    private final AndroidBitmap layerBitmap;
 
     public MapScaleBarLayer(Map map, MapScaleBar mapScaleBar) {
         super(map);
         this.mapScaleBar = mapScaleBar;
 
         mRenderer = bitmapRenderer = new BitmapRenderer();
-        layerBitmap = new AndroidBitmap(mapScaleBar.mapScaleBitmap);
-        bitmapRenderer.setBitmap(layerBitmap, mapScaleBar.mapScaleBitmap.getWidth(), mapScaleBar.mapScaleBitmap.getHeight());
+        bitmapRenderer.setBitmap(mapScaleBar.mapScaleBitmap, mapScaleBar.mapScaleBitmap.getWidth(), mapScaleBar.mapScaleBitmap.getHeight());
+    }
+
+    @Override
+    public BitmapRenderer getRenderer() {
+        return bitmapRenderer;
     }
 
     @Override
@@ -50,8 +51,8 @@ public class MapScaleBarLayer extends Layer implements Map.UpdateListener {
         if (!mapScaleBar.isRedrawNecessary())
             return;
 
-        synchronized (layerBitmap) {
-            mapScaleBar.redraw(mapScaleBar.mapScaleCanvas);
+        synchronized (mapScaleBar.mapScaleBitmap) {
+            mapScaleBar.drawScaleBar();
         }
 
         bitmapRenderer.updateBitmap();

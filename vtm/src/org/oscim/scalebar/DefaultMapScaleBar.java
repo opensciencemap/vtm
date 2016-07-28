@@ -16,30 +16,28 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.scalebar;
-
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.Typeface;
+package org.oscim.scalebar;
 
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.canvas.Canvas;
+import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
 import org.oscim.map.Map;
 
 /**
- * Displays the default MapScaleBar
+ * Displays the default MapScaleBar.
  */
 public class DefaultMapScaleBar extends MapScaleBar {
     private static final int BITMAP_HEIGHT = 40;
     private static final int BITMAP_WIDTH = 120;
+    private static final int DEFAULT_HORIZONTAL_MARGIN = 5;
+    private static final int DEFAULT_VERTICAL_MARGIN = 0;
     private static final int SCALE_BAR_MARGIN = 10;
     private static final float STROKE_EXTERNAL = 4;
     private static final float STROKE_INTERNAL = 2;
     private static final int TEXT_MARGIN = 1;
 
-    public static enum ScaleBarMode {BOTH, SINGLE}
+    public enum ScaleBarMode {BOTH, SINGLE}
 
     private final float scale;
     private ScaleBarMode scaleBarMode;
@@ -50,14 +48,15 @@ public class DefaultMapScaleBar extends MapScaleBar {
     private final Paint paintScaleText;
     private final Paint paintScaleTextStroke;
 
-    private final Rect rect = new Rect();
-
     public DefaultMapScaleBar(Map map) {
-        this(map, CanvasAdapter.dpi / 160);
+        this(map, CanvasAdapter.dpi / 240);
     }
 
     public DefaultMapScaleBar(Map map, float scale) {
         super(map, (int) (BITMAP_WIDTH * scale), (int) (BITMAP_HEIGHT * scale));
+
+        setMarginHorizontal((int) (DEFAULT_HORIZONTAL_MARGIN * scale));
+        setMarginVertical((int) (DEFAULT_VERTICAL_MARGIN * scale));
 
         this.scale = scale;
         this.scaleBarMode = ScaleBarMode.BOTH;
@@ -99,12 +98,7 @@ public class DefaultMapScaleBar extends MapScaleBar {
     }
 
     private Paint createScaleBarPaint(int color, float strokeWidth, Paint.Style style) {
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStyle(Paint.Style.FILL);
-
+        Paint paint = CanvasAdapter.newPaint();
         paint.setColor(color);
         paint.setStrokeWidth(strokeWidth * this.scale);
         paint.setStyle(style);
@@ -113,24 +107,18 @@ public class DefaultMapScaleBar extends MapScaleBar {
     }
 
     private Paint createTextPaint(int color, float strokeWidth, Paint.Style style) {
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStyle(Paint.Style.FILL);
-
+        Paint paint = CanvasAdapter.newPaint();
         paint.setColor(color);
         paint.setStrokeWidth(strokeWidth * this.scale);
         paint.setStyle(style);
-        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        paint.setTypeface(Paint.FontFamily.DEFAULT, Paint.FontStyle.BOLD);
         paint.setTextSize(12 * this.scale);
-
         return paint;
     }
 
     @Override
     protected void redraw(Canvas canvas) {
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        canvas.fillColor(Color.TRANSPARENT);
 
         ScaleBarLengthAndValue lengthAndValue = this.calculateScaleBarLengthAndValue();
         ScaleBarLengthAndValue lengthAndValue2;
@@ -276,13 +264,13 @@ public class DefaultMapScaleBar extends MapScaleBar {
         switch (scaleBarPosition) {
             case BOTTOM_CENTER:
                 if (scaleText2.length() == 0) {
-                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - getTextWidth(this.paintScaleTextStroke, scaleText1)) * 0.5f),
+                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - this.paintScaleTextStroke.getTextWidth(scaleText1)) * 0.5f),
                             Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                 } else {
                     canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                     canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
             case BOTTOM_LEFT:
@@ -293,62 +281,53 @@ public class DefaultMapScaleBar extends MapScaleBar {
                     canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                     canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
             case BOTTOM_RIGHT:
                 if (scaleText2.length() == 0) {
-                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText1)),
                             Math.round(canvas.getHeight() - SCALE_BAR_MARGIN * scale - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                 } else {
-                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText1)),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
-                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText2)),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText2)),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
             case TOP_CENTER:
                 if (scaleText2.length() == 0) {
-                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - getTextWidth(this.paintScaleTextStroke, scaleText1)) * 0.5f),
-                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                    canvas.drawText(scaleText1, Math.round((canvas.getWidth() - this.paintScaleTextStroke.getTextWidth(scaleText1)) * 0.5f),
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText1)), paint);
                 } else {
                     canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                     canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
             case TOP_LEFT:
                 if (scaleText2.length() == 0) {
                     canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
-                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText1)), paint);
                 } else {
                     canvas.drawText(scaleText1, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
                     canvas.drawText(scaleText2, Math.round(STROKE_EXTERNAL * scale + TEXT_MARGIN * scale),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
             case TOP_RIGHT:
                 if (scaleText2.length() == 0) {
-                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
-                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText1)), paint);
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText1)),
+                            Math.round(SCALE_BAR_MARGIN * scale + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText1)), paint);
                 } else {
-                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText1)),
+                    canvas.drawText(scaleText1, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText1)),
                             Math.round(canvas.getHeight() * 0.5f - STROKE_EXTERNAL * scale * 0.5f - TEXT_MARGIN * scale), paint);
-                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - getTextWidth(this.paintScaleTextStroke, scaleText2)),
-                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + getTextHeight(this.paintScaleTextStroke, scaleText2)), paint);
+                    canvas.drawText(scaleText2, Math.round(canvas.getWidth() - STROKE_EXTERNAL * scale - TEXT_MARGIN * scale - this.paintScaleTextStroke.getTextWidth(scaleText2)),
+                            Math.round(canvas.getHeight() * 0.5f + STROKE_EXTERNAL * scale * 0.5f + TEXT_MARGIN * scale + this.paintScaleTextStroke.getTextHeight(scaleText2)), paint);
                 }
                 break;
         }
-    }
-
-    private int getTextHeight(Paint paint, String text) {
-        paint.getTextBounds(text, 0, text.length(), rect);
-        return rect.height();
-    }
-
-    private int getTextWidth(Paint paint, String text) {
-        return (int) paint.measureText(text);
     }
 }

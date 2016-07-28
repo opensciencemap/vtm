@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.scalebar;
+package org.oscim.scalebar;
 
 public final class MetricUnitAdapter implements DistanceUnitAdapter {
     public static final MetricUnitAdapter INSTANCE = new MetricUnitAdapter();
