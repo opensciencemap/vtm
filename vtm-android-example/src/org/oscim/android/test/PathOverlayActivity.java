@@ -26,14 +26,19 @@ import org.oscim.layers.vector.PathLayer;
 import org.oscim.map.Map.UpdateListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
 /**
- * This is a very INEFFICIENT and somewhat less usefull example for how to use
+ * This is a very INEFFICIENT and somewhat less useful example for how to use
  * PathLayers!
  */
 public class PathOverlayActivity extends BitmapTileMapActivity {
+
+    private static final boolean ANIMATION = true;
+
+    private List<PathLayer> mPathLayers = new ArrayList<>();
 
     public PathOverlayActivity() {
         super(STAMEN_TONER.build());
@@ -42,9 +47,8 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
+        mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
-        mMap.setMapPosition(0, 0, 1 << 2);
         for (double lat = -90; lat <= 90; lat += 5) {
             int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.5f);
             PathLayer pathLayer = new PathLayer(mMap, c, 6);
@@ -52,18 +56,20 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
             mPathLayers.add(pathLayer);
         }
 
-        mMap.events.bind(new UpdateListener() {
-            @Override
-            public void onMapEvent(Event e, MapPosition mapPosition) {
-                //if (e == Map.UPDATE_EVENT) {
-                long t = System.currentTimeMillis();
-                float pos = t % 20000 / 10000f - 1f;
-                createLayers(pos);
-
-                mMap.updateMap(true);
-                //}
-            }
-        });
+        if (ANIMATION)
+            mMap.events.bind(new UpdateListener() {
+                @Override
+                public void onMapEvent(Event e, MapPosition mapPosition) {
+                    //if (e == Map.UPDATE_EVENT) {
+                    long t = System.currentTimeMillis();
+                    float pos = t % 20000 / 10000f - 1f;
+                    createLayers(pos);
+                    mMap.updateMap(true);
+                    //}
+                }
+            });
+        else
+            createLayers(1);
     }
 
     @Override
@@ -74,14 +80,12 @@ public class PathOverlayActivity extends BitmapTileMapActivity {
         mMap.setMapPosition(0, 0, 1 << 2);
     }
 
-    ArrayList<PathLayer> mPathLayers = new ArrayList<>();
-
     void createLayers(float pos) {
 
         int i = 0;
         for (double lat = -90; lat <= 90; lat += 5) {
             double[] packedCoordinates = new double[360 + 2];
-            //List<GeoPoint> pts = new ArrayList<GeoPoint>();
+            //List<GeoPoint> pts = new ArrayList<>();
             int c = 0;
             for (double lon = -180; lon <= 180; lon += 2) {
                 //pts.add(new GeoPoint(lat, lon));

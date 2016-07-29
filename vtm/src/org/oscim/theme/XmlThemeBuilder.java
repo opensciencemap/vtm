@@ -370,7 +370,7 @@ public class XmlThemeBuilder extends DefaultHandler {
         } else {
             mCurrentRule.addStyle(line);
             /* Note 'outline' will not be inherited, it's just a
-             * shorcut to add the outline RenderInstruction. */
+             * shortcut to add the outline RenderInstruction. */
             addOutline(attributes.getValue("outline"));
         }
     }
@@ -394,10 +394,11 @@ public class XmlThemeBuilder extends DefaultHandler {
             if ("id".equals(name))
                 b.style = value;
 
-            else if ("src".equals(name))
-                ;// src = value;
-
-            else if ("use".equals(name))
+            else if ("src".equals(name)) {
+                b.texture = loadTexture(value);
+                /*if (b.texture != null)
+                    b.texture.mipmap = true;*/
+            } else if ("use".equals(name))
                 ;// ignore
 
             else if ("outline".equals(name))
@@ -450,6 +451,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             else
                 logUnknownAttribute(elementName, name, value, i);
         }
+
         return b.build();
     }
 
@@ -484,8 +486,6 @@ public class XmlThemeBuilder extends DefaultHandler {
         AreaBuilder<?> b = mAreaBuilder.set(area);
         b.level(level);
 
-        String src = null;
-
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
@@ -497,7 +497,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 ;// ignore
 
             else if ("src".equals(name))
-                src = value;
+                b.texture = loadTexture(value);
 
             else if ("fill".equals(name))
                 b.color(value);
@@ -526,16 +526,23 @@ public class XmlThemeBuilder extends DefaultHandler {
                 logUnknownAttribute(elementName, name, value, i);
         }
 
-        if (src != null) {
-            try {
-                Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, src);
-                if (bitmap != null)
-                    b.texture = new TextureItem(bitmap, true);
-            } catch (Exception e) {
-                log.debug(e.getMessage());
-            }
-        }
         return b.build();
+    }
+
+    private TextureItem loadTexture(String src) {
+        if (src == null)
+            return null;
+
+        try {
+            Bitmap bitmap = CanvasAdapter.getBitmapAsset(mRelativePathPrefix, src);
+            if (bitmap != null) {
+                log.debug("loading {}", src);
+                return new TextureItem(bitmap, true);
+            }
+        } catch (Exception e) {
+            log.debug("missing file / {}", e.getMessage());
+        }
+        return null;
     }
 
     private void addOutline(String style) {

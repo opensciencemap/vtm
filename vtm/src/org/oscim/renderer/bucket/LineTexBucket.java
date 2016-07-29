@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -24,6 +25,7 @@ import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.LineStyle;
+import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,7 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 import static org.oscim.backend.GLAdapter.gl;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.renderer.MapRenderer.MAX_INDICES;
 import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
 
@@ -80,21 +83,14 @@ import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
  * - in our case there is always the polygon fill array at start
  * - see addLine hack otherwise.
  */
-public final class LineTexBucket extends RenderBucket {
+public final class LineTexBucket extends LineBucket {
 
     static final Logger log = LoggerFactory.getLogger(LineTexBucket.class);
-
-    private static final float COORD_SCALE = MapRenderer.COORD_SCALE;
-    /* scale factor mapping extrusion vector to short values */
-    public static final float DIR_SCALE = 2048;
-
-    public LineStyle line;
-    public float width;
 
     public int evenQuads;
     public int oddQuads;
 
-    private boolean evenSegment;
+    private boolean evenSegment = true;
 
     protected boolean mRandomizeOffset = true;
 
@@ -106,28 +102,21 @@ public final class LineTexBucket extends RenderBucket {
     }
 
     public void addLine(GeometryBuffer geom) {
-        addLine(geom.points, geom.index);
+        addLine(geom.points, geom.index, -1, false);
     }
 
-    public void addLine(float[] points, int[] index) {
+    @Override
+    void addLine(float[] points, int[] index, int numPoints, boolean closed) {
 
         if (vertexItems.empty()) {
-            /* HACK add one vertex offset when compiling
-             * buffer otherwise one cant use the full
-             * VertexItem (see Layers.compile)
-             * add the two 'x' at front and end */
-            //numVertices = 2;
-
-            /* the additional end vertex to make sure
-             * not to read outside allocated memory */
+            /* The additional end vertex to make sure not to read outside
+             * allocated memory */
             numVertices = 1;
         }
         VertexData vi = vertexItems;
 
-        boolean even = evenSegment;
-
         /* reset offset to last written position */
-        if (!even)
+        if (!evenSegment)
             vi.seek(-12);
 
         int n;
@@ -135,7 +124,7 @@ public final class LineTexBucket extends RenderBucket {
 
         if (index == null) {
             n = 1;
-            length = points.length;
+            length = numPoints;
         } else {
             n = index.length;
         }
@@ -169,48 +158,36 @@ public final class LineTexBucket extends RenderBucket {
                 float vx = nx - x;
                 float vy = ny - y;
 
-                float a = (float) Math.sqrt(vx * vx + vy * vy);
+                //    /* normalize vector */
+                double a = Math.sqrt(vx * vx + vy * vy);
+                //    vx /= a;
+                //    vy /= a;
+                
+                /* normalized perpendicular to line segment */
+                short dx = (short) ((-vy / a) * DIR_SCALE);
+                short dy = (short) ((vx / a) * DIR_SCALE);
 
-                /* normal vector */
-                vx /= a;
-                vy /= a;
-
-                /* perpendicular to line segment */
-                float ux = -vy;
-                float uy = vx;
-
-                short dx = (short) (ux * DIR_SCALE);
-                short dy = (short) (uy * DIR_SCALE);
-
-                vi.add((short) x,
-                        (short) y,
-                        dx, dy,
-                        (short) lineLength,
-                        (short) 0);
+                vi.add((short) x, (short) y, dx, dy, (short) lineLength, (short) 0);
 
                 lineLength += a;
 
                 vi.seek(6);
-                vi.add((short) nx,
-                        (short) ny,
-                        dx, dy,
-                        (short) lineLength,
-                        (short) 0);
+                vi.add((short) nx, (short) ny, dx, dy, (short) lineLength, (short) 0);
 
                 x = nx;
                 y = ny;
 
-                if (even) {
+                if (evenSegment) {
                     /* go to second segment */
                     vi.seek(-12);
-                    even = false;
+                    evenSegment = false;
 
                     /* vertex 0 and 2 were added */
                     numVertices += 3;
                     evenQuads++;
                 } else {
                     /* go to next block */
-                    even = true;
+                    evenSegment = true;
 
                     /* vertex 1 and 3 were added */
                     numVertices += 1;
@@ -219,11 +196,17 @@ public final class LineTexBucket extends RenderBucket {
             }
         }
 
-        evenSegment = even;
-
         /* advance offset to last written position */
-        if (!even)
+        if (!evenSegment)
             vi.seek(12);
+    }
+
+    @Override
+    protected void clear() {
+        evenSegment = true;
+        evenQuads = 0;
+        oddQuads = 0;
+        super.clear();
     }
 
     @Override
@@ -271,7 +254,8 @@ public final class LineTexBucket extends RenderBucket {
 
         public static void init() {
 
-            shader = new Shader("linetex_layer");
+            shader = new Shader("linetex_layer_tex");
+            //shader = new Shader("linetex_layer");
 
             int[] vboIds = GLUtils.glGenBuffers(1);
             mVertexFlipID = vboIds[0];
@@ -294,11 +278,46 @@ public final class LineTexBucket extends RenderBucket {
                     GL.STATIC_DRAW);
             GLState.bindVertexBuffer(0);
 
-            //        mTexID = new int[10];
-            //        byte[] stipple = new byte[2];
-            //        stipple[0] = 32;
-            //        stipple[1] = 32;
-            //        mTexID[0] = GlUtils.loadStippleTexture(stipple);
+            //    mTexID = new int[10];
+            //    byte[] stipple = new byte[40];
+            //    stipple[0] = 32;
+            //    stipple[1] = 32;
+            //    mTexID[0] = loadStippleTexture(stipple);
+
+            //tex = new TextureItem(CanvasAdapter.getBitmapAsset("patterns/arrow.png"));
+            //tex.mipmap = true;
+        }
+
+        //static TextureItem tex;
+
+        public static int loadStippleTexture(byte[] stipple) {
+            int sum = 0;
+            for (byte flip : stipple)
+                sum += flip;
+
+            byte[] pixel = new byte[sum];
+
+            boolean on = true;
+            int pos = 0;
+            for (byte flip : stipple) {
+                float max = flip;
+
+                for (int s = 0; s < flip; s++) {
+                    float alpha = Math.abs(s / (max - 1) - 0.5f);
+                    if (on)
+                        alpha = 255 * (1 - alpha);
+                    else
+                        alpha = 255 * alpha;
+
+                    pixel[pos + s] = FastMath.clampToByte((int) alpha);
+                }
+                on = !on;
+                pos += flip;
+            }
+
+            return GLUtils.loadTexture(pixel, sum, 1, GL.ALPHA,
+                    GL.LINEAR, GL.LINEAR,
+                    GL.REPEAT, GL.REPEAT);
         }
 
         private final static int STRIDE = 12;
@@ -307,11 +326,7 @@ public final class LineTexBucket extends RenderBucket {
         public static RenderBucket draw(RenderBucket b, GLViewport v,
                                         float div, RenderBuckets buckets) {
 
-            //if (shader == 0)
-            //    return curLayer.next;
-
             GLState.blend(true);
-            //GLState.useProgram(shader);
             shader.useProgram();
 
             GLState.enableVertexArrays(-1, -1);
@@ -339,30 +354,38 @@ public final class LineTexBucket extends RenderBucket {
             buckets.vbo.bind();
 
             float scale = (float) v.pos.getZoomScale();
-
             float s = scale / div;
-
-            //GL.bindTexture(GL20.TEXTURE_2D, mTexID[0]);
 
             for (; b != null && b.type == TEXLINE; b = b.next) {
                 LineTexBucket lb = (LineTexBucket) b;
                 LineStyle line = lb.line.current();
 
+                if (line.texture != null)
+                    line.texture.bind();
+
                 GLUtils.setColor(shader.uColor, line.stippleColor, 1);
                 GLUtils.setColor(shader.uBgColor, line.color, 1);
 
-                float pScale = (int) (s + 0.5f);
-                if (pScale < 1)
-                    pScale = 1;
+                float pScale;
 
-                gl.uniform1f(shader.uPatternScale,
-                        (MapRenderer.COORD_SCALE * line.stipple) / pScale);
+                if (s >= 1) {
+                    pScale = (line.stipple * s);
+                    int cnt = (int) (pScale / line.stipple);
+                    pScale = line.stipple / (cnt + 1);
+                } else {
+                    pScale = line.stipple / s;
+                    int cnt = (int) (pScale / line.stipple);
+                    pScale = line.stipple * cnt;
+                }
+
+                //log.debug("pScale {} {}", pScale, s);
+
+                gl.uniform1f(shader.uPatternScale, COORD_SCALE * pScale);
 
                 gl.uniform1f(shader.uPatternWidth, line.stippleWidth);
-                //GL.uniform1f(hScale, scale);
 
                 /* keep line width fixed */
-                gl.uniform1f(shader.uWidth, lb.width / s * COORD_SCALE_BY_DIR_SCALE);
+                gl.uniform1f(shader.uWidth, (lb.scale * line.width) / s * COORD_SCALE_BY_DIR_SCALE);
 
                 /* add offset vertex */
                 int vOffset = -STRIDE;
@@ -418,7 +441,6 @@ public final class LineTexBucket extends RenderBucket {
                     gl.drawElements(GL.TRIANGLES, numIndices,
                             GL.UNSIGNED_SHORT, 0);
                 }
-                //GlUtils.checkGlError(TAG);
             }
 
             gl.disableVertexAttribArray(aPos0);
@@ -426,8 +448,6 @@ public final class LineTexBucket extends RenderBucket {
             gl.disableVertexAttribArray(aLen0);
             gl.disableVertexAttribArray(aLen1);
             gl.disableVertexAttribArray(aFlip);
-
-            //GL.bindTexture(GL20.TEXTURE_2D, 0);
 
             return b;
         }

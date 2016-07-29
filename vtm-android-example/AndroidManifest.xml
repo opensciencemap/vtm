@@ -36,6 +36,9 @@
             android:name=".LayerGroupActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".LineTexActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".MapsforgeMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

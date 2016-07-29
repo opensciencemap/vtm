@@ -49,6 +49,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
         /* directly load bitmap from resources */
         Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);

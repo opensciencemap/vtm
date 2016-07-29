@@ -31,28 +31,33 @@ import java.util.List;
 
 public class PathLayerTest extends GdxMapApp {
 
+    private static final boolean ANIMATION = true;
+
+    private List<PathLayer> mPathLayers = new ArrayList<>();
+
     @Override
     public void createLayers() {
-        mMap.setBaseMap(new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build()));
-
-        createLayers(1, true);
+        BitmapTileLayer bitmapLayer = new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build());
+        bitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
+        mMap.setBaseMap(bitmapLayer);
 
         mMap.setMapPosition(0, 0, 1 << 2);
 
-        mMap.events.bind(new UpdateListener() {
-            @Override
-            public void onMapEvent(Event e, MapPosition mapPosition) {
-                //if (e == Map.UPDATE_EVENT) {
-                long t = System.currentTimeMillis();
-                float pos = t % 20000 / 10000f - 1f;
-                createLayers(pos, false);
-                mMap.updateMap(true);
-                //}
-            }
-        });
-    }
+        createLayers(1, true);
 
-    ArrayList<PathLayer> mPathLayers = new ArrayList<>();
+        if (ANIMATION)
+            mMap.events.bind(new UpdateListener() {
+                @Override
+                public void onMapEvent(Event e, MapPosition mapPosition) {
+                    //if (e == Map.UPDATE_EVENT) {
+                    long t = System.currentTimeMillis();
+                    float pos = t % 20000 / 10000f - 1f;
+                    createLayers(pos, false);
+                    mMap.updateMap(true);
+                    //}
+                }
+            });
+    }
 
     void createLayers(float pos, boolean init) {
 

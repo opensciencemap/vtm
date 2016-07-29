@@ -107,38 +107,6 @@ public class GLUtils {
         return textureIds[0];
     }
 
-    public static int loadStippleTexture(byte[] stipple) {
-        int sum = 0;
-        for (byte flip : stipple)
-            sum += flip;
-
-        byte[] pixel = new byte[sum];
-
-        boolean on = true;
-        int pos = 0;
-        for (byte flip : stipple) {
-            float max = flip;
-
-            for (int s = 0; s < flip; s++) {
-                float color = Math.abs(s / (max - 1) - 0.5f);
-                if (on)
-                    color = 255 * (1 - color);
-                else
-                    color = 255 * color;
-
-                pixel[pos + s] = FastMath.clampToByte((int) color);
-            }
-            on = !on;
-            pos += flip;
-        }
-
-        return loadTexture(pixel, sum, 1, GL.ALPHA,
-                GL.LINEAR, GL.LINEAR,
-                // GLES20.GL_NEAREST, GLES20.GL_NEAREST,
-                GL.REPEAT,
-                GL.REPEAT);
-    }
-
     public static void checkGlError(String op) {
         //GL = GLAdapter.get();
 

@@ -1,5 +1,6 @@
 /*
  * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -48,7 +49,8 @@ public class TextureBucket extends RenderBucket {
      */
     public final static TexturePool pool = new TexturePool(POOL_FILL,
             TEXTURE_WIDTH,
-            TEXTURE_HEIGHT);
+            TEXTURE_HEIGHT,
+            false);
 
     public TextureBucket(int type) {
         super(type, false, true);

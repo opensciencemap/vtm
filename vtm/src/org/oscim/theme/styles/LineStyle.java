@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +20,7 @@ package org.oscim.theme.styles;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
+import org.oscim.renderer.bucket.TextureItem;
 
 import static org.oscim.backend.canvas.Color.parseColor;
 
@@ -37,26 +39,28 @@ public final class LineStyle extends RenderStyle {
     public final int stipple;
     public final int stippleColor;
     public final float stippleWidth;
+    public final TextureItem texture;
 
-    private LineStyle(LineBuilder<?> builer) {
-        this.level = builer.level;
-        this.style = builer.style;
-        this.width = builer.strokeWidth;
-        this.color = builer.fillColor;
-        this.cap = builer.cap;
-        this.outline = builer.outline;
-        this.fixed = builer.fixed;
-        this.fadeScale = builer.fadeScale;
-        this.blur = builer.blur;
-        this.stipple = builer.stipple;
-        this.stippleColor = builer.stippleColor;
-        this.stippleWidth = builer.stippleWidth;
+    private LineStyle(LineBuilder<?> builder) {
+        this.level = builder.level;
+        this.style = builder.style;
+        this.width = builder.strokeWidth;
+        this.color = builder.fillColor;
+        this.cap = builder.cap;
+        this.outline = builder.outline;
+        this.fixed = builder.fixed;
+        this.fadeScale = builder.fadeScale;
+        this.blur = builder.blur;
+        this.stipple = builder.stipple;
+        this.stippleColor = builder.stippleColor;
+        this.stippleWidth = builder.stippleWidth;
+        this.texture = builder.texture;
     }
 
     public LineStyle(int level, String style, int color, float width,
                      Cap cap, boolean fixed,
                      int stipple, int stippleColor, float stippleWidth,
-                     int fadeScale, float blur, boolean isOutline) {
+                     int fadeScale, float blur, boolean isOutline, TextureItem texture) {
 
         this.level = level;
         this.style = style;
@@ -70,21 +74,22 @@ public final class LineStyle extends RenderStyle {
         this.stipple = stipple;
         this.stippleColor = stippleColor;
         this.stippleWidth = stippleWidth;
+        this.texture = texture;
 
         this.blur = blur;
         this.fadeScale = fadeScale;
     }
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
+        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null);
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false);
+        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null);
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false);
+        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null);
     }
 
     @Override
@@ -109,6 +114,7 @@ public final class LineStyle extends RenderStyle {
         public int stipple;
         public int stippleColor;
         public float stippleWidth;
+        public TextureItem texture;
 
         public T set(LineStyle line) {
             if (line == null)
@@ -125,6 +131,7 @@ public final class LineStyle extends RenderStyle {
             this.stipple = line.stipple;
             this.stippleColor = line.stippleColor;
             this.stippleWidth = line.stippleWidth;
+            this.texture = line.texture;
             return self();
         }
 
@@ -142,6 +149,7 @@ public final class LineStyle extends RenderStyle {
             stipple = 0;
             stippleWidth = 1;
             stippleColor = Color.BLACK;
+            texture = null;
 
             return self();
         }
@@ -161,6 +169,11 @@ public final class LineStyle extends RenderStyle {
             return self();
         }
 
+        public T stipple(int width) {
+            this.stipple = width;
+            return self();
+        }
+
         public T stippleColor(int color) {
             this.stippleColor = color;
             return self();
@@ -168,6 +181,11 @@ public final class LineStyle extends RenderStyle {
 
         public T stippleColor(String color) {
             this.stippleColor = parseColor(color);
+            return self();
+        }
+
+        public T stippleWidth(float width) {
+            this.stippleWidth = width;
             return self();
         }
 
@@ -187,6 +205,11 @@ public final class LineStyle extends RenderStyle {
 
         public T fixed(boolean b) {
             this.fixed = b;
+            return self();
+        }
+
+        public T texture(TextureItem texture) {
+            this.texture = texture;
             return self();
         }
     }

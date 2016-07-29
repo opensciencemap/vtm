@@ -18,6 +18,7 @@ package org.oscim.test;
 
 import com.badlogic.gdx.Input;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
@@ -29,6 +30,7 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.bucket.LineBucket;
 import org.oscim.renderer.bucket.LineTexBucket;
+import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.styles.LineStyle;
 
 public class LineRenderTest extends GdxMap {
@@ -68,28 +70,27 @@ public class LineRenderTest extends GdxMap {
         if (fixed) {
             line1 = new LineStyle(Color.RED, 0.5f);
             line2 = new LineStyle(Color.GREEN, 1);
-            line3 = new LineStyle(Color.BLUE, 2);
             line4 = new LineStyle(Color.LTGRAY, 3);
-
         } else {
-            line1 = new LineStyle(0, null, Color.fade(Color.RED, 0.5f), 4.0f,
-                    Cap.BUTT, false, 0, 0, 0, 0, 1f, false);
-
-            line2 = new LineStyle(0, null, Color.GREEN, 6.0f, Cap.BUTT, true, 0, 0,
-                    0, 0, 1f, false);
-
-            line3 = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 4,
-                    Color.CYAN, 1, 0, 0, false);
-
-            line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0,
-                    0, 0, 0, 1f, false);
+            line1 = new LineStyle(0, null, Color.fade(Color.RED, 0.5f), 4.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null);
+            line2 = new LineStyle(0, null, Color.GREEN, 6.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null);
+            line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, false, null);
         }
 
-        LineStyle outline = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 0,
-                0, 0, 0, 1f, true);
+        TextureItem tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/dot.png"));
+        tex.mipmap = true;
+        line3 = LineStyle.builder()
+                .stippleColor(Color.CYAN)
+                .stipple(8)
+                .stippleWidth(0.6f)
+                .strokeWidth(4)
+                .strokeColor(Color.BLUE)
+                .fixed(fixed)
+                .texture(tex)
+                .build();
 
-        LineStyle outline2 = new LineStyle(0, null, Color.RED, 2.0f, Cap.ROUND, false, 0,
-                0, 0, 0, 0, true);
+        LineStyle outline = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, true, null);
+        LineStyle outline2 = new LineStyle(0, null, Color.RED, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 0, true, null);
 
         LineBucket ol = l.buckets.addLineBucket(0, outline);
         LineBucket ol2 = l.buckets.addLineBucket(5, outline2);
@@ -112,13 +113,9 @@ public class LineRenderTest extends GdxMap {
 
         LineTexBucket lt = l.buckets.getLineTexBucket(30);
         lt.line = line3;
-        lt.width = line3.width;
         lt.addLine(g.translate(0, 10.5f));
         lt.addLine(g.translate(0, 10.5f));
         addCircle(200, 200, 100, lt);
-
-        // if (addOutline)
-        // ol2.addOutline(ll);
 
         ll = l.buckets.addLineBucket(40, line4);
         ll.addLine(g.translate(0, 10.5f));

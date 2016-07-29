@@ -1,6 +1,7 @@
 /*
  * Copyright 2012 osmdroid authors: Viesturs Zarins, Martin Pearman
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -15,7 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.layers;
 
 import org.oscim.backend.canvas.Paint.Cap;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class draws a path line in given color.
+ * This class draws a path line in given color or texture.
  */
 public class PathLayer extends Layer {
 
@@ -55,16 +55,25 @@ public class PathLayer extends Layer {
 
     final Worker mWorker;
 
-    public PathLayer(Map map, int lineColor, float lineWidth) {
+    public PathLayer(Map map, LineStyle style) {
         super(map);
-        mWorker = new Worker(map);
-        mLineStyle = new LineStyle(lineColor, lineWidth, Cap.BUTT);
+        mLineStyle = style;
+
+        mPoints = new ArrayList<>();
         mRenderer = new RenderPath();
-        mPoints = new ArrayList<GeoPoint>();
+        mWorker = new Worker(map);
+    }
+
+    public PathLayer(Map map, int lineColor, float lineWidth) {
+        this(map, new LineStyle(lineColor, lineWidth, Cap.BUTT));
     }
 
     public PathLayer(Map map, int lineColor) {
         this(map, lineColor, 2);
+    }
+
+    public void setStyle(LineStyle style) {
+        mLineStyle = style;
     }
 
     public void clearPath() {
@@ -190,11 +199,6 @@ public class PathLayer extends Layer {
      ***/
     final class RenderPath extends BucketRenderer {
 
-        public RenderPath() {
-
-            buckets.addLineBucket(0, mLineStyle);
-        }
-
         private int mCurX = -1;
         private int mCurY = -1;
         private int mCurZ = -1;
@@ -205,7 +209,7 @@ public class PathLayer extends Layer {
             int tx = (int) (v.pos.x * tz);
             int ty = (int) (v.pos.y * tz);
 
-            // update layers when map moved by at least one tile
+            /* update layers when map moved by at least one tile */
             if ((tx != mCurX || ty != mCurY || tz != mCurZ)) {
                 mWorker.submit(100);
                 mCurX = tx;
@@ -217,10 +221,10 @@ public class PathLayer extends Layer {
             if (t == null)
                 return;
 
-            // keep position to render relative to current state
+            /* keep position to render relative to current state */
             mMapPosition.copy(t.pos);
 
-            // compile new layers
+            /* compile new layers */
             buckets.set(t.bucket.get());
             compile();
         }
@@ -301,11 +305,16 @@ public class PathLayer extends Layer {
                 return true;
             }
 
-            RenderBuckets layers = task.bucket;
+            LineBucket ll;
 
-            LineBucket ll = layers.getLineBucket(0);
+            if (mLineStyle.stipple == 0 && mLineStyle.texture == null)
+                ll = task.bucket.getLineBucket(0);
+            else
+                ll = task.bucket.getLineTexBucket(0);
+
             ll.line = mLineStyle;
-            ll.scale = ll.line.width;
+
+            //ll.scale = ll.line.width;
 
             mMap.getMapPosition(task.pos);
 
