@@ -38,9 +38,25 @@ uniform vec4 u_bgcolor;
 uniform float u_pwidth;
 varying vec2 v_st;
 uniform sampler2D tex;
+uniform float u_mode;
 void
 main(){
-  vec4 c=texture2D(tex,vec2(abs(mod(v_st.s+1.0,2.0)),(v_st.t+1.0)*0.5));
-  float fuzz=fwidth(c.a);
-  gl_FragColor=(c * u_color) *smoothstep(0.5-fuzz,0.5+fuzz,c.a);
+  if (u_mode == 1.0) {
+    vec4 c=texture2D(tex,vec2(abs(mod(v_st.s+1.0,2.0)),(v_st.t+1.0)*0.5));
+    float fuzz=fwidth(c.a);
+    gl_FragColor=(c * u_color) *smoothstep(0.5-fuzz,0.5+fuzz,c.a);
+  }
+  else {
+    /* distance on perpendicular to the line */
+    float dist = abs(v_st.t);
+    float fuzz = fwidth(v_st.t);
+    float fuzz_p = fwidth(v_st.s);
+    float line_w = smoothstep(0.0, fuzz, 1.0 - dist);
+    float stipple_w = smoothstep(0.0, fuzz, u_pwidth - dist);
+    /* triangle waveform in the range 0..1 for regular pattern */
+    float phase = abs(mod(v_st.s, 2.0) - 1.0);
+    /* interpolate between on/off phase, 0.5 = equal phase length */
+    float stipple_p = smoothstep(0.5 - fuzz_p, 0.5 + fuzz_p, phase);
+    gl_FragColor = line_w * mix(u_bgcolor, u_color, min(stipple_w, stipple_p));
+  }
 }

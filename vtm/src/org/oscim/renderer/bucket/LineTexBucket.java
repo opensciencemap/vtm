@@ -217,7 +217,7 @@ public final class LineTexBucket extends LineBucket {
     }
 
     static class Shader extends GLShader {
-        int uMVP, uColor, uWidth, uBgColor, uScale;
+        int uMVP, uColor, uWidth, uBgColor, uScale, uMode;
         int uPatternWidth, uPatternScale;
         int aPos0, aPos1, aLen0, aLen1, aFlip;
 
@@ -231,6 +231,7 @@ public final class LineTexBucket extends LineBucket {
             uColor = getUniform("u_color");
             uWidth = getUniform("u_width");
             uBgColor = getUniform("u_bgcolor");
+            uMode = getUniform("u_mode");
 
             uPatternWidth = getUniform("u_pwidth");
             uPatternScale = getUniform("u_pscale");
@@ -359,6 +360,8 @@ public final class LineTexBucket extends LineBucket {
             for (; b != null && b.type == TEXLINE; b = b.next) {
                 LineTexBucket lb = (LineTexBucket) b;
                 LineStyle line = lb.line.current();
+
+                gl.uniform1f(shader.uMode, line.texture != null ? 1 : 0);
 
                 if (line.texture != null)
                     line.texture.bind();
