@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -22,9 +23,9 @@ import android.os.Bundle;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
-import org.oscim.layers.GroupLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Layers;
 import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.scalebar.DefaultMapScaleBar;
@@ -37,16 +38,22 @@ import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 
 public class SimpleMapActivity extends BaseMapActivity {
+    private static final int GROUP_MAPS = 1;
+    private static final int GROUP_3D_OBJECTS = 2;
+    private static final int GROUP_OVERLAYS = 3;
+
     private DefaultMapScaleBar mapScaleBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        GroupLayer groupLayer = new GroupLayer(mMap);
-        groupLayer.layers.add(new BuildingLayer(mMap, mBaseLayer));
-        groupLayer.layers.add(new LabelLayer(mMap, mBaseLayer));
-        mMap.layers().add(groupLayer);
+        Layers layers = mMap.layers();
+        layers.addGroup(GROUP_MAPS);
+        layers.add(new LabelLayer(mMap, mBaseLayer), GROUP_MAPS);
+        layers.addGroup(GROUP_3D_OBJECTS);
+        layers.add(new BuildingLayer(mMap, mBaseLayer), GROUP_3D_OBJECTS);
+        layers.addGroup(GROUP_OVERLAYS);
 
         mapScaleBar = new DefaultMapScaleBar(mMap, CanvasAdapter.dpi / 160);
         mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
@@ -58,7 +65,7 @@ public class SimpleMapActivity extends BaseMapActivity {
         BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
         renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
-        mMap.layers().add(mapScaleBarLayer);
+        layers.add(mapScaleBarLayer, GROUP_OVERLAYS);
 
         mMap.setTheme(VtmThemes.DEFAULT);
     }

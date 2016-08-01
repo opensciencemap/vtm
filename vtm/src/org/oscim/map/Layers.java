@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -27,12 +28,18 @@ import org.oscim.map.Map.UpdateListener;
 import org.oscim.renderer.LayerRenderer;
 
 import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Layers extends AbstractList<Layer> {
 
-    private final CopyOnWriteArrayList<Layer> mLayerList;
     private final Map mMap;
+
+    private final List<Layer> mLayerList = new CopyOnWriteArrayList<>();
+    private final List<Integer> mGroupList = new ArrayList<>();
+    private final java.util.Map<Integer, Integer> mGroupIndex = new HashMap<>();
 
     private boolean mDirtyLayers;
     private LayerRenderer[] mLayerRenderer;
@@ -40,7 +47,6 @@ public final class Layers extends AbstractList<Layer> {
 
     Layers(Map map) {
         mMap = map;
-        mLayerList = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -79,6 +85,28 @@ public final class Layers extends AbstractList<Layer> {
         mDirtyLayers = true;
     }
 
+    /**
+     * Add using layer groups.
+     */
+    public synchronized void add(Layer layer, int group) {
+        int index = mGroupList.indexOf(group);
+        if (index < 0)
+            throw new IllegalArgumentException("unknown layer group");
+        if (mLayerList.contains(layer))
+            throw new IllegalArgumentException("layer added twice");
+
+        index++;
+        if (index == mGroupList.size())
+            add(layer);
+        else {
+            add(mGroupIndex.get(mGroupList.get(index)), layer);
+            for (int i = index; i < mGroupList.size(); i++) {
+                group = mGroupList.get(i);
+                mGroupIndex.put(group, mGroupIndex.get(group) + 1);
+            }
+        }
+    }
+
     @Override
     public synchronized Layer remove(int index) {
         mDirtyLayers = true;
@@ -100,6 +128,13 @@ public final class Layers extends AbstractList<Layer> {
                 if (gl instanceof InputListener)
                     mMap.input.unbind((InputListener) gl);
             }
+        }
+
+        // update layer group pointers
+        for (Integer group : mGroupIndex.keySet()) {
+            int pointer = mGroupIndex.get(group);
+            if (pointer > index)
+                mGroupIndex.put(group, pointer - 1);
         }
 
         return remove;
@@ -131,6 +166,14 @@ public final class Layers extends AbstractList<Layer> {
         }
 
         return remove;
+    }
+
+    public synchronized void addGroup(int group) {
+        if (mGroupList.contains(group))
+            throw new IllegalArgumentException("group added twice");
+
+        mGroupList.add(group);
+        mGroupIndex.put(group, mLayerList.size());
     }
 
     /**
