@@ -114,9 +114,17 @@ public class IosPaint implements Paint {
         return new UIColor(colorR, colorG, colorB, colorA);
     }
 
+    public CGLineCap getIosStrokeCap() {
+        return this.cap;
+    }
+
     @Override
     public void setStrokeCap(Cap cap) {
         this.cap = getLineCap(cap);
+    }
+
+    public CGLineJoin getIosStrokeJoin() {
+        return this.join;
     }
 
     @Override
@@ -163,7 +171,6 @@ public class IosPaint implements Paint {
         }
     }
 
-
     @Override
     public float measureText(String text) {
         if (ctLineIsDirty || !text.equals(lastText)) {
@@ -172,7 +179,6 @@ public class IosPaint implements Paint {
         }
         return (float) ctLine.getWidth();
     }
-
 
     private void createCTLine(String text) {
         if (ctLineIsDirty) {
@@ -198,16 +204,13 @@ public class IosPaint implements Paint {
         }
     }
 
-
     private void createIosFont() {
-
         /*
           DEVICE_DEFAULT = [iOS == getDeviceDefault()], [Android == 'Roboto']
           MONOSPACE      = [iOS == 'Courier'], [Android == 'Droid Sans Mono']
           SANS_SERIF     = [iOS == 'Verdena'], [Android == 'Droid Sans']
           SERIF          = [iOS == 'Georgia'], [Android == 'Droid Serif']
          */
-
 
         String fontname = DEFAULT_FONT_NAME;
         switch (this.fontFamily) {
@@ -309,7 +312,6 @@ public class IosPaint implements Paint {
         }
     }
 
-
     public void drawLine(CGBitmapContext cgBitmapContext, String text, float x, float y) {
         if (ctLineIsDirty || !text.equals(lastText)) {
             ctLineIsDirty = true;
@@ -318,7 +320,7 @@ public class IosPaint implements Paint {
         cgBitmapContext.saveGState();
         cgBitmapContext.setShouldAntialias(true);
         cgBitmapContext.setTextPosition(x, y + descent);
-        cgBitmapContext.setBlendMode(CGBlendMode.Overlay);
+        cgBitmapContext.setBlendMode(CGBlendMode.Normal);
 
         ctLine.draw(cgBitmapContext);
 
@@ -337,8 +339,7 @@ public class IosPaint implements Paint {
 
     @Override
     public float getTextHeight(String text) {
-        // TODO
-        return 0;
+        return this.fontHeight;
     }
 
     @Override

@@ -17,21 +17,59 @@
  */
 package org.oscim.ios;
 
-
 import org.oscim.backend.GLAdapter;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
 import org.oscim.ios.backend.IosGL;
 import org.oscim.ios.backend.IosGraphics;
-
+import org.oscim.layers.GroupLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Map;
+import org.oscim.renderer.BitmapRenderer;
+import org.oscim.renderer.GLViewport;
+import org.oscim.scalebar.DefaultMapScaleBar;
+import org.oscim.scalebar.ImperialUnitAdapter;
+import org.oscim.scalebar.MapScaleBar;
+import org.oscim.scalebar.MapScaleBarLayer;
+import org.oscim.scalebar.MetricUnitAdapter;
+import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class IOSMapApp extends GdxMap {
 
     public static void init() {
-
         // init globals
         IosGraphics.init();
         GdxAssets.init("assets/");
         GLAdapter.init(new IosGL());
+    }
+
+    @Override
+    public void createLayers() {
+        Map map = getMap();
+
+        VectorTileLayer l = map.setBaseMap(new OSciMap4TileSource());
+
+        GroupLayer groupLayer = new GroupLayer(mMap);
+        groupLayer.layers.add(new BuildingLayer(map, l));
+        groupLayer.layers.add(new LabelLayer(map, l));
+        map.layers().add(groupLayer);
+
+        DefaultMapScaleBar mapScaleBar = new DefaultMapScaleBar(mMap);
+        mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
+        mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
+        mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
+        mapScaleBar.setScaleBarPosition(MapScaleBar.ScaleBarPosition.BOTTOM_LEFT);
+
+        MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
+        BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
+        renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
+        renderer.setOffset(5, 0);
+        map.layers().add(mapScaleBarLayer);
+
+        map.setTheme(VtmThemes.DEFAULT);
+        map.setMapPosition(53.075, 8.808, 1 << 17);
     }
 }
