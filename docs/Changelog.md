@@ -6,7 +6,7 @@
 - Mapsforge multilingual maps [#34](https://github.com/mapsforge/vtm/issues/34)
 - vtm-ios update module [#29](https://github.com/mapsforge/vtm/issues/29)
 - Native libraries for all platforms [#14](https://github.com/mapsforge/vtm/issues/14)
-- Group layer implementation [#99](https://github.com/mapsforge/vtm/issues/99)
+- Layer groups [#99](https://github.com/mapsforge/vtm/issues/99) [#103](https://github.com/mapsforge/vtm/issues/103)
 - Map scale bar multi-platform implementation [#84](https://github.com/mapsforge/vtm/issues/84)
 - Render themes area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Graphics API platform enhancements [#92](https://github.com/mapsforge/vtm/issues/92)
