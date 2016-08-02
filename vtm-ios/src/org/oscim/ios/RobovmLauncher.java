@@ -51,7 +51,6 @@ public class RobovmLauncher extends IOSApplication.Delegate {
     public static void main(String[] argv) {
         NSAutoreleasePool pool = new NSAutoreleasePool();
         System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
-        IOSMapApp.init();
 
         UIApplication.main(argv, null, RobovmLauncher.class);
         pool.drain();
