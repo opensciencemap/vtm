@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -43,8 +44,9 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(BitmapTileMapActivity.class));
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
-        linearLayout.addView(createButton(PathOverlayActivity.class));
         linearLayout.addView(createButton(MarkerOverlayActivity.class));
+        linearLayout.addView(createButton(PathOverlayActivity.class));
+        linearLayout.addView(createButton(LayerGroupActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(S3DBMapActivity.class));
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));

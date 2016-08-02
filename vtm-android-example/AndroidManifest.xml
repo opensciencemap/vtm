@@ -27,34 +27,37 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MapsforgeMapActivity$MapFilePicker"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".SimpleMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".S3DBMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".PathOverlayActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".MarkerOverlayActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".BitmapTileMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".MapsforgeMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ThemeStylerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".JeoIndoorMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".LayerGroupActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MapsforgeMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MapsforgeMapActivity$MapFilePicker"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MarkerOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".OsmJsonMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".PathOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".S3DBMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".SimpleMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ThemeStylerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".VectorLayerMapActivity"
