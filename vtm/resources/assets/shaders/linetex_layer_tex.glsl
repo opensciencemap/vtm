@@ -1,5 +1,5 @@
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 uniform mat4 u_mvp;
 uniform vec4 u_color;
@@ -31,7 +31,7 @@ $$
 
 #extension GL_OES_standard_derivatives : enable
 #ifdef GLES
-precision mediump float;
+precision highp float;
 #endif
 uniform vec4 u_color;
 uniform vec4 u_bgcolor;
