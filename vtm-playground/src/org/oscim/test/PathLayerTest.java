@@ -21,8 +21,8 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.JtsPathLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.layers.vector.PathLayer;
 import org.oscim.map.Map.UpdateListener;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
@@ -52,7 +52,7 @@ public class PathLayerTest extends GdxMapApp {
         });
     }
 
-    ArrayList<JtsPathLayer> mPathLayers = new ArrayList<>();
+    ArrayList<PathLayer> mPathLayers = new ArrayList<>();
 
     void createLayers(float pos, boolean init) {
 
@@ -80,10 +80,10 @@ public class PathLayerTest extends GdxMapApp {
 
                 pts.add(new GeoPoint(latitude, longitude));
             }
-            JtsPathLayer pathLayer;
+            PathLayer pathLayer;
             if (init) {
                 int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.5f);
-                pathLayer = new JtsPathLayer(mMap, c, 6);
+                pathLayer = new PathLayer(mMap, c, 6);
                 mMap.layers().add(pathLayer);
                 mPathLayers.add(pathLayer);
             } else {

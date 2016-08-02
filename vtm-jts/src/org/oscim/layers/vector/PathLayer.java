@@ -1,6 +1,7 @@
 /*
  * Copyright 2012 osmdroid authors: Viesturs Zarins, Martin Pearman
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -15,13 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.oscim.layers;
+package org.oscim.layers.vector;
 
 import com.vividsolutions.jts.geom.LineString;
 
 import org.oscim.core.GeoPoint;
-import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.LineDrawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Map;
@@ -33,32 +32,33 @@ import java.util.List;
 /**
  * This class draws a path line in given color.
  */
-public class JtsPathLayer extends VectorLayer {
+public class PathLayer extends VectorLayer {
 
     protected final ArrayList<GeoPoint> mPoints;
 
     protected Style mStyle;
     protected LineDrawable mDrawable;
 
-    public JtsPathLayer(Map map, int lineColor, float lineWidth) {
+    public PathLayer(Map map, Style style) {
         super(map);
-        mStyle = Style.builder()
-                .strokeColor(lineColor)
-                .strokeWidth(lineWidth)
-                .build();
+        mStyle = style;
 
-        mPoints = new ArrayList<GeoPoint>();
+        mPoints = new ArrayList<>();
     }
 
-    public JtsPathLayer(Map map, int lineColor) {
+    public PathLayer(Map map, int lineColor, float lineWidth) {
+        this(map, Style.builder()
+                .strokeColor(lineColor)
+                .strokeWidth(lineWidth)
+                .build());
+    }
+
+    public PathLayer(Map map, int lineColor) {
         this(map, lineColor, 2);
     }
 
-    public void setStyle(int lineColor, float lineWidth) {
-        mStyle = Style.builder()
-                .strokeColor(lineColor)
-                .strokeWidth(lineWidth)
-                .build();
+    public void setStyle(Style style) {
+        mStyle = style;
     }
 
     public void clearPath() {
