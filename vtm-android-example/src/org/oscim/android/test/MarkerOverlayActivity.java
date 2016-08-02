@@ -39,7 +39,7 @@ import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 public class MarkerOverlayActivity extends BitmapTileMapActivity
         implements OnItemGestureListener<MarkerItem> {
 
-    private static final boolean BILLBOARDS = true;
+    private static final boolean BILLBOARDS = false;
     private MarkerSymbol mFocusMarker;
 
     public MarkerOverlayActivity() {
@@ -55,18 +55,16 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
 
         MarkerSymbol symbol;
         if (BILLBOARDS)
-            symbol = new MarkerSymbol(bitmap, HotspotPlace.CENTER);
+            symbol = new MarkerSymbol(bitmap, HotspotPlace.BOTTOM_CENTER);
         else
-            symbol = new MarkerSymbol(bitmap, 0.5f, 0.5f, false);
+            symbol = new MarkerSymbol(bitmap, HotspotPlace.CENTER, false);
 
         /* another option: use some bitmap drawable */
-        Drawable d = getResources().getDrawable(R.drawable.ic_launcher);
+        Drawable d = getResources().getDrawable(R.drawable.marker_focus);
         if (BILLBOARDS)
-            mFocusMarker = new MarkerSymbol(drawableToBitmap(d),
-                    HotspotPlace.BOTTOM_CENTER);
+            mFocusMarker = new MarkerSymbol(drawableToBitmap(d), HotspotPlace.BOTTOM_CENTER);
         else
-            mFocusMarker = new MarkerSymbol(drawableToBitmap(d),
-                    0.5f, 0.5f, false);
+            mFocusMarker = new MarkerSymbol(drawableToBitmap(d), HotspotPlace.CENTER, false);
 
         ItemizedLayer<MarkerItem> markerLayer =
                 new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
