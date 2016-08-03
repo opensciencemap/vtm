@@ -371,7 +371,7 @@ public final class LineTexBucket extends LineBucket {
                 if (s >= 1) {
                     pScale = (line.stipple * s);
                     int cnt = (int) (pScale / line.stipple);
-                    pScale = line.stipple / (cnt + 1);
+                    pScale = (float) line.stipple / (cnt + 1);
                 } else {
                     pScale = line.stipple / s;
                     int cnt = (int) (pScale / line.stipple);
