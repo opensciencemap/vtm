@@ -24,16 +24,20 @@ import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.PointDrawable;
 import org.oscim.layers.vector.geometries.Style;
-import org.oscim.theme.VtmThemes;
 import org.oscim.utils.ColorUtil;
 
-public class VectorLayerMapActivity extends BaseMapActivity {
+import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
+
+public class VectorLayerMapActivity extends BitmapTileMapActivity {
+
+    public VectorLayerMapActivity() {
+        super(STAMEN_TONER.build());
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mMap.setTheme(VtmThemes.DEFAULT);
+        mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
         VectorLayer vectorLayer = new VectorLayer(mMap);
 
@@ -74,13 +78,13 @@ public class VectorLayerMapActivity extends BaseMapActivity {
         Style.Builder sb = Style.builder()
                 .buffer(0.5)
                 .fillColor(Color.RED)
-                .fillAlpha(0.2);
+                .fillAlpha(0.2f);
 
         for (int i = 0; i < 2000; i++) {
             Style style = sb.buffer(Math.random() + 0.2)
                     .fillColor(ColorUtil.setHue(Color.RED,
                             (int) (Math.random() * 50) / 50.0))
-                    .fillAlpha(0.5)
+                    .fillAlpha(0.5f)
                     .build();
 
             vectorLayer.add(new PointDrawable(Math.random() * 180 - 90,
@@ -88,10 +92,17 @@ public class VectorLayerMapActivity extends BaseMapActivity {
                     style));
 
         }
+        vectorLayer.update();
 
         mMap.layers().add(vectorLayer);
         mMap.layers().add(new TileGridLayer(mMap, 0xff222222, 1.2f, 1));
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        /* ignore saved position */
         mMap.setMapPosition(0, 0, 1 << 2);
     }
 }

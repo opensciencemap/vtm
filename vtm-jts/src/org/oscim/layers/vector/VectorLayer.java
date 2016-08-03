@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.layers.vector;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -234,9 +250,26 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
 
     protected void drawLine(Task t, int level, Geometry line, Style style) {
 
-        LineBucket ll = t.buckets.getLineBucket(level);
+        LineBucket ll;
+        if (style.stipple == 0 && style.texture == null)
+            ll = t.buckets.getLineBucket(level);
+        else
+            ll = t.buckets.getLineTexBucket(level);
         if (ll.line == null) {
-            ll.line = new LineStyle(0, style.strokeColor, style.strokeWidth);
+            if (style.stipple == 0 && style.texture == null)
+                ll.line = new LineStyle(style.strokeColor, style.strokeWidth, style.cap);
+            else
+                ll.line = LineStyle.builder()
+                        .cap(style.cap)
+                        .color(style.strokeColor)
+                        .fixed(style.fixed)
+                        .level(0)
+                        .stipple(style.stipple)
+                        .stippleColor(style.stippleColor)
+                        .stippleWidth(style.stippleWidth)
+                        .strokeWidth(style.strokeWidth)
+                        .texture(style.texture)
+                        .build();
         }
 
         if (style.generalization != Style.GENERALIZATION_NONE) {

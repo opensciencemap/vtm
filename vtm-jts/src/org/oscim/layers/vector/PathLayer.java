@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class draws a path line in given color.
+ * This class draws a path line in given color or texture.
  */
 public class PathLayer extends VectorLayer {
 
@@ -136,8 +136,7 @@ public class PathLayer extends VectorLayer {
     public void addGreatCircle(GeoPoint startPoint, GeoPoint endPoint,
                                final int numberOfPoints) {
         /* adapted from page
-         * http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map
-         * -in.html
+         * http://compastic.blogspot.co.uk/2011/07/how-to-draw-great-circle-on-map-in.html
          * which was adapted from page http://maps.forum.nu/gm_flight_path.html */
 
         GeomBuilder gb = new GeomBuilder();

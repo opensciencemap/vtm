@@ -19,19 +19,22 @@ package org.oscim.test;
 import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.TileGridLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.PointDrawable;
 import org.oscim.layers.vector.geometries.Style;
-import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.utils.ColorUtil;
 
 public class VectorLayerTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
-        mMap.setBaseMap(new OSciMap4TileSource());
-        mMap.setTheme(VtmThemes.DEFAULT);
+        BitmapTileLayer bitmapLayer = new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build());
+        bitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
+        mMap.setBaseMap(bitmapLayer);
+
+        mMap.setMapPosition(0, 0, 1 << 2);
 
         VectorLayer vectorLayer = new VectorLayer(mMap);
 
@@ -53,7 +56,7 @@ public class VectorLayerTest extends GdxMapApp {
         Style.Builder sb = Style.builder()
                 .buffer(0.4)
                 .fillColor(Color.RED)
-                .fillAlpha(0.2);
+                .fillAlpha(0.2f);
 
         //        int tileSize = 5;
         //        for (int x = -180; x < 200; x += tileSize) {
@@ -72,7 +75,7 @@ public class VectorLayerTest extends GdxMapApp {
             Style style = sb.buffer(Math.random() * 1)
                     .fillColor(ColorUtil.setHue(Color.RED,
                             Math.random()))
-                    .fillAlpha(0.5)
+                    .fillAlpha(0.5f)
                     .build();
 
             vectorLayer.add(new PointDrawable(Math.random() * 180 - 90,
@@ -80,11 +83,10 @@ public class VectorLayerTest extends GdxMapApp {
                     style));
 
         }
+        vectorLayer.update();
 
         mMap.layers().add(vectorLayer);
         mMap.layers().add(new TileGridLayer(mMap, 0xff222222, 1.2f, 1));
-
-        mMap.setMapPosition(0, 0, 1 << 2);
     }
 
     public static void main(String[] args) {

@@ -18,14 +18,15 @@
 package org.oscim.android.test;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
-import org.oscim.core.GeoPoint;
-import org.oscim.layers.PathLayer;
+import org.oscim.core.MapPosition;
+import org.oscim.event.Event;
+import org.oscim.layers.vector.PathLayer;
+import org.oscim.layers.vector.geometries.Style;
+import org.oscim.map.Map;
 import org.oscim.renderer.bucket.TextureItem;
-import org.oscim.theme.styles.LineStyle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,23 +39,52 @@ import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
  */
 public class LineTexActivity extends BitmapTileMapActivity {
 
+    private static final boolean ANIMATION = false;
+
+    private List<PathLayer> mPathLayers = new ArrayList<>();
+
     public LineTexActivity() {
         super(STAMEN_TONER.build());
     }
-
-    TextureItem tex;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
-        tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/pike.png"));
+        TextureItem tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/pike.png"));
         tex.mipmap = true;
 
-        createLayers(1, true);
+        for (double lat = -90; lat <= 90; lat += 5) {
+            int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.5f);
+            Style style = Style.builder()
+                    .stippleColor(c)
+                    .stipple(24)
+                    .stippleWidth(1)
+                    .strokeWidth(12)
+                    .strokeColor(c)
+                    .fixed(true)
+                    .texture(tex)
+                    .build();
+            PathLayer pathLayer = new PathLayer(mMap, style);
+            mMap.layers().add(pathLayer);
+            mPathLayers.add(pathLayer);
+        }
 
-        //looooop();
+        if (ANIMATION)
+            mMap.events.bind(new Map.UpdateListener() {
+                @Override
+                public void onMapEvent(Event e, MapPosition mapPosition) {
+                    //if (e == Map.UPDATE_EVENT) {
+                    long t = System.currentTimeMillis();
+                    float pos = t % 20000 / 10000f - 1f;
+                    createLayers(pos);
+                    mMap.updateMap(true);
+                    //}
+                }
+            });
+        else
+            createLayers(1);
     }
 
     @Override
@@ -65,40 +95,16 @@ public class LineTexActivity extends BitmapTileMapActivity {
         mMap.setMapPosition(0, 0, 1 << 2);
     }
 
-    void looooop() {
-        mMap.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                long t = SystemClock.uptimeMillis();
-                float pos = t % 20000 / 10000f - 1f;
-                createLayers(pos, false);
-                //Samples.log.debug("update took" + (SystemClock.uptimeMillis() - t) + " " + pos);
-                looooop();
-                redraw();
-            }
-        }, 50);
-    }
-
-    void redraw() {
-        mMap.render();
-    }
-
-    ArrayList<PathLayer> mPathLayers = new ArrayList<>();
-
-    void createLayers(float pos, boolean init) {
+    void createLayers(float pos) {
 
         int i = 0;
-
         for (double lat = -90; lat <= 90; lat += 5) {
-            List<GeoPoint> pts = new ArrayList<>();
-
+            double[] packedCoordinates = new double[360 + 2];
+            //List<GeoPoint> pts = new ArrayList<>();
+            int c = 0;
             for (double lon = -180; lon <= 180; lon += 2) {
                 //pts.add(new GeoPoint(lat, lon));
-                double longitude = lon + (pos * 180);
-                if (longitude < -180)
-                    longitude += 360;
-                if (longitude > 180)
-                    longitude -= 360;
+                double longitude = lon;
 
                 double latitude = lat + (pos * 90);
                 if (latitude < -90)
@@ -108,32 +114,15 @@ public class LineTexActivity extends BitmapTileMapActivity {
 
                 latitude += Math.sin((Math.abs(pos) * (lon / Math.PI)));
 
-                pts.add(new GeoPoint(latitude, longitude));
-            }
-            PathLayer pathLayer;
-            if (init) {
-                int c = Color.fade(Color.rainbow((float) (lat + 90) / 180), 0.9f);
-
-                LineStyle style = LineStyle.builder()
-                        .stippleColor(c)
-                        .stipple(24)
-                        .stippleWidth(1)
-                        .strokeWidth(12)
-                        .strokeColor(c)
-                        .fixed(true)
-                        .texture(tex)
-                        .build();
-
-                pathLayer = new PathLayer(mMap, style);
-
-                mMap.layers().add(pathLayer);
-                mPathLayers.add(pathLayer);
-            } else {
-                pathLayer = mPathLayers.get(i++);
+                packedCoordinates[c++] = longitude;
+                packedCoordinates[c++] = latitude;
             }
 
-            pathLayer.setPoints(pts);
+            //LineString line = new LineString(factory.create(packedCoordinates, 2), geomFactory);
+            //mPathLayers.get(i++).setLineString(line);
+
+            mPathLayers.get(i++).setLineString(packedCoordinates);
+
         }
-
     }
 }

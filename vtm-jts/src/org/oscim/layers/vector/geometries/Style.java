@@ -1,6 +1,26 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.layers.vector.geometries;
 
 import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
+import org.oscim.renderer.bucket.TextureItem;
+
+import static org.oscim.backend.canvas.Color.parseColor;
 
 /**
  * Class encapsulating style information for drawing geometries on the map.
@@ -23,6 +43,13 @@ public class Style {
 
     public final int generalization;
 
+    public final Paint.Cap cap;
+    public final boolean fixed;
+    public final int stipple;
+    public final int stippleColor;
+    public final float stippleWidth;
+    public final TextureItem texture;
+
     private Style(Builder builder) {
         strokeWidth = builder.strokeWidth;
         strokeColor = builder.strokeColor;
@@ -34,6 +61,13 @@ public class Style {
         scalingZoomLevel = builder.scalingZoomLevel;
 
         generalization = builder.generalization;
+
+        cap = builder.cap;
+        fixed = builder.fixed;
+        stipple = builder.stipple;
+        stippleColor = builder.stippleColor;
+        stippleWidth = builder.stippleWidth;
+        texture = builder.texture;
     }
 
     /**
@@ -58,14 +92,18 @@ public class Style {
 
         private int generalization = GENERALIZATION_NONE;
 
-        protected Builder() {
+        public Paint.Cap cap = Paint.Cap.ROUND;
+        public boolean fixed = false;
+        public int stipple = 0;
+        public int stippleColor = Color.GRAY;
+        public float stippleWidth = 1;
+        public TextureItem texture = null;
 
+        protected Builder() {
         }
 
         /**
          * Builds the GeometryStyle from the specified parameters.
-         *
-         * @return
          */
         public Style build() {
             return new Style(this);
@@ -73,9 +111,6 @@ public class Style {
 
         /**
          * Sets the line width for the geometry's line or outline.
-         *
-         * @param lineWidth
-         * @return
          */
         public Builder strokeWidth(float lineWidth) {
             this.strokeWidth = lineWidth;
@@ -84,20 +119,22 @@ public class Style {
 
         /**
          * Sets the color for the geometry's line or outline.
-         *
-         * @param stokeColor
-         * @return
          */
-        public Builder strokeColor(int stokeColor) {
-            this.strokeColor = stokeColor;
+        public Builder strokeColor(int strokeColor) {
+            this.strokeColor = strokeColor;
+            return this;
+        }
+
+        /**
+         * Sets the color for the geometry's line or outline.
+         */
+        public Builder strokeColor(String strokeColor) {
+            this.strokeColor = parseColor(strokeColor);
             return this;
         }
 
         /**
          * Sets the color for the geometry's area.
-         *
-         * @param fillColor
-         * @return
          */
         public Builder fillColor(int fillColor) {
             this.fillColor = fillColor;
@@ -105,13 +142,18 @@ public class Style {
         }
 
         /**
-         * Sets alpha channel value for the geometry's area.
-         *
-         * @param fillAlpha
-         * @return
+         * Sets the color for the geometry's area.
          */
-        public Builder fillAlpha(double fillAlpha) {
-            this.fillAlpha = (float) fillAlpha;
+        public Builder fillColor(String fillColor) {
+            this.fillColor = parseColor(fillColor);
+            return this;
+        }
+
+        /**
+         * Sets alpha channel value for the geometry's area.
+         */
+        public Builder fillAlpha(float fillAlpha) {
+            this.fillAlpha = fillAlpha;
             return this;
         }
 
@@ -119,9 +161,6 @@ public class Style {
          * This function has effect only on Points:
          * use it to control the size on the circle that
          * will be built from a buffer around the point.
-         *
-         * @param buffer
-         * @return itself
          */
         public Builder buffer(double buffer) {
             this.buffer = buffer;
@@ -132,8 +171,6 @@ public class Style {
          * This function has effect only on Points:
          * use it to specify from which zoom level the point
          * should stop decreasing in size and "stick to the map".
-         *
-         * @param zoomlvl
          */
         public Builder scaleZoomLevel(int zoomlvl) {
             this.scalingZoomLevel = zoomlvl;
@@ -144,42 +181,46 @@ public class Style {
          * Sets generalization factor for the geometry.
          * Use predefined GeometryStyle.GENERALIZATION_HIGH,
          * GENERALIZATION_MEDIUM or GENERALIZATION_SMALL
-         *
-         * @param generalization
-         * @return
          */
         public Builder generalization(int generalization) {
             this.generalization = generalization;
             return this;
         }
-    }
 
-    public float getStrokeWidth() {
-        return strokeWidth;
-    }
+        public Builder cap(Paint.Cap cap) {
+            this.cap = cap;
+            return this;
+        }
 
-    public int getStrokeColor() {
-        return strokeColor;
-    }
+        public Builder fixed(boolean b) {
+            this.fixed = b;
+            return this;
+        }
 
-    public int getFillColor() {
-        return fillColor;
-    }
+        public Builder stipple(int width) {
+            this.stipple = width;
+            return this;
+        }
 
-    public float getFillAlpha() {
-        return fillAlpha;
-    }
+        public Builder stippleColor(int color) {
+            this.stippleColor = color;
+            return this;
+        }
 
-    public int getGeneralization() {
-        return generalization;
-    }
+        public Builder stippleColor(String color) {
+            this.stippleColor = parseColor(color);
+            return this;
+        }
 
-    public double getBuffer() {
-        return buffer;
-    }
+        public Builder stippleWidth(float width) {
+            this.stippleWidth = width;
+            return this;
+        }
 
-    public int getScalingZoomLevel() {
-        return scalingZoomLevel;
+        public Builder texture(TextureItem texture) {
+            this.texture = texture;
+            return this;
+        }
     }
 
     static final Style DEFAULT_STYLE = new Builder()
@@ -194,5 +235,4 @@ public class Style {
     public static Style.Builder builder() {
         return new Style.Builder();
     }
-
 }
