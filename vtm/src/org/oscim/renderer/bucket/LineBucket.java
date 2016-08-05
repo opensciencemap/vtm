@@ -678,8 +678,7 @@ public class LineBucket extends RenderBucket {
                     }
 
                     /* Cap mode */
-                    if (lb.scale < 1.5 /* || ll.line.fixed */) {
-
+                    if (line.width < 1.5/* || line.fixed*/) {
                         if (capMode != CAP_THIN) {
                             capMode = CAP_THIN;
                             gl.uniform1f(uLineMode, capMode);
