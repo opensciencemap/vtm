@@ -104,6 +104,7 @@ public class LineTexTest extends GdxMapApp {
                         .strokeColor(c)
                         .fixed(true)
                         .texture(tex)
+                        .randomOffset(false)
                         .build();
                 pathLayer = new PathLayer(mMap, style);
                 mMap.layers().add(pathLayer);

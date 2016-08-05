@@ -92,8 +92,6 @@ public final class LineTexBucket extends LineBucket {
 
     private boolean evenSegment = true;
 
-    protected boolean mRandomizeOffset = true;
-
     LineTexBucket(int level) {
         super(TEXLINE, false, true);
 
@@ -148,7 +146,7 @@ public final class LineTexBucket extends LineBucket {
             float y = points[pos++] * COORD_SCALE;
 
             /* randomize a bit */
-            float lineLength = mRandomizeOffset ? (x * x + y * y) % 80 : 0;
+            float lineLength = line.randomOffset ? (x * x + y * y) % 80 : 0;
 
             while (pos < end) {
                 float nx = points[pos++] * COORD_SCALE;

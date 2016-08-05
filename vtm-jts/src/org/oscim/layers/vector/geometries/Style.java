@@ -50,6 +50,8 @@ public class Style {
     public final float stippleWidth;
     public final TextureItem texture;
 
+    public final boolean randomOffset;
+
     private Style(Builder builder) {
         strokeWidth = builder.strokeWidth;
         strokeColor = builder.strokeColor;
@@ -68,6 +70,8 @@ public class Style {
         stippleColor = builder.stippleColor;
         stippleWidth = builder.stippleWidth;
         texture = builder.texture;
+
+        randomOffset = builder.randomOffset;
     }
 
     /**
@@ -98,6 +102,8 @@ public class Style {
         public int stippleColor = Color.GRAY;
         public float stippleWidth = 1;
         public TextureItem texture = null;
+
+        public boolean randomOffset = true;
 
         protected Builder() {
         }
@@ -219,6 +225,11 @@ public class Style {
 
         public Builder texture(TextureItem texture) {
             this.texture = texture;
+            return this;
+        }
+
+        public Builder randomOffset(boolean randomOffset) {
+            this.randomOffset = randomOffset;
             return this;
         }
     }

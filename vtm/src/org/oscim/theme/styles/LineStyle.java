@@ -41,6 +41,8 @@ public final class LineStyle extends RenderStyle {
     public final float stippleWidth;
     public final TextureItem texture;
 
+    public final boolean randomOffset;
+
     private LineStyle(LineBuilder<?> builder) {
         this.level = builder.level;
         this.style = builder.style;
@@ -55,12 +57,14 @@ public final class LineStyle extends RenderStyle {
         this.stippleColor = builder.stippleColor;
         this.stippleWidth = builder.stippleWidth;
         this.texture = builder.texture;
+        this.randomOffset = builder.randomOffset;
     }
 
     public LineStyle(int level, String style, int color, float width,
                      Cap cap, boolean fixed,
                      int stipple, int stippleColor, float stippleWidth,
-                     int fadeScale, float blur, boolean isOutline, TextureItem texture) {
+                     int fadeScale, float blur, boolean isOutline, TextureItem texture,
+                     boolean randomOffset) {
 
         this.level = level;
         this.style = style;
@@ -78,18 +82,20 @@ public final class LineStyle extends RenderStyle {
 
         this.blur = blur;
         this.fadeScale = fadeScale;
+
+        this.randomOffset = randomOffset;
     }
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null);
+        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null);
+        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null);
+        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true);
     }
 
     @Override
@@ -116,6 +122,8 @@ public final class LineStyle extends RenderStyle {
         public float stippleWidth;
         public TextureItem texture;
 
+        public boolean randomOffset;
+
         public T set(LineStyle line) {
             if (line == null)
                 return reset();
@@ -132,6 +140,7 @@ public final class LineStyle extends RenderStyle {
             this.stippleColor = line.stippleColor;
             this.stippleWidth = line.stippleWidth;
             this.texture = line.texture;
+            this.randomOffset = line.randomOffset;
             return self();
         }
 
@@ -150,6 +159,8 @@ public final class LineStyle extends RenderStyle {
             stippleWidth = 1;
             stippleColor = Color.BLACK;
             texture = null;
+
+            randomOffset = true;
 
             return self();
         }
@@ -210,6 +221,11 @@ public final class LineStyle extends RenderStyle {
 
         public T texture(TextureItem texture) {
             this.texture = texture;
+            return self();
+        }
+
+        public T randomOffset(boolean randomOffset) {
+            this.randomOffset = randomOffset;
             return self();
         }
     }

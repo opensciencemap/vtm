@@ -264,6 +264,7 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> {
                         .color(style.strokeColor)
                         .fixed(style.fixed)
                         .level(0)
+                        .randomOffset(style.randomOffset)
                         .stipple(style.stipple)
                         .stippleColor(style.stippleColor)
                         .stippleWidth(style.stippleWidth)

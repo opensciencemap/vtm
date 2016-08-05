@@ -65,6 +65,7 @@ public class LineTexActivity extends BitmapTileMapActivity {
                     .strokeColor(c)
                     .fixed(true)
                     .texture(tex)
+                    .randomOffset(false)
                     .build();
             PathLayer pathLayer = new PathLayer(mMap, style);
             mMap.layers().add(pathLayer);
