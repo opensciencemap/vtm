@@ -1,6 +1,9 @@
 # V™
 <br/>
 
+
+**Development continues at https://github.com/mapsforge/vtm**
+#<br/>
 VTM is developed within the [OpenScienceMap](http://opensciencemap.org) project.
 
 ## Features
