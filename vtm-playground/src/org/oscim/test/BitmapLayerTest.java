@@ -22,41 +22,40 @@ import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.oscim.tiling.source.bitmap.DefaultSources.HIKEBIKE_HILLSHADE;
-import static org.oscim.tiling.source.bitmap.DefaultSources.OPENSTREETMAP;
-import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
-import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_WATERCOLOR;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 public class BitmapLayerTest extends GdxMap {
 
-    final Logger log = LoggerFactory.getLogger(BitmapTileLayer.class);
-
-    BitmapTileLayer mLayer = null;
-    BitmapTileLayer mShaded = null;
+    private BitmapTileLayer mLayer = null;
+    private BitmapTileLayer mShaded = null;
 
     @Override
     protected boolean onKeyDown(int keycode) {
         if (keycode == Input.Keys.NUM_1) {
+            mMap.layers().remove(mShaded);
+            mShaded = null;
             mMap.layers().remove(mLayer);
-            mLayer = new BitmapTileLayer(mMap, OPENSTREETMAP.build());
+            mLayer = new BitmapTileLayer(mMap, DefaultSources.OPENSTREETMAP.build());
             mMap.layers().add(mLayer);
+            mMap.clearMap();
             return true;
         } else if (keycode == Input.Keys.NUM_2) {
+            mMap.layers().remove(mShaded);
+            mShaded = null;
             mMap.layers().remove(mLayer);
-            mLayer = new BitmapTileLayer(mMap, STAMEN_WATERCOLOR.build());
+            mLayer = new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build());
             mMap.layers().add(mLayer);
+            mMap.clearMap();
             return true;
         } else if (keycode == Input.Keys.NUM_3) {
             if (mShaded != null) {
                 mMap.layers().remove(mShaded);
                 mShaded = null;
             } else {
-                mShaded = new BitmapTileLayer(mMap, HIKEBIKE_HILLSHADE.build());
+                mShaded = new BitmapTileLayer(mMap, DefaultSources.HIKEBIKE_HILLSHADE.build());
                 mMap.layers().add(mShaded);
             }
+            mMap.clearMap();
             return true;
         }
 
@@ -67,13 +66,12 @@ public class BitmapLayerTest extends GdxMap {
     public void createLayers() {
         MapRenderer.setBackgroundColor(0xff888888);
 
-        mLayer = new BitmapTileLayer(mMap, STAMEN_TONER.build());
+        mLayer = new BitmapTileLayer(mMap, DefaultSources.OPENSTREETMAP.build());
         mMap.layers().add(mLayer);
 
     }
 
     public static void main(String[] args) {
-
         GdxMapApp.init();
         GdxMapApp.run(new BitmapLayerTest(), null, 256);
     }
