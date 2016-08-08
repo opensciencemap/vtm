@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Andrey Novikov
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,9 +22,16 @@ import org.oscim.tiling.source.bitmap.BitmapTileSource.Builder;
 
 /**
  * Do not use in applications unless you read through and comply to
- * their terms of use! Only added here for testing puposes.
+ * their terms of use! Only added here for testing purposes.
  */
 public class DefaultSources {
+
+    private static final FadeStep[] FADE_STEPS = new FadeStep[]{
+            new FadeStep(0, 8 - 1, 1, 0.7f),
+            // dont fade between zoom-min/max
+            // fade above zoom max + 2, interpolate 1 to 0
+            new FadeStep(8 - 1, 8 + 1, 0.7f, 0)
+    };
 
     public static Builder<?> OPENSTREETMAP = BitmapTileSource.builder()
             .url("http://tile.openstreetmap.org")
@@ -47,35 +55,10 @@ public class DefaultSources {
             .tilePath("/{Z}/{X}/{Y}.jpg")
             .zoomMax(6);
 
-    final static FadeStep[] fadeSteps = new FadeStep[]{
-            new FadeStep(0, 8 - 1, 1, 0.7f),
-            // dont fade between zoom-min/max
-            // fade above zoom max + 2, interpolate 1 to 0
-            new FadeStep(8 - 1, 8 + 1, 0.7f, 0)
-    };
-
-    public static Builder<?> MAPQUEST_AERIAL = BitmapTileSource.builder()
-            .url("http://otile1.mqcdn.com/tiles/1.0.0/sat")
-            .tilePath("/{Z}/{X}/{Y}.jpg")
-            .fadeSteps(fadeSteps)
-            .zoomMax(8);
-
     public static Builder<?> NE_LANDCOVER = BitmapTileSource.builder()
             .url("http://opensciencemap.org/tiles/ne")
-            .fadeSteps(fadeSteps)
+            .fadeSteps(FADE_STEPS)
             .zoomMax(8);
-
-    public static Builder<?> ARCGIS_RELIEF = BitmapTileSource.builder()
-            .url("http://server.arcgisonline.com/ArcGIS/rest/services" +
-                    "/World_Shaded_Relief/MapServer/tile/")
-            .tilePath("{Z}/{Y}/{X}")
-            .zoomMax(13);
-
-    public static Builder<?> HD_HILLSHADE = BitmapTileSource.builder()
-            .url("http://korona.geog.uni-heidelberg.de/tiles/asterh/")
-            .tilePath("?x={X}&y={Y}&z={Z}")
-            .zoomMin(2)
-            .zoomMax(16);
 
     public static Builder<?> HIKEBIKE = BitmapTileSource.builder()
             .url("http://tiles.wmflabs.org/hikebike")
@@ -86,15 +69,4 @@ public class DefaultSources {
             .url("http://tiles.wmflabs.org/hillshading")
             .tilePath("/{Z}/{X}/{Y}.png")
             .zoomMax(14);
-
-    /**
-     * https://github.com/opensciencemap/vtm/issues/18
-     * https://developers.google.com/maps/faq
-     */
-
-    public static Builder<?> GOOGLE_MAPS = BitmapTileSource.builder()
-            .url("INSERT URL")
-            .tilePath("/vt/x={X}&y={Y}&z={Z}&s=Galileo&scale=2")
-            .zoomMin(1)
-            .zoomMax(20);
 }
