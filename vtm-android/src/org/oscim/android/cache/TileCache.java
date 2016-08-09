@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -107,7 +108,9 @@ public class TileCache implements ITileCache {
         if (dbg)
             log.debug("open cache {}, {}", cacheDirectory, dbName);
 
-        dbHelper = new SQLiteHelper(context, new File(cacheDirectory, dbName).getAbsolutePath());
+        if (cacheDirectory != null)
+            dbName = new File(cacheDirectory, dbName).getAbsolutePath();
+        dbHelper = new SQLiteHelper(context, dbName);
 
         if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
             dbHelper.setWriteAheadLoggingEnabled(true);

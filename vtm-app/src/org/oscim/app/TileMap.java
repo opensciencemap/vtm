@@ -1,5 +1,6 @@
 /* Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,7 +13,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.app;
 
 import android.app.AlertDialog;
@@ -81,8 +81,9 @@ public class TileMap extends MapActivity implements MapEventsReceiver {
         App.activity = this;
 
         mMapLayers = new MapLayers();
+        mMapLayers.setBaseMap(this);
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mMapLayers.setBaseMap(prefs);
 
         if (!prefs.contains("distanceTouch"))
             prefs.edit().putBoolean("distanceTouch", true).apply();
@@ -347,8 +348,9 @@ public class TileMap extends MapActivity implements MapEventsReceiver {
         mCompass.resume();
         mLocation.resume();
 
+        mMapLayers.setPreferences(this);
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mMapLayers.setPreferences(preferences);
 
         if (preferences.getBoolean("fullscreen", false)) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);

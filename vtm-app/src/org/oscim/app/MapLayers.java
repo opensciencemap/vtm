@@ -1,6 +1,24 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.app;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import org.oscim.android.cache.TileCache;
 import org.oscim.layers.GenericLayer;
@@ -25,8 +43,6 @@ import org.slf4j.LoggerFactory;
 public class MapLayers {
 
     final static Logger log = LoggerFactory.getLogger(MapLayers.class);
-
-    private static final String CACHE_DIRECTORY = "/Android/data/org.oscim.app/cache/";
 
     abstract static class Config {
         final String name;
@@ -71,7 +87,8 @@ public class MapLayers {
         setBackgroundMap(-1);
     }
 
-    void setBaseMap(SharedPreferences preferences) {
+    void setBaseMap(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String dbname = preferences.getString("mapDatabase", "OPENSCIENCEMAP4");
 
         if (dbname.equals(mMapDatabase) && mBaseLayer != null)
@@ -89,7 +106,7 @@ public class MapLayers {
         }
 
         if (tileSource instanceof UrlTileSource) {
-            mCache = new TileCache(App.activity, CACHE_DIRECTORY, dbname);
+            mCache = new TileCache(App.activity, context.getExternalCacheDir().getAbsolutePath(), dbname);
             mCache.setCacheSize(512 * (1 << 10));
             tileSource.setCache(mCache);
         } else {
@@ -106,8 +123,10 @@ public class MapLayers {
         mMapDatabase = dbname;
     }
 
-    void setPreferences(SharedPreferences preferences) {
-        setBaseMap(preferences);
+    void setPreferences(Context context) {
+        setBaseMap(context);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         ThemeFile theme = VtmThemes.DEFAULT;
         if (preferences.contains("theme")) {
