@@ -1,5 +1,6 @@
 /*
  * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2016 Stephan Leuschner 
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -100,6 +101,10 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
         return indiceOffset;
     }
 
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public void setVertexOffset(int offset) {
         this.vertexOffset = offset;
     }
@@ -111,7 +116,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
     protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
         compileVertexItems(vboData);
         if (iboData != null)
-            compileIndiceItems(iboData);
+            compileIndicesItems(iboData);
     }
 
     protected void compileVertexItems(ShortBuffer vboData) {
@@ -120,7 +125,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
         vertexItems.compile(vboData);
     }
 
-    protected void compileIndiceItems(ShortBuffer iboData) {
+    protected void compileIndicesItems(ShortBuffer iboData) {
         /* keep offset of layer data in vbo */
         if (indiceItems == null || indiceItems.empty())
             return;
