@@ -683,9 +683,11 @@ public class MapDatabase implements ITileDataSource {
                 if (e.type == GeometryType.NONE)
                     e.type = line ? LINE : POLY;
 
-            } else if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
+            } else /*if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
                     || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
-                    || e.tags.contains("natural", "nosea")) {
+                    || e.tags.contains("natural", "nosea"))*/ {
+                // Avoid additional simplification
+                // https://github.com/mapsforge/vtm/issues/39
                 outBuffer[outPos++] = lon;
                 outBuffer[outPos++] = lat;
                 cnt += 2;
