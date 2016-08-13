@@ -678,12 +678,13 @@ public class LineBucket extends RenderBucket {
                     }
 
                     /* Cap mode */
-                    if (line.width < 1.5/* || line.fixed*/) {
-                        if (capMode != CAP_THIN) {
-                            capMode = CAP_THIN;
-                            gl.uniform1f(uLineMode, capMode);
-                        }
-                    } else if (lb.roundCap) {
+                    //if (line.width < 1.5/* || line.fixed*/) {
+                    //    if (capMode != CAP_THIN) {
+                    //        capMode = CAP_THIN;
+                    //        gl.uniform1f(uLineMode, capMode);
+                    //    }
+                    //} else
+                    if (lb.roundCap) {
                         if (capMode != CAP_ROUND) {
                             capMode = CAP_ROUND;
                             gl.uniform1f(uLineMode, capMode);
@@ -730,7 +731,6 @@ public class LineBucket extends RenderBucket {
 
                     /* Cap mode */
                     if (ref.roundCap) {
-
                         if (capMode != CAP_ROUND) {
                             capMode = CAP_ROUND;
                             gl.uniform1f(uLineMode, capMode);
