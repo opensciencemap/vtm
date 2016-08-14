@@ -14,8 +14,8 @@
  */
 package org.oscim.tiling.source;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -25,7 +25,8 @@ dependencies {
 android {
   compileSdkVersion androidTargetSdk()
   buildToolsVersion "$androidBuildVersionTools"
-
+  lintOptions { abortOnError false }
+  
   sourceSets {
     main {
       manifest.srcFile 'AndroidManifest.xml'

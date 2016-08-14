@@ -26,7 +26,7 @@
             android:id="@+id/controls"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="#cc000000"
+            android:background="#ccdddddd"
             android:orientation="vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"

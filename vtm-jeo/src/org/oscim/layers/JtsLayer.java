@@ -1,7 +1,7 @@
 package org.oscim.layers;
 
 import org.jeo.geom.CoordinatePath;
-import org.oscim.core.BoundingBox;
+import org.oscim.core.Box;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
@@ -19,14 +19,16 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class JtsLayer extends AbstractVectorLayer<Geometry> {
 
+	private double mMinX;
+	private double mMinY;
+
 	public JtsLayer(Map map) {
 		super(map);
 	}
 
 	@Override
-	protected void processFeatures(Task t, BoundingBox bbox) {
-		processFeatures(t, new Envelope(bbox.getMinLongitude(), bbox.getMaxLongitude(),
-		                                bbox.getMinLatitude(), bbox.getMaxLatitude()));
+	protected void processFeatures(Task t, Box bbox) {
+		processFeatures(t, new Envelope(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax));
 
 	}
 

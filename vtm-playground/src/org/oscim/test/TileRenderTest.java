@@ -20,6 +20,7 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.QueryResult;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
@@ -100,7 +101,7 @@ public class TileRenderTest extends GdxMapApp {
 			log.debug("load {}", tile);
 
 			tileLoader[0].loadTile(tile);
-			tileManager.jobCompleted(tile, true);
+			tileManager.jobCompleted(tile, QueryResult.SUCCESS);
 		} else {
 			tileManager.update(mapPosition);
 			MapTile t = tileManager.getTileJob();
@@ -108,7 +109,7 @@ public class TileRenderTest extends GdxMapApp {
 				log.debug("load {}", t);
 
 				tileLoader[0].loadTile(t);
-				tileManager.jobCompleted(t, true);
+				tileManager.jobCompleted(t, QueryResult.SUCCESS);
 
 				t = tileManager.getTileJob();
 			}

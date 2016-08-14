@@ -40,11 +40,4 @@ public interface ITileDataSink {
 	 * Notify loader that tile loading is completed.
 	 */
 	void completed(QueryResult result);
-
-	public static enum QueryResult {
-		SUCCESS,
-		FAILED,
-		TILE_NOT_FOUND,
-		DELAYED,
-	}
 }

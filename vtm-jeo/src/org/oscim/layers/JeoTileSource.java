@@ -1,8 +1,8 @@
 package org.oscim.layers;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
-import static org.oscim.tiling.ITileDataSink.QueryResult.TILE_NOT_FOUND;
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.TILE_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

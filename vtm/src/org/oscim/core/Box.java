@@ -17,20 +17,13 @@
 package org.oscim.core;
 
 /**
- * The Class Box.
+ * The Classic Box.
  */
 public class Box {
 
-	/** The min x. */
 	public double xmin;
-
-	/** The max x. */
 	public double xmax;
-
-	/** The min y. */
 	public double ymin;
-
-	/** The max y. */
 	public double ymax;
 
 	/**
@@ -49,6 +42,8 @@ public class Box {
 	 * @param ymax the max y
 	 */
 	public Box(double xmin, double ymin, double xmax, double ymax) {
+		if (xmin > xmax || ymin > ymax)
+			throw new IllegalArgumentException("min > max !");
 		this.xmin = xmin;
 		this.ymin = ymin;
 		this.xmax = xmax;
@@ -70,21 +65,30 @@ public class Box {
 	 * @return true, if point is inside box.
 	 */
 	public boolean contains(double x, double y) {
-		return (x >= xmin && x <= ymax && y >= ymin && y <= ymax);
+		return (x >= xmin
+		        && x <= xmax
+		        && y >= ymin
+		        && y <= ymax);
 	}
 
 	/**
 	 * Check if Box contains Point.
 	 */
 	public boolean contains(Point p) {
-		return (p.x >= xmin && p.x <= ymax && p.y >= ymin && p.y <= ymax);
+		return (p.x >= xmin
+		        && p.x <= xmax
+		        && p.y >= ymin
+		        && p.y <= ymax);
 	}
 
 	/**
 	 * Check if this Box is inside box.
 	 */
 	public boolean inside(Box box) {
-		return xmin >= box.xmin && xmax <= box.xmax && ymin >= box.ymin && ymax <= box.ymax;
+		return xmin >= box.xmin
+		        && xmax <= box.xmax
+		        && ymin >= box.ymin
+		        && ymax <= box.ymax;
 	}
 
 	public double getWidth() {
@@ -96,7 +100,10 @@ public class Box {
 	}
 
 	public boolean overlap(Box other) {
-		return !(xmin > other.xmax || xmax < other.xmin || ymin > other.ymax || ymax < other.ymin);
+		return !(xmin > other.xmax
+		        || xmax < other.xmin
+		        || ymin > other.ymax
+		        || ymax < other.ymin);
 	}
 
 	@Override
@@ -104,4 +111,82 @@ public class Box {
 		return "[" + xmin + ',' + ymin + ',' + xmax + ',' + ymax + ']';
 	}
 
+	public static Box createSafe(double x1, double y1, double x2, double y2) {
+		return new Box(x1 < x2 ? x1 : x2,
+		               y1 < y2 ? y1 : y2,
+		               x1 > x2 ? x1 : x2,
+		               y1 > y2 ? y1 : y2);
+	}
+
+	public void setExtents(float[] points) {
+		float x1, y1, x2, y2;
+		x1 = x2 = points[0];
+		y1 = y2 = points[1];
+
+		for (int i = 2, n = points.length; i < n; i += 2) {
+			float x = points[i];
+			if (x < x1)
+				x1 = x;
+			else if (x > x2)
+				x2 = x;
+
+			float y = points[i + 1];
+			if (y < y1)
+				y1 = y;
+			else if (y > y2)
+				y2 = y;
+		}
+		this.xmin = x1;
+		this.ymin = y1;
+		this.xmax = x2;
+		this.ymax = y2;
+	}
+
+	public void add(Box bbox) {
+		if (bbox.xmin < xmin)
+			xmin = bbox.xmin;
+		if (bbox.ymin < ymin)
+			ymin = bbox.ymin;
+		if (bbox.xmax > xmax)
+			xmax = bbox.xmax;
+		if (bbox.ymax > ymax)
+			ymax = bbox.ymax;
+	}
+
+	public void add(double x, double y) {
+		if (x < xmin)
+			xmin = x;
+		if (y < ymin)
+			ymin = y;
+		if (x > xmax)
+			xmax = x;
+		if (y > ymax)
+			ymax = y;
+	}
+
+	public void translate(double dx, double dy) {
+		xmin += dx;
+		xmax += dx;
+		ymin += dy;
+		ymax += dy;
+	}
+
+	public void scale(double d) {
+		xmin *= d;
+		xmax *= d;
+		ymin *= d;
+		ymax *= d;
+	}
+
+	/** convrt map coordinates to lat/lon. */
+	public void map2mercator() {
+		double minLon = MercatorProjection.toLongitude(xmin);
+		double maxLon = MercatorProjection.toLongitude(xmax);
+		double minLat = MercatorProjection.toLatitude(ymax);
+		double maxLat = MercatorProjection.toLatitude(ymin);
+		xmin = minLon;
+		xmax = maxLon;
+		ymin = minLat;
+		ymax = maxLat;
+	}
 }

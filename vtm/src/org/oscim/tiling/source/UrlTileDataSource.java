@@ -16,8 +16,9 @@
  */
 package org.oscim.tiling.source;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.FAILED;
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.DELAYED;
+import static org.oscim.tiling.QueryResult.FAILED;
+import static org.oscim.tiling.QueryResult.SUCCESS;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import org.oscim.tiling.ITileCache.TileReader;
 import org.oscim.tiling.ITileCache.TileWriter;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.QueryResult;
 import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,8 @@ public class UrlTileDataSource implements ITileDataSource {
 			}
 		}
 
-		boolean ok = false;
+		QueryResult res = FAILED;
+
 		TileWriter cacheWriter = null;
 		try {
 			mConn.sendRequest(tile);
@@ -80,21 +83,27 @@ public class UrlTileDataSource implements ITileDataSource {
 				cacheWriter = cache.writeTile(tile);
 				mConn.setCache(cacheWriter.getOutputStream());
 			}
-			ok = mTileDecoder.decode(tile, sink, is);
+			if (mTileDecoder.decode(tile, sink, is))
+				res = SUCCESS;
 		} catch (SocketException e) {
 			log.debug("{} Socket Error: {}", tile, e.getMessage());
 		} catch (SocketTimeoutException e) {
 			log.debug("{} Socket Timeout", tile);
+			res = DELAYED;
 		} catch (UnknownHostException e) {
 			log.debug("{} Unknown host: {}", tile, e.getMessage());
 		} catch (IOException e) {
 			log.debug("{} Network Error: {}", tile, e.getMessage());
 		} finally {
-			ok = mConn.requestCompleted(ok);
+			boolean ok = (res == SUCCESS);
+
+			if (!mConn.requestCompleted(ok) && ok)
+				res = FAILED;
+
 			if (cacheWriter != null)
 				cacheWriter.complete(ok);
 
-			sink.completed(ok ? SUCCESS : FAILED);
+			sink.completed(res);
 		}
 	}
 

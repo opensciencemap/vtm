@@ -16,6 +16,8 @@
  */
 package org.oscim.map;
 
+import org.oscim.core.BoundingBox;
+import org.oscim.core.Box;
 import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.event.EventDispatcher;
@@ -32,6 +34,7 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeFile;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.TileSource;
+import org.oscim.utils.ThreadUtils;
 import org.oscim.utils.async.AsyncExecutor;
 import org.oscim.utils.async.TaskQueue;
 import org.slf4j.Logger;
@@ -65,29 +68,32 @@ public abstract class Map implements TaskQueue {
 	/**
 	 * UpdateListener event. Map position has changed.
 	 */
-	public static Event POSITION_EVENT = new Event();
+	public static final Event POSITION_EVENT = new Event();
 
 	/**
 	 * UpdateLister event. Delivered on main-thread when updateMap() was called
 	 * and no CLEAR_EVENT or POSITION_EVENT was triggered.
 	 */
-	public static Event UPDATE_EVENT = new Event();
+	public static final Event UPDATE_EVENT = new Event();
 
 	/**
 	 * UpdateListerner event. Map state has changed in a way that all layers
 	 * should clear their state e.g. the theme or the TilesSource has changed.
 	 * TODO should have an event-source to only clear affected layers.
 	 */
-	public static Event CLEAR_EVENT = new Event();
+	public static final Event CLEAR_EVENT = new Event();
+
+	public static final Event ANIM_END = new Event();
 
 	public final EventDispatcher<InputListener, MotionEvent> input;
 	public final EventDispatcher<UpdateListener, MapPosition> events;
 
 	private final Layers mLayers;
 	private final ViewController mViewport;
-	private final Animator mAnimator;
-	private final MapPosition mMapPosition;
 	private final AsyncExecutor mAsyncExecutor;
+
+	protected final Animator mAnimator;
+	protected final MapPosition mMapPosition;
 
 	protected final MapEventLayer mEventLayer;
 	protected GestureDetector mGestureDetector;
@@ -97,6 +103,8 @@ public abstract class Map implements TaskQueue {
 	protected boolean mClearMap = true;
 
 	public Map() {
+		ThreadUtils.init();
+
 		mViewport = new ViewController();
 		mAnimator = new Animator(this);
 		mLayers = new Layers(this);
@@ -237,9 +245,19 @@ public abstract class Map implements TaskQueue {
 	/**
 	 * Set {@link MapPosition} of {@link Viewport} and trigger a redraw.
 	 */
-	public void setMapPosition(MapPosition mapPosition) {
-		mViewport.setMapPosition(mapPosition);
-		updateMap(true);
+	public void setMapPosition(final MapPosition mapPosition) {
+		if (!ThreadUtils.isMainThread())
+			post(new Runnable() {
+				@Override
+				public void run() {
+					mViewport.setMapPosition(mapPosition);
+					updateMap(true);
+				}
+			});
+		else {
+			mViewport.setMapPosition(mapPosition);
+			updateMap(true);
+		}
 	}
 
 	public void setMapPosition(double latitude, double longitude, double scale) {
@@ -253,6 +271,10 @@ public abstract class Map implements TaskQueue {
 	 * @return true when MapPosition was updated (has changed)
 	 */
 	public boolean getMapPosition(MapPosition mapPosition) {
+		if (!ThreadUtils.isMainThread()) {
+			return mViewport.getSyncMapPosition(mapPosition);
+		}
+
 		return mViewport.getMapPosition(mapPosition);
 	}
 
@@ -265,6 +287,13 @@ public abstract class Map implements TaskQueue {
 		MapPosition pos = new MapPosition();
 		mViewport.getMapPosition(pos);
 		return pos;
+	}
+
+	public BoundingBox getBoundingBox(int expand) {
+		Box box = new Box();
+		mViewport.getBBox(box, expand);
+		box.map2mercator();
+		return new BoundingBox(box.ymin, box.xmin, box.ymax, box.xmax);
 	}
 
 	/**
@@ -289,14 +318,18 @@ public abstract class Map implements TaskQueue {
 	}
 
 	/**
-	 * This function is run on main-loop before rendering a frame.
-	 * Caution: Do not call directly!
+	 * This function is run on main-thread before rendering a frame.
+	 * 
+	 * For internal use only. Do not call!
 	 */
-	protected void updateLayers() {
-		boolean changed = false;
+	protected void prepareFrame() {
+		ThreadUtils.assertMainThread();
+
 		MapPosition pos = mMapPosition;
 
-		changed |= mViewport.getMapPosition(pos);
+		mAnimator.updateAnimation();
+
+		boolean changed = mViewport.getMapPosition(pos);
 
 		if (mClearMap)
 			events.fire(CLEAR_EVENT, pos);
@@ -306,9 +339,19 @@ public abstract class Map implements TaskQueue {
 			events.fire(UPDATE_EVENT, pos);
 
 		mClearMap = false;
+
+		mAnimator.updateAnimation();
+
+		mViewport.syncViewport();
 	}
 
 	public boolean handleGesture(Gesture g, MotionEvent e) {
 		return mLayers.handleGesture(g, e);
 	}
+
+	/** Called on render thread, use synchronized! */
+	public abstract void beginFrame();
+
+	/** Called on render thread, use synchronized! */
+	public abstract void doneFrame(boolean needsRedraw);
 }

@@ -16,7 +16,7 @@
  */
 package org.oscim.tiling.source.test;
 
-import static org.oscim.tiling.ITileDataSink.QueryResult.SUCCESS;
+import static org.oscim.tiling.QueryResult.SUCCESS;
 
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;

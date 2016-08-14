@@ -6,6 +6,14 @@ import org.oscim.core.Box;
 
 public interface SpatialIndex<T> {
 	public interface SearchCb<T> {
+		/**
+		 *
+		 * TODO should be able to return 'continue', 'stop',
+		 * 'remove-current'
+		 * 
+		 * @return false to stop search
+		 */
+
 		boolean call(T item, Object context);
 	}
 
@@ -15,7 +23,9 @@ public interface SpatialIndex<T> {
 
 	public List<T> search(Box bbox, List<T> results);
 
-	public int search(Box bbox, SearchCb<T> cb, Object context);
+	public boolean search(Box bbox, SearchCb<T> cb, Object context);
 
 	public int size();
+
+	public void clear();
 }

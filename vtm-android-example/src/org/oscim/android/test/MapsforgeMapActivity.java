@@ -14,7 +14,6 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.android.MapActivity;
 import org.oscim.android.MapView;
 import org.oscim.android.filepicker.FilePicker;
 import org.oscim.android.filepicker.FilterByFileExtension;
@@ -42,10 +41,6 @@ public class MapsforgeMapActivity extends MapActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-
-		mMapView = (MapView) findViewById(R.id.mapView);
-		registerMapView(mMapView);
 
 		startActivityForResult(new Intent(this, MapFilePicker.class),
 		                       SELECT_MAP_FILE);
@@ -65,7 +60,7 @@ public class MapsforgeMapActivity extends MapActivity {
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 			case R.id.theme_default:

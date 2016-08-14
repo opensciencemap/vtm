@@ -1,14 +1,23 @@
 package org.oscim.map;
 
+import static org.oscim.utils.FastMath.clamp;
+
 import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.ThreadUtils;
 
 public class ViewController extends Viewport {
 
-	public synchronized void setScreenSize(int width, int height) {
+	protected float mPivotY = 0.0f;
+
+	private final float[] mat = new float[16];
+
+	public void setScreenSize(int width, int height) {
+		ThreadUtils.assertMainThread();
+
 		mHeight = height;
 		mWidth = width;
 
@@ -21,19 +30,19 @@ public class ViewController extends Viewport {
 		 * 1. invert translate to VIEW_DISTANCE */
 
 		float ratio = (mHeight / mWidth) * VIEW_SCALE;
-		float[] tmp = new float[16];
 
-		GLMatrix.frustumM(tmp, 0, -VIEW_SCALE, VIEW_SCALE,
+		GLMatrix.frustumM(mat, 0, -VIEW_SCALE, VIEW_SCALE,
 		                  ratio, -ratio, VIEW_NEAR, VIEW_FAR);
 
-		mProjMatrix.set(tmp);
+		mProjMatrix.set(mat);
+
 		mTmpMatrix.setTranslation(0, 0, -VIEW_DISTANCE);
 		mProjMatrix.multiplyRhs(mTmpMatrix);
 
 		/* set inverse projection matrix (without scaling) */
-		mProjMatrix.get(tmp);
-		GLMatrix.invertM(tmp, 0, tmp, 0);
-		mProjMatrixInverse.set(tmp);
+		mProjMatrix.get(mat);
+		GLMatrix.invertM(mat, 0, mat, 0);
+		mProjMatrixInverse.set(mat);
 
 		mProjMatrixUnscaled.copy(mProjMatrix);
 
@@ -45,12 +54,23 @@ public class ViewController extends Viewport {
 	}
 
 	/**
+	 * Set pivot height relative to screen center. E.g. 0.5 is usually preferred
+	 * for navigation, moving the center to 25% of the screen height.
+	 * Range is [-1, 1].
+	 */
+	public void setMapScreenCenter(float pivotY) {
+		mPivotY = FastMath.clamp(pivotY, -1, 1) * 0.5f;
+	}
+
+	/**
 	 * Moves this Viewport by the given amount of pixels.
 	 * 
 	 * @param mx the amount of pixels to move the map horizontally.
 	 * @param my the amount of pixels to move the map vertically.
 	 */
-	public synchronized void moveMap(float mx, float my) {
+	public void moveMap(float mx, float my) {
+		ThreadUtils.assertMainThread();
+
 		Point p = applyRotation(mx, my);
 		double tileScale = mPos.scale * Tile.SIZE;
 		moveTo(mPos.x - p.x / tileScale, mPos.y - p.y / tileScale);
@@ -94,7 +114,9 @@ public class ViewController extends Viewport {
 	 * @param pivotY
 	 * @return true if scale was changed
 	 */
-	public synchronized boolean scaleMap(float scale, float pivotX, float pivotY) {
+	public boolean scaleMap(float scale, float pivotX, float pivotY) {
+		ThreadUtils.assertMainThread();
+
 		// just sanitize input
 		//scale = FastMath.clamp(scale, 0.5f, 2);
 		if (scale < 0.000001)
@@ -102,7 +124,7 @@ public class ViewController extends Viewport {
 
 		double newScale = mPos.scale * scale;
 
-		newScale = FastMath.clamp(newScale, MIN_SCALE, MAX_SCALE);
+		newScale = clamp(newScale, mMinScale, mMaxScale);
 
 		if (newScale == mPos.scale)
 			return false;
@@ -111,10 +133,12 @@ public class ViewController extends Viewport {
 
 		mPos.scale = newScale;
 
-		if (pivotX != 0 || pivotY != 0)
+		if (pivotX != 0 || pivotY != 0) {
+			pivotY -= mHeight * mPivotY;
+
 			moveMap(pivotX * (1.0f - scale),
 			        pivotY * (1.0f - scale));
-
+		}
 		return true;
 	}
 
@@ -126,10 +150,13 @@ public class ViewController extends Viewport {
 	 * @param pivotX
 	 * @param pivotY
 	 */
-	public synchronized void rotateMap(double radians, float pivotX, float pivotY) {
+	public void rotateMap(double radians, float pivotX, float pivotY) {
+		ThreadUtils.assertMainThread();
 
 		double rsin = Math.sin(radians);
 		double rcos = Math.cos(radians);
+
+		pivotY -= mHeight * mPivotY;
 
 		float x = (float) (pivotX - pivotX * rcos + pivotY * rsin);
 		float y = (float) (pivotY - pivotX * rsin - pivotY * rcos);
@@ -139,35 +166,47 @@ public class ViewController extends Viewport {
 		setRotation(mPos.bearing + Math.toDegrees(radians));
 	}
 
-	public synchronized void setRotation(double degree) {
+	public void setRotation(double degree) {
+		ThreadUtils.assertMainThread();
+
 		while (degree > 180)
 			degree -= 360;
 		while (degree < -180)
 			degree += 360;
 
 		mPos.bearing = (float) degree;
+
 		updateMatrices();
 	}
 
-	public synchronized boolean tiltMap(float move) {
+	public boolean tiltMap(float move) {
 		return setTilt(mPos.tilt + move);
 	}
 
-	public synchronized boolean setTilt(float tilt) {
-		tilt = FastMath.clamp(tilt, 0, MAX_TILT);
+	public boolean setTilt(float tilt) {
+		ThreadUtils.assertMainThread();
+
+		tilt = limitTilt(tilt);
 		if (tilt == mPos.tilt)
 			return false;
+
 		mPos.tilt = tilt;
 		updateMatrices();
 		return true;
 	}
 
-	public synchronized void setMapPosition(MapPosition mapPosition) {
-		mPos.scale = FastMath.clamp(mapPosition.scale, MIN_SCALE, MAX_SCALE);
-		mPos.x = mapPosition.x;
-		mPos.y = mapPosition.y;
-		mPos.tilt = mapPosition.tilt;
-		mPos.bearing = mapPosition.bearing;
+	public void setMapPosition(MapPosition mapPosition) {
+		ThreadUtils.assertMainThread();
+
+		mPos.copy(mapPosition);
+		limitPosition(mPos);
+
+		//	mPos.scale = clamp(mapPosition.scale, mMinScale, mMaxScale);
+		//	mPos.x = mapPosition.x;
+		//	mPos.y = mapPosition.y;
+		//	mPos.tilt = limitTilt(mapPosition.tilt);
+		//	mPos.bearing = mapPosition.bearing;
+
 		updateMatrices();
 	}
 
@@ -184,19 +223,39 @@ public class ViewController extends Viewport {
 
 		mViewMatrix.copy(mRotationMatrix);
 
+		mTmpMatrix.setTranslation(0, mPivotY * mHeight, 0);
+		mViewMatrix.multiplyLhs(mTmpMatrix);
+
 		mViewProjMatrix.multiplyMM(mProjMatrix, mViewMatrix);
 
-		/* inverse projection matrix: */
-		/* invert scale */
-		mUnprojMatrix.setScale(mWidth, mWidth, 1);
-
-		/* invert rotation and tilt */
-		mTmpMatrix.transposeM(mRotationMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert scale, tilt and rotation */
-		mTmpMatrix.multiplyLhs(mUnprojMatrix);
-
-		/* (AB)^-1 = B^-1*A^-1, invert projection */
-		mUnprojMatrix.multiplyMM(mTmpMatrix, mProjMatrixInverse);
+		mViewProjMatrix.get(mat);
+		GLMatrix.invertM(mat, 0, mat, 0);
+		mUnprojMatrix.set(mat);
 	}
+
+	public final Viewport mNextFrame = new Viewport();
+
+	/** synchronize on this object when doing multiple calls on it */
+	public final Viewport getSyncViewport() {
+		return mNextFrame;
+	}
+
+	void syncViewport() {
+		synchronized (mNextFrame) {
+			mNextFrame.copy(this);
+		}
+	}
+
+	public boolean getSyncViewport(Viewport v) {
+		synchronized (mNextFrame) {
+			return v.copy(mNextFrame);
+		}
+	}
+
+	public boolean getSyncMapPosition(MapPosition mapPosition) {
+		synchronized (mNextFrame) {
+			return mNextFrame.getMapPosition(mapPosition);
+		}
+	}
+
 }

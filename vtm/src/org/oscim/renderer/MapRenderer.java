@@ -72,13 +72,20 @@ public class MapRenderer {
 
 	public void onDrawFrame() {
 		frametime = System.currentTimeMillis();
+		rerender = false;
+
+		mMap.beginFrame();
+
 		draw();
+
+		mMap.doneFrame(rerender);
 
 		mBufferPool.releaseBuffers();
 		TextureItem.disposeTextures();
 	}
 
 	private void draw() {
+
 		GLState.setClearColor(mClearColor);
 
 		gl.depthMask(true);
@@ -98,8 +105,7 @@ public class MapRenderer {
 		GLState.bindElementBuffer(-1);
 		GLState.bindVertexBuffer(-1);
 
-		mMap.animator().updateAnimation();
-		mViewport.setFrom(mMap.viewport());
+		mViewport.setFrom(mMap);
 
 		if (GLAdapter.debugView) {
 			/* modify this to scale only the view, to see
@@ -133,10 +139,6 @@ public class MapRenderer {
 			BufferObject.checkBufferUsage(true);
 			// FIXME also throw out some textures etc
 		}
-		if (rerender) {
-			mMap.render();
-			rerender = false;
-		}
 	}
 
 	public void onSurfaceChanged(int width, int height) {
@@ -145,8 +147,6 @@ public class MapRenderer {
 		if (width <= 0 || height <= 0)
 			return;
 
-		//mMap.viewport().getMatrix(null, mMatrices.proj, null);
-		mViewport.initFrom(mMap.viewport());
 		gl.viewport(0, 0, width, height);
 
 		//GL.scissor(0, 0, width, height);

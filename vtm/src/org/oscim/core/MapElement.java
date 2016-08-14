@@ -44,9 +44,10 @@ public class MapElement extends GeometryBuffer {
 	}
 
 	@Override
-	public void clear() {
+	public MapElement clear() {
 		layer = 5;
 		super.clear();
+		return this;
 	}
 
 	@Override

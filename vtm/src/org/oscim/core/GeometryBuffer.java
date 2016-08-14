@@ -70,6 +70,20 @@ public class GeometryBuffer {
 	private PointF mTmpPoint = new PointF();
 	private int pointLimit;
 
+	public GeometryBuffer() {
+		this(32, 4);
+	}
+
+	/**
+	 * Instantiates a new geometry buffer.
+	 * 
+	 * @param numPoints the num of expected points
+	 * @param numIndices the num of expected indices
+	 */
+	public GeometryBuffer(int numPoints, int numIndices) {
+		this(new float[numPoints * 2], new int[numIndices]);
+	}
+
 	/**
 	 * Instantiates a new geometry buffer.
 	 * 
@@ -123,23 +137,14 @@ public class GeometryBuffer {
 	}
 
 	/**
-	 * Instantiates a new geometry buffer.
-	 * 
-	 * @param numPoints the num points
-	 * @param numIndices the num indices
-	 */
-	public GeometryBuffer(int numPoints, int numIndices) {
-		this(new float[numPoints * 2], new int[numIndices]);
-	}
-
-	/**
 	 * Reset buffer.
 	 */
-	public void clear() {
+	public GeometryBuffer clear() {
 		index[0] = 0;
 		indexPos = 0;
 		pointPos = 0;
 		type = GeometryType.NONE;
+		return this;
 	}
 
 	/**
@@ -423,4 +428,23 @@ public class GeometryBuffer {
 		return sb.toString();
 	}
 
+	public static GeometryBuffer makeCircle(float x, float y,
+	        float radius, int segments) {
+		GeometryBuffer g = new GeometryBuffer(segments, 1);
+		makeCircle(g, x, y, radius, segments);
+		return g;
+	}
+
+	public static GeometryBuffer makeCircle(GeometryBuffer g,
+	        float x, float y, float radius, int segments) {
+		g.clear();
+		g.startPolygon();
+		for (int i = 0; i < segments; i++) {
+			double rad = Math.toRadians(i * (360f / segments));
+
+			g.addPoint((float) (x + Math.cos(rad) * radius),
+			           (float) (y + Math.sin(rad) * radius));
+		}
+		return g;
+	}
 }

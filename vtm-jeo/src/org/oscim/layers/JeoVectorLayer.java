@@ -33,6 +33,8 @@ public class JeoVectorLayer extends JtsLayer {
 	private final RuleList mRules;
 
 	protected double mDropPointDistance = 0.01;
+	private double mMinX;
+	private double mMinY;
 
 	public JeoVectorLayer(Map map, VectorDataset data, Style style) {
 		super(map);

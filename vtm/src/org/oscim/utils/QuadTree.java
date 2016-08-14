@@ -9,13 +9,18 @@ import org.oscim.utils.quadtree.BoxTree.BoxItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Quad-tree with fixed extents.
+ * This implementation uses int bounding-boxes internally,
+ * so items extents should be greater than 1. FIXME tests this case
+ */
 public class QuadTree<T> extends BoxTree<BoxItem<T>, T> implements SpatialIndex<T> {
+
+	static final Logger log = LoggerFactory.getLogger(QuadTree.class);
 
 	public QuadTree(int extents, int maxDepth) {
 		super(extents, maxDepth);
 	}
-
-	static final Logger log = LoggerFactory.getLogger(QuadTree.class);
 
 	final Pool<BoxItem<T>> boxPool = new Pool<BoxItem<T>>() {
 		@Override
@@ -67,10 +72,10 @@ public class QuadTree<T> extends BoxTree<BoxItem<T>, T> implements SpatialIndex<
 	}
 
 	@Override
-	public int search(Box bbox, SearchCb<T> cb, Object context) {
+	public boolean search(Box bbox, SearchCb<T> cb, Object context) {
 		BoxItem<T> box = getBox(bbox);
-		search(box, cb, context);
+		boolean finished = search(box, cb, context);
 		boxPool.release(box);
-		return 0;
+		return finished;
 	}
 }
