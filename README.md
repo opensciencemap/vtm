@@ -22,7 +22,7 @@ See the [integration guide](docs/Integration.md) and [changelog](docs/Changelog.
 - Backends:
   - Android (optional libGDX)
   - iOS (using libGDX/RoboVM, [instructions](docs/ios.md))
-  - Desktop (using libGDX/JGLFW)
+  - Desktop (using libGDX/LWJGL)
   - HTML5/WebGL (using libGDX/GWT)
 
 ### Projects

@@ -8,7 +8,7 @@ dependencies {
         compile files(dir.path)
     }
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    compile "com.badlogicgames.gdx:gdx-backend-jglfw:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
     compile 'com.kitfox.svg:svg-salamander:1.0'
 }
 

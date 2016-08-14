@@ -8,6 +8,7 @@
 - Mapsforge multilingual maps [#34](https://github.com/mapsforge/vtm/issues/34)
 - vtm-ios update module [#29](https://github.com/mapsforge/vtm/issues/29)
 - Native libraries for all platforms [#14](https://github.com/mapsforge/vtm/issues/14)
+- LWJGL desktop libGDX backend [#129](https://github.com/mapsforge/vtm/issues/129)
 - Line stipple and texture rendering [#105](https://github.com/mapsforge/vtm/issues/105)
 - Layer groups [#99](https://github.com/mapsforge/vtm/issues/99) [#103](https://github.com/mapsforge/vtm/issues/103)
 - Map scale bar multi-platform [#84](https://github.com/mapsforge/vtm/issues/84)

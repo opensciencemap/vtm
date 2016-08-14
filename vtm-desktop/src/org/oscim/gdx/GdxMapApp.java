@@ -17,8 +17,8 @@
  */
 package org.oscim.gdx;
 
-import com.badlogic.gdx.backends.jglfw.JglfwApplication;
-import com.badlogic.gdx.backends.jglfw.JglfwApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
 
 import org.oscim.awt.AwtGraphics;
@@ -40,28 +40,28 @@ public class GdxMapApp extends GdxMap {
         // init globals
         AwtGraphics.init();
         GdxAssets.init("assets/");
-        GLAdapter.init(new GdxGL());
+        GLAdapter.init(new LwjglGL20());
         GLAdapter.GDX_DESKTOP_QUIRKS = true;
     }
 
     public static void main(String[] args) {
         Tile.SIZE = 360;
         init();
-        new JglfwApplication(new GdxMapApp(), getConfig());
+        new LwjglApplication(new GdxMapApp(), getConfig());
     }
 
-    public static void run(GdxMap map, JglfwApplicationConfiguration config, int tileSize) {
+    public static void run(GdxMap map, LwjglApplicationConfiguration config, int tileSize) {
         Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
 
-        new JglfwApplication(map, (config == null ? getConfig() : config));
+        new LwjglApplication(map, (config == null ? getConfig() : config));
     }
 
-    public static void run(JglfwApplicationConfiguration config, int tileSize, GdxMap map) {
+    public static void run(LwjglApplicationConfiguration config, int tileSize, GdxMap map) {
         run(map, config, tileSize);
     }
 
-    static protected JglfwApplicationConfiguration getConfig() {
-        JglfwApplicationConfiguration cfg = new JglfwApplicationConfiguration();
+    static protected LwjglApplicationConfiguration getConfig() {
+        LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
         cfg.title = "vtm-gdx";
         cfg.width = 800;
         cfg.height = 600;
