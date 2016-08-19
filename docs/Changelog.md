@@ -15,6 +15,7 @@
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Graphics API platform enhancements [#92](https://github.com/mapsforge/vtm/issues/92)
 - vtm-jts module [#53](https://github.com/mapsforge/vtm/issues/53)
+- vtm-http module [#140](https://github.com/mapsforge/vtm/issues/140)
 - Internal render themes various enhancements
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aissue+is%3Aclosed+milestone%3A0.6.0)

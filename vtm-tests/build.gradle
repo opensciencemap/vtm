@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 dependencies {
-    compile project(':vtm')
+    compile project(':vtm-http')
     compile 'com.squareup.okhttp:okhttp:1.5.2'
     testCompile 'com.squareup.okhttp:mockwebserver:1.5.2'
     testCompile 'junit:junit:4.11'

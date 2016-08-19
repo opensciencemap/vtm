@@ -1,5 +1,6 @@
 rootProject.name = 'vtm-parent'
 include ':vtm'
+include ':vtm-http'
 include ':vtm-jts'
 include ':vtm-tests'
 include ':vtm-extras'

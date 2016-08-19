@@ -4,6 +4,7 @@ apply plugin: 'application'
 dependencies {
     compile project(':vtm-desktop')
     compile project(':vtm-extras')
+    compile project(':vtm-http')
     compile project(':vtm-jeo')
     compile project(':vtm-jts')
     compile 'org.slf4j:slf4j-simple:1.7.21'

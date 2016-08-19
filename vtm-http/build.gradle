@@ -1,17 +1,13 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
-configurations { providedCompile }
-
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.21'
-    providedCompile 'com.google.code.findbugs:annotations:2.0.1'
+    compile project(':vtm')
+    compile 'com.squareup.okhttp:okhttp:1.5.2'
 }
 
 sourceSets {
     main.java.srcDirs = ['src']
-    main.resources.srcDirs = ['resources']
-    main.compileClasspath += configurations.providedCompile
 }
 
 // Automated Gradle project deployment to Sonatype OSSRH
