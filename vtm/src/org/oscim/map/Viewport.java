@@ -331,14 +331,33 @@ public class Viewport {
     }
 
     /**
-     * Get the screen pixel for a GeoPoint
+     * Get the screen pixel for a GeoPoint (relative to center)
      *
      * @param geoPoint the GeoPoint
      * @param out      Point projected to screen pixel relative to center
      */
     public void toScreenPoint(GeoPoint geoPoint, Point out) {
+        toScreenPoint(geoPoint, true, out);
+    }
+
+    /**
+     * Get the screen pixel for a GeoPoint
+     *
+     * @param geoPoint the GeoPoint
+     * @param out      Point projected to screen pixel
+     */
+    public void toScreenPoint(GeoPoint geoPoint, boolean relativeToCenter, Point out) {
         MercatorProjection.project(geoPoint, out);
-        toScreenPoint(out.x, out.y, out);
+        toScreenPoint(out.x, out.y, relativeToCenter, out);
+    }
+
+    /**
+     * Get the screen pixel for map coordinates (relative to center)
+     *
+     * @param out Point projected to screen coordinate relative to center
+     */
+    public void toScreenPoint(double x, double y, Point out) {
+        toScreenPoint(x, y, true, out);
     }
 
     /**
@@ -346,7 +365,7 @@ public class Viewport {
      *
      * @param out Point projected to screen coordinate
      */
-    public void toScreenPoint(double x, double y, Point out) {
+    public void toScreenPoint(double x, double y, boolean relativeToCenter, Point out) {
 
         double cs = mPos.scale * Tile.SIZE;
         double cx = mPos.x * cs;
@@ -362,6 +381,11 @@ public class Viewport {
 
         out.x = (mv[0] * (mWidth / 2));
         out.y = -(mv[1] * (mHeight / 2));
+
+        if (!relativeToCenter) {
+            out.x += mWidth / 2;
+            out.y += mHeight / 2;
+        }
     }
 
     protected boolean copy(Viewport viewport) {
