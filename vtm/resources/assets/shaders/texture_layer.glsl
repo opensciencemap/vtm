@@ -13,7 +13,7 @@ void
 main(){
   vec4 pos;
   vec2 dir = vertex.zw;
-  if (mod(vertex.x, 2.0) == 0.0) {
+  if (mod(vertex.x, 2.0) < 1.0) {
     pos = u_proj * (u_mv * vec4(vertex.xy + dir * u_scale, 0.0, 1.0));
   }
   else { // place as billboard
