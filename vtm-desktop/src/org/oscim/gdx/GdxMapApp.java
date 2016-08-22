@@ -66,7 +66,7 @@ public class GdxMapApp extends GdxMap {
         cfg.width = 800;
         cfg.height = 600;
         cfg.stencil = 8;
-        //cfg.samples = 2;
+        cfg.samples = 2;
         cfg.foregroundFPS = 30;
         cfg.backgroundFPS = 10;
         return cfg;
