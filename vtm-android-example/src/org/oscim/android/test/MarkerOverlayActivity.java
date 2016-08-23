@@ -25,7 +25,6 @@ import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ItemizedLayer;
-import org.oscim.layers.marker.ItemizedLayer.OnItemGestureListener;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerItem.HotspotPlace;
 import org.oscim.layers.marker.MarkerSymbol;
@@ -37,9 +36,9 @@ import static org.oscim.android.canvas.AndroidGraphics.drawableToBitmap;
 import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
 public class MarkerOverlayActivity extends BitmapTileMapActivity
-        implements OnItemGestureListener<MarkerItem> {
+        implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
 
-    private static final boolean BILLBOARDS = false;
+    private static final boolean BILLBOARDS = true;
     private MarkerSymbol mFocusMarker;
 
     public MarkerOverlayActivity() {
@@ -68,12 +67,12 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
             mFocusMarker = new MarkerSymbol(drawableToBitmap(d), HotspotPlace.CENTER, false);
 
         ItemizedLayer<MarkerItem> markerLayer =
-                new ItemizedLayer<MarkerItem>(mMap, new ArrayList<MarkerItem>(),
+                new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(),
                         symbol, this);
 
         mMap.layers().add(markerLayer);
 
-        List<MarkerItem> pts = new ArrayList<MarkerItem>();
+        List<MarkerItem> pts = new ArrayList<>();
 
         for (double lat = -90; lat <= 90; lat += 5) {
             for (double lon = -180; lon <= 180; lon += 5)
