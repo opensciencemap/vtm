@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -92,7 +93,6 @@ public abstract class GdxMap implements ApplicationListener {
     }
 
     protected void createLayers() {
-        mMap.layers().add(new TileGridLayer(mMap));
     }
 
     @Override
