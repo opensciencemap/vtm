@@ -38,6 +38,9 @@ See the [integration guide](docs/Integration.md) and [changelog](docs/Changelog.
 
 The libGDX backend for GWT is experimental.
 
+## Applications
+- VTM is used by many [applications](docs/Applications.md).
+
 ## Master build downloads
 - [Latest jars and samples](http://ci.mapsforge.org/job/vtm/)
 
