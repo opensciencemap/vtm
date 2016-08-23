@@ -6,6 +6,7 @@
  * 
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,7 +21,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.layers.marker;
 
 import org.oscim.core.Point;
@@ -70,7 +70,7 @@ public abstract class MarkerLayer<Item extends MarkerItem> extends Layer {
      * should call this as soon as it has data, before anything else gets
      * called.
      */
-    protected final void populate() {
+    public final void populate() {
         mMarkerRenderer.populate(size());
     }
 

@@ -103,6 +103,10 @@ public class ItemizedLayer<Item extends MarkerItem> extends MarkerLayer<Item>
         return result;
     }
 
+    public List<Item> getItemList() {
+        return mItemList;
+    }
+
     public void removeAllItems() {
         removeAllItems(true);
     }
