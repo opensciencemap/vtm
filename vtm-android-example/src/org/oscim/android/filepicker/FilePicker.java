@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -58,7 +60,7 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 
     private static final String PREFERENCES_FILE = "FilePicker";
     private static final String CURRENT_DIRECTORY = "currentDirectory";
-    private static final String DEFAULT_DIRECTORY = "/";
+    private static final String DEFAULT_DIRECTORY = Environment.getExternalStorageDirectory().getAbsolutePath();
     private static final int DIALOG_FILE_INVALID = 0;
 
     // private static final int DIALOG_FILE_SELECT = 1;
