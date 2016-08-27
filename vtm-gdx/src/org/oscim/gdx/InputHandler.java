@@ -96,9 +96,11 @@ public class InputHandler implements InputProcessor {
                 break;
             case Input.Keys.NUM_1:
                 mMap.animator().animateZoom(500, 0.5, 0, 0);
+                mMap.updateMap(false);
                 break;
             case Input.Keys.NUM_2:
                 mMap.animator().animateZoom(500, 2, 0, 0);
+                mMap.updateMap(false);
                 break;
 
             case Input.Keys.D:
