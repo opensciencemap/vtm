@@ -28,7 +28,7 @@ public class MapScaleBarLayer extends Layer implements Map.UpdateListener {
         super(map);
         this.mapScaleBar = mapScaleBar;
 
-        mRenderer = bitmapRenderer = new BitmapRenderer();
+        mRenderer = bitmapRenderer = new MapScaleBarRenderer();
         bitmapRenderer.setBitmap(mapScaleBar.mapScaleBitmap, mapScaleBar.mapScaleBitmap.getWidth(), mapScaleBar.mapScaleBitmap.getHeight());
     }
 
