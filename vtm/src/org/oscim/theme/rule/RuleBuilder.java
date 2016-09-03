@@ -1,6 +1,7 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * 
+ * Copyright 2016 devemux86
+ *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  * 
  * This program is free software: you can redistribute it and/or modify it under the
@@ -25,13 +26,11 @@ import org.oscim.theme.rule.Rule.PositiveRuleMultiKV;
 import org.oscim.theme.rule.Rule.PositiveRuleV;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.RenderStyle.StyleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class RuleBuilder {
-    final static Logger log = LoggerFactory.getLogger(RuleBuilder.class);
 
     private final static String[] EMPTY_KV = {};
 
@@ -49,8 +48,8 @@ public class RuleBuilder {
     String keys[];
     String values[];
 
-    ArrayList<RenderStyle> renderStyles = new ArrayList<RenderStyle>(4);
-    ArrayList<RuleBuilder> subRules = new ArrayList<RuleBuilder>(4);
+    ArrayList<RenderStyle> renderStyles = new ArrayList<>(4);
+    ArrayList<RuleBuilder> subRules = new ArrayList<>(4);
     StyleBuilder<?>[] styleBuilder;
 
     private static final String STRING_NEGATION = "~";
@@ -166,7 +165,7 @@ public class RuleBuilder {
             return new NegativeRule(type, element, zoom, selector,
                     keys, values, rules, styles);
 
-        if (numKeys == 1 && numKeys == 0)
+        if (numKeys == 1 && numVals == 0)
             return new PositiveRuleK(element, zoom, selector, keys[0],
                     rules, styles);
 
@@ -199,8 +198,7 @@ public class RuleBuilder {
     }
 
     public RuleBuilder rules(RuleBuilder... rules) {
-        for (RuleBuilder rule : rules)
-            subRules.add(rule);
+        Collections.addAll(subRules, rules);
         return this;
     }
 
