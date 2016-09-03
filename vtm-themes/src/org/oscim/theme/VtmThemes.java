@@ -28,14 +28,19 @@ import java.io.InputStream;
 public enum VtmThemes implements ThemeFile {
 
     DEFAULT("styles/default.xml"),
-    TRONRENDER("styles/tronrender.xml"),
     NEWTRON("styles/newtron.xml"),
-    OSMARENDER("styles/osmarender.xml");
+    OSMARENDER("styles/osmarender.xml"),
+    TRONRENDER("styles/tronrender.xml");
 
     private final String mPath;
 
     VtmThemes(String path) {
         mPath = path;
+    }
+
+    @Override
+    public XmlRenderThemeMenuCallback getMenuCallback() {
+        return null;
     }
 
     @Override
