@@ -118,7 +118,7 @@ public class RuleBuilder {
         return new RuleBuilder(type, keyList, valueList);
     }
 
-    public RuleBuilder setZoom(byte zoomMin, byte zoomMax) {
+    public RuleBuilder zoom(byte zoomMin, byte zoomMax) {
         // zoom-level bitmask
         zoom = 0;
         for (int z = zoomMin; z <= zoomMax && z < 32; z++)

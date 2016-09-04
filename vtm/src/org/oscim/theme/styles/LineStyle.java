@@ -110,7 +110,6 @@ public final class LineStyle extends RenderStyle {
 
     public static class LineBuilder<T extends LineBuilder<T>> extends StyleBuilder<T> {
 
-        public String style;
         public Cap cap;
         public boolean outline;
         public boolean fixed;
@@ -162,11 +161,6 @@ public final class LineStyle extends RenderStyle {
 
             randomOffset = true;
 
-            return self();
-        }
-
-        public T style(String name) {
-            this.style = name;
             return self();
         }
 

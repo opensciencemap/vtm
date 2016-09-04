@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -35,7 +36,7 @@ public abstract class RenderStyle {
         public int strokeColor;
         public float strokeWidth;
 
-        public T setStyle(String style) {
+        public T style(String style) {
             this.style = style;
             return self();
         }

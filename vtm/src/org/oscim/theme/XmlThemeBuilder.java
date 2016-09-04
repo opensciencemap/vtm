@@ -331,7 +331,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 
         RuleBuilder b = RuleBuilder.create(keys, values);
-        b.setZoom(zoomMin, zoomMax);
+        b.zoom(zoomMin, zoomMax);
         b.element(element);
         b.select(selector);
         return b;
