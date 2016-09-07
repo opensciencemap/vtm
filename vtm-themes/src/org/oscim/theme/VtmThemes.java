@@ -19,6 +19,7 @@
 package org.oscim.theme;
 
 import org.oscim.backend.AssetAdapter;
+import org.oscim.theme.IRenderTheme.ThemeException;
 
 import java.io.InputStream;
 
@@ -49,7 +50,7 @@ public enum VtmThemes implements ThemeFile {
     }
 
     @Override
-    public InputStream getRenderThemeAsStream() {
+    public InputStream getRenderThemeAsStream() throws ThemeException {
         return AssetAdapter.readFileAsStream(mPath);
     }
 }
