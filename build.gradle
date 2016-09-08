@@ -14,7 +14,7 @@ allprojects {
     ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
     ext.androidBuildVersionTools = "24.0.2"
-    ext.gdxVersion = "1.9.3"
+    ext.gdxVersion = "1.9.4"
 
     // Disable Java 8 doclint
     if (JavaVersion.current().isJava8Compatible()) {
