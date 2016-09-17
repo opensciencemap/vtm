@@ -30,6 +30,8 @@ import static org.oscim.backend.GLAdapter.gl;
 public class LocationRenderer extends LayerRenderer {
     private static final int SHOW_ACCURACY_ZOOM = 16;
 
+    public enum Shader {SHADER_1, SHADER_2}
+
     private final Map mMap;
     private final Layer mLayer;
 
@@ -60,6 +62,7 @@ public class LocationRenderer extends LayerRenderer {
     private Callback mCallback;
     private final Point mLocation = new Point(Double.NaN, Double.NaN);
     private double mRadius;
+    private Shader mShader = Shader.SHADER_1;
     private int mShowAccuracyZoom = SHOW_ACCURACY_ZOOM;
 
     public LocationRenderer(Map map, Layer layer) {
@@ -75,6 +78,10 @@ public class LocationRenderer extends LayerRenderer {
         mLocation.x = x;
         mLocation.y = y;
         mRadius = radius;
+    }
+
+    public void setShader(Shader shader) {
+        mShader = shader;
     }
 
     public void setShowAccuracyZoom(int showAccuracyZoom) {
@@ -234,7 +241,15 @@ public class LocationRenderer extends LayerRenderer {
     }
 
     private boolean init() {
-        int shader = GLShader.createProgram(vShaderStr, fShaderStr);
+        int shader = 0;
+        switch (mShader) {
+            case SHADER_1:
+                shader = GLShader.createProgram(vShaderStr, fShaderStr1);
+                break;
+            case SHADER_2:
+                shader = GLShader.createProgram(vShaderStr, fShaderStr2);
+                break;
+        }
         if (shader == 0)
             return false;
 
@@ -248,7 +263,7 @@ public class LocationRenderer extends LayerRenderer {
         return true;
     }
 
-    private final static String vShaderStr = ""
+    private static final String vShaderStr = ""
             + "precision mediump float;"
             + "uniform mat4 u_mvp;"
             + "uniform float u_phase;"
@@ -260,7 +275,7 @@ public class LocationRenderer extends LayerRenderer {
             + "  v_tex = a_pos;"
             + "}";
 
-    private final static String fShaderStr = ""
+    private static final String fShaderStr1 = ""
             + "precision mediump float;"
             + "varying vec2 v_tex;"
             + "uniform float u_scale;"
@@ -289,30 +304,30 @@ public class LocationRenderer extends LayerRenderer {
             + "  gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * a;"
             + "}}";
 
-    //private final static String fShaderStr = ""
-    //		+ "precision mediump float;"
-    //		+ "varying vec2 v_tex;"
-    //		+ "uniform float u_scale;"
-    //		+ "uniform float u_phase;"
-    //		+ "uniform vec2 u_dir;"
-    //		+ "void main() {"
-    //		+ "  float len = 1.0 - length(v_tex);"
-    //		///  outer ring
-    //		+ "  float a = smoothstep(0.0, 2.0 / u_scale, len);"
-    //		///  inner ring
-    //		+ "  float b = 0.8 * smoothstep(3.0 / u_scale, 4.0 / u_scale, len);"
-    //		///  center point
-    //		+ "  float c = 0.5 * (1.0 - smoothstep(14.0 / u_scale, 16.0 / u_scale, 1.0 - len));"
-    //		+ "  vec2 dir = normalize(v_tex);"
-    //		+ "  float d = dot(dir, u_dir); "
-    //		///  0.5 width of viewshed
-    //		+ "  d = clamp(smoothstep(0.7, 0.7 + 2.0/u_scale, d) * len, 0.0, 1.0);"
-    //		///  - subtract inner from outer to create the outline
-    //		///  - multiply by viewshed
-    //		///  - add center point
-    //		+ "  a = max(d, (a - (b + c)) + c);"
-    //		+ "  gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * a;"
-    //		+ "}";
+    private static final String fShaderStr2 = ""
+            + "precision mediump float;"
+            + "varying vec2 v_tex;"
+            + "uniform float u_scale;"
+            + "uniform float u_phase;"
+            + "uniform vec2 u_dir;"
+            + "void main() {"
+            + "  float len = 1.0 - length(v_tex);"
+            ///  outer ring
+            + "  float a = smoothstep(0.0, 2.0 / u_scale, len);"
+            ///  inner ring
+            + "  float b = 0.8 * smoothstep(3.0 / u_scale, 4.0 / u_scale, len);"
+            ///  center point
+            + "  float c = 0.5 * (1.0 - smoothstep(14.0 / u_scale, 16.0 / u_scale, 1.0 - len));"
+            + "  vec2 dir = normalize(v_tex);"
+            + "  float d = dot(dir, u_dir); "
+            ///  0.5 width of viewshed
+            + "  d = clamp(smoothstep(0.7, 0.7 + 2.0/u_scale, d) * len, 0.0, 1.0);"
+            ///  - subtract inner from outer to create the outline
+            ///  - multiply by viewshed
+            ///  - add center point
+            + "  a = max(d, (a - (b + c)) + c);"
+            + "  gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * a;"
+            + "}";
 
     public interface Callback {
         float getRotation();
