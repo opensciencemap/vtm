@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Ahmad Saleem
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -13,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.app.location;
 
 import android.content.Context;
@@ -31,10 +31,11 @@ import org.oscim.core.MapPosition;
 import org.oscim.event.Event;
 import org.oscim.layers.Layer;
 import org.oscim.map.Map;
+import org.oscim.renderer.LocationRenderer;
 
 @SuppressWarnings("deprecation")
-public class Compass extends Layer implements SensorEventListener,
-        Map.UpdateListener {
+public class Compass extends Layer implements SensorEventListener, Map.UpdateListener,
+        LocationRenderer.Callback {
 
     // final static Logger log = LoggerFactory.getLogger(Compass.class);
 
@@ -84,6 +85,7 @@ public class Compass extends Layer implements SensorEventListener,
         setEnabled(false);
     }
 
+    @Override
     public synchronized float getRotation() {
         return mCurRotation;
     }
