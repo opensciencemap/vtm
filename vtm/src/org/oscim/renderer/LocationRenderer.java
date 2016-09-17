@@ -28,6 +28,11 @@ import org.oscim.utils.math.Interpolation;
 import static org.oscim.backend.GLAdapter.gl;
 
 public class LocationRenderer extends LayerRenderer {
+
+    private static final long ANIM_RATE = 50;
+    private static final long INTERVAL = 2000;
+
+    private static final float CIRCLE_SIZE = 60;
     private static final int SHOW_ACCURACY_ZOOM = 16;
 
     public enum Shader {SHADER_1, SHADER_2}
@@ -41,11 +46,6 @@ public class LocationRenderer extends LayerRenderer {
     private int hScale;
     private int hPhase;
     private int hDirection;
-
-    private static final float CIRCLE_SIZE = 60;
-
-    private static final long ANIM_RATE = 50;
-    private static final long INTERVAL = 2000;
 
     private final Point mIndicatorPosition = new Point();
 
@@ -199,8 +199,9 @@ public class LocationRenderer extends LayerRenderer {
         if (!mLocationIsVisible /* || pos.zoomLevel < SHOW_ACCURACY_ZOOM */) {
             //animate(true);
         } else {
-            if (v.pos.zoomLevel >= mShowAccuracyZoom && mRadius > 0)
+            if (v.pos.zoomLevel >= mShowAccuracyZoom)
                 radius = (float) (mRadius * v.pos.scale);
+            radius = Math.max(CIRCLE_SIZE, radius);
 
             viewShed = true;
             //animate(false);
