@@ -264,7 +264,7 @@ public class LocationRenderer extends LayerRenderer {
     }
 
     private static final String vShaderStr = ""
-            + "precision mediump float;"
+            + "precision highp float;"
             + "uniform mat4 u_mvp;"
             + "uniform float u_phase;"
             + "uniform float u_scale;"
@@ -276,7 +276,7 @@ public class LocationRenderer extends LayerRenderer {
             + "}";
 
     private static final String fShaderStr1 = ""
-            + "precision mediump float;"
+            + "precision highp float;"
             + "varying vec2 v_tex;"
             + "uniform float u_scale;"
             + "uniform float u_phase;"
@@ -305,7 +305,7 @@ public class LocationRenderer extends LayerRenderer {
             + "}}";
 
     private static final String fShaderStr2 = ""
-            + "precision mediump float;"
+            + "precision highp float;"
             + "varying vec2 v_tex;"
             + "uniform float u_scale;"
             + "uniform float u_phase;"
