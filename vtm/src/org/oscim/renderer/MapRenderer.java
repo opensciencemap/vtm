@@ -1,5 +1,6 @@
 /*
  * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2016 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -61,6 +62,8 @@ public class MapRenderer {
 
     private static NativeBufferPool mBufferPool;
 
+    private float viewPortScale = 1;
+
     public MapRenderer(Map map) {
         mMap = map;
         mViewport = new GLViewport();
@@ -74,6 +77,13 @@ public class MapRenderer {
 
     public static void setBackgroundColor(int color) {
         mClearColor = GLUtils.colorToFloat(color);
+    }
+
+    /**
+     * Set the scale value for map viewport.
+     */
+    public void setViewPortScale(float scale) {
+        this.viewPortScale = scale;
     }
 
     public void onDrawFrame() {
@@ -117,6 +127,12 @@ public class MapRenderer {
             /* modify this to scale only the view, to see
              * which tiles are rendered */
             mViewport.mvp.setScale(0.5f, 0.5f, 1);
+            mViewport.viewproj.multiplyLhs(mViewport.mvp);
+            mViewport.proj.multiplyLhs(mViewport.mvp);
+        }
+
+        if (this.viewPortScale != 1) {
+            mViewport.mvp.setScale(this.viewPortScale, this.viewPortScale, 1);
             mViewport.viewproj.multiplyLhs(mViewport.mvp);
             mViewport.proj.multiplyLhs(mViewport.mvp);
         }
