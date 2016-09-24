@@ -495,7 +495,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.fixed = parseBoolean(value);
 
             else if ("stipple".equals(name))
-                b.stipple = parseInt(value);
+                b.stipple = Math.round(parseInt(value) * mScaleValue);
 
             else if ("stipple-stroke".equals(name))
                 b.stippleColor(value);
