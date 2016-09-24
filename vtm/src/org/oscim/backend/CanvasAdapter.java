@@ -49,6 +49,11 @@ public abstract class CanvasAdapter {
     public static float dpi = 240;
 
     /**
+     * The scale.
+     */
+    public static float scale = 1;
+
+    /**
      * The text scale.
      */
     public static float textScale = 1;

@@ -133,7 +133,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private final ThemeFile mTheme;
     private RenderTheme mRenderTheme;
 
-    private final float mScaleValue;
+    private final float mScale;
 
     private Set<String> mCategories;
     private XmlRenderThemeStyleLayer mCurrentLayer;
@@ -141,7 +141,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
     public XmlThemeBuilder(ThemeFile theme) {
         mTheme = theme;
-        mScaleValue = 1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f;
+        mScale = CanvasAdapter.scale + (CanvasAdapter.dpi / 240 - 1) * 0.5f;
     }
 
     @Override
@@ -478,7 +478,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.color(value);
 
             else if ("width".equals(name) || "stroke-width".equals(name)) {
-                b.strokeWidth = parseFloat(value) * mScaleValue;
+                b.strokeWidth = parseFloat(value) * mScale;
                 if (line == null) {
                     if (!isOutline)
                         validateNonNegative("width", b.strokeWidth);
@@ -495,7 +495,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.fixed = parseBoolean(value);
 
             else if ("stipple".equals(name))
-                b.stipple = Math.round(parseInt(value) * mScaleValue);
+                b.stipple = Math.round(parseInt(value) * mScale);
 
             else if ("stipple-stroke".equals(name))
                 b.stippleColor(value);
@@ -582,7 +582,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("stroke-width".equals(name)) {
                 float strokeWidth = Float.parseFloat(value);
                 validateNonNegative("stroke-width", strokeWidth);
-                b.strokeWidth = strokeWidth * mScaleValue;
+                b.strokeWidth = strokeWidth * mScale;
 
             } else if ("fade".equals(name))
                 b.fadeScale = Integer.parseInt(value);
@@ -855,7 +855,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.strokeColor = Color.parseColor(value);
 
             else if ("stroke-width".equals(name))
-                b.strokeWidth = Float.parseFloat(value) * mScaleValue;
+                b.strokeWidth = Float.parseFloat(value) * mScale;
 
             else if ("caption".equals(name))
                 b.caption = Boolean.parseBoolean(value);
@@ -907,7 +907,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             String value = attributes.getValue(i);
 
             if ("r".equals(name) || "radius".equals(name))
-                radius = Float.parseFloat(value) * mScaleValue;
+                radius = Float.parseFloat(value) * mScale;
 
             else if ("cat".equals(name))
                 cat = value;
@@ -922,7 +922,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 stroke = Color.parseColor(value);
 
             else if ("stroke-width".equals(name))
-                strokeWidth = Float.parseFloat(value) * mScaleValue;
+                strokeWidth = Float.parseFloat(value) * mScale;
 
             else
                 logUnknownAttribute(elementName, name, value, i);
