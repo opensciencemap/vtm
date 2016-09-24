@@ -36,10 +36,10 @@ import org.oscim.utils.FastMath;
  */
 public class Viewport {
 
-    private final static int MAX_ZOOMLEVEL = 20;
-    private final static int MIN_ZOOMLEVEL = 2;
-    private final static float MIN_TILT = 0;
-    private final static float MAX_TILT = 65;
+    public final static int MAX_ZOOMLEVEL = 20;
+    public final static int MIN_ZOOMLEVEL = 2;
+    public final static float MIN_TILT = 0;
+    public final static float MAX_TILT = 65;
 
     protected double mMaxScale = (1 << MAX_ZOOMLEVEL);
     protected double mMinScale = (1 << MIN_ZOOMLEVEL);
