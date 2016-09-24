@@ -35,9 +35,15 @@ import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.Rule.Closed;
 import org.oscim.theme.rule.Rule.Selector;
 import org.oscim.theme.rule.RuleBuilder;
-import org.oscim.theme.styles.*;
+import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.AreaStyle.AreaBuilder;
+import org.oscim.theme.styles.CircleStyle;
+import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
+import org.oscim.theme.styles.RenderStyle;
+import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +53,18 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Set;
+import java.util.Stack;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
 
 public class XmlThemeBuilder extends DefaultHandler {
-    static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
 
     private static final int RENDER_THEME_VERSION = 1;
 
@@ -96,8 +106,8 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param value          the XML attribute value.
      * @param attributeIndex the XML attribute index position.
      */
-    public static void logUnknownAttribute(String element, String name,
-                                           String value, int attributeIndex) {
+    private static void logUnknownAttribute(String element, String name,
+                                            String value, int attributeIndex) {
         log.debug("unknown attribute in element {} () : {} = {}",
                 element, attributeIndex, name, value);
     }
@@ -131,7 +141,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
     public XmlThemeBuilder(ThemeFile theme) {
         mTheme = theme;
-        mScaleValue = CanvasAdapter.dpi / 160;
+        mScaleValue = 1 + (CanvasAdapter.dpi / 240 - 1) * 0.5f;
     }
 
     @Override
@@ -755,7 +765,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 mapBackground = Color.parseColor(value);
 
             else if ("base-stroke-width".equals(name))
-                baseStrokeWidth = Float.parseFloat(value) * mScaleValue;
+                baseStrokeWidth = Float.parseFloat(value);
 
             else if ("base-text-scale".equals(name))
                 baseTextScale = Float.parseFloat(value);
@@ -855,7 +865,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             else if ("dy".equals(name))
                 // NB: minus..
-                b.dy = -Float.parseFloat(value) * mScaleValue;
+                b.dy = -Float.parseFloat(value) * CanvasAdapter.dpi / 160;
 
             else if ("symbol".equals(name)) {
                 String lowValue = value.toLowerCase(Locale.ENGLISH);
@@ -1024,13 +1034,13 @@ public class XmlThemeBuilder extends DefaultHandler {
         return mCategories == null || rule.cat == null || mCategories.contains(rule.cat);
     }
 
-    public static void validateNonNegative(String name, float value) {
+    private static void validateNonNegative(String name, float value) {
         if (value < 0)
             throw new ThemeException(name + " must not be negative: "
                     + value);
     }
 
-    public static void validateExists(String name, Object obj, String elementName) {
+    private static void validateExists(String name, Object obj, String elementName) {
         if (obj == null)
             throw new ThemeException("missing attribute " + name
                     + " for element: " + elementName);
