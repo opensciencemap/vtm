@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -25,6 +26,7 @@ public abstract class TileSource {
     public abstract static class Builder<T extends Builder<T>> {
         protected int zoomMin, zoomMax;
         protected FadeStep[] fadeSteps;
+        protected int tileSize;
 
         public T zoomMin(int zoom) {
             zoomMin = zoom;
@@ -41,6 +43,11 @@ public abstract class TileSource {
             return self();
         }
 
+        public T tileSize(int tileSize) {
+            this.tileSize = tileSize;
+            return self();
+        }
+
         @SuppressWarnings("unchecked")
         protected T self() {
             return (T) this;
@@ -51,6 +58,7 @@ public abstract class TileSource {
 
     protected int mZoomMin = 0;
     protected int mZoomMax = 20;
+    protected int mTileSize = 256;
 
     protected TileSource() {
     }
@@ -64,6 +72,7 @@ public abstract class TileSource {
         mZoomMin = builder.zoomMin;
         mZoomMax = builder.zoomMax;
         mFadeSteps = builder.fadeSteps;
+        mTileSize = builder.tileSize;
     }
 
     public abstract ITileDataSource getDataSource();
@@ -95,6 +104,10 @@ public abstract class TileSource {
 
     public FadeStep[] getFadeSteps() {
         return mFadeSteps;
+    }
+
+    public int getTileSize() {
+        return mTileSize;
     }
 
     public TileSource setOption(String key, String value) {
