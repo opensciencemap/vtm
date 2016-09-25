@@ -27,6 +27,7 @@ robovm-build
 .settings
 .classpath
 .project
+project.properties
 
 local.properties
 
