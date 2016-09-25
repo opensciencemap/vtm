@@ -70,6 +70,6 @@ public class MapzenTest extends GdxMap {
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapzenTest(), null, 400);
+        GdxMapApp.run(new MapzenTest());
     }
 }

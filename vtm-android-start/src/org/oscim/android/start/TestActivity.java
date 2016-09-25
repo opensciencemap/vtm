@@ -21,6 +21,8 @@ import android.os.Bundle;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
+import org.oscim.core.Tile;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -34,6 +36,7 @@ public class TestActivity extends Activity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Tile.SIZE = Tile.calculateTileSize(getResources().getDisplayMetrics().scaledDensity);
         setContentView(R.layout.activity_map);
 
         mMapView = (MapView) findViewById(R.id.mapView);
@@ -43,6 +46,7 @@ public class TestActivity extends Activity {
         VectorTileLayer baseLayer = map.setBaseMap(new OSciMap4TileSource());
         map.layers().add(new BuildingLayer(map, baseLayer));
         map.layers().add(new LabelLayer(map, baseLayer));
+        map.layers().add(new TileGridLayer(map));
         map.setTheme(VtmThemes.DEFAULT);
     }
 

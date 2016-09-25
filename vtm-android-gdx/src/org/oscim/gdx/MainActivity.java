@@ -40,10 +40,10 @@ public class MainActivity extends AndroidApplication {
         AndroidGraphics.init();
         GdxAssets.init("");
         GLAdapter.init(new AndroidGL());
-        Tile.SIZE = 400;
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
+        Tile.SIZE = Tile.calculateTileSize(metrics.scaledDensity);
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.stencil = 8;

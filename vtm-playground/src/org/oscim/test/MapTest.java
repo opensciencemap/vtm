@@ -63,6 +63,6 @@ public class MapTest extends GdxMapApp {
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapTest(), null, 400);
+        GdxMapApp.run(new MapTest());
     }
 }

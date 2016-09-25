@@ -71,6 +71,6 @@ public class MapsforgeTest extends GdxMap {
         mapFile = getMapFile(args);
 
         GdxMapApp.init();
-        GdxMapApp.run(new MapsforgeTest(), null, 400);
+        GdxMapApp.run(new MapsforgeTest());
     }
 }

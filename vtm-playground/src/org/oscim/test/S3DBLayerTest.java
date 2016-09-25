@@ -43,6 +43,6 @@ public class S3DBLayerTest extends GdxMapApp {
 
     public static void main(String[] args) {
         init();
-        run(new S3DBLayerTest(), null, 400);
+        run(new S3DBLayerTest());
     }
 }

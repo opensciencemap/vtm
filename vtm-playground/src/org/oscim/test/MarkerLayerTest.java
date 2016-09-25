@@ -87,6 +87,6 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MarkerLayerTest(), null, 400);
+        GdxMapApp.run(new MarkerLayerTest());
     }
 }

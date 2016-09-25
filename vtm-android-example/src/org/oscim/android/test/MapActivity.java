@@ -21,6 +21,7 @@ import android.os.Bundle;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
+import org.oscim.core.Tile;
 import org.oscim.map.Map;
 
 public class MapActivity extends Activity {
@@ -40,6 +41,7 @@ public class MapActivity extends Activity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Tile.SIZE = Tile.calculateTileSize(getResources().getDisplayMetrics().scaledDensity);
         setContentView(mContentView);
 
         setTitle(getClass().getSimpleName());

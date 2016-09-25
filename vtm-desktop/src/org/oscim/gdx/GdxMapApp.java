@@ -45,19 +45,18 @@ public class GdxMapApp extends GdxMap {
     }
 
     public static void main(String[] args) {
-        Tile.SIZE = 360;
         init();
         new LwjglApplication(new GdxMapApp(), getConfig());
+    }
+
+    public static void run(GdxMap map) {
+        run(map, null, Tile.SIZE);
     }
 
     public static void run(GdxMap map, LwjglApplicationConfiguration config, int tileSize) {
         Tile.SIZE = FastMath.clamp(tileSize, 128, 512);
 
         new LwjglApplication(map, (config == null ? getConfig() : config));
-    }
-
-    public static void run(LwjglApplicationConfiguration config, int tileSize, GdxMap map) {
-        run(map, config, tileSize);
     }
 
     static protected LwjglApplicationConfiguration getConfig() {

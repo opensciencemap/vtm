@@ -120,6 +120,6 @@ public class LineTexTest extends GdxMapApp {
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new LineTexTest(), null, 400);
+        GdxMapApp.run(new LineTexTest());
     }
 }
