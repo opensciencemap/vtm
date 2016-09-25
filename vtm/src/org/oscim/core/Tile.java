@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -25,9 +26,19 @@ package org.oscim.core;
 public class Tile {
 
     /**
-     * Width and height of a map tile in pixel.
+     * Default tile size in pixels.
      */
-    public static int SIZE = 400;
+    private static final int DEFAULT_TILE_SIZE = 256;
+
+    /**
+     * Width and height of a map tile in pixels.
+     */
+    public static int SIZE = 512;
+
+    /**
+     * Tile size multiple in pixels.
+     */
+    public static int TILE_SIZE_MULTIPLE = 64;
 
     /**
      * The X number of this tile.
@@ -97,5 +108,15 @@ public class Tile {
             mHash = result;
         }
         return mHash;
+    }
+
+    /**
+     * Calculate tile size (256px) with a scale factor.
+     * Clamp tile size to a preset multiple, e.g. 64px.
+     */
+    public static int calculateTileSize(float scaleFactor) {
+        float scaled = DEFAULT_TILE_SIZE * scaleFactor;
+        return Math.max(TILE_SIZE_MULTIPLE,
+                Math.round(scaled / TILE_SIZE_MULTIPLE) * TILE_SIZE_MULTIPLE);
     }
 }
