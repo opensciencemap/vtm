@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -52,7 +53,7 @@ public final class PolygonBucket extends RenderBucket {
 
     private static final float S = MapRenderer.COORD_SCALE;
 
-    private static final boolean enableTexture = true;
+    public static boolean enableTexture = true;
 
     public AreaStyle area;
 
