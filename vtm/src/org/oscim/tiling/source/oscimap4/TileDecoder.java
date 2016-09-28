@@ -78,7 +78,7 @@ public class TileDecoder extends PbfDecoder {
     private final static float REF_TILE_SIZE = 4096.0f;
     private final float mScaleFactor = REF_TILE_SIZE / Tile.SIZE;
 
-    TileDecoder() {
+    public TileDecoder() {
         mElem = new MapElement();
         mTileTags = new TagSet(100);
     }
