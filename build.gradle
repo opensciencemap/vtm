@@ -13,7 +13,7 @@ allprojects {
     version = 'master-SNAPSHOT'
     ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-    ext.androidBuildVersionTools = "24.0.2"
+    ext.androidBuildVersionTools = "24.0.3"
     ext.gdxVersion = "1.9.4"
 
     if (JavaVersion.current().isJava8Compatible()) {
