@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.ThemeFile;
 import org.oscim.theme.XmlRenderThemeMenuCallback;
+import org.oscim.utils.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +76,7 @@ public class AssetsRenderTheme implements ThemeFile {
         if (mInputStream != other.mInputStream) {
             return false;
         }
-        if (mRelativePathPrefix != other.mRelativePathPrefix) {
+        if (!Utils.equals(mRelativePathPrefix, other.mRelativePathPrefix)) {
             return false;
         }
         return true;

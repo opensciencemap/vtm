@@ -1,6 +1,7 @@
 /*
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 Longri
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -150,7 +151,7 @@ public final class PolygonBucket extends RenderBucket {
             uMVP = getUniform("u_mvp");
             aPos = getAttrib("a_pos");
             uColor = getUniform("u_color");
-            if (shaderFile == "polygon_layer_tex")
+            if ("polygon_layer_tex".equals(shaderFile))
                 uScale = getUniform("u_scale");
         }
     }
@@ -291,14 +292,10 @@ public final class PolygonBucket extends RenderBucket {
          * draw polygon buckets (until bucket.next is not polygon bucket)
          * using stencil buffer method
          *
-         * @param buckets  layer to draw (referencing vertices in current vbo)
-         * @param v        GLViewport
-         * @param pos      used to fade buckets according to 'fade' in
-         *                 layer.area style
-         * @param div      scale relative to 'base scale' of the tile
-         * @param first    pass true to clear stencil buffer region
-         * @param clipMode clip to first quad in current vbo
-         *                 using CLIP_STENCIL / CLIP_DEPTH
+         * @param buckets layer to draw (referencing vertices in current vbo)
+         * @param v       GLViewport
+         * @param div     scale relative to 'base scale' of the tile
+         * @param first   pass true to clear stencil buffer region
          * @return next layer
          */
         public static RenderBucket draw(RenderBucket buckets, GLViewport v,
@@ -440,8 +437,8 @@ public final class PolygonBucket extends RenderBucket {
          * Draw a tile filling rectangle to set stencil- and depth buffer
          * appropriately
          *
-         * @param first in the first run the clip region is set based on
-         *              depth buffer and depth buffer is updated
+         * @param clipMode clip to first quad in current vbo
+         *                 using CLIP_STENCIL / CLIP_DEPTH
          */
         static void drawStencilRegion(int clipMode) {
             //log.debug("draw stencil {}", clipMode);

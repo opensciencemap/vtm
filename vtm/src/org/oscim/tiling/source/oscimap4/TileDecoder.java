@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -218,12 +219,12 @@ public class TileDecoder extends PbfDecoder {
 
             // FIXME filter out all variable tags
             // might depend on theme though
-            if (key == Tag.KEY_NAME
-                    || key == Tag.KEY_HEIGHT
-                    || key == Tag.KEY_MIN_HEIGHT
-                    || key == Tag.KEY_HOUSE_NUMBER
-                    || key == Tag.KEY_REF
-                    || key == Tag.KEY_ELE)
+            if (Tag.KEY_NAME.equals(key)
+                    || Tag.KEY_HEIGHT.equals(key)
+                    || Tag.KEY_MIN_HEIGHT.equals(key)
+                    || Tag.KEY_HOUSE_NUMBER.equals(key)
+                    || Tag.KEY_REF.equals(key)
+                    || Tag.KEY_ELE.equals(key))
                 tag = new Tag(key, val, false);
             else
                 tag = new Tag(key, val, false, true);

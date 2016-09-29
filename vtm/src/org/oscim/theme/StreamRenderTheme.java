@@ -15,6 +15,7 @@
 package org.oscim.theme;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
+import org.oscim.utils.Utils;
 
 import java.io.InputStream;
 
@@ -59,7 +60,7 @@ public class StreamRenderTheme implements ThemeFile {
         if (mInputStream != other.mInputStream) {
             return false;
         }
-        if (mRelativePathPrefix != other.mRelativePathPrefix) {
+        if (!Utils.equals(mRelativePathPrefix, other.mRelativePathPrefix)) {
             return false;
         }
         return true;

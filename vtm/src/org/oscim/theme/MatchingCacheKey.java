@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -18,6 +19,7 @@ package org.oscim.theme;
 
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
+import org.oscim.utils.Utils;
 
 class MatchingCacheKey {
     int mHash;
@@ -44,7 +46,7 @@ class MatchingCacheKey {
                 Tag t1 = tags.tags[i];
                 Tag t2 = compare.mTags[i];
 
-                if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+                if (!(t1 == t2 || (Utils.equals(t1.key, t2.key) && Utils.equals(t1.value, t2.value))))
                     break;
             }
             if (i == numTags)
@@ -86,7 +88,7 @@ class MatchingCacheKey {
             Tag t1 = mTags[i];
             Tag t2 = other.mTags[i];
 
-            if (!(t1 == t2 || (t1.key == t2.key && t1.value == t2.value)))
+            if (!(t1 == t2 || (Utils.equals(t1.key, t2.key) && Utils.equals(t1.value, t2.value))))
                 return false;
         }
         return true;

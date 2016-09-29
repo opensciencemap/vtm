@@ -1,9 +1,27 @@
+/*
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.layers.tile.vector;
 
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
 import org.oscim.layers.tile.TileLoader;
 import org.oscim.map.Map;
+import org.oscim.utils.Utils;
 
 public class OsmTileLayer extends VectorTileLayer {
 
@@ -52,7 +70,7 @@ public class OsmTileLayer extends VectorTileLayer {
                 Tag t = tags[i];
 
                 for (TagReplacement replacement : mTagReplacement) {
-                    if (t.key == replacement.key) {
+                    if (Utils.equals(t.key, replacement.key)) {
                         mFilteredTags.add(replacement.tag);
                         continue O;
                     }

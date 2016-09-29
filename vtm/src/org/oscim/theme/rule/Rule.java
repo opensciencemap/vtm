@@ -20,6 +20,7 @@ package org.oscim.theme.rule;
 import org.oscim.core.Tag;
 import org.oscim.theme.rule.RuleBuilder.RuleType;
 import org.oscim.theme.styles.RenderStyle;
+import org.oscim.utils.Utils;
 
 import java.util.List;
 
@@ -190,7 +191,7 @@ public class Rule {
         @Override
         public boolean matchesTags(Tag[] tags) {
             for (Tag tag : tags)
-                if (mKey == tag.key)
+                if (Utils.equals(mKey, tag.key))
                     return true;
 
             return false;
@@ -209,7 +210,7 @@ public class Rule {
         @Override
         public boolean matchesTags(Tag[] tags) {
             for (Tag tag : tags)
-                if (mValue == tag.value)
+                if (Utils.equals(mValue, tag.value))
                     return true;
 
             return false;
@@ -231,8 +232,8 @@ public class Rule {
         @Override
         public boolean matchesTags(Tag[] tags) {
             for (Tag tag : tags)
-                if (mKey == tag.key)
-                    return (mValue == tag.value);
+                if (Utils.equals(mKey, tag.key))
+                    return (Utils.equals(mValue, tag.value));
 
             return false;
         }
@@ -263,7 +264,7 @@ public class Rule {
             if (mKeys == null) {
                 for (Tag tag : tags) {
                     for (String value : mValues) {
-                        if (value == tag.value)
+                        if (Utils.equals(value, tag.value))
                             return true;
                     }
                 }
@@ -272,12 +273,12 @@ public class Rule {
 
             for (Tag tag : tags)
                 for (String key : mKeys) {
-                    if (key == tag.key) {
+                    if (Utils.equals(key, tag.key)) {
                         if (mValues == null)
                             return true;
 
                         for (String value : mValues) {
-                            if (value == tag.value)
+                            if (Utils.equals(value, tag.value))
                                 return true;
                         }
                     }
@@ -319,7 +320,7 @@ public class Rule {
 
             for (Tag tag : tags)
                 for (String value : values)
-                    if (value == tag.value)
+                    if (Utils.equals(value, tag.value))
                         return !exclusive;
 
             return exclusive;
@@ -328,7 +329,7 @@ public class Rule {
         private boolean containsKeys(Tag[] tags) {
             for (Tag tag : tags)
                 for (String key : keys)
-                    if (key == tag.key)
+                    if (Utils.equals(key, tag.key))
                         return true;
 
             return false;

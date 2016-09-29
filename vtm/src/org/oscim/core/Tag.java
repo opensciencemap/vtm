@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,6 +17,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.core;
+
+import org.oscim.utils.Utils;
 
 /**
  * A tag represents an immutable key-value pair. Keys are always intern().
@@ -107,11 +110,11 @@ public class Tag {
         }
         Tag other = (Tag) obj;
 
-        if (key != other.key)
+        if (!Utils.equals(key, other.key))
             return false;
 
         if (intern && other.intern) {
-            if (value == other.value)
+            if (Utils.equals(value, other.value))
                 return true;
 
         } else if (!intern && value.equals(other.value)) {
