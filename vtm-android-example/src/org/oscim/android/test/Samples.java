@@ -53,6 +53,7 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));
         linearLayout.addView(createButton(OsmJsonMapActivity.class));
         linearLayout.addView(createButton(VectorLayerMapActivity.class));
+        linearLayout.addView(createButton(MultiMapActivity.class));
     }
 
     private Button createButton(final Class<?> clazz) {
