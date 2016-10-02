@@ -30,9 +30,6 @@
             android:name=".BitmapTileMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MultiMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".JeoIndoorMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
@@ -49,6 +46,9 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MarkerOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MultiMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".OsmJsonMapActivity"

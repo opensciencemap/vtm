@@ -6,13 +6,13 @@
     <org.oscim.android.MapView
         android:id="@+id/mapView1"
         android:layout_width="match_parent"
-	android:layout_weight="1"
-        android:layout_height="0dip" />
+        android:layout_height="0dip"
+        android:layout_weight="1" />
 
     <org.oscim.android.MapView
         android:id="@+id/mapView2"
         android:layout_width="match_parent"
-	android:layout_weight="1"
-        android:layout_height="0dip" />
+        android:layout_height="0dip"
+        android:layout_weight="1" />
 
 </LinearLayout>

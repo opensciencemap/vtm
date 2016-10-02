@@ -1,4 +1,5 @@
 /*
+ * Copyright 2016 Marvin W
  * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -22,65 +23,51 @@ import android.os.Bundle;
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
 import org.oscim.core.Tile;
-import org.oscim.map.Map;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.tiling.TileSource;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
-import org.oscim.theme.VtmThemes;
-import org.oscim.layers.GroupLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-
+import org.oscim.map.Map;
+import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MultiMapActivity extends Activity {
-    MapView mMapView1;
-    MapView mMapView2;
-    Map mMap1;
-    Map mMap2;
-    MapPreferences mPrefs;
-
-    VectorTileLayer mBaseLayer1;
-    VectorTileLayer mBaseLayer2;
-    TileSource mTileSource;
+    private MapView mMapView1, mMapView2;
+    private MapPreferences mPrefs1, mPrefs2;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Tile.SIZE = Tile.calculateTileSize(getResources().getDisplayMetrics().scaledDensity);
-	setContentView(R.layout.activity_map_multi);
+        setContentView(R.layout.activity_map_multi);
 
         setTitle(getClass().getSimpleName());
 
-        mTileSource = new OSciMap4TileSource();
-
+        // 1st map view
         mMapView1 = (MapView) findViewById(R.id.mapView1);
-        mMap1 = mMapView1.map();
-        mBaseLayer1 = mMap1.setBaseMap(mTileSource);
+        Map map1 = mMapView1.map();
+        mPrefs1 = new MapPreferences(MultiMapActivity.class.getName() + "1", this);
+        VectorTileLayer baseLayer1 = map1.setBaseMap(new OSciMap4TileSource());
+        map1.layers().add(new BuildingLayer(map1, baseLayer1));
+        map1.layers().add(new LabelLayer(map1, baseLayer1));
+        map1.setTheme(VtmThemes.DEFAULT);
 
-        GroupLayer groupLayer1 = new GroupLayer(mMap1);
-        groupLayer1.layers.add(new BuildingLayer(mMap1, mBaseLayer1));
-        groupLayer1.layers.add(new LabelLayer(mMap1, mBaseLayer1));
-        mMap1.layers().add(groupLayer1);
-	mMap1.setTheme(VtmThemes.DEFAULT);
-
+        // 2nd map view
         mMapView2 = (MapView) findViewById(R.id.mapView2);
-        mMap2 = mMapView2.map();
-        mBaseLayer2 = mMap2.setBaseMap(mTileSource);
-
-        GroupLayer groupLayer2 = new GroupLayer(mMap2);
-        groupLayer2.layers.add(new BuildingLayer(mMap2, mBaseLayer2));
-        groupLayer2.layers.add(new LabelLayer(mMap2, mBaseLayer2));
-        mMap2.layers().add(groupLayer2);
-	mMap2.setTheme(VtmThemes.DEFAULT);
-
-        mPrefs = new MapPreferences(MapActivity.class.getName(), this);
+        Map map2 = mMapView2.map();
+        mPrefs2 = new MapPreferences(MultiMapActivity.class.getName() + "2", this);
+        VectorTileLayer baseLayer2 = map2.setBaseMap(new OSciMap4TileSource());
+        map2.layers().add(new BuildingLayer(map2, baseLayer2));
+        map2.layers().add(new LabelLayer(map2, baseLayer2));
+        map2.setTheme(VtmThemes.DEFAULT);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mPrefs.load(mMapView1.map());
+        mPrefs1.load(mMapView1.map());
         mMapView1.onResume();
+
+        mPrefs2.load(mMapView2.map());
         mMapView2.onResume();
     }
 
@@ -89,7 +76,9 @@ public class MultiMapActivity extends Activity {
         super.onPause();
 
         mMapView1.onPause();
+        mPrefs1.save(mMapView1.map());
+
         mMapView2.onPause();
-        mPrefs.save(mMapView1.map());
+        mPrefs2.save(mMapView2.map());
     }
 }
