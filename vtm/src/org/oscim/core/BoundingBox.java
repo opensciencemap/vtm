@@ -67,12 +67,38 @@ public class BoundingBox {
         this.maxLongitudeE6 = maxLongitudeE6;
     }
 
-    public BoundingBox(double minLatitude, double minLongitude, double maxLatitude,
-                       double maxLongitude) {
+    /**
+     * @param minLatitude  the minimum latitude coordinate in degrees.
+     * @param minLongitude the minimum longitude coordinate in degrees.
+     * @param maxLatitude  the maximum latitude coordinate in degrees.
+     * @param maxLongitude the maximum longitude coordinate in degrees.
+     */
+    public BoundingBox(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {
         this.minLatitudeE6 = (int) (minLatitude * 1E6);
         this.minLongitudeE6 = (int) (minLongitude * 1E6);
         this.maxLatitudeE6 = (int) (maxLatitude * 1E6);
         this.maxLongitudeE6 = (int) (maxLongitude * 1E6);
+    }
+
+    /**
+     * @param geoPoints the coordinates list.
+     */
+    public BoundingBox(List<GeoPoint> geoPoints) {
+        int minLat = Integer.MAX_VALUE;
+        int minLon = Integer.MAX_VALUE;
+        int maxLat = Integer.MIN_VALUE;
+        int maxLon = Integer.MIN_VALUE;
+        for (GeoPoint geoPoint : geoPoints) {
+            minLat = Math.min(minLat, geoPoint.latitudeE6);
+            minLon = Math.min(minLon, geoPoint.longitudeE6);
+            maxLat = Math.max(maxLat, geoPoint.latitudeE6);
+            maxLon = Math.max(maxLon, geoPoint.longitudeE6);
+        }
+
+        this.minLatitudeE6 = minLat;
+        this.minLongitudeE6 = minLon;
+        this.maxLatitudeE6 = maxLat;
+        this.maxLongitudeE6 = maxLon;
     }
 
     /**
@@ -108,6 +134,118 @@ public class BoundingBox {
     }
 
     /**
+     * @param boundingBox the BoundingBox which this BoundingBox should be extended if it is larger
+     * @return a BoundingBox that covers this BoundingBox and the given BoundingBox.
+     */
+    public BoundingBox extendBoundingBox(BoundingBox boundingBox) {
+        return new BoundingBox(Math.min(this.minLatitudeE6, boundingBox.minLatitudeE6),
+                Math.min(this.minLongitudeE6, boundingBox.minLongitudeE6),
+                Math.max(this.maxLatitudeE6, boundingBox.maxLatitudeE6),
+                Math.max(this.maxLongitudeE6, boundingBox.maxLongitudeE6));
+    }
+
+    /**
+     * Creates a BoundingBox extended up to <code>GeoPoint</code> (but does not cross date line/poles).
+     *
+     * @param geoPoint coordinates up to the extension
+     * @return an extended BoundingBox or this (if contains coordinates)
+     */
+    public BoundingBox extendCoordinates(GeoPoint geoPoint) {
+        if (contains(geoPoint)) {
+            return this;
+        }
+
+        double minLat = Math.max(MercatorProjection.LATITUDE_MIN, Math.min(getMinLatitude(), geoPoint.getLatitude()));
+        double minLon = Math.max(MercatorProjection.LONGITUDE_MIN, Math.min(getMinLongitude(), geoPoint.getLongitude()));
+        double maxLat = Math.min(MercatorProjection.LATITUDE_MAX, Math.max(getMaxLatitude(), geoPoint.getLatitude()));
+        double maxLon = Math.min(MercatorProjection.LONGITUDE_MAX, Math.max(getMaxLongitude(), geoPoint.getLongitude()));
+
+        return new BoundingBox(minLat, minLon, maxLat, maxLon);
+    }
+
+    /**
+     * Creates a BoundingBox that is a fixed degree amount larger on all sides (but does not cross date line/poles).
+     *
+     * @param verticalExpansion   degree extension (must be >= 0)
+     * @param horizontalExpansion degree extension (must be >= 0)
+     * @return an extended BoundingBox or this (if degrees == 0)
+     */
+    public BoundingBox extendDegrees(double verticalExpansion, double horizontalExpansion) {
+        if (verticalExpansion == 0 && horizontalExpansion == 0) {
+            return this;
+        } else if (verticalExpansion < 0 || horizontalExpansion < 0) {
+            throw new IllegalArgumentException("BoundingBox extend operation does not accept negative values");
+        }
+
+        double minLat = Math.max(MercatorProjection.LATITUDE_MIN, getMinLatitude() - verticalExpansion);
+        double minLon = Math.max(MercatorProjection.LONGITUDE_MIN, getMinLongitude() - horizontalExpansion);
+        double maxLat = Math.min(MercatorProjection.LATITUDE_MAX, getMaxLatitude() + verticalExpansion);
+        double maxLon = Math.min(MercatorProjection.LONGITUDE_MAX, getMaxLongitude() + horizontalExpansion);
+
+        return new BoundingBox(minLat, minLon, maxLat, maxLon);
+    }
+
+    /**
+     * Creates a BoundingBox that is a fixed margin factor larger on all sides (but does not cross date line/poles).
+     *
+     * @param margin extension (must be > 0)
+     * @return an extended BoundingBox or this (if margin == 1)
+     */
+    public BoundingBox extendMargin(float margin) {
+        if (margin == 1) {
+            return this;
+        } else if (margin <= 0) {
+            throw new IllegalArgumentException("BoundingBox extend operation does not accept negative or zero values");
+        }
+
+        double verticalExpansion = (getLatitudeSpan() * margin - getLatitudeSpan()) * 0.5;
+        double horizontalExpansion = (getLongitudeSpan() * margin - getLongitudeSpan()) * 0.5;
+
+        double minLat = Math.max(MercatorProjection.LATITUDE_MIN, getMinLatitude() - verticalExpansion);
+        double minLon = Math.max(MercatorProjection.LONGITUDE_MIN, getMinLongitude() - horizontalExpansion);
+        double maxLat = Math.min(MercatorProjection.LATITUDE_MAX, getMaxLatitude() + verticalExpansion);
+        double maxLon = Math.min(MercatorProjection.LONGITUDE_MAX, getMaxLongitude() + horizontalExpansion);
+
+        return new BoundingBox(minLat, minLon, maxLat, maxLon);
+    }
+
+    /**
+     * Creates a BoundingBox that is a fixed meter amount larger on all sides (but does not cross date line/poles).
+     *
+     * @param meters extension (must be >= 0)
+     * @return an extended BoundingBox or this (if meters == 0)
+     */
+    public BoundingBox extendMeters(int meters) {
+        if (meters == 0) {
+            return this;
+        } else if (meters < 0) {
+            throw new IllegalArgumentException("BoundingBox extend operation does not accept negative values");
+        }
+
+        double verticalExpansion = GeoPoint.latitudeDistance(meters);
+        double horizontalExpansion = GeoPoint.longitudeDistance(meters, Math.max(Math.abs(getMinLatitude()), Math.abs(getMaxLatitude())));
+
+        double minLat = Math.max(MercatorProjection.LATITUDE_MIN, getMinLatitude() - verticalExpansion);
+        double minLon = Math.max(MercatorProjection.LONGITUDE_MIN, getMinLongitude() - horizontalExpansion);
+        double maxLat = Math.min(MercatorProjection.LATITUDE_MAX, getMaxLatitude() + verticalExpansion);
+        double maxLon = Math.min(MercatorProjection.LONGITUDE_MAX, getMaxLongitude() + horizontalExpansion);
+
+        return new BoundingBox(minLat, minLon, maxLat, maxLon);
+    }
+
+    public String format() {
+        return new StringBuilder()
+                .append(minLatitudeE6 / CONVERSION_FACTOR)
+                .append(',')
+                .append(minLongitudeE6 / CONVERSION_FACTOR)
+                .append(',')
+                .append(maxLatitudeE6 / CONVERSION_FACTOR)
+                .append(',')
+                .append(maxLongitudeE6 / CONVERSION_FACTOR)
+                .toString();
+    }
+
+    /**
      * @return the GeoPoint at the horizontal and vertical center of this
      * BoundingBox.
      */
@@ -116,6 +254,20 @@ public class BoundingBox {
         int longitudeOffset = (maxLongitudeE6 - minLongitudeE6) / 2;
         return new GeoPoint(minLatitudeE6 + latitudeOffset, minLongitudeE6
                 + longitudeOffset);
+    }
+
+    /**
+     * @return the latitude span of this BoundingBox in degrees.
+     */
+    public double getLatitudeSpan() {
+        return getMaxLatitude() - getMinLatitude();
+    }
+
+    /**
+     * @return the longitude span of this BoundingBox in degrees.
+     */
+    public double getLongitudeSpan() {
+        return getMaxLongitude() - getMinLatitude();
     }
 
     /**
@@ -156,6 +308,19 @@ public class BoundingBox {
         return result;
     }
 
+    /**
+     * @param boundingBox the BoundingBox which should be checked for intersection with this BoundingBox.
+     * @return true if this BoundingBox intersects with the given BoundingBox, false otherwise.
+     */
+    public boolean intersects(BoundingBox boundingBox) {
+        if (this == boundingBox) {
+            return true;
+        }
+
+        return getMaxLatitude() >= boundingBox.getMinLatitude() && getMaxLongitude() >= boundingBox.getMinLongitude()
+                && getMinLatitude() <= boundingBox.getMaxLatitude() && getMinLongitude() <= boundingBox.getMaxLongitude();
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -169,34 +334,5 @@ public class BoundingBox {
                 .append(maxLongitudeE6)
                 .append("]")
                 .toString();
-    }
-
-    public String format() {
-        return new StringBuilder()
-                .append(minLatitudeE6 / CONVERSION_FACTOR)
-                .append(',')
-                .append(minLongitudeE6 / CONVERSION_FACTOR)
-                .append(',')
-                .append(maxLatitudeE6 / CONVERSION_FACTOR)
-                .append(',')
-                .append(maxLongitudeE6 / CONVERSION_FACTOR)
-                .toString();
-    }
-
-    /* code below is from osdmroid, @author Nicolas Gramlich */
-    public static BoundingBox fromGeoPoints(final List<? extends GeoPoint> partialPolyLine) {
-        int minLat = Integer.MAX_VALUE;
-        int minLon = Integer.MAX_VALUE;
-        int maxLat = Integer.MIN_VALUE;
-        int maxLon = Integer.MIN_VALUE;
-        for (final GeoPoint gp : partialPolyLine) {
-
-            minLat = Math.min(minLat, gp.latitudeE6);
-            minLon = Math.min(minLon, gp.longitudeE6);
-            maxLat = Math.max(maxLat, gp.latitudeE6);
-            maxLon = Math.max(maxLon, gp.longitudeE6);
-        }
-
-        return new BoundingBox(minLat, minLon, maxLat, maxLon);
     }
 }
