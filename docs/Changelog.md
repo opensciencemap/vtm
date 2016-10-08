@@ -17,9 +17,10 @@
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Graphics API platform enhancements [#92](https://github.com/mapsforge/vtm/issues/92)
+- GeoPoint & BoundingBox improvements [#201](https://github.com/mapsforge/vtm/issues/201) [#200](https://github.com/mapsforge/vtm/issues/200)
 - vtm-jts module [#53](https://github.com/mapsforge/vtm/issues/53)
 - vtm-http module [#140](https://github.com/mapsforge/vtm/issues/140)
-- Internal render themes various enhancements [#41](https://github.com/mapsforge/vtm/issues/41)
+- Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)
 - LWJGL desktop libGDX backend [#129](https://github.com/mapsforge/vtm/issues/129)
 - SNAPSHOT builds publish to Sonatype OSSRH [#165](https://github.com/mapsforge/vtm/issues/165)
 - Many other minor improvements and bug fixes
