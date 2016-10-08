@@ -1,8 +1,10 @@
 # Changelog
 
-## New for 0.6.0
+## Version 0.6.X
 
-**Revive of VTM vector map library.**
+**Version 0.6.0-rc1 (2016-10-08)**
+
+**Revive of VTM vector map library**
 
 - Render theme SVG resources [#60](https://github.com/mapsforge/vtm/issues/60)
 - Mapsforge multilingual maps [#34](https://github.com/mapsforge/vtm/issues/34)
