@@ -427,7 +427,7 @@ public class RouteSearch {
                 time = hour + "h " + minute + "m";
             }
 
-            double dis = ((double) (mStartPoint.distanceTo(mDestinationPoint))) / 1000;
+            double dis = ((double) (mStartPoint.sphericalDistance(mDestinationPoint))) / 1000;
             String distance;
             String shortpath;
             if (dis < 100) {

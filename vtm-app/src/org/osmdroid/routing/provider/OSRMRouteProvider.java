@@ -254,7 +254,7 @@ public class OSRMRouteProvider extends RouteProvider {
             route = new Route(waypoints);
         } else {
             route.buildLegs(waypoints);
-            BoundingBox bb = BoundingBox.fromGeoPoints(route.routeHigh);
+            BoundingBox bb = new BoundingBox(route.routeHigh);
             //Correcting osmdroid bug #359:
             route.boundingBox = bb;
             //    new BoundingBox(

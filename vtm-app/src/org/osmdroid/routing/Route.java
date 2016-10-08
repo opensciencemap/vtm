@@ -103,7 +103,7 @@ public class Route {
             RouteLeg leg = new RouteLeg(/* i, i+1, mLinks */);
             legs.add(leg);
         }
-        boundingBox = BoundingBox.fromGeoPoints(routeHigh);
+        boundingBox = new BoundingBox(routeHigh);
         status = STATUS_DEFAULT;
     }
 
