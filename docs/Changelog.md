@@ -1,5 +1,9 @@
 # Changelog
 
+## New since 0.6.0-rc1
+
+- Minor improvements and bug fixes
+
 ## Version 0.6.X
 
 **Version 0.6.0-rc1 (2016-10-08)**

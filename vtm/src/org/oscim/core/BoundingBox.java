@@ -267,7 +267,7 @@ public class BoundingBox {
      * @return the longitude span of this BoundingBox in degrees.
      */
     public double getLongitudeSpan() {
-        return getMaxLongitude() - getMinLatitude();
+        return getMaxLongitude() - getMinLongitude();
     }
 
     /**
