@@ -26,14 +26,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A simple start screen for the sample activities.
  */
 public class Samples extends Activity {
-    public static Logger log = LoggerFactory.getLogger(Samples.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +44,7 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(PathOverlayActivity.class));
         linearLayout.addView(createButton(LineTexActivity.class));
         linearLayout.addView(createButton(LayerGroupActivity.class));
+        linearLayout.addView(createButton(LocationActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(S3DBMapActivity.class));
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));

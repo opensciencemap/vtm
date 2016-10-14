@@ -2,6 +2,7 @@
 
 ## New since 0.6.0-rc1
 
+- Location layer [#171](https://github.com/mapsforge/vtm/issues/171)
 - Minor improvements and bug fixes
 
 ## Version 0.6.X
