@@ -43,6 +43,7 @@ public class LocationActivity extends SimpleMapActivity implements LocationListe
         super.onResume();
 
         enableAvailableProviders();
+        locationLayer.setEnabled(true);
     }
 
     @Override
@@ -50,6 +51,7 @@ public class LocationActivity extends SimpleMapActivity implements LocationListe
         super.onPause();
 
         locationManager.removeUpdates(this);
+        locationLayer.setEnabled(false);
     }
 
     @Override
