@@ -402,7 +402,8 @@
     <m e="way">
         <m closed="yes" k="natural" v="water">
             <area use="water" />
-            <caption k="name" fill="#777744" size="16" stroke="#aaffffff" stroke-width="2.0" area-size="0.4" />
+            <caption area-size="0.4" fill="#777744" k="name" size="16" stroke="#aaffffff"
+                stroke-width="2.0" />
             <!--<line use="water:outline" />-->
         </m>
 
@@ -527,8 +528,8 @@
                     <area fill="#e8ecde" />
                 </m>
                 <m zoom-min="12">
-                    <caption dy="18" fill="#000000" k="name" priority="5" size="19" stroke="#ffffff"
-                        stroke-width="2.0" area-size="0.1"/>
+                    <caption area-size="0.1" dy="18" fill="#000000" k="name" priority="5" size="19"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
                 <m zoom-max="11">
                     <caption dy="18" fill="#000000" k="ref" priority="5" size="19" stroke="#ffffff"
@@ -997,7 +998,7 @@
 
         <!-- place -->
         <m k="place">
-            <circle radius="5.0" fill="#ff0000"/>
+            <circle fill="#ff0000" radius="5.0" />
             <m v="suburb" zoom-max="14">
                 <caption style="italic" fill="#606060" k="name" priority="4" size="17"
                     stroke="#ffffff" stroke-width="2.0" />

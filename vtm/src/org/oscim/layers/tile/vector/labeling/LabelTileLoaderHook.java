@@ -86,7 +86,7 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 
                 PointF label = element.labelPosition;
                 if (label == null)
-                    label = PolyLabel.get(element, 5f);
+                    label = PolyLabel.get(element);
 
                 if (label.x < 0 || label.x > Tile.SIZE || label.y < 0 || label.y > Tile.SIZE)
                     return false;

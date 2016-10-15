@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
+ * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -26,14 +27,14 @@ package org.oscim.core;
  */
 public class MapElement extends GeometryBuffer {
 
+    public PointF labelPosition;
+
     /**
      * layer of the element (0-10) overrides the theme drawing order
      */
     public int layer;
 
     public final TagSet tags = new TagSet();
-
-    public PointF labelPosition;
 
     public MapElement() {
         super(1024, 16);
@@ -43,12 +44,12 @@ public class MapElement extends GeometryBuffer {
         super(points, indices);
     }
 
-    public void setLayer(int layer) {
-        this.layer = layer;
-    }
-
     public void setLabelPosition(float x, float y) {
         labelPosition = new PointF(x, y);
+    }
+
+    public void setLayer(int layer) {
+        this.layer = layer;
     }
 
     @Override

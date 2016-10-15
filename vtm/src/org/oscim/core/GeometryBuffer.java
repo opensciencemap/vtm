@@ -426,9 +426,9 @@ public class GeometryBuffer {
         int n = index[0];
 
         for (int i = 0; i < n - 2; i += 2) {
-            area = area + (points[i] * points[i+3]) - (points[i+1] * points[i+2]);
+            area = area + (points[i] * points[i + 3]) - (points[i + 1] * points[i + 2]);
         }
-        area = area + (points[n-2] * points[1]) - (points[n-1] * points[0]);
+        area = area + (points[n - 2] * points[1]) - (points[n - 1] * points[0]);
 
         return 0.5f * area;
     }
