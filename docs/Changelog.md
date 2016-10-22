@@ -2,6 +2,10 @@
 
 ## Version 0.6.X
 
+**Version 0.6.0-rc3 (2016-10-22)**
+
+- Minor improvements and bug fixes
+
 **Version 0.6.0-rc2 (2016-10-16)**
 
 - Location layer [#171](https://github.com/mapsforge/vtm/issues/171)
