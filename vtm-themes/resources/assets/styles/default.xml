@@ -260,7 +260,9 @@
                 -->
                 <m v="parking" zoom-min="15">
                     <area fill="#f4f4f4" stroke="#d4d4d4" stroke-width="0.2" />
-                    <symbol src="assets:symbols/transport/parking.svg" />
+                    <m zoom-min="17">
+                        <symbol src="assets:symbols/transport/parking.svg" />
+                    </m>
                 </m>
                 <m closed="yes" v="fountain">
                     <area fill="#b4cbdc" stroke="#000080" stroke-width="0.15" />
@@ -527,13 +529,13 @@
                 <m zoom-min="12">
                     <area fill="#e8ecde" />
                 </m>
-                <m zoom-min="12">
-                    <caption area-size="0.1" dy="18" fill="#000000" k="name" priority="5" size="19"
-                        stroke="#ffffff" stroke-width="2.0" />
-                </m>
                 <m zoom-max="11">
                     <caption dy="18" fill="#000000" k="ref" priority="5" size="19" stroke="#ffffff"
                         stroke-width="2.0" />
+                </m>
+                <m zoom-min="12">
+                    <caption area-size="0.1" dy="18" fill="#000000" k="name" priority="5" size="19"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
                 <symbol src="assets:symbols/transport/airport.svg" />
             </m>
@@ -568,7 +570,7 @@
             <m zoom-min="17">
                 <caption style="bold" fill="#4040ff" k="name" priority="9" size="14"
                     stroke="#ffffff" stroke-width="2.0" />
-                <caption style="bold" fill="#606060" k="addr:housenumber" priority="10" size="16"
+                <caption style="bold" fill="#606060" k="addr:housenumber" priority="10" size="14"
                     stroke="#ffffff" stroke-width="2.0" />
             </m>
         </m>
@@ -992,7 +994,7 @@
 
         <!-- house numbers -->
         <m k="addr:housenumber" zoom-min="18">
-            <caption style="bold" fill="#606060" k="addr:housenumber" size="10" stroke="#ffffff"
+            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
                 stroke-width="2.0" />
         </m>
 
@@ -1012,7 +1014,7 @@
                     stroke="#ffffff" stroke-width="2.0" />
             </m>
             <m v="town">
-                <caption dy="14" fill="#000000" k="name" priority="2" size="19" stroke="#ffffff"
+                <caption fill="#000000" k="name" priority="2" size="19" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m v="city">
@@ -1041,7 +1043,7 @@
 
             <m v="halt|tram_stop">
                 <symbol src="assets:symbols/transport/train_station2.svg" />
-                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="13" stroke="#ffffff"
+                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m v="level_crossing">
