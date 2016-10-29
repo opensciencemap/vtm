@@ -23,7 +23,7 @@ import org.oscim.tiling.source.UrlTileSource;
 
 public class MapboxTileSource extends UrlTileSource {
 
-    private final static String DEFAULT_URL = "https://vector.mapzen.com/osm/all";
+    private final static String DEFAULT_URL = "https://tile.mapzen.com/mapzen/vector/v1/all";
     private final static String DEFAULT_PATH = "/{Z}/{X}/{Y}.mvt";
 
     public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
