@@ -69,7 +69,7 @@
 
     <xs:simpleType name="src">
         <xs:restriction base="xs:string">
-            <xs:pattern value="(file|assets):.+" />
+            <xs:pattern value="((file|assets):)?.+" />
         </xs:restriction>
     </xs:simpleType>
 
