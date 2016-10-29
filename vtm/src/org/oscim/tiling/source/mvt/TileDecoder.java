@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -64,7 +65,7 @@ public class TileDecoder extends PbfDecoder {
     private short[] mTmpTags = new short[1024];
 
     private Tile mTile;
-    private final String mLocale = "de";
+    private final String mLocale = "en";
     private ITileDataSink mMapDataCallback;
 
     private final static float REF_TILE_SIZE = 4096.0f;
@@ -166,7 +167,8 @@ public class TileDecoder extends PbfDecoder {
         }
 
         Tag layerTag = new Tag("layer", name);
-        log.debug("add layer " + name);
+        if (debug)
+            log.debug("add layer " + name);
 
         if (numFeatures == 0)
             return true;

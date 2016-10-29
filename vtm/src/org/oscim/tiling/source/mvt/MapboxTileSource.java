@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,13 +21,37 @@ import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
-public class MapboxVectorTileSource extends UrlTileSource {
-    public MapboxVectorTileSource(String url, String tilePath) {
-        super(url, tilePath);
-        //Map<String, String> opt = new HashMap<String, String>();
-        //opt.put("Accept-Encoding", "gzip");
-        //opt.put("User-Agent", "curl/7.47.1");
-        //setHttpRequestHeaders(opt);
+public class MapboxTileSource extends UrlTileSource {
+
+    private final static String DEFAULT_URL = "https://vector.mapzen.com/osm/all";
+    private final static String DEFAULT_PATH = "/{Z}/{X}/{Y}.mvt";
+
+    public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
+
+        public Builder() {
+            super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
+        }
+
+        public MapboxTileSource build() {
+            return new MapboxTileSource(this);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static Builder<?> builder() {
+        return new Builder();
+    }
+
+    protected MapboxTileSource(Builder<?> builder) {
+        super(builder);
+    }
+
+    public MapboxTileSource() {
+        this(builder());
+    }
+
+    public MapboxTileSource(String urlString) {
+        this(builder().url(urlString));
     }
 
     @Override
