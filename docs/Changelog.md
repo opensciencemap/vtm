@@ -2,8 +2,9 @@
 
 ## New since 0.6.0
 
-- MapFileTileSource zoom level improvements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
+- PathLayer (regular) fix disappearing segments [#108](https://github.com/mapsforge/vtm/issues/108)
+- MapFileTileSource zoom level improvements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aissue+is%3Aclosed+milestone%3A0.7.0)
 
