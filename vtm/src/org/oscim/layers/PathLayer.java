@@ -3,6 +3,7 @@
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 devemux86
  * Copyright 2016 Bezzu
+ * Copyright 2016 Pedinel
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -36,6 +37,7 @@ import org.oscim.utils.async.SimpleWorker;
 import org.oscim.utils.geom.LineClipper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -87,7 +89,7 @@ public class PathLayer extends Layer {
         updatePoints();
     }
 
-    public void setPoints(List<GeoPoint> pts) {
+    public void setPoints(Collection<? extends GeoPoint> pts) {
         synchronized (mPoints) {
             mPoints.clear();
             mPoints.addAll(pts);
@@ -105,6 +107,13 @@ public class PathLayer extends Layer {
     public void addPoint(int latitudeE6, int longitudeE6) {
         synchronized (mPoints) {
             mPoints.add(new GeoPoint(latitudeE6, longitudeE6));
+        }
+        updatePoints();
+    }
+
+    public void addPoints(Collection<? extends GeoPoint> pts) {
+        synchronized (mPoints) {
+            mPoints.addAll(pts);
         }
         updatePoints();
     }
