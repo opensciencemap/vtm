@@ -24,6 +24,11 @@ import java.util.List;
 public class MultiMapDatabase implements ITileDataSource {
 
     private final List<MapDatabase> mapDatabases = new ArrayList<>();
+    private final MultiMapFileTileSource tileSource;
+
+    public MultiMapDatabase(MultiMapFileTileSource tileSource) {
+        this.tileSource = tileSource;
+    }
 
     public boolean add(MapDatabase mapDatabase) {
         if (mapDatabases.contains(mapDatabase)) {
@@ -36,7 +41,9 @@ public class MultiMapDatabase implements ITileDataSource {
     public void query(MapTile tile, ITileDataSink mapDataSink) {
         MultiMapDataSink multiMapDataSink = new MultiMapDataSink(mapDataSink);
         for (MapDatabase mapDatabase : mapDatabases) {
-            mapDatabase.query(tile, multiMapDataSink);
+            int[] zoomLevels = tileSource.getZoomsByTileSource().get(mapDatabase.getTileSource());
+            if (zoomLevels == null || (zoomLevels[0] <= tile.zoomLevel && tile.zoomLevel <= zoomLevels[1]))
+                mapDatabase.query(tile, multiMapDataSink);
         }
         mapDataSink.completed(multiMapDataSink.getResult());
     }

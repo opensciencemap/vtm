@@ -22,13 +22,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MultiMapFileTileSource extends TileSource implements IMapFileTileSource {
 
     private static final Logger log = LoggerFactory.getLogger(MultiMapFileTileSource.class);
 
     private final List<MapFileTileSource> mapFileTileSources = new ArrayList<>();
+    private final Map<MapFileTileSource, int[]> zoomsByTileSource = new HashMap<>();
 
     public MultiMapFileTileSource() {
         this(0, 17);
@@ -45,6 +48,13 @@ public class MultiMapFileTileSource extends TileSource implements IMapFileTileSo
         return mapFileTileSources.add(mapFileTileSource);
     }
 
+    public boolean add(MapFileTileSource mapFileTileSource, int zoomMin, int zoomMax) {
+        boolean result = add(mapFileTileSource);
+        if (result)
+            zoomsByTileSource.put(mapFileTileSource, new int[]{zoomMin, zoomMax});
+        return result;
+    }
+
     public BoundingBox getBoundingBox() {
         BoundingBox boundingBox = null;
         for (MapFileTileSource mapFileTileSource : mapFileTileSources) {
@@ -53,9 +63,13 @@ public class MultiMapFileTileSource extends TileSource implements IMapFileTileSo
         return boundingBox;
     }
 
+    Map<MapFileTileSource, int[]> getZoomsByTileSource() {
+        return zoomsByTileSource;
+    }
+
     @Override
     public ITileDataSource getDataSource() {
-        MultiMapDatabase multiMapDatabase = new MultiMapDatabase();
+        MultiMapDatabase multiMapDatabase = new MultiMapDatabase(this);
         for (MapFileTileSource mapFileTileSource : mapFileTileSources) {
             try {
                 multiMapDatabase.add(new MapDatabase(mapFileTileSource));
