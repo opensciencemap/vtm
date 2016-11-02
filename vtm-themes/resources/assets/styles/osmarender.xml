@@ -18,7 +18,7 @@
         stroke-width="2.0" />
 
     <m e="way" k="natural" v="issea|sea">
-        <area fill="#b5d6f1" />
+        <area fill="#b5d6f1" mesh="true" />
     </m>
 
     <m e="way" k="natural" v="nosea">
