@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rendertheme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" base-text-scale="1.25"
+    map-background="#fffcfa" version="1" xmlns="http://opensciencemap.org/rendertheme"
+    xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
+
+    <stylemenu defaultlang="en" defaultvalue="1" id="menu">
+        <layer enabled="true" id="sea">
+            <name lang="de" value="Meer" />
+            <name lang="en" value="Sea" />
+            <name lang="es" value="Mar" />
+            <name lang="fr" value="Mer" />
+            <cat id="sea" />
+        </layer>
+
+        <layer id="land">
+            <name lang="de" value="Land" />
+            <name lang="en" value="Land" />
+            <name lang="es" value="Tierra" />
+            <name lang="fr" value="Terrain" />
+            <cat id="land" />
+        </layer>
+
+        <layer id="base">
+            <overlay id="sea" />
+        </layer>
+
+        <!-- Sea with land -->
+        <layer id="1" parent="base" visible="true">
+            <name lang="de" value="1" />
+            <name lang="en" value="1" />
+            <name lang="es" value="1" />
+            <name lang="fr" value="1" />
+            <cat id="land" />
+        </layer>
+
+        <!-- Sea without land -->
+        <layer id="2" parent="base" visible="true">
+            <name lang="de" value="2" />
+            <name lang="en" value="2" />
+            <name lang="es" value="2" />
+            <name lang="fr" value="2" />
+            <overlay id="land" />
+        </layer>
+    </stylemenu>
+
+    <m cat="sea" e="way" k="natural" v="issea|sea">
+        <area fill="#0000ff" mesh="true" />
+    </m>
+
+    <m cat="land" e="way" k="natural" v="nosea">
+        <area fill="#00ff00" mesh="true" />
+    </m>
+
+</rendertheme>
