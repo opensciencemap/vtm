@@ -45,6 +45,9 @@
             android:name=".MapboxMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".MapFragmentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".MapsforgeMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
