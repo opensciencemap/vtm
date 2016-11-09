@@ -36,7 +36,6 @@ import java.util.Set;
 public class MapsforgeStyleTest extends GdxMap {
 
     private static File mapFile;
-    private String style;
 
     @Override
     public void createLayers() {
@@ -45,7 +44,7 @@ public class MapsforgeStyleTest extends GdxMap {
         tileSource.setPreferredLanguage("en");
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
-        loadTheme();
+        loadTheme(null);
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
@@ -72,23 +71,31 @@ public class MapsforgeStyleTest extends GdxMap {
         return file;
     }
 
-    private void loadTheme() {
+    private void loadTheme(final String styleId) {
         mMap.setTheme(new StreamRenderTheme("", getClass().getResourceAsStream("/assets/styles/style.xml"), new XmlRenderThemeMenuCallback() {
             @Override
             public Set<String> getCategories(XmlRenderThemeStyleMenu renderThemeStyleMenu) {
-                if (style == null)
-                    style = renderThemeStyleMenu.getDefaultValue();
+                // Use the selected style or the default
+                String style = styleId != null ? styleId : renderThemeStyleMenu.getDefaultValue();
+
+                // Retrieve the layer from the style id
                 XmlRenderThemeStyleLayer renderThemeStyleLayer = renderThemeStyleMenu.getLayer(style);
                 if (renderThemeStyleLayer == null) {
                     System.err.println("Invalid style " + style);
                     return null;
                 }
+
+                // First get the selected layer's categories that are enabled together
                 Set<String> categories = renderThemeStyleLayer.getCategories();
-                // Add the categories from overlays that are enabled
+
+                // Then add the selected layer's overlays that are enabled individually
+                // Here we use the style menu, but users can use their own preferences
                 for (XmlRenderThemeStyleLayer overlay : renderThemeStyleLayer.getOverlays()) {
                     if (overlay.isEnabled())
                         categories.addAll(overlay.getCategories());
                 }
+
+                // This is the whole categories set to be enabled
                 return categories;
             }
         }));
@@ -98,15 +105,11 @@ public class MapsforgeStyleTest extends GdxMap {
     protected boolean onKeyDown(int keycode) {
         switch (keycode) {
             case Input.Keys.NUM_1:
-                System.out.println("Sea with land");
-                style = "1";
-                loadTheme();
+                loadTheme("1");
                 mMap.clearMap();
                 return true;
             case Input.Keys.NUM_2:
-                System.out.println("Sea without land");
-                style = "2";
-                loadTheme();
+                loadTheme("2");
                 mMap.clearMap();
                 return true;
         }
