@@ -87,7 +87,7 @@
                 </m>
             </m>
             <m k="wood" v="~">
-                <area fill="#6fc18e" stroke="#6fc18e" stroke-width="0.2" />
+                <area fill="#6fc18e" mesh="true" stroke="#6fc18e" stroke-width="0.2" />
             </m>
 
             <m zoom-min="16">

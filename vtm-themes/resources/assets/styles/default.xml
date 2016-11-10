@@ -228,10 +228,10 @@
             </m>
 
             <m k="landuse|natural" v="forest|wood">
-                <m zoom-max="9" zoom-min="8">
+                <m zoom-max="13" zoom-min="8">
                     <area use="wood" />
                 </m>
-                <m zoom-min="10">
+                <m zoom-min="14">
                     <area stroke="#91bf63" stroke-width="1.0" use="wood" />
                 </m>
             </m>
