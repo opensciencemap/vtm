@@ -41,7 +41,7 @@
     <style-line blur="1.0" fade="13" id="residential" stroke="#ffffff" width="1.0" />
     <style-line cap="square" id="residential:bridge" use="residential" />
 
-    <!-- when inheriting another style with 'from' then 'witdth' is meant relative to the parent -->
+    <!-- when inheriting another style with 'from' then 'width' is meant relative to the parent -->
     <style-line id="pedestrian" use="residential" width="-0.4" />
     <style-line cap="square" id="pedestrian:bridge" use="pedestrian" />
 
@@ -334,7 +334,7 @@
 
         <m k="natural" v="water">
             <area use="water" />
-            <caption area-size="0.4" fill="#777744" k="name" size="16" stroke="#aaffffff"
+            <caption area-size="0.4" fill="#808000" k="name" size="16" stroke="#aaffffff"
                 stroke-width="2.0" />
             <!--<line use="water:outline" width="0.5" fix="true" />-->
         </m>
@@ -1207,28 +1207,37 @@
             <m select="first">
                 <m v="cave_entrance" zoom-min="15">
                     <symbol src="assets:symbols/poi/cave.svg" />
+                    <m zoom-min="17">
+                        <text use="caption-small-blue" />
+                    </m>
                 </m>
                 <m v="peak" zoom-min="12">
-                    <symbol src="assets:symbols/peak1.svg" />
-                    <caption style="bold" dy="12" fill="#000000" k="ele" size="12" stroke="#ffffff"
+                    <symbol src="assets:symbols/peak.svg" />
+                    <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
                         stroke-width="2.0" />
+                    <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
                 <m v="tree" zoom-min="16">
                     <circle radius="10" />
                 </m>
                 <m v="volcano" zoom-min="12">
                     <symbol src="assets:symbols/volcano.svg" />
+                    <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
+                        stroke-width="2.0" />
+                    <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
-            </m>
-            <m zoom-min="17">
-                <caption style="bold" fill="#000000" k="name" size="12" stroke="#ffffff"
-                    stroke-width="2.0" />
             </m>
         </m>
 
 
         <m k="place" select="first">
             <circle fill="#ff0000" radius="5.0" />
+            <m v="locality" zoom-min="13">
+                <caption style="bold" fill="#606060" k="name" size="14" stroke="#ffffff"
+                    stroke-width="2.0" />
+            </m>
             <m v="hamlet" zoom-min="13">
                 <caption style="bold" fill="#000000" k="name" size="13" stroke="#ffffff"
                     stroke-width="2.0" />

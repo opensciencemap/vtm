@@ -12,7 +12,7 @@
     <style-text style="bold" fill="#101010" id="major-road" k="name" priority="1" size="16"
         stroke="#eeeeee" stroke-width="2.0" />
 
-    <style-text caption="true" dy="20" fill="#777744" id="poi" k="name" size="16" stroke="#aaffffff"
+    <style-text caption="true" dy="20" fill="#808000" id="poi" k="name" size="16" stroke="#aaffffff"
         stroke-width="2.0" />
 
     <style-area fade="11" fill="#e8e7e3" id="residential" />
@@ -62,7 +62,7 @@
     <style-line id="residential" stroke="#ffffff" width="1.3" />
     <style-line cap="square" id="residential:bridge" use="residential" />
 
-    <!-- when inheriting another style with 'from' then 'witdth' is relative to the parent -->
+    <!-- when inheriting another style with 'from' then 'width' is relative to the parent -->
     <style-line id="pedestrian" use="residential" width="-0.4" />
     <style-line cap="square" id="pedestrian:bridge" use="pedestrian" />
     <style-line id="highway:z11" stroke="#fcba5a" width="1.8" />
@@ -404,7 +404,7 @@
     <m e="way">
         <m closed="yes" k="natural" v="water">
             <area use="water" />
-            <caption area-size="0.4" fill="#777744" k="name" size="16" stroke="#aaffffff"
+            <caption area-size="0.4" fill="#808000" k="name" size="16" stroke="#aaffffff"
                 stroke-width="2.0" />
             <!--<line use="water:outline" />-->
         </m>
@@ -1001,8 +1001,12 @@
         <!-- place -->
         <m k="place">
             <circle fill="#ff0000" radius="5.0" />
+            <m v="locality" zoom-min="13">
+                <caption style="bold" fill="#606060" k="name" priority="5" size="14"
+                    stroke="#ffffff" stroke-width="2.0" />
+            </m>
             <m v="suburb" zoom-max="14">
-                <caption style="italic" fill="#606060" k="name" priority="4" size="17"
+                <caption style="bold_italic" fill="#404040" k="name" priority="4" size="17"
                     stroke="#ffffff" stroke-width="2.0" />
             </m>
             <m v="village" zoom-max="14">
@@ -1252,6 +1256,13 @@
 
         <m k="natural" v="tree" zoom-min="15">
             <circle radius="10" />
+        </m>
+        <m k="natural" v="peak" zoom-min="12">
+            <symbol src="assets:symbols/peak.svg" />
+            <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
+                stroke-width="2.0" />
+            <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14" stroke="#ffffff"
+                stroke-width="2.0" />
         </m>
     </m>
 

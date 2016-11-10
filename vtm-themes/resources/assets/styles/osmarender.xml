@@ -295,7 +295,7 @@
 
         <m k="natural" v="water">
             <area fill="#b5d6f1" />
-            <caption area-size="0.4" fill="#777744" k="name" size="16" stroke="#aaffffff"
+            <caption area-size="0.4" fill="#808000" k="name" size="16" stroke="#aaffffff"
                 stroke-width="2.0" />
         </m>
 
@@ -948,7 +948,7 @@
         <m k="aerialway">
             <line cap="butt" stroke="#202020" width="0.4" />
             <line cap="butt" dasharray="2,200" stroke="#202020" width="4.0" />
-            <m k="aerialway" v="cable_car">
+            <!--<m k="aerialway" v="cable_car">
                 <lineSymbol src="assets:symbols/cable_car.svg" />
             </m>
             <m k="aerialway" v="chair_lift">
@@ -956,7 +956,7 @@
             </m>
             <m k="aerialway" v="gondola">
                 <lineSymbol src="assets:symbols/gondola.svg" />
-            </m>
+            </m>-->
             <m zoom-min="14">
                 <text style="bold" fill="#606060" k="name" size="16" stroke="#ffffff"
                     stroke-width="2.0" />
@@ -1060,17 +1060,15 @@
             </m>
         </m>
 
+        <!--<m k="historic" v="ruins" zoom-min="17">
+            <caption style="bold" fill="#4040ff" k="name" size="16" stroke="#ffffff"
+                stroke-width="2.0" />
+        </m>-->
 
-        <!-- <m k="historic" v="ruins" zoom-min="17">
-          <caption k="name" style="bold" size="16" fill="#4040ff"
-          stroke="#ffffff" width="2.0" />
-          </m>
-
-
-          <m k="place" v="locality" zoom-min="17">
-          <caption k="name" style="bold" size="16" fill="#000000"
-          stroke="#ffffff" width="2.0" />
-          </m> -->
+        <m k="place" v="locality" zoom-min="17">
+            <caption style="bold" fill="#000000" k="name" size="16" stroke="#ffffff"
+                stroke-width="2.0" />
+        </m>
     </m>
 
 
@@ -1235,22 +1233,26 @@
             <m select="first">
                 <m v="cave_entrance" zoom-min="15">
                     <symbol src="assets:symbols/poi/cave.svg" />
+                    <m zoom-min="17">
+                        <text use="caption-small-blue" />
+                    </m>
                 </m>
                 <m v="peak" zoom-min="12">
-                    <symbol src="assets:symbols/peak1.svg" />
-                    <caption style="bold" dy="12" fill="#000000" k="ele" size="12" stroke="#ffffff"
+                    <symbol src="assets:symbols/peak.svg" />
+                    <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
                         stroke-width="2.0" />
+                    <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
                 <m v="tree" zoom-min="16">
                     <circle radius="10" />
                 </m>
                 <m v="volcano" zoom-min="12">
                     <symbol src="assets:symbols/volcano.svg" />
-                </m>
-
-                <m select="when-matched" zoom-min="17">
-                    <caption style="bold" fill="#000000" k="name" size="12" stroke="#ffffff"
+                    <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
                         stroke-width="2.0" />
+                    <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14"
+                        stroke="#ffffff" stroke-width="2.0" />
                 </m>
             </m>
         </m>
@@ -1258,6 +1260,10 @@
 
         <m k="place" select="first">
             <circle fill="#ff0000" radius="5.0" />
+            <m v="locality" zoom-min="13">
+                <caption style="bold" fill="#606060" k="name" size="14" stroke="#ffffff"
+                    stroke-width="2.0" />
+            </m>
             <m v="hamlet" zoom-min="13">
                 <caption style="bold" fill="#000000" k="name" size="13" stroke="#ffffff"
                     stroke-width="2.0" />

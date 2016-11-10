@@ -55,6 +55,6 @@
     <rect id="tree" pos="145 2 4 4" />
     <rect id="university" pos="302 35 19 9" />
     <rect id="viewpoint" pos="279 20 16 16" />
-    <rect id="vulcan" pos="315 25 9 8" />
+    <rect id="volcano" pos="315 25 9 8" />
     <rect id="windmill" pos="310 2 13 19" />
 </atlas>
