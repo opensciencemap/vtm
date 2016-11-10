@@ -111,7 +111,7 @@
     <style-area fade="15" fill="#f2f0eb" id="building" stroke="#b7b6b3" stroke-width="1.0" />
 
     <m closed="yes" e="way" k="layer" v="water">
-        <area use="water" />
+        <area mesh="true" use="water" />
     </m>
 
     <m closed="no" e="way" k="layer" v="water">
