@@ -992,12 +992,6 @@
             </m>
         </m>
 
-        <!-- house numbers -->
-        <m k="addr:housenumber" zoom-min="17">
-            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
-                stroke-width="2.0" />
-        </m>
-
         <!-- place -->
         <m k="place">
             <circle fill="#ff0000" radius="5.0" />
@@ -1262,6 +1256,12 @@
             <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
                 stroke-width="2.0" />
             <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14" stroke="#ffffff"
+                stroke-width="2.0" />
+        </m>
+
+        <!-- house numbers -->
+        <m k="addr:housenumber" zoom-min="17">
+            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
                 stroke-width="2.0" />
         </m>
     </m>

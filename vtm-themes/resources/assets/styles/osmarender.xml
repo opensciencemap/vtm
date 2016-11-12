@@ -1072,7 +1072,7 @@
     </m>
 
 
-    <m e="node">
+    <m e="node" select="first">
 
         <m k="aeroway">
             <m k="aeroway" v="helipad" zoom-min="17">
@@ -1213,12 +1213,6 @@
         </m>
 
 
-        <m k="addr:housenumber" zoom-min="17">
-            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
-                stroke-width="2.0" />
-        </m>
-
-
         <m k="leisure" v="playground" zoom-min="17">
             <symbol src="assets:symbols/amenity/playground.svg" />
         </m>
@@ -1349,5 +1343,13 @@
                 <text use="caption-small-blue" />
             </m>
         </m>
+
+
+        <!-- house numbers -->
+        <m k="addr:housenumber" zoom-min="17">
+            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
+                stroke-width="2.0" />
+        </m>
     </m>
+
 </rendertheme>

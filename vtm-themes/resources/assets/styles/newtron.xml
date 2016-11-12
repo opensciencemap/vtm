@@ -984,76 +984,8 @@
         </m>
     </m>
 
-    <!-- <m e="node">
-      barrier
-      <m k="barrier" v="bollard">
-      <circle radius="1.5" fill="#909090" />
-      </m>
 
-      <m k="debug">
-      <caption k="name" size="16" fill="#fefece" />
-      </m>
-
-      highway
-      <m k="highway"> <m k="highway" v="turning_circle">
-      <circle radius="1.4" scale-radius="true" fill="#ffffff" /> </m> </m>
-
-      historic
-      <m k="historic">
-      <symbol src="assets:symbols/tourist/monument.svg" />
-      <m zoom-min="17">
-      <caption k="name" dy="-10" style="bold" size="10" fill="#4040ff" stroke="#ffffff" stroke-width="2.0" />
-      </m>
-      </m>
-
-      house numbers
-      <m k="addr:housenumber" zoom-min="17"> <caption
-      k="addr:housenumber" style="bold" size="14" fill="#ffffff" stroke="#606060"
-      width="2.0" /> </m>
-
-      place
-      <m k="place">
-      <m v="suburb|town|village">
-      <caption k="name" size="20" fill="#eeeeee" stroke="#000020"
-      stroke-width="4.0" priority="2" />
-      </m>
-      <m v="island" zoom-min="10">
-      <caption k="name" style="bold" size="20" fill="#ffffff" stroke="#ffffff"
-      stroke-width="1.0" priority="1" />
-      </m>
-      <m v="city">
-      <caption k="name" style="bold" size="22" fill="#ffffff" stroke="#002020"
-      stroke-width="4.0" priority="1" />
-      </m>
-      <m v="country">
-      <caption k="name" size="22" fill="#ffffff" stroke="#000000"
-      stroke-width="2.0" priority="0" />
-      </m>
-      </m>
-
-
-      railway
-      <m k="railway">
-      <m v="station" zoom-min="14">
-      <symbol src="assets:symbols/transport/train_station.svg" />
-      <caption k="name" dy="-15" style="bold" size="14" fill="#ec2d2d"
-      stroke="#ffffff" stroke-width="2.0" />
-      </m>
-      <m v="halt|tram_stop" zoom-min="17">
-      <symbol src="assets:symbols/transport/train_station2.svg" />
-      <caption k="name" dy="-15" style="bold" size="14" fill="#ec2d2d"
-      stroke="#ffffff" stroke-width="2.0" />
-      </m>
-      </m>
-
-      <m k="natural" v="tree" zoom-min="15">
-      <circle radius="10"/>
-      </m>
-
-      </m> -->
-
-
-    <m e="node">
+    <m e="node" select="first">
 
         <m k="aeroway">
             <m k="aeroway" v="helipad" zoom-min="17">
@@ -1194,12 +1126,6 @@
         </m>
 
 
-        <m k="addr:housenumber" zoom-min="17">
-            <caption style="bold" fill="#ffffff" k="addr:housenumber" size="14" stroke="#606060"
-                stroke-width="2.0" />
-        </m>
-
-
         <m k="leisure" v="playground" zoom-min="17">
             <symbol src="assets:symbols/amenity/playground.svg" />
         </m>
@@ -1332,5 +1258,13 @@
                 <text use="caption-small-blue" />
             </m>
         </m>
+
+
+        <!-- house numbers -->
+        <m k="addr:housenumber" zoom-min="17">
+            <caption style="bold" fill="#ffffff" k="addr:housenumber" size="14" stroke="#606060"
+                stroke-width="2.0" />
+        </m>
     </m>
+
 </rendertheme>
