@@ -550,9 +550,9 @@ public class MapDatabase implements ITileDataSource {
         Tag[] poiTags = mTileSource.fileInfo.poiTags;
         MapElement e = mElem;
 
-        int numTags = 0;
-
         for (int elementCounter = numberOfPois; elementCounter != 0; --elementCounter) {
+            int numTags = 0;
+
             if (mDebugFile) {
                 /* get and check the POI signature */
                 mSignaturePoi = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_POI);
@@ -725,8 +725,6 @@ public class MapDatabase implements ITileDataSource {
         Tag[] wayTags = mTileSource.fileInfo.wayTags;
         MapElement e = mElem;
 
-        int numTags = 0;
-
         int wayDataBlocks;
 
         // skip string block
@@ -742,6 +740,8 @@ public class MapDatabase implements ITileDataSource {
         //setTileClipping(queryParameters);
 
         for (int elementCounter = numberOfWays; elementCounter != 0; --elementCounter) {
+            int numTags = 0;
+
             if (mDebugFile) {
                 // get and check the way signature
                 mSignatureWay = mReadBuffer.readUTF8EncodedString(SIGNATURE_LENGTH_WAY);
