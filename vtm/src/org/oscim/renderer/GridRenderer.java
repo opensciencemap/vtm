@@ -18,6 +18,7 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
@@ -38,9 +39,14 @@ public class GridRenderer extends BucketRenderer {
     private int mCurX, mCurY, mCurZ;
 
     public GridRenderer() {
-        this(1, new LineStyle(Color.LTGRAY, 1.2f, Cap.BUTT),
+        this(1);
+    }
+
+    public GridRenderer(float scale) {
+        this(1, new LineStyle(Color.LTGRAY, 1.2f * scale, Cap.BUTT),
                 TextStyle.builder()
-                        .fontSize(22)
+                        .fontSize(12 * scale)
+                        .fontStyle(Paint.FontStyle.BOLD)
                         .color(Color.RED)
                         .build());
     }

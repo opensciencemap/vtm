@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.oscim.android.cache.TileCache;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -107,7 +109,7 @@ public class BaseMapActivity extends MapActivity {
                 } else {
                     item.setChecked(true);
                     if (mGridLayer == null)
-                        mGridLayer = new TileGridLayer(mMap);
+                        mGridLayer = new TileGridLayer(mMap, CanvasAdapter.dpi / 160);
 
                     mMap.layers().add(mGridLayer);
                 }

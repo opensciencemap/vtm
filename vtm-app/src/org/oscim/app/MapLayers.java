@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.oscim.android.cache.TileCache;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.layers.GenericLayer;
 import org.oscim.layers.Layer;
 import org.oscim.layers.TileGridLayer;
@@ -154,7 +155,7 @@ public class MapLayers {
 
         if (enable) {
             if (mGridOverlay == null)
-                mGridOverlay = new TileGridLayer(App.map);
+                mGridOverlay = new TileGridLayer(App.map, CanvasAdapter.dpi / 160);
 
             App.map.layers().add(mGridOverlay);
         } else {

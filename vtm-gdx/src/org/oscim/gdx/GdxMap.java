@@ -47,6 +47,11 @@ public abstract class GdxMap implements ApplicationListener {
 
     protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
                                      boolean buildings) {
+        initDefaultLayers(tileSource, tileGrid, labels, buildings, 1);
+    }
+
+    protected void initDefaultLayers(TileSource tileSource, boolean tileGrid, boolean labels,
+                                     boolean buildings, float scale) {
         Layers layers = mMap.layers();
 
         if (tileSource != null) {
@@ -61,7 +66,7 @@ public abstract class GdxMap implements ApplicationListener {
         }
 
         if (tileGrid)
-            layers.add(new TileGridLayer(mMap));
+            layers.add(new TileGridLayer(mMap, scale));
     }
 
     @Override

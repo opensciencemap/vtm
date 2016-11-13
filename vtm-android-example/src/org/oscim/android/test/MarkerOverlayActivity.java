@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.TileGridLayer;
@@ -81,7 +82,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
 
         markerLayer.addItems(pts);
 
-        mMap.layers().add(new TileGridLayer(mMap));
+        mMap.layers().add(new TileGridLayer(mMap, CanvasAdapter.dpi / 160));
     }
 
     @Override
