@@ -19,6 +19,7 @@
  */
 package org.oscim.tiling.source.mapfile;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.MapElement;
 import org.oscim.core.MercatorProjection;
@@ -383,8 +384,8 @@ public class MapDatabase implements ITileDataSource {
 
         //log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
 
-        // Buffer is half the tile size
-        int buffer = Tile.SIZE / 2;
+        // Buffer based on dpi
+        int buffer = (int) (16 * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI + 0.5f);
 
         xmin = -buffer;
         ymin = -buffer;
