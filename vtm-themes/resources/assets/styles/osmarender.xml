@@ -295,7 +295,7 @@
 
         <m k="natural" v="water">
             <area fill="#b5d6f1" />
-            <caption area-size="0.4" fill="#808000" k="name" size="16" stroke="#aaffffff"
+            <caption area-size="0.4" fill="#404000" k="name" size="16" stroke="#aaffffff"
                 stroke-width="2.0" />
         </m>
 

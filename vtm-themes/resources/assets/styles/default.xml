@@ -12,7 +12,7 @@
     <style-text style="bold" fill="#101010" id="major-road" k="name" priority="1" size="16"
         stroke="#eeeeee" stroke-width="2.0" />
 
-    <style-text caption="true" dy="20" fill="#808000" id="poi" k="name" size="16" stroke="#aaffffff"
+    <style-text caption="true" dy="20" fill="#404000" id="poi" k="name" size="16" stroke="#aaffffff"
         stroke-width="2.0" />
 
     <style-area fade="11" fill="#e8e7e3" id="residential" />
@@ -404,7 +404,7 @@
     <m e="way">
         <m closed="yes" k="natural" v="water">
             <area use="water" />
-            <caption area-size="0.4" fill="#808000" k="name" size="16" stroke="#aaffffff"
+            <caption area-size="0.4" fill="#404000" k="name" size="16" stroke="#aaffffff"
                 stroke-width="2.0" />
             <!--<line use="water:outline" />-->
         </m>
