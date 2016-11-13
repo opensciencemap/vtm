@@ -43,7 +43,7 @@ public class GridRenderer extends BucketRenderer {
     }
 
     public GridRenderer(float scale) {
-        this(1, new LineStyle(Color.LTGRAY, 1.2f * scale, Cap.BUTT),
+        this(1, new LineStyle(Color.GRAY, 1.2f * scale, Cap.BUTT),
                 TextStyle.builder()
                         .fontSize(12 * scale)
                         .fontStyle(Paint.FontStyle.BOLD)
