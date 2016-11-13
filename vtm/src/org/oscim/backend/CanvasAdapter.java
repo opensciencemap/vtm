@@ -44,9 +44,14 @@ public abstract class CanvasAdapter {
     static CanvasAdapter g;
 
     /**
+     * Default dpi.
+     */
+    public static final float DEFAULT_DPI = 160;
+
+    /**
      * The dpi.
      */
-    public static float dpi = 240;
+    public static float dpi = DEFAULT_DPI;
 
     /**
      * The scale.

@@ -28,7 +28,7 @@ import java.net.URI;
 
 public class AwtSvgBitmap extends AwtBitmap {
     /**
-     * Default size is 20x20px (400px) at 240dpi.
+     * Default size is 20x20px (400px) at 160dpi.
      */
     public static float DEFAULT_SIZE = 400f;
 
@@ -79,7 +79,7 @@ public class AwtSvgBitmap extends AwtBitmap {
 
     private static BufferedImage getResourceBitmapImpl(InputStream inputStream) throws IOException {
         synchronized (SVGCache.getSVGUniverse()) {
-            return getResourceBitmap(inputStream, CanvasAdapter.dpi / 240, DEFAULT_SIZE, 0, 0, 100);
+            return getResourceBitmap(inputStream, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI, DEFAULT_SIZE, 0, 0, 100);
         }
     }
 

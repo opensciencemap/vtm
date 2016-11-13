@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rendertheme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" base-text-scale="1.25"
-    map-background="#fffcfa" version="1" xmlns="http://opensciencemap.org/rendertheme"
+<rendertheme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" map-background="#fffcfa"
+    version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
 
     <style-line id="trunk" stroke="#7fc97f" width="1.5" />
@@ -1291,12 +1291,12 @@
             </m>
             <m k="railway" v="station" zoom-min="14">
                 <symbol src="assets:symbols/transport/train_station.svg" />
-                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
+                <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m k="railway" v="halt|tram_stop" zoom-min="15">
                 <symbol src="assets:symbols/transport/train_station2.svg" />
-                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
+                <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
         </m>

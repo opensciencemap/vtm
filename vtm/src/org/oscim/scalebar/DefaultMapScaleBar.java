@@ -49,7 +49,7 @@ public class DefaultMapScaleBar extends MapScaleBar {
     private final Paint paintScaleTextStroke;
 
     public DefaultMapScaleBar(Map map) {
-        this(map, CanvasAdapter.dpi / 240);
+        this(map, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
     }
 
     public DefaultMapScaleBar(Map map, float scale) {

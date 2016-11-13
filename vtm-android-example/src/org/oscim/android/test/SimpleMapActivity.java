@@ -19,7 +19,6 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.layers.GroupLayer;
@@ -48,7 +47,7 @@ public class SimpleMapActivity extends BaseMapActivity {
         groupLayer.layers.add(new LabelLayer(mMap, mBaseLayer));
         mMap.layers().add(groupLayer);
 
-        mapScaleBar = new DefaultMapScaleBar(mMap, CanvasAdapter.dpi / 160);
+        mapScaleBar = new DefaultMapScaleBar(mMap);
         mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
         mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
         mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
@@ -57,7 +56,7 @@ public class SimpleMapActivity extends BaseMapActivity {
         MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
         BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
-        renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
+        renderer.setOffset(5 * getResources().getDisplayMetrics().density, 0);
         mMap.layers().add(mapScaleBarLayer);
 
         mMap.setTheme(VtmThemes.DEFAULT);

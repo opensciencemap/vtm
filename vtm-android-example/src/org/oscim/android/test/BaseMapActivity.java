@@ -22,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.oscim.android.cache.TileCache;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -109,7 +108,7 @@ public class BaseMapActivity extends MapActivity {
                 } else {
                     item.setChecked(true);
                     if (mGridLayer == null)
-                        mGridLayer = new TileGridLayer(mMap, CanvasAdapter.dpi / 160);
+                        mGridLayer = new TileGridLayer(mMap, getResources().getDisplayMetrics().density);
 
                     mMap.layers().add(mGridLayer);
                 }

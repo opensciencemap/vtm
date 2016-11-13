@@ -58,7 +58,7 @@ public class MainActivity extends AndroidApplication {
         @Override
         public void createLayers() {
             TileSource ts = new OSciMap4TileSource();
-            initDefaultLayers(ts, true, true, true, CanvasAdapter.dpi / 160);
+            initDefaultLayers(ts, true, true, true, getResources().getDisplayMetrics().density);
         }
     }
 }

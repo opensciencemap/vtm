@@ -20,7 +20,6 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Layers;
@@ -53,7 +52,7 @@ public class LayerGroupActivity extends BaseMapActivity {
         layers.addGroup(GROUP_LABELS);
         layers.add(new LabelLayer(mMap, mBaseLayer), GROUP_LABELS);
 
-        mapScaleBar = new DefaultMapScaleBar(mMap, CanvasAdapter.dpi / 160);
+        mapScaleBar = new DefaultMapScaleBar(mMap);
         mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
         mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
         mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
@@ -62,7 +61,7 @@ public class LayerGroupActivity extends BaseMapActivity {
         MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
         BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
-        renderer.setOffset(5 * CanvasAdapter.dpi / 160, 0);
+        renderer.setOffset(5 * getResources().getDisplayMetrics().density, 0);
 
         layers.addGroup(GROUP_OVERLAYS);
         layers.add(mapScaleBarLayer, GROUP_OVERLAYS);

@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import org.oscim.android.filepicker.FilePicker;
 import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.TileGridLayer;
@@ -93,7 +92,7 @@ public class MapsforgeMapActivity extends MapActivity {
                 } else {
                     item.setChecked(true);
                     if (mGridLayer == null)
-                        mGridLayer = new TileGridLayer(mMap, CanvasAdapter.dpi / 160);
+                        mGridLayer = new TileGridLayer(mMap, getResources().getDisplayMetrics().density);
 
                     mMap.layers().add(mGridLayer);
                 }

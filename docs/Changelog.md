@@ -6,6 +6,7 @@
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
 - PathLayer (vtm) fix disappearing segments [#108](https://github.com/mapsforge/vtm/issues/108)
 - House numbers (nodes) fix visibility [#168](https://github.com/mapsforge/vtm/issues/168)
+- Use baseline 160dpi in scaling [#236](https://github.com/mapsforge/vtm/issues/236)
 - MapFileTileSource zoom level API enhancements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Tile grid layer scaling [#238](https://github.com/mapsforge/vtm/issues/238)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)

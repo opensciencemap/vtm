@@ -205,7 +205,7 @@ public class TileMap extends MapActivity implements MapEventsReceiver {
                 break;
 
             case R.id.menu_layer_grid:
-                mMapLayers.enableGridOverlay(!mMapLayers.isGridEnabled());
+                mMapLayers.enableGridOverlay(this, !mMapLayers.isGridEnabled());
                 mMap.updateMap(true);
                 break;
 

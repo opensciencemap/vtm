@@ -76,7 +76,7 @@ public class AndroidSvgBitmap extends AndroidBitmap {
 
     private static android.graphics.Bitmap getResourceBitmapImpl(InputStream inputStream) throws IOException {
         synchronized (SVG.getVersion()) {
-            return getResourceBitmap(inputStream, CanvasAdapter.dpi / 160, DEFAULT_SIZE, 0, 0, 100);
+            return getResourceBitmap(inputStream, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI, DEFAULT_SIZE, 0, 0, 100);
         }
     }
 

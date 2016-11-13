@@ -19,7 +19,6 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -66,7 +65,7 @@ public class OsmJsonMapActivity extends MapActivity {
         mMap.layers().add(l);
         mMap.layers().add(new LabelLayer(mMap, l));
 
-        mMap.layers().add(new TileGridLayer(mMap, CanvasAdapter.dpi / 160));
+        mMap.layers().add(new TileGridLayer(mMap, getResources().getDisplayMetrics().density));
 
         mMap.setMapPosition(53.08, 8.83, Math.pow(2, 16));
     }

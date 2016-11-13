@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -180,7 +181,7 @@ public class Animator {
 
         float duration = 500;
 
-        float flingFactor = 240 / CanvasAdapter.dpi;
+        float flingFactor = CanvasAdapter.DEFAULT_DPI / CanvasAdapter.dpi;
         mVelocity.x = velocityX * flingFactor;
         mVelocity.y = velocityY * flingFactor;
         mVelocity.x = clamp(mVelocity.x, xmin, xmax);

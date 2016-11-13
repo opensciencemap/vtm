@@ -33,7 +33,7 @@ public class ThemeLoader {
     public static IRenderTheme load(ThemeFile theme) throws ThemeException {
         IRenderTheme t = XmlThemeBuilder.read(theme);
         if (t != null)
-            t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / 240 - 1) * 0.5f);
+            t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1));
         return t;
     }
 }
