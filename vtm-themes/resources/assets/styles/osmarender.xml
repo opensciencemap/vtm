@@ -551,7 +551,7 @@
 
             <m zoom-min="17">
                 <text priority="9" use="caption-small-blue" />
-                <caption style="bold" fill="#606060" k="addr:housenumber" priority="10" size="14"
+                <caption style="bold" fill="#606060" k="addr:housenumber" priority="10" size="12"
                     stroke="#ffffff" stroke-width="2.0" />
             </m>
         </m>
@@ -1347,7 +1347,7 @@
 
         <!-- house numbers -->
         <m k="addr:housenumber" zoom-min="17">
-            <caption style="bold" fill="#606060" k="addr:housenumber" size="14" stroke="#ffffff"
+            <caption style="bold" fill="#606060" k="addr:housenumber" size="12" stroke="#ffffff"
                 stroke-width="2.0" />
         </m>
     </m>
