@@ -43,7 +43,6 @@ public class LocationActivity extends SimpleMapActivity implements LocationListe
         super.onResume();
 
         enableAvailableProviders();
-        locationLayer.setEnabled(true);
     }
 
     @Override
@@ -56,6 +55,7 @@ public class LocationActivity extends SimpleMapActivity implements LocationListe
 
     @Override
     public void onLocationChanged(Location location) {
+        locationLayer.setEnabled(true);
         locationLayer.setPosition(location.getLatitude(), location.getLongitude(), location.getAccuracy());
 
         // Follow location

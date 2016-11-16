@@ -27,6 +27,7 @@ public class LocationLayer extends Layer {
         super(map);
 
         mRenderer = locationRenderer = new LocationRenderer(mMap, this);
+        setEnabled(false);
     }
 
     @Override
