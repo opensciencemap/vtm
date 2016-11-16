@@ -91,32 +91,32 @@ public class AwtPaint implements Paint {
         throw new IllegalArgumentException("unknown cap: " + join);
     }
 
-    static final Font defaultFont;
-    private static final Map<Attribute, Object> textAttributes = new HashMap<>();
+    private static final Font DEFAULT_FONT;
+    private static final Map<Attribute, Object> TEXT_ATTRIBUTES = new HashMap<>();
 
     static {
-        textAttributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        TEXT_ATTRIBUTES.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
 
-        defaultFont = new Font("Arial", Font.PLAIN, 14).deriveFont(textAttributes);
+        DEFAULT_FONT = new Font("Arial", Font.PLAIN, 14).deriveFont(TEXT_ATTRIBUTES);
     }
 
     Color color = new Color(0.1f, 0.1f, 0.1f, 1);
     FontMetrics fm;
-    Font font = defaultFont; // new Font("Default", Font.PLAIN, 13);
+    Font font = DEFAULT_FONT; // new Font("Default", Font.PLAIN, 13);
     Stroke stroke;
     Style style = Style.FILL;
     private int cap = getCap(Cap.BUTT);
-    private String fontName = defaultFont.getFontName();
-    private int fontStyle = defaultFont.getStyle();
+    private String fontName = DEFAULT_FONT.getFontName();
+    private int fontStyle = DEFAULT_FONT.getStyle();
     private int join = getJoin(Join.MITER);
     private float strokeWidth;
-    private float textSize = defaultFont.getSize();
+    private float textSize = DEFAULT_FONT.getSize();
 
     private final BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 
     @Override
     public int getColor() {
-        return 0;
+        return color.getRGB();
     }
 
     @Override
@@ -169,7 +169,7 @@ public class AwtPaint implements Paint {
     public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
         this.fontName = getFontName(fontFamily);
         this.fontStyle = getFontStyle(fontStyle);
-        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(this.textAttributes);
+        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(this.TEXT_ATTRIBUTES);
     }
 
     @Override
