@@ -74,7 +74,11 @@
         </m>
 
 
-        <m k="natural|landuse" v="forest|wood|scrub">
+        <m k="natural" v="grassland|scrub">
+            <area fill="#6fc18e" stroke="#6fc18e" stroke-width="0.2" />
+        </m>
+
+        <m k="natural|landuse" v="forest|wood">
             <m k="wood">
                 <m k="wood" v="coniferous">
                     <area src="assets:patterns/wood-coniferous.png" />
@@ -87,7 +91,7 @@
                 </m>
             </m>
             <m k="wood" v="~">
-                <area fill="#6fc18e" mesh="true" stroke="#6fc18e" stroke-width="0.2" />
+                <area fill="#6fc18e" stroke="#6fc18e" stroke-width="0.2" />
             </m>
 
             <m zoom-min="16">
