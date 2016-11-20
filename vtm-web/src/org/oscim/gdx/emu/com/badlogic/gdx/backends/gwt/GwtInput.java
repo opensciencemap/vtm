@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,12 +52,12 @@ public class GwtInput implements Input {
     final CanvasElement canvas;
     boolean hasFocus = true;
 
-    public GwtInput (CanvasElement canvas) {
+    public GwtInput(CanvasElement canvas) {
         this.canvas = canvas;
         hookEvents();
     }
 
-    void reset () {
+    void reset() {
         justTouched = false;
         if (keyJustPressed) {
             keyJustPressed = false;
@@ -68,80 +68,80 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public float getAccelerometerX () {
+    public float getAccelerometerX() {
         return 0;
     }
 
     @Override
-    public float getAccelerometerY () {
+    public float getAccelerometerY() {
         return 0;
     }
 
     @Override
-    public float getAccelerometerZ () {
+    public float getAccelerometerZ() {
         return 0;
     }
 
     @Override
-    public float getGyroscopeX () {
+    public float getGyroscopeX() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public float getGyroscopeY () {
+    public float getGyroscopeY() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public float getGyroscopeZ () {
+    public float getGyroscopeZ() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
-    public int getX () {
+    public int getX() {
         return touchX[0];
     }
 
     @Override
-    public int getX (int pointer) {
+    public int getX(int pointer) {
         return touchX[pointer];
     }
 
     @Override
-    public int getDeltaX () {
+    public int getDeltaX() {
         return deltaX[0];
     }
 
     @Override
-    public int getDeltaX (int pointer) {
+    public int getDeltaX(int pointer) {
         return deltaX[pointer];
     }
 
     @Override
-    public int getY () {
+    public int getY() {
         return touchY[0];
     }
 
     @Override
-    public int getY (int pointer) {
+    public int getY(int pointer) {
         return touchY[pointer];
     }
 
     @Override
-    public int getDeltaY () {
+    public int getDeltaY() {
         return deltaY[0];
     }
 
     @Override
-    public int getDeltaY (int pointer) {
+    public int getDeltaY(int pointer) {
         return deltaY[pointer];
     }
 
     @Override
-    public boolean isTouched () {
+    public boolean isTouched() {
         for (int pointer = 0; pointer < MAX_TOUCHES; pointer++) {
             if (touched[pointer]) {
                 return true;
@@ -151,22 +151,22 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public boolean justTouched () {
+    public boolean justTouched() {
         return justTouched;
     }
 
     @Override
-    public boolean isTouched (int pointer) {
+    public boolean isTouched(int pointer) {
         return touched[pointer];
     }
 
     @Override
-    public boolean isButtonPressed (int button) {
+    public boolean isButtonPressed(int button) {
         return pressedButtons.contains(button) && touched[0];
     }
 
     @Override
-    public boolean isKeyPressed (int key) {
+    public boolean isKeyPressed(int key) {
         if (key == Keys.ANY_KEY) {
             return pressedKeyCount > 0;
         }
@@ -177,7 +177,7 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public boolean isKeyJustPressed (int key) {
+    public boolean isKeyJustPressed(int key) {
         if (key == Keys.ANY_KEY) {
             return keyJustPressed;
         }
@@ -187,19 +187,19 @@ public class GwtInput implements Input {
         return justPressedKeys[key];
     }
 
-    public void getTextInput (TextInputListener listener, String title, String text, String hint) {
+    public void getTextInput(TextInputListener listener, String title, String text, String hint) {
         TextInputDialogBox dialog = new TextInputDialogBox(title, text, hint);
         final TextInputListener capturedListener = listener;
         dialog.setListener(new TextInputDialogListener() {
             @Override
-            public void onPositive (String text) {
+            public void onPositive(String text) {
                 if (capturedListener != null) {
                     capturedListener.input(text);
                 }
             }
 
             @Override
-            public void onNegative () {
+            public void onNegative() {
                 if (capturedListener != null) {
                     capturedListener.canceled();
                 }
@@ -208,75 +208,75 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public void setOnscreenKeyboardVisible (boolean visible) {
+    public void setOnscreenKeyboardVisible(boolean visible) {
     }
 
     @Override
-    public void vibrate (int milliseconds) {
+    public void vibrate(int milliseconds) {
     }
 
     @Override
-    public void vibrate (long[] pattern, int repeat) {
+    public void vibrate(long[] pattern, int repeat) {
     }
 
     @Override
-    public void cancelVibrate () {
+    public void cancelVibrate() {
     }
 
     @Override
-    public float getAzimuth () {
+    public float getAzimuth() {
         return 0;
     }
 
     @Override
-    public float getPitch () {
+    public float getPitch() {
         return 0;
     }
 
     @Override
-    public float getRoll () {
+    public float getRoll() {
         return 0;
     }
 
     @Override
-    public void getRotationMatrix (float[] matrix) {
+    public void getRotationMatrix(float[] matrix) {
     }
 
     @Override
-    public long getCurrentEventTime () {
+    public long getCurrentEventTime() {
         return currentEventTimeStamp;
     }
 
     @Override
-    public void setCatchBackKey (boolean catchBack) {
+    public void setCatchBackKey(boolean catchBack) {
     }
 
     @Override
-    public boolean isCatchBackKey () {
+    public boolean isCatchBackKey() {
         return false;
     }
 
     @Override
-    public void setCatchMenuKey (boolean catchMenu) {
+    public void setCatchMenuKey(boolean catchMenu) {
     }
 
     @Override
-    public boolean isCatchMenuKey () {
+    public boolean isCatchMenuKey() {
         return false;
     }
 
     @Override
-    public void setInputProcessor (InputProcessor processor) {
+    public void setInputProcessor(InputProcessor processor) {
         this.processor = processor;
     }
 
     @Override
-    public InputProcessor getInputProcessor () {
+    public InputProcessor getInputProcessor() {
         return processor;
     }
 
     @Override
-    public boolean isPeripheralAvailable (Peripheral peripheral) {
+    public boolean isPeripheralAvailable(Peripheral peripheral) {
         if (peripheral == Peripheral.Accelerometer) return false;
         if (peripheral == Peripheral.Compass) return false;
         if (peripheral == Peripheral.HardwareKeyboard) return true;
@@ -287,95 +287,111 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public int getRotation () {
+    public int getRotation() {
         return 0;
     }
 
     @Override
-    public Orientation getNativeOrientation () {
+    public Orientation getNativeOrientation() {
         return Orientation.Landscape;
     }
 
-    /** from https://github.com/toji/game-shim/blob/master/game-shim.js
-     * @return is Cursor catched */
-    private native boolean isCursorCatchedJSNI () /*-{
-		if (!navigator.pointer) {
-			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-		}
-		if (navigator.pointer) {
-			if (typeof (navigator.pointer.isLocked) === "boolean") {
-				// Chrome initially launched with this interface
-				return navigator.pointer.isLocked;
-			} else if (typeof (navigator.pointer.isLocked) === "function") {
-				// Some older builds might provide isLocked as a function
-				return navigator.pointer.isLocked();
-			} else if (typeof (navigator.pointer.islocked) === "function") {
-				// For compatibility with early Firefox build
-				return navigator.pointer.islocked();
-			}
-		}
-		return false;
-	}-*/;
+    /**
+     * from https://github.com/toji/game-shim/blob/master/game-shim.js
+     *
+     * @return is Cursor catched
+     */
+    private native boolean isCursorCatchedJSNI() /*-{
+        if (!navigator.pointer) {
+            navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+        }
+        if (navigator.pointer) {
+            if (typeof (navigator.pointer.isLocked) === "boolean") {
+                // Chrome initially launched with this interface
+                return navigator.pointer.isLocked;
+            } else if (typeof (navigator.pointer.isLocked) === "function") {
+                // Some older builds might provide isLocked as a function
+                return navigator.pointer.isLocked();
+            } else if (typeof (navigator.pointer.islocked) === "function") {
+                // For compatibility with early Firefox build
+                return navigator.pointer.islocked();
+            }
+        }
+        return false;
+    }-*/;
 
-    /** from https://github.com/toji/game-shim/blob/master/game-shim.js
-     * @param element Canvas */
-    private native void setCursorCatchedJSNI (CanvasElement element) /*-{
-		// Navigator pointer is not the right interface according to spec.
-		// Here for backwards compatibility only
-		if (!navigator.pointer) {
-			navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
-		}
-		// element.requestPointerLock
-		if (!element.requestPointerLock) {
-			element.requestPointerLock = (function() {
-				return element.webkitRequestPointerLock
-						|| element.mozRequestPointerLock || function() {
-							if (navigator.pointer) {
-								navigator.pointer.lock(element);
-							}
-						};
-			})();
-		}
-		element.requestPointerLock();
-	}-*/;
+    /**
+     * from https://github.com/toji/game-shim/blob/master/game-shim.js
+     *
+     * @param element Canvas
+     */
+    private native void setCursorCatchedJSNI(CanvasElement element) /*-{
+        // Navigator pointer is not the right interface according to spec.
+        // Here for backwards compatibility only
+        if (!navigator.pointer) {
+            navigator.pointer = navigator.webkitPointer || navigator.mozPointer;
+        }
+        // element.requestPointerLock
+        if (!element.requestPointerLock) {
+            element.requestPointerLock = (function() {
+                return element.webkitRequestPointerLock
+                        || element.mozRequestPointerLock || function() {
+                            if (navigator.pointer) {
+                                navigator.pointer.lock(element);
+                            }
+                        };
+            })();
+        }
+        element.requestPointerLock();
+    }-*/;
 
-    /** from https://github.com/toji/game-shim/blob/master/game-shim.js */
-    private native void exitCursorCatchedJSNI () /*-{
-		if (!$doc.exitPointerLock) {
-			$doc.exitPointerLock = (function() {
-				return $doc.webkitExitPointerLock || $doc.mozExitPointerLock
-						|| function() {
-							if (navigator.pointer) {
-								var elem = this;
-								navigator.pointer.unlock();
-							}
-						};
-			})();
-		}
-	}-*/;
+    /**
+     * from https://github.com/toji/game-shim/blob/master/game-shim.js
+     */
+    private native void exitCursorCatchedJSNI() /*-{
+        if (!$doc.exitPointerLock) {
+            $doc.exitPointerLock = (function() {
+                return $doc.webkitExitPointerLock || $doc.mozExitPointerLock
+                        || function() {
+                            if (navigator.pointer) {
+                                var elem = this;
+                                navigator.pointer.unlock();
+                            }
+                        };
+            })();
+        }
+    }-*/;
 
-    /** from https://github.com/toji/game-shim/blob/master/game-shim.js
+    /**
+     * from https://github.com/toji/game-shim/blob/master/game-shim.js
+     *
      * @param event JavaScript Mouse Event
-     * @return movement in x direction */
-    private native float getMovementXJSNI (NativeEvent event) /*-{
-		return event.movementX || event.webkitMovementX || 0;
-	}-*/;
+     * @return movement in x direction
+     */
+    private native float getMovementXJSNI(NativeEvent event) /*-{
+        return event.movementX || event.webkitMovementX || 0;
+    }-*/;
 
-    /** from https://github.com/toji/game-shim/blob/master/game-shim.js
+    /**
+     * from https://github.com/toji/game-shim/blob/master/game-shim.js
+     *
      * @param event JavaScript Mouse Event
-     * @return movement in y direction */
-    private native float getMovementYJSNI (NativeEvent event) /*-{
-		return event.movementY || event.webkitMovementY || 0;
-	}-*/;
+     * @return movement in y direction
+     */
+    private native float getMovementYJSNI(NativeEvent event) /*-{
+        return event.movementY || event.webkitMovementY || 0;
+    }-*/;
 
-    private static native boolean isTouchScreen () /*-{
-		return (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-	}-*/;
+    private static native boolean isTouchScreen() /*-{
+        return (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+    }-*/;
 
-    /** works only for Chrome > Version 18 with enabled Mouse Lock enable in about:flags or start Chrome with the
-     * --enable-pointer-lock flag */
+    /**
+     * works only for Chrome > Version 18 with enabled Mouse Lock enable in about:flags or start Chrome with the
+     * --enable-pointer-lock flag
+     */
     @Override
-    public void setCursorCatched (boolean catched) {
+    public void setCursorCatched(boolean catched) {
         if (catched)
             setCursorCatchedJSNI(canvas);
         else
@@ -383,90 +399,96 @@ public class GwtInput implements Input {
     }
 
     @Override
-    public boolean isCursorCatched () {
+    public boolean isCursorCatched() {
         return isCursorCatchedJSNI();
     }
 
     @Override
-    public void setCursorPosition (int x, int y) {
+    public void setCursorPosition(int x, int y) {
         // FIXME??
     }
 
     // kindly borrowed from our dear playn friends...
-    static native void addEventListener (JavaScriptObject target, String name, GwtInput handler, boolean capture) /*-{
-		target
-				.addEventListener(
-						name,
-						function(e) {
-							handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
-						}, capture);
-	}-*/;
+    static native void addEventListener(JavaScriptObject target, String name, GwtInput handler, boolean capture) /*-{
+        target
+                .addEventListener(
+                        name,
+                        function(e) {
+                            handler.@com.badlogic.gdx.backends.gwt.GwtInput::handleEvent(Lcom/google/gwt/dom/client/NativeEvent;)(e);
+                        }, capture);
+    }-*/;
 
-    private static native float getMouseWheelVelocity (NativeEvent evt) /*-{
-		var delta = 0.0;
-		var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
+    private static native float getMouseWheelVelocity(NativeEvent evt) /*-{
+        var delta = 0.0;
+        var agentInfo = @com.badlogic.gdx.backends.gwt.GwtApplication::agentInfo()();
 
-		if (agentInfo.isFirefox) {
-			if (agentInfo.isMacOS) {
-				delta = 1.0 * evt.detail;
-			} else {
-				delta = 1.0 * evt.detail / 3;
-			}
-		} else if (agentInfo.isOpera) {
-			if (agentInfo.isLinux) {
-				delta = -1.0 * evt.wheelDelta / 80;
-			} else {
-				// on mac
-				delta = -1.0 * evt.wheelDelta / 40;
-			}
-		} else if (agentInfo.isChrome || agentInfo.isSafari) {
-			delta = -1.0 * evt.wheelDelta / 120;
-			// handle touchpad for chrome
-			if (Math.abs(delta) < 1) {
-				if (agentInfo.isWindows) {
-					delta = -1.0 * evt.wheelDelta;
-				} else if (agentInfo.isMacOS) {
-					delta = -1.0 * evt.wheelDelta / 3;
-				}
-			}
-		}
-		return delta;
-	}-*/;
+        if (agentInfo.isFirefox) {
+            if (agentInfo.isMacOS) {
+                delta = 1.0 * evt.detail;
+            } else {
+                delta = 1.0 * evt.detail / 3;
+            }
+        } else if (agentInfo.isOpera) {
+            if (agentInfo.isLinux) {
+                delta = -1.0 * evt.wheelDelta / 80;
+            } else {
+                // on mac
+                delta = -1.0 * evt.wheelDelta / 40;
+            }
+        } else if (agentInfo.isChrome || agentInfo.isSafari) {
+            delta = -1.0 * evt.wheelDelta / 120;
+            // handle touchpad for chrome
+            if (Math.abs(delta) < 1) {
+                if (agentInfo.isWindows) {
+                    delta = -1.0 * evt.wheelDelta;
+                } else if (agentInfo.isMacOS) {
+                    delta = -1.0 * evt.wheelDelta / 3;
+                }
+            }
+        }
+        return delta;
+    }-*/;
 
-    /** Kindly borrowed from PlayN. **/
-    protected static native String getMouseWheelEvent () /*-{
-		if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
-			return "DOMMouseScroll";
-		} else {
-			return "mousewheel";
-		}
-	}-*/;
+    /**
+     * Kindly borrowed from PlayN.
+     **/
+    protected static native String getMouseWheelEvent() /*-{
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') != -1) {
+            return "DOMMouseScroll";
+        } else {
+            return "mousewheel";
+        }
+    }-*/;
 
-    /** Kindly borrowed from PlayN. **/
-    protected int getRelativeX (NativeEvent e, CanvasElement target) {
+    /**
+     * Kindly borrowed from PlayN.
+     **/
+    protected int getRelativeX(NativeEvent e, CanvasElement target) {
         float xScaleRatio = target.getWidth() * 1f / target.getClientWidth(); // Correct for canvas CSS scaling
         return Math.round(xScaleRatio
                 * (e.getClientX() - target.getAbsoluteLeft() + target.getScrollLeft() + target.getOwnerDocument().getScrollLeft()));
     }
 
-    /** Kindly borrowed from PlayN. **/
-    protected int getRelativeY (NativeEvent e, CanvasElement target) {
+    /**
+     * Kindly borrowed from PlayN.
+     **/
+    protected int getRelativeY(NativeEvent e, CanvasElement target) {
         float yScaleRatio = target.getHeight() * 1f / target.getClientHeight(); // Correct for canvas CSS scaling
         return Math.round(yScaleRatio
                 * (e.getClientY() - target.getAbsoluteTop() + target.getScrollTop() + target.getOwnerDocument().getScrollTop()));
     }
 
-    protected int getRelativeX (Touch touch, CanvasElement target) {
+    protected int getRelativeX(Touch touch, CanvasElement target) {
         float xScaleRatio = target.getWidth() * 1f / target.getClientWidth(); // Correct for canvas CSS scaling
         return Math.round(xScaleRatio * touch.getRelativeX(target));
     }
 
-    protected int getRelativeY (Touch touch, CanvasElement target) {
+    protected int getRelativeY(Touch touch, CanvasElement target) {
         float yScaleRatio = target.getHeight() * 1f / target.getClientHeight(); // Correct for canvas CSS scaling
         return Math.round(yScaleRatio * touch.getRelativeY(target));
     }
 
-    private void hookEvents () {
+    private void hookEvents() {
         addEventListener(canvas, "mousedown", this, true);
         //        addEventListener(Document.get(), "mousedown", this, true);
         addEventListener(canvas, "mouseup", this, true);
@@ -488,14 +510,14 @@ public class GwtInput implements Input {
 
     }
 
-    private int getButton (int button) {
+    private int getButton(int button) {
         if (button == NativeEvent.BUTTON_LEFT) return Buttons.LEFT;
         if (button == NativeEvent.BUTTON_RIGHT) return Buttons.RIGHT;
         if (button == NativeEvent.BUTTON_MIDDLE) return Buttons.MIDDLE;
         return Buttons.LEFT;
     }
 
-    private void handleEvent (NativeEvent e) {
+    private void handleEvent(NativeEvent e) {
         if (e.getType().equals("mousedown")) {
             if (!e.getEventTarget().equals(canvas) || touched[0]) {
                 float mouseX = getRelativeX(e, canvas);
@@ -519,13 +541,14 @@ public class GwtInput implements Input {
                 this.touchY[0] = getRelativeY(e, canvas);
             }
             this.currentEventTimeStamp = TimeUtils.nanoTime();
-            if (processor != null) processor.touchDown(touchX[0], touchY[0], 0, getButton(e.getButton()));
+            if (processor != null)
+                processor.touchDown(touchX[0], touchY[0], 0, getButton(e.getButton()));
         }
 
         if (e.getType().equals("mousemove")) {
             if (isCursorCatched()) {
-                this.deltaX[0] = (int)getMovementXJSNI(e);
-                this.deltaY[0] = (int)getMovementYJSNI(e);
+                this.deltaX[0] = (int) getMovementXJSNI(e);
+                this.deltaY[0] = (int) getMovementYJSNI(e);
                 this.touchX[0] += getMovementXJSNI(e);
                 this.touchY[0] += getMovementYJSNI(e);
             } else {
@@ -548,8 +571,8 @@ public class GwtInput implements Input {
             this.pressedButtons.remove(getButton(e.getButton()));
             this.touched[0] = pressedButtons.size > 0;
             if (isCursorCatched()) {
-                this.deltaX[0] = (int)getMovementXJSNI(e);
-                this.deltaY[0] = (int)getMovementYJSNI(e);
+                this.deltaX[0] = (int) getMovementXJSNI(e);
+                this.deltaY[0] = (int) getMovementYJSNI(e);
                 this.touchX[0] += getMovementXJSNI(e);
                 this.touchY[0] += getMovementYJSNI(e);
             } else {
@@ -560,11 +583,12 @@ public class GwtInput implements Input {
             }
             this.currentEventTimeStamp = TimeUtils.nanoTime();
             this.touched[0] = false;
-            if (processor != null) processor.touchUp(touchX[0], touchY[0], 0, getButton(e.getButton()));
+            if (processor != null)
+                processor.touchUp(touchX[0], touchY[0], 0, getButton(e.getButton()));
         }
         if (e.getType().equals(getMouseWheelEvent())) {
             if (processor != null) {
-                processor.scrolled((int)getMouseWheelVelocity(e));
+                processor.scrolled((int) getMouseWheelVelocity(e));
             }
             this.currentEventTimeStamp = TimeUtils.nanoTime();
             e.preventDefault();
@@ -593,7 +617,7 @@ public class GwtInput implements Input {
 
         if (e.getType().equals("keypress") && hasFocus) {
             // System.out.println("keypress");
-            char c = (char)e.getCharCode();
+            char c = (char) e.getCharCode();
             if (processor != null) processor.keyTyped(c);
         }
 
@@ -687,15 +711,17 @@ public class GwtInput implements Input {
 // if(hasFocus) e.preventDefault();
     }
 
-    private int getAvailablePointer () {
+    private int getAvailablePointer() {
         for (int i = 0; i < MAX_TOUCHES; i++) {
             if (!touchMap.containsValue(i, false)) return i;
         }
         return -1;
     }
 
-    /** borrowed from PlayN, thanks guys **/
-    private static int keyForCode (int keyCode) {
+    /**
+     * borrowed from PlayN, thanks guys
+     **/
+    private static int keyForCode(int keyCode) {
         switch (keyCode) {
             case KeyCodes.KEY_ALT:
                 return Keys.ALT_LEFT;

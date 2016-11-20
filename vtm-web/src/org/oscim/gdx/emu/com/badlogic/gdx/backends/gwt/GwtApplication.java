@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,10 +55,13 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-/** Implementation of an {@link Application} based on GWT. Clients have to override {@link #getConfig()} and
+/**
+ * Implementation of an {@link Application} based on GWT. Clients have to override {@link #getConfig()} and
  * {@link #createApplicationListener()}. Clients can override the default loading screen via
  * {@link #getPreloaderCallback()} and implement any loading screen drawing via GWT widgets.
- * @author mzechner */
+ *
+ * @author mzechner
+ */
 public abstract class GwtApplication implements EntryPoint, Application {
     private ApplicationListener listener;
     GwtApplicationConfiguration config;
@@ -79,12 +82,13 @@ public abstract class GwtApplication implements EntryPoint, Application {
     private Clipboard clipboard;
     LoadingListener loadingListener;
 
-    /** @return the configuration for the {@link GwtApplication}. */
-    public abstract GwtApplicationConfiguration getConfig ();
+    /**
+     * @return the configuration for the {@link GwtApplication}.
+     */
+    public abstract GwtApplicationConfiguration getConfig();
 
 
-    public String getPreloaderBaseURL()
-    {
+    public String getPreloaderBaseURL() {
         return GWT.getHostPageBaseURL() + "assets/";
     }
 
@@ -96,7 +100,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     public abstract ApplicationListener createApplicationListener();
 
     @Override
-    public void onModuleLoad () {
+    public void onModuleLoad() {
         GwtApplication.agentInfo = computeAgentInfo();
         this.listener = createApplicationListener();
         this.config = getConfig();
@@ -133,19 +137,19 @@ public abstract class GwtApplication implements EntryPoint, Application {
         preloader = createPreloader();
         preloader.preload("assets.txt", new PreloaderCallback() {
             @Override
-            public void error (String file) {
+            public void error(String file) {
                 callback.error(file);
             }
 
             @Override
-            public void update (PreloaderState state) {
+            public void update(PreloaderState state) {
                 callback.update(state);
                 if (state.hasEnded()) {
                     getRootPanel().clear();
-                    if(loadingListener != null)
+                    if (loadingListener != null)
                         loadingListener.beforeSetup();
                     setupLoop();
-                    if(loadingListener != null)
+                    if (loadingListener != null)
                         loadingListener.afterSetup();
                 }
             }
@@ -161,7 +165,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         return new Label("Sorry, your browser doesn't seem to support WebGL");
     }
 
-    void setupLoop () {
+    void setupLoop() {
         // setup modules
         try {
             graphics = new GwtGraphics(root, config);
@@ -197,7 +201,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
 
         AnimationScheduler.get().requestAnimationFrame(new AnimationCallback() {
             @Override
-            public void execute (double timestamp) {
+            public void execute(double timestamp) {
                 try {
                     mainLoop();
                 } catch (Throwable t) {
@@ -228,7 +232,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         input.reset();
     }
 
-    public Panel getRootPanel () {
+    public Panel getRootPanel() {
         return root;
     }
 
@@ -238,7 +242,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         return new Preloader(getPreloaderBaseURL());
     }
 
-    public PreloaderCallback getPreloaderCallback () {
+    public PreloaderCallback getPreloaderCallback() {
         final Panel preloaderPanel = new VerticalPanel();
         preloaderPanel.setStyleName("gdx-preloader");
         final Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
@@ -256,12 +260,12 @@ public abstract class GwtApplication implements EntryPoint, Application {
         return new PreloaderCallback() {
 
             @Override
-            public void error (String file) {
+            public void error(String file) {
                 System.out.println("error: " + file);
             }
 
             @Override
-            public void update (PreloaderState state) {
+            public void update(PreloaderState state) {
                 meterStyle.setWidth(100f * state.getProgress(), Unit.PCT);
             }
 
@@ -269,22 +273,22 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public Graphics getGraphics () {
+    public Graphics getGraphics() {
         return graphics;
     }
 
     @Override
-    public Audio getAudio () {
+    public Audio getAudio() {
         return Gdx.audio;
     }
 
     @Override
-    public Input getInput () {
+    public Input getInput() {
         return Gdx.input;
     }
 
     @Override
-    public Files getFiles () {
+    public Files getFiles() {
         return Gdx.files;
     }
 
@@ -293,7 +297,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         return Gdx.net;
     }
 
-    private void updateLogLabelSize () {
+    private void updateLogLabelSize() {
         if (log != null) {
             if (graphics != null) {
                 log.setSize(graphics.getWidth() + "px", "200px");
@@ -303,7 +307,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         }
     }
 
-    private void checkLogLabel () {
+    private void checkLogLabel() {
         if (log == null) {
             log = new TextArea();
 
@@ -322,7 +326,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void log (String tag, String message) {
+    public void log(String tag, String message) {
         if (logLevel >= LOG_INFO) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message);
@@ -332,7 +336,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void log (String tag, String message, Throwable exception) {
+    public void log(String tag, String message, Throwable exception) {
         if (logLevel >= LOG_INFO) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + getMessages(exception) + "\n");
@@ -343,7 +347,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void error (String tag, String message) {
+    public void error(String tag, String message) {
         if (logLevel >= LOG_ERROR) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message + "\n");
@@ -353,7 +357,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void error (String tag, String message, Throwable exception) {
+    public void error(String tag, String message, Throwable exception) {
         if (logLevel >= LOG_ERROR) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + getMessages(exception) + "\n");
@@ -364,7 +368,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void debug (String tag, String message) {
+    public void debug(String tag, String message) {
         if (logLevel >= LOG_DEBUG) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message + "\n");
@@ -374,7 +378,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void debug (String tag, String message, Throwable exception) {
+    public void debug(String tag, String message, Throwable exception) {
         if (logLevel >= LOG_DEBUG) {
             checkLogLabel();
             log.setText(log.getText() + "\n" + tag + ": " + message + "\n" + getMessages(exception) + "\n");
@@ -384,7 +388,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         }
     }
 
-    private String getMessages (Throwable e) {
+    private String getMessages(Throwable e) {
         StringBuffer buffer = new StringBuffer();
         while (e != null) {
             buffer.append(e.getMessage() + "\n");
@@ -393,7 +397,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
         return buffer.toString();
     }
 
-    private String getStackTrace (Throwable e) {
+    private String getStackTrace(Throwable e) {
         StringBuffer buffer = new StringBuffer();
         for (StackTraceElement trace : e.getStackTrace()) {
             buffer.append(trace.toString() + "\n");
@@ -402,7 +406,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public void setLogLevel (int logLevel) {
+    public void setLogLevel(int logLevel) {
         this.logLevel = logLevel;
     }
 
@@ -412,27 +416,27 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public ApplicationType getType () {
+    public ApplicationType getType() {
         return ApplicationType.WebGL;
     }
 
     @Override
-    public int getVersion () {
+    public int getVersion() {
         return 0;
     }
 
     @Override
-    public long getJavaHeap () {
+    public long getJavaHeap() {
         return 0;
     }
 
     @Override
-    public long getNativeHeap () {
+    public long getNativeHeap() {
         return 0;
     }
 
     @Override
-    public Preferences getPreferences (String name) {
+    public Preferences getPreferences(String name) {
         Preferences pref = prefs.get(name);
         if (pref == null) {
             pref = new GwtPreferences(name);
@@ -442,126 +446,132 @@ public abstract class GwtApplication implements EntryPoint, Application {
     }
 
     @Override
-    public Clipboard getClipboard () {
+    public Clipboard getClipboard() {
         return clipboard;
     }
 
     @Override
-    public void postRunnable (Runnable runnable) {
+    public void postRunnable(Runnable runnable) {
         runnables.add(runnable);
     }
 
     @Override
-    public void exit () {
+    public void exit() {
     }
 
-    /** Contains precomputed information on the user-agent. Useful for dealing with browser and OS behavioral differences. Kindly
-     * borrowed from PlayN */
-    public static AgentInfo agentInfo () {
+    /**
+     * Contains precomputed information on the user-agent. Useful for dealing with browser and OS behavioral differences. Kindly
+     * borrowed from PlayN
+     */
+    public static AgentInfo agentInfo() {
         return agentInfo;
     }
 
-    /** kindly borrowed from PlayN **/
-    private static native AgentInfo computeAgentInfo () /*-{
-																			var userAgent = navigator.userAgent.toLowerCase();
-																			return {
-																			// browser type flags
-																			isFirefox : userAgent.indexOf("firefox") != -1,
-																			isChrome : userAgent.indexOf("chrome") != -1,
-																			isSafari : userAgent.indexOf("safari") != -1,
-																			isOpera : userAgent.indexOf("opera") != -1,
-																			isIE : userAgent.indexOf("msie") != -1,
-																			// OS type flags
-																			isMacOS : userAgent.indexOf("mac") != -1,
-																			isLinux : userAgent.indexOf("linux") != -1,
-																			isWindows : userAgent.indexOf("win") != -1
-																			};
-																			}-*/;
+    /**
+     * kindly borrowed from PlayN
+     **/
+    private static native AgentInfo computeAgentInfo() /*-{
+                                                                            var userAgent = navigator.userAgent.toLowerCase();
+                                                                            return {
+                                                                            // browser type flags
+                                                                            isFirefox : userAgent.indexOf("firefox") != -1,
+                                                                            isChrome : userAgent.indexOf("chrome") != -1,
+                                                                            isSafari : userAgent.indexOf("safari") != -1,
+                                                                            isOpera : userAgent.indexOf("opera") != -1,
+                                                                            isIE : userAgent.indexOf("msie") != -1,
+                                                                            // OS type flags
+                                                                            isMacOS : userAgent.indexOf("mac") != -1,
+                                                                            isLinux : userAgent.indexOf("linux") != -1,
+                                                                            isWindows : userAgent.indexOf("win") != -1
+                                                                            };
+                                                                            }-*/;
 
-    /** Returned by {@link #agentInfo}. Kindly borrowed from PlayN. */
+    /**
+     * Returned by {@link #agentInfo}. Kindly borrowed from PlayN.
+     */
     public static class AgentInfo extends JavaScriptObject {
-        public final native boolean isFirefox () /*-{
-																return this.isFirefox;
-																}-*/;
+        public final native boolean isFirefox() /*-{
+                                                                return this.isFirefox;
+                                                                }-*/;
 
-        public final native boolean isChrome () /*-{
-																return this.isChrome;
-																}-*/;
+        public final native boolean isChrome() /*-{
+                                                                return this.isChrome;
+                                                                }-*/;
 
-        public final native boolean isSafari () /*-{
-																return this.isSafari;
-																}-*/;
+        public final native boolean isSafari() /*-{
+                                                                return this.isSafari;
+                                                                }-*/;
 
-        public final native boolean isOpera () /*-{
-															return this.isOpera;
-															}-*/;
+        public final native boolean isOpera() /*-{
+                                                            return this.isOpera;
+                                                            }-*/;
 
-        public final native boolean isIE () /*-{
-														return this.isIE;
-														}-*/;
+        public final native boolean isIE() /*-{
+                                                        return this.isIE;
+                                                        }-*/;
 
-        public final native boolean isMacOS () /*-{
-															return this.isMacOS;
-															}-*/;
+        public final native boolean isMacOS() /*-{
+                                                            return this.isMacOS;
+                                                            }-*/;
 
-        public final native boolean isLinux () /*-{
-															return this.isLinux;
-															}-*/;
+        public final native boolean isLinux() /*-{
+                                                            return this.isLinux;
+                                                            }-*/;
 
-        public final native boolean isWindows () /*-{
-																return this.isWindows;
-																}-*/;
+        public final native boolean isWindows() /*-{
+                                                                return this.isWindows;
+                                                                }-*/;
 
-        protected AgentInfo () {
+        protected AgentInfo() {
         }
     }
 
-    public String getBaseUrl () {
+    public String getBaseUrl() {
         return preloader.baseUrl;
     }
 
-    public Preloader getPreloader () {
+    public Preloader getPreloader() {
         return preloader;
     }
 
-    public CanvasElement getCanvasElement(){
+    public CanvasElement getCanvasElement() {
         return graphics.canvas;
     }
 
-    public LoadingListener getLoadingListener () {
+    public LoadingListener getLoadingListener() {
         return loadingListener;
     }
 
-    public void setLoadingListener (LoadingListener loadingListener) {
+    public void setLoadingListener(LoadingListener loadingListener) {
         this.loadingListener = loadingListener;
     }
 
     @Override
-    public void addLifecycleListener (LifecycleListener listener) {
-        synchronized(lifecycleListeners) {
+    public void addLifecycleListener(LifecycleListener listener) {
+        synchronized (lifecycleListeners) {
             lifecycleListeners.add(listener);
         }
     }
 
     @Override
-    public void removeLifecycleListener (LifecycleListener listener) {
-        synchronized(lifecycleListeners) {
+    public void removeLifecycleListener(LifecycleListener listener) {
+        synchronized (lifecycleListeners) {
             lifecycleListeners.removeValue(listener, true);
         }
     }
 
     native static public void consoleLog(String message) /*-{
-		console.log( "GWT: " + message );
-	}-*/;
+        console.log( "GWT: " + message );
+    }-*/;
 
-    private native void addEventListeners () /*-{
-		var self = this;
-		$doc.addEventListener('visibilitychange', function (e) {
-			self.@com.badlogic.gdx.backends.gwt.GwtApplication::onVisibilityChange(Z)($doc['hidden'] !== true);
-		});
-	}-*/;
+    private native void addEventListeners() /*-{
+        var self = this;
+        $doc.addEventListener('visibilitychange', function (e) {
+            self.@com.badlogic.gdx.backends.gwt.GwtApplication::onVisibilityChange(Z)($doc['hidden'] !== true);
+        });
+    }-*/;
 
-    private void onVisibilityChange (boolean visible) {
+    private void onVisibilityChange(boolean visible) {
         if (visible) {
             for (LifecycleListener listener : lifecycleListeners) {
                 listener.resume();
@@ -578,7 +588,7 @@ public abstract class GwtApplication implements EntryPoint, Application {
     /**
      * LoadingListener interface main purpose is to do some things before or after {@link GwtApplication#setupLoop()}
      */
-    public interface LoadingListener{
+    public interface LoadingListener {
         /**
          * Method called before the setup
          */
