@@ -26,7 +26,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
   - Android (optional libGDX)
   - iOS (using libGDX/RoboVM, [instructions](docs/ios.md))
   - Desktop (using libGDX/LWJGL)
-  - HTML5/WebGL (using libGDX/GWT)
+  - HTML5/WebGL (using libGDX/GWT, [instructions](docs/web.md))
 
 ### Projects
 - **vtm** contains the core library
@@ -38,9 +38,6 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 - **vtm-ios** iOS backend
 - **vtm-web** HTML5/GWT backend
 - **vtm-web-app** HTML5/GWT application
-
-The libGDX backend for GWT is experimental.
-- `./gradlew :vtm-web-app:jettyDraftWar` will run standalone Jetty server at port 8080. See http://localhost:8080/vtm-web-app in your web browser.
 
 ## Applications
 - VTM is used by many [applications](docs/Applications.md).
