@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -134,11 +135,12 @@ public abstract class UrlTileSource extends TileSource {
     }
 
     public String getTileUrl(Tile tile) {
-        String tileUrl = mUrl + mTileUrlFormatter.formatTilePath(this, tile);
+        StringBuilder sb = new StringBuilder();
+        sb.append(mUrl).append(mTileUrlFormatter.formatTilePath(this, tile));
         if (mApiKey != null) {
-            tileUrl += String.format("?api_key=%s", mApiKey);
+            sb.append("?api_key=").append(mApiKey);
         }
-        return tileUrl;
+        return sb.toString();
     }
 
     public void setHttpEngine(HttpEngine.Factory httpFactory) {
