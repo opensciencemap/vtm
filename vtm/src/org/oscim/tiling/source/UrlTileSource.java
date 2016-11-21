@@ -68,7 +68,7 @@ public abstract class UrlTileSource extends TileSource {
 
     }
 
-    public final static TileUrlFormatter URL_FORMATTER = new DefaultTileUrlFormatter();
+    public static final TileUrlFormatter URL_FORMATTER = new DefaultTileUrlFormatter();
     private final URL mUrl;
     private final String[] mTilePath;
 
@@ -174,7 +174,19 @@ public abstract class UrlTileSource extends TileSource {
         return mHttpFactory.create(this);
     }
 
-    static class DefaultTileUrlFormatter implements TileUrlFormatter {
+    public int tileXToUrlX(int tileX) {
+        return tileX;
+    }
+
+    public int tileYToUrlY(int tileY) {
+        return tileY;
+    }
+
+    public int tileZToUrlZ(int tileZ) {
+        return tileZ;
+    }
+
+    private static class DefaultTileUrlFormatter implements TileUrlFormatter {
         @Override
         public String formatTilePath(UrlTileSource tileSource, Tile tile) {
 
@@ -183,13 +195,13 @@ public abstract class UrlTileSource extends TileSource {
                 if (b.length() == 1) {
                     switch (b.charAt(0)) {
                         case 'X':
-                            sb.append(tile.tileX);
+                            sb.append(tileSource.tileXToUrlX(tile.tileX));
                             continue;
                         case 'Y':
-                            sb.append(tile.tileY);
+                            sb.append(tileSource.tileYToUrlY(tile.tileY));
                             continue;
                         case 'Z':
-                            sb.append(tile.zoomLevel);
+                            sb.append(tileSource.tileZToUrlZ(tile.zoomLevel));
                             continue;
                         default:
                             break;
