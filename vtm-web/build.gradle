@@ -1,16 +1,10 @@
 buildscript {
     repositories {
-        mavenLocal()
-        mavenCentral()
         maven { url 'http://dl.bintray.com/steffenschaefer/maven' }
     }
     dependencies {
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
     }
-}
-
-repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 //apply plugin: 'war'
@@ -39,7 +33,7 @@ evaluationDependsOn(':vtm-gdx')
 evaluationDependsOn(':vtm-extras')
 
 gwt {
-    gwtVersion = '2.6.1'
+    gwtVersion = project.ext.gwtVersion
     modules 'org.oscim.gdx.VtmWeb'
 
     superDev {

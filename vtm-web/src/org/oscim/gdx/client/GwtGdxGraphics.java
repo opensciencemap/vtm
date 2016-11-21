@@ -49,7 +49,7 @@ public class GwtGdxGraphics extends CanvasAdapter {
 
     @Override
     public Bitmap decodeBitmapImpl(InputStream in) {
-        //ImageData data = new ImageData();
+        // TODO
         return null;
     }
 
