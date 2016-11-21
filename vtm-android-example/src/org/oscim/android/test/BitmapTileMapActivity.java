@@ -25,7 +25,6 @@ import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
-import org.oscim.utils.Easing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +94,7 @@ public class BitmapTileMapActivity extends MapActivity {
                 if (i == 1) {
                     mMapView.map().getMapPosition(p);
                     p.setScale(4);
-                    mMapView.map().animator().animateTo(time, p, Easing.Type.LINEAR);
+                    mMapView.map().animator().animateTo(time, p);
                 } else {
                     //mMapView.map().setMapPosition(p);
                     p.setScale(2 + (1 << (int) (Math.random() * 13)));
@@ -108,7 +107,7 @@ public class BitmapTileMapActivity extends MapActivity {
                     p.setBearing((float) (Math.random() * 360));
                     //mMapView.map().setMapPosition(p);
 
-                    mMapView.map().animator().animateTo(time, p, Easing.Type.LINEAR);
+                    mMapView.map().animator().animateTo(time, p);
                 }
                 loooop((i + 1) % 2);
 

@@ -66,6 +66,10 @@ public class Animator {
         mMap = map;
     }
 
+    public synchronized void animateTo(long duration, BoundingBox bbox) {
+        animateTo(duration, bbox, Easing.Type.LINEAR);
+    }
+
     public synchronized void animateTo(long duration, BoundingBox bbox, Easing.Type easingType) {
         ThreadUtils.assertMainThread();
 
@@ -100,6 +104,14 @@ public class Animator {
         animateTo(1000, bbox, Easing.Type.LINEAR);
     }
 
+    /**
+     * Animate to GeoPoint
+     *
+     * @param duration in ms
+     * @param geoPoint
+     * @param scale
+     * @param relative alter scale relative to current scale
+     */
     public void animateTo(long duration, GeoPoint geoPoint,
                           double scale, boolean relative) {
         animateTo(duration, geoPoint, scale, relative, Easing.Type.LINEAR);
@@ -108,10 +120,11 @@ public class Animator {
     /**
      * Animate to GeoPoint
      *
-     * @param duration in ms
+     * @param duration   in ms
      * @param geoPoint
      * @param scale
-     * @param relative alter scale relative to current scale
+     * @param relative   alter scale relative to current scale
+     * @param easingType easing function
      */
     public void animateTo(long duration, GeoPoint geoPoint,
                           double scale, boolean relative, Easing.Type easingType) {
@@ -134,6 +147,10 @@ public class Animator {
 
     public void animateTo(GeoPoint p) {
         animateTo(500, p, 1, true, Easing.Type.LINEAR);
+    }
+
+    public void animateTo(long duration, MapPosition pos) {
+        animateTo(duration, pos, Easing.Type.LINEAR);
     }
 
     public void animateTo(long duration, MapPosition pos, Easing.Type easingType) {
@@ -238,7 +255,11 @@ public class Animator {
         }
 
         float adv = clamp(1.0f - millisLeft / mDuration, 0, 1);
-        adv = Easing.ease(0, (long) (adv * Long.MAX_VALUE), Long.MAX_VALUE, mEasingType);
+        // Avoid redundant calculations in case of linear easing
+        if (mEasingType != Easing.Type.LINEAR) {
+            adv = Easing.ease(0, (long) (adv * Long.MAX_VALUE), Long.MAX_VALUE, mEasingType);
+            adv = clamp(adv, 0, 1);
+        }
 
         double scaleAdv = 1;
         if ((mState & ANIM_SCALE) != 0) {
