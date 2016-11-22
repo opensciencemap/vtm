@@ -8,6 +8,7 @@
 - Mapbox vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
 - PathLayer (vtm) fix disappearing segments [#108](https://github.com/mapsforge/vtm/issues/108)
 - House numbers (nodes) fix visibility [#168](https://github.com/mapsforge/vtm/issues/168)
+- Android fix quick scale vs long press [#250](https://github.com/mapsforge/vtm/issues/250)
 - Use baseline 160dpi in scaling [#236](https://github.com/mapsforge/vtm/issues/236)
 - MapFileTileSource zoom level API enhancements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Animator enhancements with easing functions [#246](https://github.com/mapsforge/vtm/issues/246)
