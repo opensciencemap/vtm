@@ -76,13 +76,19 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
         else
             item.setMarker(null);
 
-        System.out.println(item.getTitle());
+        System.out.println("Tap " + item.getTitle());
         return true;
     }
 
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
-        return false;
+        if (item.getMarker() == null)
+            item.setMarker(mFocusMarker);
+        else
+            item.setMarker(null);
+
+        System.out.println("Long press " + item.getTitle());
+        return true;
     }
 
     public static void main(String[] args) {

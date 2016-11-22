@@ -23,11 +23,16 @@ import android.widget.Toast;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
+import org.oscim.event.Gesture;
+import org.oscim.event.GestureListener;
+import org.oscim.event.MotionEvent;
+import org.oscim.layers.Layer;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
+import org.oscim.map.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +54,9 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
+
+        // Long press receiver
+        mMap.layers().add(new LongPressLayer(mMap));
 
         /* directly load bitmap from resources */
         Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
@@ -99,13 +107,35 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         else
             item.setMarker(null);
 
-        Toast toast = Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT);
-        toast.show();
+        Toast.makeText(this, "Tap " + item.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
     @Override
     public boolean onItemLongPress(int index, MarkerItem item) {
-        return false;
+        if (item.getMarker() == null)
+            item.setMarker(mFocusMarker);
+        else
+            item.setMarker(null);
+
+        Toast.makeText(this, "Long press " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
+    class LongPressLayer extends Layer implements GestureListener {
+
+        LongPressLayer(Map map) {
+            super(map);
+        }
+
+        @Override
+        public boolean onGesture(Gesture g, MotionEvent e) {
+            if (g instanceof Gesture.LongPress) {
+                GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                Toast.makeText(MarkerOverlayActivity.this, "Long press " + p, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        }
     }
 }
