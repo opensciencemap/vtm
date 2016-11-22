@@ -56,7 +56,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
         // Long press receiver
-        mMap.layers().add(new LongPressLayer(mMap));
+        mMap.layers().add(new MapEventsReceiver(mMap));
 
         /* directly load bitmap from resources */
         Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
@@ -107,7 +107,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         else
             item.setMarker(null);
 
-        Toast.makeText(this, "Tap " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Marker tap\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -118,21 +118,26 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         else
             item.setMarker(null);
 
-        Toast.makeText(this, "Long press " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Marker long press\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
-    class LongPressLayer extends Layer implements GestureListener {
+    class MapEventsReceiver extends Layer implements GestureListener {
 
-        LongPressLayer(Map map) {
+        MapEventsReceiver(Map map) {
             super(map);
         }
 
         @Override
         public boolean onGesture(Gesture g, MotionEvent e) {
+            if (g instanceof Gesture.Tap) {
+                GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                Toast.makeText(MarkerOverlayActivity.this, "Map tap\n" + p, Toast.LENGTH_SHORT).show();
+                return true;
+            }
             if (g instanceof Gesture.LongPress) {
                 GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
-                Toast.makeText(MarkerOverlayActivity.this, "Long press " + p, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MarkerOverlayActivity.this, "Map long press\n" + p, Toast.LENGTH_SHORT).show();
                 return true;
             }
             return false;
