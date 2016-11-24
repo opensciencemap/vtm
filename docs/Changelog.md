@@ -13,6 +13,7 @@
 - MapFileTileSource zoom level API enhancements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Animator enhancements with easing functions [#246](https://github.com/mapsforge/vtm/issues/246)
 - Tile grid layer scaling [#238](https://github.com/mapsforge/vtm/issues/238)
+- Internal render themes new SVG resources [#251](https://github.com/mapsforge/vtm/issues/251)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aissue+is%3Aclosed+milestone%3A0.7.0)
