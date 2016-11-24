@@ -55,7 +55,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         super.onCreate(savedInstanceState);
         mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
 
-        // Long press receiver
+        // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
         /* directly load bitmap from resources */

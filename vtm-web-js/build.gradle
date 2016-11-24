@@ -85,3 +85,7 @@ tasks.withType(JavaCompile) { compileTask ->
     compileTask.dependsOn copyVtmAssets
     compileTask.dependsOn copyWarSources
 }
+
+clean {
+    delete "assets"
+}
