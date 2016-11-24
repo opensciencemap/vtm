@@ -63,6 +63,7 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Experiments"));
         linearLayout.addView(createButton(LayerGroupActivity.class));
+        linearLayout.addView(createButton(MapPositionActivity.class));
         linearLayout.addView(createButton(S3DBMapActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));
