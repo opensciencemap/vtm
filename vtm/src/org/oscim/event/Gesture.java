@@ -34,7 +34,7 @@ public interface Gesture {
     final class TripleTap implements Gesture {
     }
 
-    class TwoFingerTap implements Gesture {
+    final class TwoFingerTap implements Gesture {
     }
 
     Gesture PRESS = new Press();
