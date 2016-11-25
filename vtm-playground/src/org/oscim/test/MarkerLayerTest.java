@@ -17,12 +17,17 @@ package org.oscim.test;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
+import org.oscim.event.Gesture;
+import org.oscim.event.GestureListener;
+import org.oscim.event.MotionEvent;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.layers.Layer;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
+import org.oscim.map.Map;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import java.util.ArrayList;
@@ -40,6 +45,9 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
         BitmapTileLayer bitmapLayer = new BitmapTileLayer(mMap, DefaultSources.STAMEN_TONER.build());
         bitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
         mMap.setBaseMap(bitmapLayer);
+
+        // Map events receiver
+        mMap.layers().add(new MapEventsReceiver(mMap));
 
         mMap.setMapPosition(0, 0, 1 << 2);
 
@@ -76,7 +84,7 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
         else
             item.setMarker(null);
 
-        System.out.println("Tap " + item.getTitle());
+        System.out.println("Marker tap " + item.getTitle());
         return true;
     }
 
@@ -87,12 +95,34 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
         else
             item.setMarker(null);
 
-        System.out.println("Long press " + item.getTitle());
+        System.out.println("Marker long press " + item.getTitle());
         return true;
     }
 
     public static void main(String[] args) {
         GdxMapApp.init();
         GdxMapApp.run(new MarkerLayerTest());
+    }
+
+    private class MapEventsReceiver extends Layer implements GestureListener {
+
+        MapEventsReceiver(Map map) {
+            super(map);
+        }
+
+        @Override
+        public boolean onGesture(Gesture g, MotionEvent e) {
+            if (g instanceof Gesture.Tap) {
+                GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                System.out.println("Map tap " + p);
+                return true;
+            }
+            if (g instanceof Gesture.LongPress) {
+                GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
+                System.out.println("Map long press " + p);
+                return true;
+            }
+            return false;
+        }
     }
 }
