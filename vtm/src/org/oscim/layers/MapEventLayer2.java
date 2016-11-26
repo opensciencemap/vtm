@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
  * Copyright 2016 Andrey Novikov
+ * Copyright 2016 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -498,6 +499,15 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
         mPrevY2 = y2;
 
         mMap.updateMap(true);
+
+        if (mMap.viewport().getMapPosition(mapPosition)) {
+            if (mDoScale)
+                mMap.events.fire(Map.SCALE_EVENT, mapPosition);
+            if (mDoRotate)
+                mMap.events.fire(Map.ROTATE_EVENT, mapPosition);
+            if (mDoTilt)
+                mMap.events.fire(Map.TILT_EVENT, mapPosition);
+        }
     }
 
     private void updateMulti(MotionEvent e) {
