@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Mathieu De Brito
+ * Copyright 2016 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,12 +16,18 @@
 package org.oscim.android.test;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.Toast;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 
+/**
+ * Test consecutive map position animations.
+ */
 public class MapPositionActivity extends SimpleMapActivity {
+
+    // Avoid object creation
+    private final MapPosition mapPosition = new MapPosition();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,52 +36,52 @@ public class MapPositionActivity extends SimpleMapActivity {
         runTest();
     }
 
-    void runTest() {
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-        // 1 - ask for a bearing
-        int bearing = 180;
-        animateToBearing(bearing);
-
-        // 2 - ask for a new location
-        double latitude = Math.random() * 60;
-        double longitude = Math.random() * 180;
-        animateToLocation(latitude, longitude);
-
-        // If animations have merged, final bearing should 180
-        checkThatAnimationsHaveMerged(bearing);
+        /* ignore saved position */
+        mMap.setMapPosition(0, 0, 1 << 2);
     }
 
-    void animateToLocation(final double latitude, final double longitude) {
-        mMapView.postDelayed(new Runnable() {
+    private void animateToBearing(final float bearing) {
+        mMap.postDelayed(new Runnable() {
             @Override
             public void run() {
-                MapPosition p = mMapView.map().getMapPosition();
-                p.setX(MercatorProjection.longitudeToX(longitude));
-                p.setY(MercatorProjection.latitudeToY(latitude));
-                mMapView.map().animator().animateTo(1000, p);
-            }
-        }, 1000);
-    }
-
-    void animateToBearing(final int bearing) {
-        mMapView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                MapPosition p = mMapView.map().getMapPosition();
-                p.setBearing(bearing);
-                mMapView.map().animator().animateTo(1000, p);
+                mMap.getMapPosition(mapPosition);
+                mapPosition.setBearing(bearing);
+                mMap.animator().animateTo(1000, mapPosition);
             }
         }, 500);
     }
 
-    void checkThatAnimationsHaveMerged(final int bearing) {
-        mMapView.postDelayed(new Runnable() {
+    private void animateToLocation(final double latitude, final double longitude) {
+        mMap.postDelayed(new Runnable() {
             @Override
             public void run() {
-                MapPosition p = mMapView.map().getMapPosition();
-                if (p.getBearing() != bearing) {
-                    Log.e(MapPositionActivity.class.getName(), "Bearing is not correct (expected:" + bearing + ", actual:" + p.getBearing() + ")");
-                }
+                mMap.getMapPosition(mapPosition);
+                mapPosition.setPosition(latitude, longitude);
+                mMap.animator().animateTo(1000, mapPosition);
+            }
+        }, 1000);
+    }
+
+    private void runTest() {
+        // 1 - ask for a bearing
+        final float bearing = 180;
+        animateToBearing(bearing);
+
+        // 2 - ask for a new location
+        double latitude = Math.random() * MercatorProjection.LATITUDE_MAX;
+        double longitude = Math.random() * MercatorProjection.LONGITUDE_MAX;
+        animateToLocation(latitude, longitude);
+
+        // If animations were merged, final bearing should be 180°
+        mMap.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mMap.getMapPosition(mapPosition);
+                Toast.makeText(MapPositionActivity.this, "Bearing expected: " + bearing + ", got: " + mapPosition.getBearing(), Toast.LENGTH_LONG).show();
             }
         }, 3000);
     }
