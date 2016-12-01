@@ -41,6 +41,7 @@ public class Samples extends Activity {
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
+        linearLayout.addView(createButton(MapsforgeStyleActivity.class));
         linearLayout.addView(createButton(MapboxMapActivity.class));
         linearLayout.addView(createButton(OsmJsonMapActivity.class));
 
