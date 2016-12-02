@@ -86,7 +86,7 @@ public abstract class GdxMap implements ApplicationListener {
 
         InputMultiplexer mux = new InputMultiplexer();
         if (!Map.NEW_GESTURES) {
-            mGestureDetector = new GestureDetector(new LayerHandler(mMap));
+            mGestureDetector = new GestureDetector(new GestureHandlerImpl(mMap));
             mux.addProcessor(mGestureDetector);
         }
         mux.addProcessor(new InputHandler(this));

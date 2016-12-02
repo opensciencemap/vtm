@@ -14,28 +14,42 @@
  */
 package org.oscim.gdx;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.input.GestureDetector;
 
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
 import org.oscim.map.Map;
 
-public class LayerHandler extends GestureDetector.GestureAdapter {
+public class GestureHandlerImpl extends GestureDetector.GestureAdapter {
 
     private final Map map;
 
-    public LayerHandler(Map map) {
+    public GestureHandlerImpl(Map map) {
         this.map = map;
     }
 
     @Override
     public boolean longPress(float x, float y) {
+        // Handle gesture on layers
         map.handleGesture(Gesture.LONG_PRESS, new GdxMotionEvent(MotionEvent.ACTION_DOWN, x, y));
         return true;
     }
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
+        // Handle double tap zoom
+        if (button == Input.Buttons.LEFT) {
+            if (count == 2) {
+                float pivotX = x - map.getWidth() / 2;
+                float pivotY = y - map.getHeight() / 2;
+                map.animator().animateZoom(300, 2, pivotX, pivotY);
+                map.updateMap(true);
+                return false;
+            }
+        }
+
+        // Handle gesture on layers
         map.handleGesture(Gesture.TAP, new GdxMotionEvent(MotionEvent.ACTION_UP, x, y, button));
         return false;
     }
