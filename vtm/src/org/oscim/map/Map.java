@@ -314,16 +314,34 @@ public abstract class Map implements TaskQueue {
     }
 
     /**
-     * Get current {@link MapPosition}.
+     * Get current {@link MapPosition} or at possible animation end.
      *
+     * @param animationEnd map position at animation end (valid with Animator.animateTo methods)
+     * @param mapPosition  reuse MapPosition instance
      * @return true when MapPosition was updated (has changed)
      */
-    public boolean getMapPosition(MapPosition mapPosition) {
+    public boolean getMapPosition(boolean animationEnd, MapPosition mapPosition) {
+        if (animationEnd) {
+            if (animator().isActive()) {
+                mapPosition.copy(animator().getEndPosition());
+                return true;
+            }
+        }
+
         if (!ThreadUtils.isMainThread()) {
             return mViewport.getSyncMapPosition(mapPosition);
         }
 
         return mViewport.getMapPosition(mapPosition);
+    }
+
+    /**
+     * Get current {@link MapPosition}.
+     *
+     * @return true when MapPosition was updated (has changed)
+     */
+    public boolean getMapPosition(MapPosition mapPosition) {
+        return getMapPosition(false, mapPosition);
     }
 
     /**

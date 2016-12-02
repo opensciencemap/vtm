@@ -26,7 +26,7 @@ import org.oscim.core.MercatorProjection;
  */
 public class MapPositionActivity extends SimpleMapActivity {
 
-    // Avoid object creation
+    // Reuse MapPosition instance
     private final MapPosition mapPosition = new MapPosition();
 
     @Override
@@ -59,7 +59,7 @@ public class MapPositionActivity extends SimpleMapActivity {
         mMap.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mapPosition.copy(mMap.animator().getDeltaPosition());
+                mMap.getMapPosition(true, mapPosition);
                 mapPosition.setPosition(latitude, longitude);
                 mMap.animator().animateTo(1000, mapPosition);
             }

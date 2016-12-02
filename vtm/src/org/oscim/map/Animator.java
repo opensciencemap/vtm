@@ -337,7 +337,11 @@ public class Animator {
         return mState != ANIM_NONE;
     }
 
-    public MapPosition getDeltaPosition() {
+    /**
+     * Get the map position at animation end.<br>
+     * Note: valid only with animateTo methods.
+     */
+    public MapPosition getEndPosition() {
         return mDeltaPos;
     }
 }
