@@ -59,7 +59,7 @@ public class MapPositionActivity extends SimpleMapActivity {
         mMap.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mMap.getMapPosition(mapPosition);
+                mapPosition.copy(mMap.animator().getDeltaPosition());
                 mapPosition.setPosition(latitude, longitude);
                 mMap.animator().animateTo(1000, mapPosition);
             }

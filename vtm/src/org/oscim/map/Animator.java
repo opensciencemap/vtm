@@ -336,4 +336,8 @@ public class Animator {
     public boolean isActive() {
         return mState != ANIM_NONE;
     }
+
+    public MapPosition getDeltaPosition() {
+        return mDeltaPos;
+    }
 }
