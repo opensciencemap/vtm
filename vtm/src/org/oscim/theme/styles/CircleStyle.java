@@ -31,7 +31,7 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
     public final boolean scaleRadius;
     public final float strokeWidth;
 
-    public CircleStyle(Float radius, boolean scaleRadius, int fill, int stroke,
+    public CircleStyle(float radius, boolean scaleRadius, int fill, int stroke,
                        float strokeWidth, int level) {
         super();
 

@@ -381,14 +381,6 @@ public class RenderBuckets extends TileData {
             }
         }
 
-        for (RenderBucket l = buckets; l != null; l = l.next) {
-            if (l.type == CIRCLE) {
-                l.compile(vboData, iboData);
-                l.vertexOffset = pos;
-                pos += l.numVertices;
-            }
-        }
-
         offset[LINE] = vboData.position() * SHORT_BYTES;
         pos = 0;
         for (RenderBucket l = buckets; l != null; l = l.next) {
