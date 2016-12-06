@@ -1156,9 +1156,6 @@
                     <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14"
                         stroke="#ffffff" stroke-width="2.0" />
                 </m>
-                <m v="tree" zoom-min="16">
-                    <circle radius="10" />
-                </m>
                 <m v="volcano" zoom-min="12">
                     <symbol src="assets:symbols/volcano.svg" />
                     <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
@@ -1171,7 +1168,6 @@
 
 
         <m k="place" select="first">
-            <circle fill="#ff0000" radius="5.0" />
             <m v="locality" zoom-min="13">
                 <caption style="bold" fill="#606060" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />

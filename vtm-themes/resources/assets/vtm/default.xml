@@ -994,7 +994,6 @@
 
         <!-- place -->
         <m k="place">
-            <circle fill="#ff0000" radius="5.0" />
             <m v="locality" zoom-min="13">
                 <caption style="bold" fill="#606060" k="name" priority="5" size="14"
                     stroke="#ffffff" stroke-width="2.0" />
@@ -1260,9 +1259,6 @@
 
         </m>
 
-        <m k="natural" v="tree" zoom-min="15">
-            <circle radius="10" />
-        </m>
         <m k="natural" v="peak" zoom-min="12">
             <symbol src="assets:symbols/peak.svg" />
             <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
