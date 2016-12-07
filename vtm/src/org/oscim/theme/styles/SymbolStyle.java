@@ -26,15 +26,27 @@ import org.oscim.renderer.atlas.TextureRegion;
  */
 public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
-    public Bitmap bitmap;
-    public TextureRegion texture;
+    public final Bitmap bitmap;
+    public final TextureRegion texture;
 
-    public SymbolStyle(Bitmap symbol) {
-        this.bitmap = symbol;
+    public SymbolStyle(Bitmap bitmap) {
+        this.bitmap = bitmap;
+        this.texture = null;
     }
 
-    public SymbolStyle(TextureRegion symbol) {
-        this.texture = symbol;
+    public SymbolStyle(TextureRegion texture) {
+        this.bitmap = null;
+        this.texture = texture;
+    }
+
+    public SymbolStyle(SymbolBuilder<?> b) {
+        this.bitmap = b.bitmap;
+        this.texture = b.texture;
+    }
+
+    @Override
+    public SymbolStyle current() {
+        return (SymbolStyle) mCurrent;
     }
 
     @Override
@@ -53,8 +65,47 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         cb.renderSymbol(this);
     }
 
-    @Override
-    public SymbolStyle current() {
-        return (SymbolStyle) mCurrent;
+    public static class SymbolBuilder<T extends SymbolBuilder<T>> extends StyleBuilder<T> {
+
+        public Bitmap bitmap;
+        public TextureRegion texture;
+
+        public SymbolBuilder() {
+        }
+
+        public T set(SymbolStyle symbol) {
+            if (symbol == null)
+                return reset();
+
+            this.bitmap = symbol.bitmap;
+            this.texture = symbol.texture;
+
+            return self();
+        }
+
+        public T bitmap(Bitmap bitmap) {
+            this.bitmap = bitmap;
+            return self();
+        }
+
+        public T texture(TextureRegion texture) {
+            this.texture = texture;
+            return self();
+        }
+
+        public T reset() {
+            bitmap = null;
+            texture = null;
+            return self();
+        }
+
+        public SymbolStyle build() {
+            return new SymbolStyle(this);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static SymbolBuilder<?> builder() {
+        return new SymbolBuilder();
     }
 }
