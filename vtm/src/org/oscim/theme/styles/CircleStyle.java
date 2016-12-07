@@ -42,7 +42,7 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
         this.level = level;
     }
 
-    public CircleStyle(CircleStyle.CircleBuilder<?> b) {
+    public CircleStyle(CircleBuilder<?> b) {
         this.radius = b.radius;
         this.scaleRadius = b.scaleRadius;
         this.fillColor = b.fillColor;
@@ -61,7 +61,7 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
         cb.renderCircle(this, this.level);
     }
 
-    public static class CircleBuilder<T extends CircleStyle.CircleBuilder<T>> extends StyleBuilder<T> {
+    public static class CircleBuilder<T extends CircleBuilder<T>> extends StyleBuilder<T> {
 
         public float radius;
         public boolean scaleRadius;
@@ -108,7 +108,7 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
     }
 
     @SuppressWarnings("rawtypes")
-    public static CircleStyle.CircleBuilder<?> builder() {
-        return new CircleStyle.CircleBuilder<>();
+    public static CircleBuilder<?> builder() {
+        return new CircleBuilder();
     }
 }
