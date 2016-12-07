@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2014 Hannes Janetzek
  * Copyright 2016 devemux86
  *
@@ -77,6 +78,10 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
      */
     public final boolean mesh;
 
+    public final int symbolWidth;
+    public final int symbolHeight;
+    public final int symbolPercent;
+
     public AreaStyle(int color) {
         this(0, color);
     }
@@ -92,6 +97,10 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
         this.strokeColor = color;
         this.strokeWidth = 1;
         this.mesh = false;
+
+        this.symbolWidth = 0;
+        this.symbolHeight = 0;
+        this.symbolPercent = 100;
     }
 
     public AreaStyle(AreaBuilder<?> b) {
@@ -105,6 +114,10 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
         this.strokeColor = b.strokeColor;
         this.strokeWidth = b.strokeWidth;
         this.mesh = b.mesh;
+
+        this.symbolWidth = b.symbolWidth;
+        this.symbolHeight = b.symbolHeight;
+        this.symbolPercent = b.symbolPercent;
     }
 
     @Override
@@ -163,6 +176,10 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
 
         public TextureItem texture;
 
+        public int symbolWidth;
+        public int symbolHeight;
+        public int symbolPercent;
+
         public AreaBuilder() {
         }
 
@@ -180,6 +197,10 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
             this.strokeColor = area.strokeColor;
             this.strokeWidth = area.strokeWidth;
             this.mesh = area.mesh;
+
+            this.symbolWidth = area.symbolWidth;
+            this.symbolHeight = area.symbolHeight;
+            this.symbolPercent = area.symbolPercent;
 
             return self();
         }
@@ -214,6 +235,21 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
             return self();
         }
 
+        public T symbolWidth(int symbolWidth) {
+            this.symbolWidth = symbolWidth;
+            return self();
+        }
+
+        public T symbolHeight(int symbolHeight) {
+            this.symbolHeight = symbolHeight;
+            return self();
+        }
+
+        public T symbolPercent(int symbolPercent) {
+            this.symbolPercent = symbolPercent;
+            return self();
+        }
+
         public T reset() {
             fillColor = Color.WHITE;
             strokeColor = Color.BLACK;
@@ -224,6 +260,11 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
             style = null;
             texture = null;
             mesh = false;
+
+            symbolWidth = 0;
+            symbolHeight = 0;
+            symbolPercent = 100;
+
             return self();
         }
 

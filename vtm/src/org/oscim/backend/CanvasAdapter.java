@@ -117,10 +117,10 @@ public abstract class CanvasAdapter {
      * @param inputStream the input stream
      * @return the SVG bitmap
      */
-    protected abstract Bitmap decodeSvgBitmapImpl(InputStream inputStream);
+    protected abstract Bitmap decodeSvgBitmapImpl(InputStream inputStream, int width, int height, int percent);
 
-    public static Bitmap decodeSvgBitmap(InputStream inputStream) {
-        return g.decodeSvgBitmapImpl(inputStream);
+    public static Bitmap decodeSvgBitmap(InputStream inputStream, int width, int height, int percent) {
+        return g.decodeSvgBitmapImpl(inputStream, width, height, percent);
     }
 
     /**
@@ -130,13 +130,17 @@ public abstract class CanvasAdapter {
      * @param src                the resource
      * @return the bitmap
      */
-    protected abstract Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src);
+    protected abstract Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src, int width, int height, int percent);
 
     public static Bitmap getBitmapAsset(String relativePathPrefix, String src) {
-        return g.loadBitmapAssetImpl(relativePathPrefix, src);
+        return getBitmapAsset(relativePathPrefix, src, 0, 0, 100);
     }
 
-    protected static Bitmap createBitmap(String relativePathPrefix, String src) throws IOException {
+    public static Bitmap getBitmapAsset(String relativePathPrefix, String src, int width, int height, int percent) {
+        return g.loadBitmapAssetImpl(relativePathPrefix, src, width, height, percent);
+    }
+
+    protected static Bitmap createBitmap(String relativePathPrefix, String src, int width, int height, int percent) throws IOException {
         if (src == null || src.length() == 0) {
             // no image source defined
             return null;
@@ -163,7 +167,7 @@ public abstract class CanvasAdapter {
 
         Bitmap bitmap;
         if (src.toLowerCase(Locale.ENGLISH).endsWith(".svg"))
-            bitmap = decodeSvgBitmap(inputStream);
+            bitmap = decodeSvgBitmap(inputStream, width, height, percent);
         else
             bitmap = decodeBitmap(inputStream);
         inputStream.close();

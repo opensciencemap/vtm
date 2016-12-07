@@ -26,7 +26,7 @@ import org.oscim.backend.canvas.Color;
 public final class CircleStyle extends RenderStyle<CircleStyle> {
 
     public final int fillColor;
-    public final int level;
+    private final int level;
     public final float radius;
     public final boolean scaleRadius;
     public final int strokeColor;

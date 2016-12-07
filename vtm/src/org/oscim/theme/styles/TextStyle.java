@@ -43,6 +43,10 @@ public final class TextStyle extends RenderStyle<TextStyle> {
         public FontFamily fontFamily;
         public FontStyle fontStyle;
 
+        public int symbolWidth;
+        public int symbolHeight;
+        public int symbolPercent;
+
         public T reset() {
             fontFamily = FontFamily.DEFAULT;
             fontStyle = FontStyle.NORMAL;
@@ -58,6 +62,11 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             strokeColor = Color.BLACK;
             strokeWidth = 0;
             dy = 0;
+
+            symbolWidth = 0;
+            symbolHeight = 0;
+            symbolPercent = 100;
+
             return self();
         }
 
@@ -126,6 +135,21 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             return self();
         }
 
+        public T symbolWidth(int symbolWidth) {
+            this.symbolWidth = symbolWidth;
+            return self();
+        }
+
+        public T symbolHeight(int symbolHeight) {
+            this.symbolHeight = symbolHeight;
+            return self();
+        }
+
+        public T symbolPercent(int symbolPercent) {
+            this.symbolPercent = symbolPercent;
+            return self();
+        }
+
         public T from(TextBuilder<?> other) {
             fontFamily = other.fontFamily;
             fontStyle = other.fontStyle;
@@ -141,6 +165,11 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             strokeColor = other.strokeColor;
             strokeWidth = other.strokeWidth;
             dy = other.dy;
+
+            symbolWidth = other.symbolWidth;
+            symbolHeight = other.symbolHeight;
+            symbolPercent = other.symbolPercent;
+
             return self();
         }
 
@@ -159,6 +188,11 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             this.strokeColor = style.stroke.getColor();
             this.strokeWidth = 2;
             this.fontSize = style.fontSize;
+
+            this.symbolWidth = style.symbolWidth;
+            this.symbolHeight = style.symbolHeight;
+            this.symbolPercent = style.symbolPercent;
+
             return self();
         }
     }
@@ -192,6 +226,10 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             stroke = null;
 
         this.fontSize = tb.fontSize;
+
+        this.symbolWidth = tb.symbolWidth;
+        this.symbolHeight = tb.symbolHeight;
+        this.symbolPercent = tb.symbolPercent;
     }
 
     public final String style;
@@ -211,6 +249,10 @@ public final class TextStyle extends RenderStyle<TextStyle> {
 
     public final Bitmap bitmap;
     public final TextureRegion texture;
+
+    public final int symbolWidth;
+    public final int symbolHeight;
+    public final int symbolPercent;
 
     @Override
     public void dispose() {

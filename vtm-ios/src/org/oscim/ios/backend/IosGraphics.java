@@ -30,7 +30,7 @@ import java.io.InputStream;
  */
 public class IosGraphics extends CanvasAdapter {
 
-    static final Logger log = LoggerFactory.getLogger(IosGraphics.class);
+    private static final Logger log = LoggerFactory.getLogger(IosGraphics.class);
 
     public static void init() {
         CanvasAdapter.init(new IosGraphics());
@@ -62,9 +62,9 @@ public class IosGraphics extends CanvasAdapter {
     }
 
     @Override
-    protected Bitmap decodeSvgBitmapImpl(InputStream inputStream) {
+    protected Bitmap decodeSvgBitmapImpl(InputStream inputStream, int width, int height, int percent) {
         try {
-            return new IosSvgBitmap(inputStream);
+            return new IosSvgBitmap(inputStream, width, height, percent);
         } catch (IOException e) {
             log.error("decodeSvgBitmapImpl", e);
             return null;
@@ -72,9 +72,9 @@ public class IosGraphics extends CanvasAdapter {
     }
 
     @Override
-    protected Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src) {
+    protected Bitmap loadBitmapAssetImpl(String relativePathPrefix, String src, int width, int height, int percent) {
         try {
-            return createBitmap(relativePathPrefix, src);
+            return createBitmap(relativePathPrefix, src, width, height, percent);
         } catch (IOException e) {
             log.error("loadBitmapAssetImpl", e);
             return null;

@@ -7,6 +7,7 @@
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
 - vtm-web modules update [#51](https://github.com/mapsforge/vtm/issues/51)
 - Mapbox vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
+- SVG resources scaling [#214](https://github.com/mapsforge/vtm/issues/214)
 - Circle map style [#122](https://github.com/mapsforge/vtm/issues/122)
 - PathLayer (vtm) fix disappearing segments [#108](https://github.com/mapsforge/vtm/issues/108)
 - House numbers (nodes) fix visibility [#168](https://github.com/mapsforge/vtm/issues/168)

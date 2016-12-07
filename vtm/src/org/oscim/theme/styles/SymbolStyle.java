@@ -29,19 +29,35 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
     public final Bitmap bitmap;
     public final TextureRegion texture;
 
+    public final int symbolWidth;
+    public final int symbolHeight;
+    public final int symbolPercent;
+
     public SymbolStyle(Bitmap bitmap) {
         this.bitmap = bitmap;
         this.texture = null;
+
+        this.symbolWidth = 0;
+        this.symbolHeight = 0;
+        this.symbolPercent = 100;
     }
 
     public SymbolStyle(TextureRegion texture) {
         this.bitmap = null;
         this.texture = texture;
+
+        this.symbolWidth = 0;
+        this.symbolHeight = 0;
+        this.symbolPercent = 100;
     }
 
     public SymbolStyle(SymbolBuilder<?> b) {
         this.bitmap = b.bitmap;
         this.texture = b.texture;
+
+        this.symbolWidth = b.symbolWidth;
+        this.symbolHeight = b.symbolHeight;
+        this.symbolPercent = b.symbolPercent;
     }
 
     @Override
@@ -70,6 +86,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         public Bitmap bitmap;
         public TextureRegion texture;
 
+        public int symbolWidth;
+        public int symbolHeight;
+        public int symbolPercent;
+
         public SymbolBuilder() {
         }
 
@@ -79,6 +99,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
             this.bitmap = symbol.bitmap;
             this.texture = symbol.texture;
+
+            this.symbolWidth = symbol.symbolWidth;
+            this.symbolHeight = symbol.symbolHeight;
+            this.symbolPercent = symbol.symbolPercent;
 
             return self();
         }
@@ -93,9 +117,29 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             return self();
         }
 
+        public T symbolWidth(int symbolWidth) {
+            this.symbolWidth = symbolWidth;
+            return self();
+        }
+
+        public T symbolHeight(int symbolHeight) {
+            this.symbolHeight = symbolHeight;
+            return self();
+        }
+
+        public T symbolPercent(int symbolPercent) {
+            this.symbolPercent = symbolPercent;
+            return self();
+        }
+
         public T reset() {
             bitmap = null;
             texture = null;
+
+            symbolWidth = 0;
+            symbolHeight = 0;
+            symbolPercent = 100;
+
             return self();
         }
 

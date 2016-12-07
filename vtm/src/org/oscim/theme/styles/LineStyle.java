@@ -26,7 +26,7 @@ import static org.oscim.backend.canvas.Color.parseColor;
 
 public final class LineStyle extends RenderStyle<LineStyle> {
 
-    final int level;
+    private final int level;
     public final String style;
     public final float width;
     public final int color;
@@ -43,21 +43,20 @@ public final class LineStyle extends RenderStyle<LineStyle> {
 
     public final boolean randomOffset;
 
-    private LineStyle(LineBuilder<?> builder) {
-        this.level = builder.level;
-        this.style = builder.style;
-        this.width = builder.strokeWidth;
-        this.color = builder.fillColor;
-        this.cap = builder.cap;
-        this.outline = builder.outline;
-        this.fixed = builder.fixed;
-        this.fadeScale = builder.fadeScale;
-        this.blur = builder.blur;
-        this.stipple = builder.stipple;
-        this.stippleColor = builder.stippleColor;
-        this.stippleWidth = builder.stippleWidth;
-        this.texture = builder.texture;
-        this.randomOffset = builder.randomOffset;
+    public final int symbolWidth;
+    public final int symbolHeight;
+    public final int symbolPercent;
+
+    public LineStyle(int stroke, float width) {
+        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
+    }
+
+    public LineStyle(int level, int stroke, float width) {
+        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
+    }
+
+    public LineStyle(int stroke, float width, Cap cap) {
+        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true);
     }
 
     public LineStyle(int level, String style, int color, float width,
@@ -84,28 +83,41 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.fadeScale = fadeScale;
 
         this.randomOffset = randomOffset;
+
+        this.symbolWidth = 0;
+        this.symbolHeight = 0;
+        this.symbolPercent = 100;
     }
 
-    public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
-    }
+    private LineStyle(LineBuilder<?> b) {
+        this.level = b.level;
+        this.style = b.style;
+        this.width = b.strokeWidth;
+        this.color = b.fillColor;
+        this.cap = b.cap;
+        this.outline = b.outline;
+        this.fixed = b.fixed;
+        this.fadeScale = b.fadeScale;
+        this.blur = b.blur;
+        this.stipple = b.stipple;
+        this.stippleColor = b.stippleColor;
+        this.stippleWidth = b.stippleWidth;
+        this.texture = b.texture;
+        this.randomOffset = b.randomOffset;
 
-    public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
-    }
-
-    public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true);
-    }
-
-    @Override
-    public void renderWay(Callback cb) {
-        cb.renderWay(this, level);
+        this.symbolWidth = b.symbolWidth;
+        this.symbolHeight = b.symbolHeight;
+        this.symbolPercent = b.symbolPercent;
     }
 
     @Override
     public LineStyle current() {
         return (LineStyle) mCurrent;
+    }
+
+    @Override
+    public void renderWay(Callback cb) {
+        cb.renderWay(this, level);
     }
 
     public static class LineBuilder<T extends LineBuilder<T>> extends StyleBuilder<T> {
@@ -123,9 +135,17 @@ public final class LineStyle extends RenderStyle<LineStyle> {
 
         public boolean randomOffset;
 
+        public int symbolWidth;
+        public int symbolHeight;
+        public int symbolPercent;
+
+        public LineBuilder() {
+        }
+
         public T set(LineStyle line) {
             if (line == null)
                 return reset();
+
             this.level = line.level;
             this.style = line.style;
             this.strokeWidth = line.width;
@@ -140,26 +160,10 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.stippleWidth = line.stippleWidth;
             this.texture = line.texture;
             this.randomOffset = line.randomOffset;
-            return self();
-        }
 
-        public T reset() {
-            level = -1;
-            style = null;
-            fillColor = Color.BLACK;
-            cap = Cap.ROUND;
-            strokeWidth = 1;
-            fixed = false;
-
-            fadeScale = -1;
-            blur = 0;
-
-            stipple = 0;
-            stippleWidth = 1;
-            stippleColor = Color.BLACK;
-            texture = null;
-
-            randomOffset = true;
+            this.symbolWidth = line.symbolWidth;
+            this.symbolHeight = line.symbolHeight;
+            this.symbolPercent = line.symbolPercent;
 
             return self();
         }
@@ -199,10 +203,6 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             return self();
         }
 
-        public LineStyle build() {
-            return new LineStyle(this);
-        }
-
         public T cap(Cap cap) {
             this.cap = cap;
             return self();
@@ -221,6 +221,50 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         public T randomOffset(boolean randomOffset) {
             this.randomOffset = randomOffset;
             return self();
+        }
+
+        public T symbolWidth(int symbolWidth) {
+            this.symbolWidth = symbolWidth;
+            return self();
+        }
+
+        public T symbolHeight(int symbolHeight) {
+            this.symbolHeight = symbolHeight;
+            return self();
+        }
+
+        public T symbolPercent(int symbolPercent) {
+            this.symbolPercent = symbolPercent;
+            return self();
+        }
+
+        public T reset() {
+            level = -1;
+            style = null;
+            fillColor = Color.BLACK;
+            cap = Cap.ROUND;
+            strokeWidth = 1;
+            fixed = false;
+
+            fadeScale = -1;
+            blur = 0;
+
+            stipple = 0;
+            stippleWidth = 1;
+            stippleColor = Color.BLACK;
+            texture = null;
+
+            randomOffset = true;
+
+            symbolWidth = 0;
+            symbolHeight = 0;
+            symbolPercent = 100;
+
+            return self();
+        }
+
+        public LineStyle build() {
+            return new LineStyle(this);
         }
     }
 
