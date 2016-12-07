@@ -901,7 +901,7 @@ public class XmlThemeBuilder extends DefaultHandler {
      */
     private CircleStyle createCircle(String elementName, Attributes attributes, int level) {
         String cat = null;
-        Float radius = null;
+        float radius = 0;
         boolean scaleRadius = false;
         int fill = Color.TRANSPARENT;
         int stroke = Color.TRANSPARENT;

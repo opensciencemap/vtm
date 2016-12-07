@@ -59,7 +59,10 @@ public class CircleTest extends GdxMap {
 
         mMap.setMapPosition(0, 0, 1 << 4);
 
-        CircleStyle cs = new CircleStyle(30, false, 0xff00ff00, 0xffffffff, 2, 0);
+        CircleStyle cs = CircleStyle.builder()
+                .radius(30)
+                .color(0xff00ff00)
+                .build();
         CircleBucket cb = renderer.buckets.addCircleBucket(0, cs);
         addCircle(200, -200, cb);
         addCircle(-200, -200, cb);
