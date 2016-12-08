@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2016 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -34,6 +35,11 @@ public class GLAdapter {
      * https://github.com/opensciencemap/vtm/issues/52
      */
     public static boolean NO_BUFFER_SUB_DATA = false;
+
+    /**
+     * Draw circles with quads or points.
+     */
+    public static boolean CIRCLE_QUADS = false;
 
     public static void init(GL gl20) {
         gl = gl20;

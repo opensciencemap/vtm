@@ -36,7 +36,7 @@ public class CircleBucket extends RenderBucket {
     public CircleStyle circle;
 
     public CircleBucket(int level) {
-        super(RenderBucket.CIRCLE, true, false);
+        super(RenderBucket.CIRCLE, true, GLAdapter.CIRCLE_QUADS);
         this.level = level;
     }
 
@@ -49,16 +49,43 @@ public class CircleBucket extends RenderBucket {
         float x = geom.getPointX(0);
         float y = geom.getPointY(0);
 
-        vertexItems.add((short) (x * COORD_SCALE), (short) (y * COORD_SCALE));
-        indiceItems.add((short) numVertices++);
-        numIndices++;
+        if (GLAdapter.CIRCLE_QUADS) {
+            // Create quad
+            vertexItems.add((short) ((x + circle.radius) * COORD_SCALE), (short) ((y - circle.radius) * COORD_SCALE));
+            int ne = numVertices++;
+            vertexItems.add((short) ((x - circle.radius) * COORD_SCALE), (short) ((y - circle.radius) * COORD_SCALE));
+            int nw = numVertices++;
+            vertexItems.add((short) ((x - circle.radius) * COORD_SCALE), (short) ((y + circle.radius) * COORD_SCALE));
+            int sw = numVertices++;
+            vertexItems.add((short) ((x + circle.radius) * COORD_SCALE), (short) ((y + circle.radius) * COORD_SCALE));
+            int se = numVertices++;
+
+            indiceItems.add((short) ne);
+            numIndices++;
+            indiceItems.add((short) nw);
+            numIndices++;
+            indiceItems.add((short) sw);
+            numIndices++;
+
+            indiceItems.add((short) sw);
+            numIndices++;
+            indiceItems.add((short) se);
+            numIndices++;
+            indiceItems.add((short) ne);
+            numIndices++;
+        } else {
+            // Use point
+            vertexItems.add((short) (x * COORD_SCALE), (short) (y * COORD_SCALE));
+            indiceItems.add((short) numVertices++);
+            numIndices++;
+        }
     }
 
     public static class Renderer {
         static Shader shader;
 
         static boolean init() {
-            shader = new Shader("circle");
+            shader = new Shader(GLAdapter.CIRCLE_QUADS ? "circle_quad" : "circle_point");
             return true;
         }
 
@@ -66,12 +93,14 @@ public class CircleBucket extends RenderBucket {
             int uMVP, uColor, uScale, aPos;
 
             Shader(String shaderFile) {
-                gl.enable(GL.VERTEX_PROGRAM_POINT_SIZE);
+                if (!GLAdapter.CIRCLE_QUADS)
+                    gl.enable(GL.VERTEX_PROGRAM_POINT_SIZE);
 
-                // OpenGL needs GLSL version 120
                 String version = null;
-                if (GLAdapter.GDX_DESKTOP_QUIRKS)
+                if (!GLAdapter.CIRCLE_QUADS && GLAdapter.GDX_DESKTOP_QUIRKS) {
+                    // OpenGL requires GLSL version 120 for gl_PointCoord
                     version = "120";
+                }
 
                 if (!createVersioned(shaderFile, version))
                     return;
@@ -106,10 +135,16 @@ public class CircleBucket extends RenderBucket {
                 gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
                         false, 0, cb.vertexOffset);
 
-                gl.drawElements(GL.POINTS,
-                        cb.numIndices,
-                        GL.UNSIGNED_SHORT,
-                        cb.indiceOffset);
+                if (GLAdapter.CIRCLE_QUADS)
+                    gl.drawElements(GL.TRIANGLES,
+                            cb.numIndices,
+                            GL.UNSIGNED_SHORT,
+                            cb.indiceOffset);
+                else
+                    gl.drawElements(GL.POINTS,
+                            cb.numIndices,
+                            GL.UNSIGNED_SHORT,
+                            cb.indiceOffset);
             }
 
             return b;

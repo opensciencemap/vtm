@@ -14,6 +14,7 @@
  */
 package org.oscim.test;
 
+import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMap;
@@ -73,6 +74,9 @@ public class CircleTest extends GdxMap {
     }
 
     public static void main(String[] args) {
+        // Draw circles with quads or points
+        GLAdapter.CIRCLE_QUADS = false;
+
         GdxMapApp.init();
         GdxMapApp.run(new CircleTest());
     }
