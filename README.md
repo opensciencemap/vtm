@@ -31,7 +31,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 ### Projects
 - **vtm** contains the core library
 - **vtm-android** Android backend (no libGDX required)
-- **vtm-android-example** provides examples using **vtm-android**
+- **vtm-android-example** provides examples using vtm-android
 - **vtm-gdx** common libGDX backend
 - **vtm-android-gdx** Android backend (with libGDX)
 - **vtm-desktop** Desktop backend
@@ -48,11 +48,11 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 
 ## Credits
 This library contains code from several projects:
-- **Android**: some Matrix code, TimSort (http://source.android.com)
-- **libGDX**: AsyncTask, MathUtils and Interpolation classes (https://github.com/libgdx)
-- **mapsforge**: based on 0.2.4 (https://github.com/mapsforge/mapsforge)
-- **osmdroid**: some overlay classes (https://github.com/osmdroid/osmdroid)
-- **tessellate**: (https://github.com/cscheid/tessellate)
+- **Android** (Apache 2.0): some Matrix code, TimSort (http://source.android.com)
+- **libGDX** (Apache 2.0): AsyncTask, MathUtils and Interpolation classes (https://github.com/libgdx)
+- **mapsforge** (LGPL3): based on 0.2.4 (https://github.com/mapsforge/mapsforge)
+- **osmdroid** (Apache 2.0): some overlay classes (https://github.com/osmdroid/osmdroid)
+- **tessellate** (SGI Free Software License B 2.0): (https://github.com/cscheid/tessellate)
 
 ## Screenshots
 ![Screenshot Samples App Bremen 1](docs/images/screenshot-bremen-1.png)
