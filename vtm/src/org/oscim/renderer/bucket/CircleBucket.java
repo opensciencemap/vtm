@@ -128,9 +128,10 @@ public class CircleBucket extends RenderBucket {
 
             for (; b != null && b.type == CIRCLE; b = b.next) {
                 CircleBucket cb = (CircleBucket) b;
+                CircleStyle circle = cb.circle.current();
 
-                GLUtils.setColor(s.uColor, cb.circle.fillColor, 1);
-                gl.uniform1f(s.uScale, cb.circle.radius);
+                GLUtils.setColor(s.uColor, circle.fillColor, 1);
+                gl.uniform1f(s.uScale, circle.radius);
 
                 gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
                         false, 0, cb.vertexOffset);
