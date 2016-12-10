@@ -94,6 +94,7 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
         }
 
         public T reset() {
+            level = -1;
             radius = 0;
             scaleRadius = false;
             fillColor = Color.TRANSPARENT;

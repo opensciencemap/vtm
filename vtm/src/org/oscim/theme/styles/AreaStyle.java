@@ -251,6 +251,7 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
         }
 
         public T reset() {
+            level = -1;
             fillColor = Color.WHITE;
             strokeColor = Color.BLACK;
             strokeWidth = 0;

@@ -74,7 +74,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         if (!(style instanceof ExtrusionStyle))
             return false;
 
-        ExtrusionStyle extrusion = (ExtrusionStyle) style;
+        ExtrusionStyle extrusion = (ExtrusionStyle) style.current();
 
         int height = 0;
         int minHeight = 0;

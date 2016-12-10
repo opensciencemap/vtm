@@ -173,25 +173,30 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             return self();
         }
 
-        public TextBuilder<?> from(TextStyle style) {
-            this.style = style.style;
-            this.textKey = style.textKey;
-            this.caption = style.caption;
-            this.dy = style.dy;
-            this.priority = style.priority;
-            this.areaSize = style.areaSize;
-            this.bitmap = style.bitmap;
-            this.texture = style.texture;
-            this.fillColor = style.paint.getColor();
+        public TextBuilder<?> set(TextStyle text) {
+            if (text == null)
+                return reset();
+
+            this.style = text.style;
+            this.textKey = text.textKey;
+            this.caption = text.caption;
+            this.dy = text.dy;
+            this.priority = text.priority;
+            this.areaSize = text.areaSize;
+            this.bitmap = text.bitmap;
+            this.texture = text.texture;
+            this.fillColor = text.paint.getColor();
             this.fontFamily = FontFamily.DEFAULT;
             this.fontStyle = FontStyle.NORMAL;
-            this.strokeColor = style.stroke.getColor();
-            this.strokeWidth = 2;
-            this.fontSize = style.fontSize;
+            if (text.stroke != null) {
+                this.strokeColor = text.stroke.getColor();
+                this.strokeWidth = text.stroke.getStrokeWidth();
+            }
+            this.fontSize = text.fontSize;
 
-            this.symbolWidth = style.symbolWidth;
-            this.symbolHeight = style.symbolHeight;
-            this.symbolPercent = style.symbolPercent;
+            this.symbolWidth = text.symbolWidth;
+            this.symbolHeight = text.symbolHeight;
+            this.symbolPercent = text.symbolPercent;
 
             return self();
         }
