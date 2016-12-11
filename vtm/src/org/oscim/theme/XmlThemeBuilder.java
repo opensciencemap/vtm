@@ -41,6 +41,7 @@ import org.oscim.theme.styles.AreaStyle.AreaBuilder;
 import org.oscim.theme.styles.CircleStyle;
 import org.oscim.theme.styles.CircleStyle.CircleBuilder;
 import org.oscim.theme.styles.ExtrusionStyle;
+import org.oscim.theme.styles.ExtrusionStyle.ExtrusionBuilder;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
 import org.oscim.theme.styles.RenderStyle;
@@ -124,6 +125,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
     private final AreaBuilder<?> mAreaBuilder = AreaStyle.builder();
     private final CircleBuilder<?> mCircleBuilder = CircleStyle.builder();
+    private final ExtrusionBuilder<?> mExtrusionBuilder = ExtrusionStyle.builder();
     private final LineBuilder<?> mLineBuilder = LineStyle.builder();
     private final SymbolBuilder<?> mSymbolBuilder = SymbolStyle.builder();
     private final TextBuilder<?> mTextBuilder = TextStyle.builder();
@@ -1028,37 +1030,33 @@ public class XmlThemeBuilder extends DefaultHandler {
     }
 
     private ExtrusionStyle createExtrusion(String elementName, Attributes attributes, int level) {
-        String cat = null;
-        int colorSide = 0;
-        int colorTop = 0;
-        int colorLine = 0;
-        int defaultHeight = 0;
+        ExtrusionBuilder<?> b = mExtrusionBuilder.reset();
+        b.level(level);
 
         for (int i = 0; i < attributes.getLength(); ++i) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
 
             if ("cat".equals(name))
-                cat = value;
+                b.cat(value);
 
             else if ("side-color".equals(name))
-                colorSide = Color.parseColor(value);
+                b.colorSide(Color.parseColor(value));
 
             else if ("top-color".equals(name))
-                colorTop = Color.parseColor(value);
+                b.colorTop(Color.parseColor(value));
 
             else if ("line-color".equals(name))
-                colorLine = Color.parseColor(value);
+                b.colorLine(Color.parseColor(value));
 
             else if ("default-height".equals(name))
-                defaultHeight = Integer.parseInt(value);
+                b.defaultHeight(Integer.parseInt(value));
 
             else
                 logUnknownAttribute(elementName, name, value, i);
         }
 
-        return new ExtrusionStyle(level, colorSide, colorTop, colorLine, defaultHeight)
-                .setCat(cat);
+        return b.build();
     }
 
     private String getStringAttribute(Attributes attributes, String name) {
