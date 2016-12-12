@@ -186,8 +186,8 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             this.bitmap = text.bitmap;
             this.texture = text.texture;
             this.fillColor = text.paint.getColor();
-            this.fontFamily = FontFamily.DEFAULT;
-            this.fontStyle = FontStyle.NORMAL;
+            this.fontFamily = text.fontFamily;
+            this.fontStyle = text.fontStyle;
             if (text.stroke != null) {
                 this.strokeColor = text.stroke.getColor();
                 this.strokeWidth = text.stroke.getStrokeWidth();
@@ -230,6 +230,8 @@ public final class TextStyle extends RenderStyle<TextStyle> {
         } else
             stroke = null;
 
+        this.fontFamily = tb.fontFamily;
+        this.fontStyle = tb.fontStyle;
         this.fontSize = tb.fontSize;
 
         this.symbolWidth = tb.symbolWidth;
@@ -239,7 +241,9 @@ public final class TextStyle extends RenderStyle<TextStyle> {
 
     public final String style;
 
-    public final float fontSize;
+    public final FontFamily fontFamily;
+    public final FontStyle fontStyle;
+    public float fontSize;
     public final Paint paint;
     public final Paint stroke;
     public final String textKey;
@@ -282,9 +286,10 @@ public final class TextStyle extends RenderStyle<TextStyle> {
 
     @Override
     public void scaleTextSize(float scaleFactor) {
-        paint.setTextSize(fontSize * scaleFactor);
+        fontSize *= scaleFactor;
+        paint.setTextSize(fontSize);
         if (stroke != null)
-            stroke.setTextSize(fontSize * scaleFactor);
+            stroke.setTextSize(fontSize);
 
         fontHeight = paint.getFontHeight();
         fontDescent = paint.getFontDescent();
