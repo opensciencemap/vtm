@@ -11,6 +11,9 @@ void main() {
 
 $$
 
+#ifdef GL_OES_standard_derivatives
+#extension GL_OES_standard_derivatives : enable
+#endif
 #ifdef GLES
 precision highp float;
 #endif
@@ -18,6 +21,7 @@ uniform vec4 u_color;
 void main() {
     vec2 cxy = 2.0 * gl_PointCoord - 1.0;
     float r = dot(cxy, cxy);
-    float len = 1.0 - length(r);
-    gl_FragColor = u_color * len;
+    float delta = fwidth(r);
+    float alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r);
+    gl_FragColor = u_color * alpha;
 }
