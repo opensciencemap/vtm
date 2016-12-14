@@ -62,7 +62,9 @@ public class CircleTest extends GdxMap {
 
         CircleStyle cs = CircleStyle.builder()
                 .radius(30)
-                .color(0xff00ff00)
+                .color(Color.MAGENTA)
+                .strokeWidth(6)
+                .strokeColor(Color.WHITE)
                 .build();
         CircleBucket cb = renderer.buckets.addCircleBucket(0, cs);
         addCircle(200, -200, cb);

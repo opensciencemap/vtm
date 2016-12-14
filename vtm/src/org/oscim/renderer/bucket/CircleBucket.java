@@ -90,7 +90,7 @@ public class CircleBucket extends RenderBucket {
         }
 
         public static class Shader extends GLShader {
-            int uMVP, uColor, uScale, aPos;
+            int uMVP, uFill, uRadius, uStroke, uWidth, aPos;
 
             Shader(String shaderFile) {
                 if (!GLAdapter.CIRCLE_QUADS)
@@ -106,8 +106,10 @@ public class CircleBucket extends RenderBucket {
                     return;
 
                 uMVP = getUniform("u_mvp");
-                uColor = getUniform("u_color");
-                uScale = getUniform("u_scale");
+                uFill = getUniform("u_fill");
+                uRadius = getUniform("u_radius");
+                uStroke = getUniform("u_stroke");
+                uWidth = getUniform("u_width");
                 aPos = getAttrib("a_pos");
             }
 
@@ -130,8 +132,10 @@ public class CircleBucket extends RenderBucket {
                 CircleBucket cb = (CircleBucket) b;
                 CircleStyle circle = cb.circle.current();
 
-                GLUtils.setColor(s.uColor, circle.fillColor, 1);
-                gl.uniform1f(s.uScale, circle.radius);
+                GLUtils.setColor(s.uFill, circle.fillColor, 1);
+                gl.uniform1f(s.uRadius, circle.radius);
+                GLUtils.setColor(s.uStroke, circle.strokeColor, 1);
+                gl.uniform1f(s.uWidth, circle.strokeWidth);
 
                 gl.vertexAttribPointer(s.aPos, 2, GL.SHORT,
                         false, 0, cb.vertexOffset);
