@@ -46,9 +46,9 @@ public class ExtrusionStyle extends RenderStyle<ExtrusionStyle> {
     public ExtrusionStyle(ExtrusionBuilder<?> b) {
         this.level = b.level;
 
-        this.colorSide = b.colorSide;
-        this.colorTop = b.colorTop;
-        this.colorLine = b.colorLine;
+        this.colorSide = b.themeCallback != null ? b.themeCallback.getColor(b.colorSide) : b.colorSide;
+        this.colorTop = b.themeCallback != null ? b.themeCallback.getColor(b.colorTop) : b.colorTop;
+        this.colorLine = b.themeCallback != null ? b.themeCallback.getColor(b.colorLine) : b.colorLine;
         this.colors = new float[16];
         fillColors(colorSide, colorTop, colorLine, colors);
 
@@ -106,9 +106,9 @@ public class ExtrusionStyle extends RenderStyle<ExtrusionStyle> {
                 return reset();
 
             this.level = extrusion.level;
-            this.colorSide = extrusion.colorSide;
-            this.colorTop = extrusion.colorTop;
-            this.colorLine = extrusion.colorLine;
+            this.colorSide = themeCallback != null ? themeCallback.getColor(extrusion.colorSide) : extrusion.colorSide;
+            this.colorTop = themeCallback != null ? themeCallback.getColor(extrusion.colorTop) : extrusion.colorTop;
+            this.colorLine = themeCallback != null ? themeCallback.getColor(extrusion.colorLine) : extrusion.colorLine;
             this.defaultHeight = extrusion.defaultHeight;
 
             return self();

@@ -185,11 +185,11 @@ public final class TextStyle extends RenderStyle<TextStyle> {
             this.areaSize = text.areaSize;
             this.bitmap = text.bitmap;
             this.texture = text.texture;
-            this.fillColor = text.paint.getColor();
+            this.fillColor = themeCallback != null ? themeCallback.getColor(text.paint.getColor()) : text.paint.getColor();
             this.fontFamily = text.fontFamily;
             this.fontStyle = text.fontStyle;
             if (text.stroke != null) {
-                this.strokeColor = text.stroke.getColor();
+                this.strokeColor = themeCallback != null ? themeCallback.getColor(text.stroke.getColor()) : text.stroke.getColor();
                 this.strokeWidth = text.stroke.getStrokeWidth();
             }
             this.fontSize = text.fontSize;
@@ -202,41 +202,41 @@ public final class TextStyle extends RenderStyle<TextStyle> {
         }
     }
 
-    TextStyle(TextBuilder<?> tb) {
-        this.style = tb.style;
-        this.textKey = tb.textKey;
-        this.caption = tb.caption;
-        this.dy = tb.dy;
-        this.priority = tb.priority;
-        this.areaSize = tb.areaSize;
-        this.bitmap = tb.bitmap;
-        this.texture = tb.texture;
+    TextStyle(TextBuilder<?> b) {
+        this.style = b.style;
+        this.textKey = b.textKey;
+        this.caption = b.caption;
+        this.dy = b.dy;
+        this.priority = b.priority;
+        this.areaSize = b.areaSize;
+        this.bitmap = b.bitmap;
+        this.texture = b.texture;
 
         paint = CanvasAdapter.newPaint();
         paint.setTextAlign(Align.CENTER);
-        paint.setTypeface(tb.fontFamily, tb.fontStyle);
+        paint.setTypeface(b.fontFamily, b.fontStyle);
 
-        paint.setColor(tb.fillColor);
-        paint.setTextSize(tb.fontSize);
+        paint.setColor(b.themeCallback != null ? b.themeCallback.getColor(b.fillColor) : b.fillColor);
+        paint.setTextSize(b.fontSize);
 
-        if (tb.strokeWidth > 0) {
+        if (b.strokeWidth > 0) {
             stroke = CanvasAdapter.newPaint();
             stroke.setStyle(Paint.Style.STROKE);
             stroke.setTextAlign(Align.CENTER);
-            stroke.setTypeface(tb.fontFamily, tb.fontStyle);
-            stroke.setColor(tb.strokeColor);
-            stroke.setStrokeWidth(tb.strokeWidth);
-            stroke.setTextSize(tb.fontSize);
+            stroke.setTypeface(b.fontFamily, b.fontStyle);
+            stroke.setColor(b.themeCallback != null ? b.themeCallback.getColor(b.strokeColor) : b.strokeColor);
+            stroke.setStrokeWidth(b.strokeWidth);
+            stroke.setTextSize(b.fontSize);
         } else
             stroke = null;
 
-        this.fontFamily = tb.fontFamily;
-        this.fontStyle = tb.fontStyle;
-        this.fontSize = tb.fontSize;
+        this.fontFamily = b.fontFamily;
+        this.fontStyle = b.fontStyle;
+        this.fontSize = b.fontSize;
 
-        this.symbolWidth = tb.symbolWidth;
-        this.symbolHeight = tb.symbolHeight;
-        this.symbolPercent = tb.symbolPercent;
+        this.symbolWidth = b.symbolWidth;
+        this.symbolHeight = b.symbolHeight;
+        this.symbolPercent = b.symbolPercent;
     }
 
     public final String style;

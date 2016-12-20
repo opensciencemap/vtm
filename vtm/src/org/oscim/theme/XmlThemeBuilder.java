@@ -91,7 +91,17 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @throws ThemeException if an error occurs while parsing the render theme XML.
      */
     public static IRenderTheme read(ThemeFile theme) throws ThemeException {
-        XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(theme);
+        return read(theme, null);
+    }
+
+    /**
+     * @param theme         an input theme containing valid render theme XML data.
+     * @param themeCallback the theme callback.
+     * @return a new RenderTheme which is created by parsing the XML data from the input theme.
+     * @throws ThemeException if an error occurs while parsing the render theme XML.
+     */
+    public static IRenderTheme read(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
+        XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(theme, themeCallback);
 
         try {
             new XMLReaderAdapter().parse(renderThemeHandler, theme.getRenderThemeAsStream());
@@ -138,6 +148,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private float mTextScale = 1;
 
     private final ThemeFile mTheme;
+    private final ThemeCallback mThemeCallback;
     private RenderTheme mRenderTheme;
 
     private final float mScale, mScale2;
@@ -147,7 +158,12 @@ public class XmlThemeBuilder extends DefaultHandler {
     private XmlRenderThemeStyleMenu mRenderThemeStyleMenu;
 
     public XmlThemeBuilder(ThemeFile theme) {
+        this(theme, null);
+    }
+
+    public XmlThemeBuilder(ThemeFile theme, ThemeCallback themeCallback) {
         mTheme = theme;
+        mThemeCallback = themeCallback;
         mScale = CanvasAdapter.scale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1);
         mScale2 = CanvasAdapter.scale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1) * 0.5f;
     }
@@ -461,6 +477,7 @@ public class XmlThemeBuilder extends DefaultHandler {
         LineBuilder<?> b = mLineBuilder.set(line);
         b.isOutline(isOutline);
         b.level(level);
+        b.themeCallback(mThemeCallback);
         String src = null;
 
         for (int i = 0; i < attributes.getLength(); i++) {
@@ -577,6 +594,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                                  int level) {
         AreaBuilder<?> b = mAreaBuilder.set(area);
         b.level(level);
+        b.themeCallback(mThemeCallback);
         String src = null;
 
         for (int i = 0; i < attributes.getLength(); i++) {
@@ -794,10 +812,11 @@ public class XmlThemeBuilder extends DefaultHandler {
             if ("version".equals(name))
                 version = Integer.parseInt(value);
 
-            else if ("map-background".equals(name))
+            else if ("map-background".equals(name)) {
                 mapBackground = Color.parseColor(value);
-
-            else if ("base-stroke-width".equals(name))
+                if (mThemeCallback != null)
+                    mapBackground = mThemeCallback.getColor(mapBackground);
+            } else if ("base-stroke-width".equals(name))
                 baseStrokeWidth = Float.parseFloat(value);
 
             else if ("base-text-scale".equals(name))
@@ -858,6 +877,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             b.caption = caption;
         } else
             b = mTextBuilder.from(style);
+        b.themeCallback(mThemeCallback);
         String symbol = null;
 
         for (int i = 0; i < attributes.getLength(); i++) {
@@ -949,6 +969,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private CircleStyle createCircle(String elementName, Attributes attributes, int level) {
         CircleBuilder<?> b = mCircleBuilder.reset();
         b.level(level);
+        b.themeCallback(mThemeCallback);
 
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
@@ -1032,6 +1053,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private ExtrusionStyle createExtrusion(String elementName, Attributes attributes, int level) {
         ExtrusionBuilder<?> b = mExtrusionBuilder.reset();
         b.level(level);
+        b.themeCallback(mThemeCallback);
 
         for (int i = 0; i < attributes.getLength(); ++i) {
             String name = attributes.getLocalName(i);

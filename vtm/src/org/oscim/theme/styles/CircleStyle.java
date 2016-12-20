@@ -45,8 +45,8 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
     public CircleStyle(CircleBuilder<?> b) {
         this.radius = b.radius;
         this.scaleRadius = b.scaleRadius;
-        this.fillColor = b.fillColor;
-        this.strokeColor = b.strokeColor;
+        this.fillColor = b.themeCallback != null ? b.themeCallback.getColor(b.fillColor) : b.fillColor;
+        this.strokeColor = b.themeCallback != null ? b.themeCallback.getColor(b.strokeColor) : b.strokeColor;
         this.strokeWidth = b.strokeWidth;
         this.level = b.level;
     }
@@ -75,8 +75,8 @@ public final class CircleStyle extends RenderStyle<CircleStyle> {
 
             this.radius = circle.radius;
             this.scaleRadius = circle.scaleRadius;
-            this.fillColor = circle.fillColor;
-            this.strokeColor = circle.strokeColor;
+            this.fillColor = themeCallback != null ? themeCallback.getColor(circle.fillColor) : circle.fillColor;
+            this.strokeColor = themeCallback != null ? themeCallback.getColor(circle.strokeColor) : circle.strokeColor;
             this.strokeWidth = circle.strokeWidth;
             this.level = circle.level;
 

@@ -107,11 +107,11 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
         this.level = b.level;
         this.style = b.style;
         this.fadeScale = b.fadeScale;
-        this.blendColor = b.blendColor;
+        this.blendColor = b.themeCallback != null ? b.themeCallback.getColor(b.blendColor) : b.blendColor;
         this.blendScale = b.blendScale;
-        this.color = b.fillColor;
+        this.color = b.themeCallback != null ? b.themeCallback.getColor(b.fillColor) : b.fillColor;
         this.texture = b.texture;
-        this.strokeColor = b.strokeColor;
+        this.strokeColor = b.themeCallback != null ? b.themeCallback.getColor(b.strokeColor) : b.strokeColor;
         this.strokeWidth = b.strokeWidth;
         this.mesh = b.mesh;
 
@@ -190,11 +190,11 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
             this.level = area.level;
             this.style = area.style;
             this.fadeScale = area.fadeScale;
-            this.blendColor = area.blendColor;
+            this.blendColor = themeCallback != null ? themeCallback.getColor(area.blendColor) : area.blendColor;
             this.blendScale = area.blendScale;
-            this.fillColor = area.color;
+            this.fillColor = themeCallback != null ? themeCallback.getColor(area.color) : area.color;
             this.texture = area.texture;
-            this.strokeColor = area.strokeColor;
+            this.strokeColor = themeCallback != null ? themeCallback.getColor(area.strokeColor) : area.strokeColor;
             this.strokeWidth = area.strokeWidth;
             this.mesh = area.mesh;
 
