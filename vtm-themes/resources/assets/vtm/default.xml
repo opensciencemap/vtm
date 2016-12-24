@@ -950,6 +950,18 @@
             </m>
         </m>
 
+        <!-- highway one-way markers -->
+        <m k="tunnel" v="~|false|no">
+            <m k="area" v="~|false|no">
+                <m k="highway">
+                    <m k="oneway" v="yes|true" zoom-min="16">
+                        <line fix="true" src="assets:patterns/oneway.svg" stipple="160"
+                            stipple-stroke="#666666" width="6" />
+                    </m>
+                </m>
+            </m>
+        </m>
+
     </m><!-- end e="way" -->
 
     <m e="node" select="first">
