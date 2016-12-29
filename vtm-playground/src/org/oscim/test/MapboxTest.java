@@ -21,11 +21,13 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.mvt.MapboxTileSource;
+import org.oscim.tiling.source.mvt.TileDecoder;
 
 public class MapboxTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
+        TileDecoder.LOCALE = "en";
         UrlTileSource tileSource = MapboxTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
                 .build();
