@@ -22,7 +22,6 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.mvt.MapboxTileSource;
-import org.oscim.tiling.source.mvt.TileDecoder;
 
 public class MapboxMapActivity extends MapActivity {
 
@@ -30,9 +29,9 @@ public class MapboxMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TileDecoder.LOCALE = "en";
         UrlTileSource tileSource = MapboxTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
+                //.locale("en")
                 .build();
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);

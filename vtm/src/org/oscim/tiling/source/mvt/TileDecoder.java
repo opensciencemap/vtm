@@ -35,11 +35,6 @@ import java.util.ArrayList;
 public class TileDecoder extends PbfDecoder {
     private static final Logger log = LoggerFactory.getLogger(TileDecoder.class);
 
-    /**
-     * Use default locale.
-     */
-    public static String LOCALE = "";
-
     private static final int TAG_TILE_LAYERS = 3;
 
     private static final int TAG_LAYER_VERSION = 15;
@@ -70,10 +65,19 @@ public class TileDecoder extends PbfDecoder {
     private short[] mTmpTags = new short[1024];
 
     private Tile mTile;
+    private final String mLocale;
     private ITileDataSink mMapDataCallback;
 
     private final static float REF_TILE_SIZE = 4096.0f;
     private float mScale;
+
+    public TileDecoder() {
+        this("");
+    }
+
+    public TileDecoder(String locale) {
+        mLocale = locale;
+    }
 
     @Override
     public boolean decode(Tile tile, ITileDataSink mapDataCallback, InputStream is)
@@ -197,7 +201,7 @@ public class TileDecoder extends PbfDecoder {
                 continue;
             }
 
-            if (LOCALE.equals(key.substring(5))) {
+            if (mLocale.equals(key.substring(5))) {
                 //log.debug("found local " + key);
                 matchedLocal = i;
             } //else
