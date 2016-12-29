@@ -452,10 +452,10 @@
 
             <!-- railway tunnel -->
             <m k="railway">
-                <!-- <m k="railway" v="tram|subway|light_rail|narrow_gauge">
+                <!-- <m v="tram|subway|light_rail|narrow_gauge">
                   <line stroke="#a0a0a0" width="0.8" cap="butt" fix="true"/>
                   </m> -->
-                <m k="railway" v="rail">
+                <m v="rail">
                     <line cap="butt" fix="true" stroke="#aaaaaa" width="0.9" />
                 </m>
             </m>
@@ -863,7 +863,7 @@
         <m k="railway" zoom-min="12">
             <m k="tunnel" v="~|false|no">
 
-                <m k="railway" v="station">
+                <m v="station">
                     <area fill="#aa000000" />
                     <line fix="true" stroke="#cccccc" width="1.0" />
                 </m>
@@ -871,46 +871,46 @@
                 <!-- railway bridge casings -->
                 <m zoom-min="14">
                     <m k="bridge" v="yes|true">
-                        <m k="railway" v="tram">
+                        <m v="tram">
                             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
                         </m>
-                        <m k="railway" v="subway|light_rail|narrow_gauge">
+                        <m v="subway|light_rail|narrow_gauge">
                             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
                         </m>
-                        <m k="railway" v="rail">
+                        <m v="rail">
                             <line cap="butt" fix="true" stroke="#777777" width="0.9" />
                         </m>
                     </m>
                 </m>
 
                 <!-- railway casings and cores -->
-                <m k="railway" v="tram" zoom-min="15">
+                <m v="tram" zoom-min="15">
                     <line fix="true" stroke="#887766" width="1.0" />
                 </m>
 
-                <m k="railway" v="light_rail|subway|narrow_gauge" zoom-min="14">
+                <m v="light_rail|subway|narrow_gauge" zoom-min="14">
                     <line cap="butt" fix="true" stroke="#a0a0a0" width="0.9" />
 
                 </m>
 
-                <m k="railway" v="rail|turntable" zoom-max="15">
+                <m v="rail|turntable" zoom-max="15">
                     <line cap="butt" fade="12" fix="true" stroke="#ddaa9988" width="1.0" />
                 </m>
 
-                <m k="railway" v="rail|turntable" zoom-min="16">
-                    <line cap="butt" fade="12" fix="true" stipple="1" stroke="#ddaa9988"
-                        width="1.0" />
+                <m v="rail|turntable" zoom-min="16">
+                    <line cap="butt" fade="12" fix="true" stipple="12" stroke="#ddaa9988"
+                        width="2.0" />
                 </m>
 
-                <!-- <m k="railway" v="rail" zoom-max="14" zoom-min="13">
+                <!-- <m v="rail" zoom-max="14" zoom-min="13">
                   <line stroke="#8888aa" width="0.6" cap="butt"
                   fix="true" />
                   </m> -->
-                <!-- <m k="railway" v="rail" zoom-max="13" zoom-min="11">
+                <!-- <m v="rail" zoom-max="13" zoom-min="11">
                   <line stroke="#bbbbcc" width="0.8" cap="butt" fix="true" />
                   </m> -->
                 <!-- whatever railway:spur means ... -->
-                <m k="railway" v="disused|spur|abandoned|preserved">
+                <m v="disused|spur|abandoned|preserved">
                     <line cap="butt" fade="12" fix="true" stroke="#cccccc" width="0.8" />
                 </m>
             </m>
@@ -924,27 +924,23 @@
 
         <!--<m k="boundary" v="administrative"> -->
         <m k="admin_level">
-            <!-- <m k="admin_level" v="11"> <line stroke="#f9574b" width="0.1"
-              fix="true" cap="butt" /> </m> <m k="admin_level"
-              v="10"> <line stroke="#f9574b" width="0.1" fix="true" cap="butt"
-              /> </m> <m k="admin_level" v="9"> <line stroke="#f9574b" width="0.1"
-              fix="true" cap="butt" /> </m> <m k="admin_level"
-              v="8"> <line stroke="#f9574b" width="0.3" fix="true" cap="butt"
-              /> </m> <m k="admin_level" v="7"> <line stroke="#f9574b" width="0.1"
-              fix="true" cap="butt" /> </m> <m k="admin_level"
-              v="6"> <line stroke="#f9574b" width="0.15" fix="true" cap="butt"
-              /> </m> <m k="admin_level" v="5"> <line stroke="#f9574b" width="0.15"
-              fix="true" cap="butt" /> </m> -->
-            <m k="admin_level" v="4">
+            <!-- <m v="11"> <line stroke="#f9574b" width="0.1" fix="true" cap="butt" /> </m>
+            <m v="10"> <line stroke="#f9574b" width="0.1" fix="true" cap="butt" /> </m>
+            <m v="9"> <line stroke="#f9574b" width="0.1" fix="true" cap="butt" /> </m>
+            <m v="8"> <line stroke="#f9574b" width="0.3" fix="true" cap="butt" /> </m>
+            <m v="7"> <line stroke="#f9574b" width="0.1" fix="true" cap="butt" /> </m>
+            <m v="6"> <line stroke="#f9574b" width="0.15" fix="true" cap="butt" /> </m>
+            <m v="5"> <line stroke="#f9574b" width="0.15" fix="true" cap="butt" /> </m> -->
+            <m v="4">
                 <line cap="butt" fix="true" stroke="#8f80dd" width="1.2" />
             </m>
-            <m k="admin_level" v="3">
+            <m v="3">
                 <line cap="butt" fix="true" stroke="#0000ff" width="1.0" />
             </m>
-            <m k="admin_level" v="2">
+            <m v="2">
                 <line blur="0.3" cap="butt" fix="true" stroke="#dddddd" width="1.0" />
             </m>
-            <m k="admin_level" v="1">
+            <m v="1">
                 <line cap="butt" fix="true" stroke="#ff0000" width="0.95" />
             </m>
 
@@ -993,10 +989,10 @@
     <m e="node" select="first">
 
         <m k="aeroway">
-            <m k="aeroway" v="helipad" zoom-min="17">
+            <m v="helipad" zoom-min="17">
                 <symbol src="assets:symbols/transport/helicopter.svg" />
             </m>
-            <m k="aeroway" v="aerodrome|airport" zoom-max="13" zoom-min="9">
+            <m v="aerodrome|airport" zoom-max="13" zoom-min="9">
                 <symbol src="assets:symbols/transport/airport2.svg" />
             </m>
         </m>
@@ -1208,19 +1204,19 @@
 
 
         <m k="railway">
-            <m k="railway" v="crossing" zoom-min="16">
+            <m v="crossing" zoom-min="16">
                 <symbol src="assets:symbols/railway-crossing-small.svg" />
             </m>
             <!-- in Bremen this is also used for crossings between tram-lines and roads... -->
-            <m k="railway" v="level_crossing" zoom-min="14">
+            <m v="level_crossing" zoom-min="14">
                 <symbol src="assets:symbols/railway-crossing.svg" />
             </m>
-            <m k="railway" v="station" zoom-min="14">
+            <m v="station" zoom-min="14">
                 <symbol src="assets:symbols/transport/train_station2.svg" />
                 <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
-            <m k="railway" v="halt|tram_stop" zoom-min="15">
+            <m v="halt|tram_stop" zoom-min="15">
                 <symbol src="assets:symbols/transport/tram_stop.svg" />
                 <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
