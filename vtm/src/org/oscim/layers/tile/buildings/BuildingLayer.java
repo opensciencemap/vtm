@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2016 Robin Boldt
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,11 +34,8 @@ import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.pool.Inlist;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
-    static final Logger log = LoggerFactory.getLogger(BuildingLayer.class);
 
     private final static int MIN_ZOOM = 17;
     private final static int MAX_ZOOM = 17;

@@ -172,7 +172,7 @@
             <!-- tourism areas
               Berlin Zoologischer Garten has lots of details that should be drawn above
             -->
-            <!-- <m k="tourism" v="attraction"> <area fill="#f2caea" /> </m> -->
+            <!-- <m v="attraction"> <area fill="#f2caea" /> </m> -->
 
             <m v="zoo|picnic_site|caravan_site|camp_site">
                 <area fill="#c0d69a" />
@@ -315,26 +315,26 @@
                   e="way" k="area" v="~|no|false"> <line stroke="#b7c690" width="0.75"
                   /> </m> </m> -->
             </m>
-        </m>
 
-        <!-- area outlines need to be above to avoid uggly pixelation where
-          not aliased polygon overlaps the lines... -->
-        <m zoom-min="14">
+            <!-- area outlines need to be above to avoid uggly pixelation where
+              not aliased polygon overlaps the lines... -->
+            <m zoom-min="14">
 
-            <m v="nature_reserve">
-                <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
+                <m v="nature_reserve">
+                    <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
+                </m>
+                <m v="military">
+                    <line use="fence" />
+                </m>
             </m>
-            <m v="military">
-                <line use="fence" />
+            <m v="reservoir|basin">
+                <area use="water" />
             </m>
-        </m>
-        <m v="reservoir|basin">
-            <area use="water" />
-        </m>
 
-        <!-- ...should rewrite tag to: highway=leisure/sport=* imho -->
-        <m v="track">
-            <line cap="butt" fix="true" stroke="#c1bcb6" width="1.3" />
+            <!-- ...should rewrite tag to: highway=leisure/sport=* imho -->
+            <m v="track">
+                <line cap="butt" fix="true" stroke="#c1bcb6" width="1.3" />
+            </m>
         </m>
     </m>
 
@@ -382,12 +382,11 @@
                 <line fade="9" use="water" width="0.1" />
             </m>
         </m>
-        <!-- TODO this breaks the rendering
-        <m v="riverbank|dock">
+        <!-- TODO this breaks the rendering -->
+        <!--<m v="riverbank|dock">
             <area use="water" />
             <line use="water:outline" />
-        </m>
-        -->
+        </m>-->
         <m v="weir">
             <line stroke="#000088" use="fix" />
         </m>
@@ -500,10 +499,10 @@
                     </m>
                     <!-- railway tunnel -->
                     <m k="railway">
-                        <!-- <m k="railway" v="tram|subway|light_rail|narrow_gauge">
+                        <!-- <m v="tram|subway|light_rail|narrow_gauge">
                           <line stroke="#a0a0a0" width="0.8" cap="butt" fix="true"/>
                           </m> -->
-                        <m k="railway" v="rail">
+                        <m v="rail">
                             <line cap="butt" fix="true" stroke="#aa888888" width="0.9" />
                         </m>
                     </m>
@@ -891,11 +890,11 @@
                         stipple-width="0.8" stroke="#aaa6a4" width="2.0" />
                 </m>
 
-                <!-- <m k="railway" v="rail" zoom-max="14" zoom-min="13">
+                <!-- <m v="rail" zoom-max="14" zoom-min="13">
                   <line stroke="#8888aa" width="0.6" cap="butt"
                   fix="true" />
                   </m> -->
-                <!-- <m k="railway" v="rail" zoom-max="13" zoom-min="11">
+                <!-- <m v="rail" zoom-max="13" zoom-min="11">
                   <line stroke="#bbbbcc" width="0.8" cap="butt" fix="true" />
                   </m> -->
                 <!-- whatever railway:spur means ... -->
@@ -1136,7 +1135,7 @@
                 <m v="bank">
                     <symbol src="assets:symbols/money/bank2.svg" />
                 </m>
-                <!--<m k="amenity" v="bench">
+                <!--<m v="bench">
                     <symbol src="assets:symbols/bench.svg" />
                 </m>-->
                 <m v="bicycle_rental">
@@ -1230,6 +1229,11 @@
                 <m v="supermarket|organic">
                     <symbol src="assets:symbols/shopping/supermarket.svg" />
                 </m>
+
+                <!-- TODO show rest shops -->
+                <!--<m zoom-min="17">
+                    <symbol src="assets:symbols/dot_magenta.svg" />
+                </m>-->
 
                 <m select="when-matched" zoom-min="17">
                     <text use="poi" />
