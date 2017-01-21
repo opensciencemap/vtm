@@ -39,12 +39,15 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 - **vtm-web** HTML5/GWT backend
 - **vtm-web-app** HTML5/GWT application
 
-## Applications
-- VTM is used by many [applications](docs/Applications.md).
-
 ## WebGL Demo
 [OpenScienceMap](http://opensciencemap.org/s3db/#scale=17,rot=61,tilt=51,lat=53.075,lon=8.807) view of Bremen.
 - Hold right mouse button to change view direction.
+
+## Applications
+- VTM is used by many [applications](docs/Applications.md).
+
+## Maps
+- Mapsforge [map providers](docs/Mapsforge-Maps.md).
 
 ## Credits
 This library contains code from several projects:
