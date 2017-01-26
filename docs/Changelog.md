@@ -10,6 +10,7 @@
 - SVG resources scaling in themes [#214](https://github.com/mapsforge/vtm/issues/214)
 - Circle map style [#122](https://github.com/mapsforge/vtm/issues/122)
 - Oneway arrows in themes [#275](https://github.com/mapsforge/vtm/issues/275)
+- Texture atlas from bitmaps [#283](https://github.com/mapsforge/vtm/pull/283)
 - PathLayer (vtm) fix disappearing segments [#108](https://github.com/mapsforge/vtm/issues/108)
 - House numbers (nodes) fix visibility [#168](https://github.com/mapsforge/vtm/issues/168)
 - Android fix quick scale vs long press [#250](https://github.com/mapsforge/vtm/issues/250)
@@ -21,7 +22,7 @@
 - Internal render themes new SVG resources [#251](https://github.com/mapsforge/vtm/issues/251)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)
 - Many other minor improvements and bug fixes
-- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aissue+is%3Aclosed+milestone%3A0.7.0)
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.7.0)
 
 ## Version 0.6.0 (2016-10-28) -- VTM revive
 
@@ -58,4 +59,4 @@
 - LWJGL desktop libGDX backend [#129](https://github.com/mapsforge/vtm/issues/129)
 - SNAPSHOT builds publish to Sonatype OSSRH [#165](https://github.com/mapsforge/vtm/issues/165)
 - Many other minor improvements and bug fixes
-- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aissue+is%3Aclosed+milestone%3A0.6.0)
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.6.0)

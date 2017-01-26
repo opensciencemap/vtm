@@ -20,11 +20,14 @@ import org.oscim.backend.canvas.Canvas;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Created by Longri on 26.01.2017.
- */
 public class TextureAtlasUtils {
 
     private final static int MAX_ATLAS_SIZE = 1024;
@@ -36,18 +39,19 @@ public class TextureAtlasUtils {
      * The List<TextureAtlas> contains the generated TextureAtlas object, for disposing if no longer needed!<br/>
      * With tha param disposeBitmap, all Bitmaps will released!<br/>
      * With parameter flipY, the Atlas TextureItem will flipped over Y. (Is needed by iOS)<br/>
-     * @param inputMap Map<Object, Bitmap> input Map with all Bitmaps, from which the regions are to be created
-     * @param outputMap  Map<Object, TextureRegion> contains all generated TextureRegions
-     * @param atlasList List<TextureAtlas> contains all created TextureAtlases
+     *
+     * @param inputMap       Map<Object, Bitmap> input Map with all Bitmaps, from which the regions are to be created
+     * @param outputMap      Map<Object, TextureRegion> contains all generated TextureRegions
+     * @param atlasList      List<TextureAtlas> contains all created TextureAtlases
      * @param disposeBitmaps boolean (will recycle all Bitmap's)
-     * @param flipY boolean (set True with iOS)
+     * @param flipY          boolean (set True with iOS)
      */
     public static void createTextureRegions(final Map<Object, Bitmap> inputMap, Map<Object, TextureRegion> outputMap,
                                             List<TextureAtlas> atlasList, boolean disposeBitmaps, boolean flipY) {
 
         // step 1: sort inputMap by Bitmap size
         List<Map.Entry<Object, Bitmap>> list =
-                new LinkedList<Map.Entry<Object, Bitmap>>(inputMap.entrySet());
+                new LinkedList<>(inputMap.entrySet());
 
         Collections.sort(list, new Comparator<Map.Entry<Object, Bitmap>>() {
             public int compare(Map.Entry<Object, Bitmap> o1, Map.Entry<Object, Bitmap> o2) {
@@ -59,7 +63,7 @@ public class TextureAtlasUtils {
             }
         });
 
-        Map<Object, Object> sortedByValues = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> sortedByValues = new LinkedHashMap<>();
         for (Map.Entry<Object, Bitmap> entry : list) {
             sortedByValues.put(entry.getKey(), entry.getValue());
         }
@@ -88,7 +92,7 @@ public class TextureAtlasUtils {
 
 
         //step 4: calculate Regions(rectangles) and split to atlases
-        List<AtlasElement> atlases = new ArrayList<AtlasElement>();
+        List<AtlasElement> atlases = new ArrayList<>();
         atlases.add(new AtlasElement());
         int atlasIndex = 0;
         int maxLineHeight = PAD;
@@ -171,6 +175,6 @@ public class TextureAtlasUtils {
 
     private static class AtlasElement {
         int width = 0, height = 0;
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Map<Object, Object> map = new LinkedHashMap<>();
     }
 }
