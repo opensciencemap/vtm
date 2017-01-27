@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,33 +15,26 @@
  */
 package org.oscim.backend;
 
-
 public enum Platform {
-    ANDROID(false, false),
-    IOS(true, false),
-    MAC_OS(true, true),
-    LINUX(false, true),
-    WINDOWS(false, true),
-    WEB(false, false),
-    UNKNOWN(false, false);
 
-
-    Platform(boolean buildingLayerTranslucent, boolean desktopQuirks) {
-        this.BUILDING_LAYER_TRANSLUCENT = buildingLayerTranslucent;
-        this.GDX_DESKTOP_QUIRKS = desktopQuirks;
-    }
-
-
-    public boolean BUILDING_LAYER_TRANSLUCENT;
-
-    public boolean GDX_DESKTOP_QUIRKS;
+    ANDROID,
+    IOS,
+    LINUX,
+    MACOS,
+    UNKNOWN,
+    WEBGL,
+    WINDOWS;
 
     /**
-     * Returns true when This is WINDOWS, LINUX or MAC_OS other, false
-     *
-     * @return boolean
+     * @return true if on desktop (Windows, macOS, Linux)
      */
-    public boolean isAnyDesktop() {
-        return this == LINUX || this == WINDOWS || this == MAC_OS;
+    public boolean isDesktop() {
+        switch (this) {
+            case LINUX:
+            case MACOS:
+            case WINDOWS:
+                return true;
+        }
+        return false;
     }
 }

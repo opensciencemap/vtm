@@ -84,6 +84,6 @@ public class GwtGdxGraphics extends CanvasAdapter {
 
     public static void init() {
         CanvasAdapter.init(new GwtGdxGraphics());
-        CanvasAdapter.platform = Platform.WEB;
+        CanvasAdapter.platform = Platform.WEBGL;
     }
 }

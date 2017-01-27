@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,6 +16,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.backend;
+
+import org.oscim.layers.tile.buildings.BuildingLayer;
 
 public class GLAdapter {
 
@@ -43,6 +45,12 @@ public class GLAdapter {
 
     public static void init(GL gl20) {
         gl = gl20;
-        GDX_DESKTOP_QUIRKS = CanvasAdapter.platform.GDX_DESKTOP_QUIRKS;
+
+        GDX_DESKTOP_QUIRKS = CanvasAdapter.platform.isDesktop();
+        GDX_WEBGL_QUIRKS = (CanvasAdapter.platform == Platform.WEBGL);
+
+        // Buildings translucency does not work on macOS, see #61
+        if (CanvasAdapter.platform == Platform.MACOS)
+            BuildingLayer.TRANSLUCENT = false;
     }
 }

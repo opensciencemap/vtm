@@ -31,17 +31,20 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 public class AwtGraphics extends CanvasAdapter {
 
     public static void init() {
         CanvasAdapter.init(new AwtGraphics());
 
-        String os = System.getProperty("os.name").toLowerCase();
-
-        if(os.contains("win")) CanvasAdapter.platform = Platform.WINDOWS;
-        else if(os.contains("mac")) CanvasAdapter.platform = Platform.MAC_OS;
-        else CanvasAdapter.platform = Platform.LINUX;
+        String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+        if (os.contains("win"))
+            CanvasAdapter.platform = Platform.WINDOWS;
+        else if (os.contains("mac"))
+            CanvasAdapter.platform = Platform.MACOS;
+        else
+            CanvasAdapter.platform = Platform.LINUX;
     }
 
     public static BufferedImage getBitmap(Bitmap bitmap) {
