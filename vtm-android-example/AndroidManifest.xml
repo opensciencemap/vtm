@@ -27,6 +27,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".AtlasMarkerOverlayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".BitmapTileMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

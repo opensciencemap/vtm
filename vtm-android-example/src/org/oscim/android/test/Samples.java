@@ -50,6 +50,7 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Overlays"));
         linearLayout.addView(createButton(MarkerOverlayActivity.class));
+        linearLayout.addView(createButton(AtlasMarkerOverlayActivity.class));
         linearLayout.addView(createButton(PathOverlayActivity.class));
         linearLayout.addView(createButton(LineTexActivity.class));
         linearLayout.addView(createButton(VectorLayerMapActivity.class));

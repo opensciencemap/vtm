@@ -43,8 +43,8 @@ import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 public class MarkerOverlayActivity extends BitmapTileMapActivity
         implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
 
-    private static final boolean BILLBOARDS = true;
-    private MarkerSymbol mFocusMarker;
+    protected static final boolean BILLBOARDS = true;
+    protected MarkerSymbol mFocusMarker;
 
     public MarkerOverlayActivity() {
         super(STAMEN_TONER.build());
@@ -122,7 +122,7 @@ public class MarkerOverlayActivity extends BitmapTileMapActivity
         return true;
     }
 
-    class MapEventsReceiver extends Layer implements GestureListener {
+    protected class MapEventsReceiver extends Layer implements GestureListener {
 
         MapEventsReceiver(Map map) {
             super(map);
