@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -52,6 +53,11 @@ public abstract class CanvasAdapter {
      * The dpi.
      */
     public static float dpi = DEFAULT_DPI;
+
+    /**
+     * The used platform.
+     */
+    public static Platform platform = Platform.UNKNOWN;
 
     /**
      * The scale.
