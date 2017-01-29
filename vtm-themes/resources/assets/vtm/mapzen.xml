@@ -1016,7 +1016,7 @@
 
         <!-- place -->
         <m k="kind">
-            <m v="locality">
+            <m v="locality" zoom-min="13">
                 <caption style="bold" fill="#606060" k="name" priority="5" size="14"
                     stroke="#ffffff" stroke-width="2.0" />
             </m>
@@ -1042,6 +1042,12 @@
                         stroke="#ffffff" stroke-width="2.0" symbol="assets:symbols/dot_black.svg" />
                 </m>
                 <m zoom-max="6">
+                    <caption dy="14" fill="#000000" k="name" priority="1" size="19" stroke="#ffffff"
+                        stroke-width="2.0" symbol="assets:symbols/dot_black.svg" />
+                </m>
+            </m>
+            <m v="locality">
+                <m zoom-max="7">
                     <caption dy="14" fill="#000000" k="name" priority="1" size="19" stroke="#ffffff"
                         stroke-width="2.0" symbol="assets:symbols/dot_black.svg" />
                 </m>
