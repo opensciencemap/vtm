@@ -1,4 +1,4 @@
-<atlas img="icons/maki.png">
+<atlas img="atlas/maki.png">
     <rect id="airfield" pos="1 105 24 24" />
     <rect id="airport" pos="1 79 24 24" />
     <rect id="alcohol-shop" pos="27 105 24 24" />

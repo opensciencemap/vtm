@@ -68,6 +68,12 @@ task copyThemeAssets(type: Copy) {
     include '**/*'
 }
 
+task copyThemeLocalAssets(type: Copy) {
+    from "resources/assets"
+    into "assets"
+    include '**/*'
+}
+
 task copyVtmAssets(type: Copy) {
     from "$rootDir/vtm/resources/assets"
     into "assets"
@@ -82,6 +88,7 @@ task copyWarSources(type: Copy) {
 
 tasks.withType(JavaCompile) { compileTask ->
     compileTask.dependsOn copyThemeAssets
+    compileTask.dependsOn copyThemeLocalAssets
     compileTask.dependsOn copyVtmAssets
     compileTask.dependsOn copyWarSources
 }

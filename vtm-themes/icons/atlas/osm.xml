@@ -1,4 +1,4 @@
-<atlas img="icons/osm.png">
+<atlas img="atlas/osm.png">
     <rect id="airport" pos="1 40 16 16" />
     <rect id="atm" pos="19 40 16 16" />
     <rect id="bar" pos="1 80 20 20" />

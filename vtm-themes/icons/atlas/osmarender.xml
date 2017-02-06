@@ -1,4 +1,4 @@
-<atlas img="icons/osmarender.png">
+<atlas img="atlas/osmarender.png">
     <rect id="airport" pos="226 38 24 24" />
     <rect id="alpine_hut" pos="198 41 26 21" />
     <rect id="atm" pos="279 2 14 16" />
