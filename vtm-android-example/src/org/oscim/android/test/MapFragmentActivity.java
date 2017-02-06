@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Mathieu De Brito
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -69,7 +70,6 @@ public class MapFragmentActivity extends FragmentActivity {
             super.onViewCreated(view, savedInstanceState);
 
             mMapView = (MapView) view.findViewById(R.id.mapView);
-            mMapView.setZOrderOnTop(true);
             mPrefs = new MapPreferences(MapFragment.class.getName(), getContext());
 
             VectorTileLayer l = mMapView.map().setBaseMap(new OSciMap4TileSource());
