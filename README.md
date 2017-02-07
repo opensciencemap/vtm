@@ -58,4 +58,15 @@ This library contains code from several projects:
 - **tessellate** (SGI Free Software License B 2.0): (https://github.com/cscheid/tessellate)
 
 ## Screenshots
-![Screenshot Samples App Berlin 1](docs/images/screenshot-berlin-1.png)
+
+### Android
+![Android](docs/images/android.png)
+
+### iOS
+![iOS](docs/images/iOS.png)
+
+### Desktop
+![Desktop](docs/images/desktop.png)
+
+### Browser
+![Browser](docs/images/browser.png)
