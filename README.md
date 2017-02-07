@@ -63,7 +63,7 @@ This library contains code from several projects:
 ![Android](docs/images/android.png)
 
 ### iOS
-![iOS](docs/images/iOS.png)
+![iOS](docs/images/ios.png)
 
 ### Desktop
 ![Desktop](docs/images/desktop.png)
