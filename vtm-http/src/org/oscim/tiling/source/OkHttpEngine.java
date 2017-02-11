@@ -20,6 +20,8 @@ package org.oscim.tiling.source;
 
 import org.oscim.core.Tile;
 import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +35,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class OkHttpEngine implements HttpEngine {
+
+    private static final Logger log = LoggerFactory.getLogger(OkHttpEngine.class);
 
     private final OkHttpClient mClient;
     private final UrlTileSource mTileSource;
@@ -73,14 +77,18 @@ public class OkHttpEngine implements HttpEngine {
         if (tile == null) {
             throw new IllegalArgumentException("Tile cannot be null.");
         }
-        URL url = new URL(mTileSource.getTileUrl(tile));
-        Request.Builder builder = new Request.Builder()
-                .url(url);
-        for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
-            builder.addHeader(opt.getKey(), opt.getValue());
-        Request request = builder.build();
-        Response response = mClient.newCall(request).execute();
-        inputStream = response.body().byteStream();
+        try {
+            URL url = new URL(mTileSource.getTileUrl(tile));
+            Request.Builder builder = new Request.Builder()
+                    .url(url);
+            for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
+                builder.addHeader(opt.getKey(), opt.getValue());
+            Request request = builder.build();
+            Response response = mClient.newCall(request).execute();
+            inputStream = response.body().byteStream();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
