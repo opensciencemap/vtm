@@ -5,7 +5,7 @@ dependencies {
     compile project(':vtm-themes')
     compile project(':vtm-extras')
     compile 'com.noveogroup.android:android-logger:1.3.6'
-    compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
 }
 
 android {

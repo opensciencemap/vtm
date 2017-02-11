@@ -15,6 +15,7 @@
 - House numbers (nodes) fix visibility [#168](https://github.com/mapsforge/vtm/issues/168)
 - Android fix quick scale vs long press [#250](https://github.com/mapsforge/vtm/issues/250)
 - Use baseline 160dpi in scaling [#236](https://github.com/mapsforge/vtm/issues/236)
+- OkHttp3 update [#138](https://github.com/mapsforge/vtm/issues/138)
 - libGDX double tap zoom [#263](https://github.com/mapsforge/vtm/issues/263)
 - MapFileTileSource zoom level API enhancements [#219](https://github.com/mapsforge/vtm/issues/219)
 - Animator enhancements with easing functions [#246](https://github.com/mapsforge/vtm/issues/246)

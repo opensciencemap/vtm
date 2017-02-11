@@ -1,6 +1,7 @@
 /*
  * Copyright 2014 Charles Greb
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,24 +18,21 @@
  */
 package org.oscim.tiling.source;
 
-import com.squareup.okhttp.HttpResponseCache;
-import com.squareup.okhttp.OkHttpClient;
-
 import org.oscim.core.Tile;
 import org.oscim.utils.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map.Entry;
 
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class OkHttpEngine implements HttpEngine {
-    static final Logger log = LoggerFactory.getLogger(OkHttpEngine.class);
 
     private final OkHttpClient mClient;
     private final UrlTileSource mTileSource;
@@ -46,9 +44,10 @@ public class OkHttpEngine implements HttpEngine {
             mClient = new OkHttpClient();
         }
 
-        public OkHttpFactory(HttpResponseCache responseCache) {
-            mClient = new OkHttpClient();
-            mClient.setResponseCache(responseCache);
+        public OkHttpFactory(Cache cache) {
+            mClient = new OkHttpClient.Builder()
+                    .cache(cache)
+                    .build();
         }
 
         @Override
@@ -75,17 +74,13 @@ public class OkHttpEngine implements HttpEngine {
             throw new IllegalArgumentException("Tile cannot be null.");
         }
         URL url = new URL(mTileSource.getTileUrl(tile));
-        HttpURLConnection conn = mClient.open(url);
-
+        Request.Builder builder = new Request.Builder()
+                .url(url);
         for (Entry<String, String> opt : mTileSource.getRequestHeader().entrySet())
-            conn.addRequestProperty(opt.getKey(), opt.getValue());
-
-        try {
-            inputStream = conn.getInputStream();
-        } catch (FileNotFoundException e) {
-            throw new IOException("ERROR " + conn.getResponseCode()
-                    + ": " + conn.getResponseMessage());
-        }
+            builder.addHeader(opt.getKey(), opt.getValue());
+        Request request = builder.build();
+        Response response = mClient.newCall(request).execute();
+        inputStream = response.body().byteStream();
     }
 
     @Override
@@ -103,9 +98,11 @@ public class OkHttpEngine implements HttpEngine {
         }).start();
     }
 
+    /**
+     * OkHttp cache implemented through {@link OkHttpClient.Builder#cache(Cache)}.
+     */
     @Override
     public void setCache(OutputStream os) {
-        // OkHttp cache implented through tileSource setResponseCache
     }
 
     @Override

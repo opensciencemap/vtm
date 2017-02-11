@@ -1,10 +1,5 @@
 package org.oscim.tiling.source;
 
-import com.squareup.okhttp.HttpResponseCache;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,23 +11,26 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import okhttp3.Cache;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class OkHttpEngineTest {
     private OkHttpEngine engine;
     private MockWebServer server;
-    private MockResponse mockResponse;
-    private HttpResponseCache cache;
 
     @Before
     public void setUp() throws Exception {
-        mockResponse = new MockResponse();
-        mockResponse.setBody("TEST RESPONSE".getBytes());
+        MockResponse mockResponse = new MockResponse();
+        mockResponse.setBody("TEST RESPONSE");
         server = new MockWebServer();
         server.enqueue(mockResponse);
-        server.play();
+        server.start();
         engine = (OkHttpEngine) new OkHttpEngine.OkHttpFactory()
-                .create(new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString()));
+                .create(new OSciMap4TileSource(server.url("/tiles/vtm").toString()));
     }
 
     @After
@@ -52,7 +50,7 @@ public class OkHttpEngineTest {
 
     @Test
     public void sendRequest_shouldAppendXYZToPath() throws Exception {
-        engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
+        engine.sendRequest(new Tile(1, 2, (byte) 3));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getPath()).isEqualTo("/tiles/vtm/3/1/2.vtm");
@@ -60,7 +58,7 @@ public class OkHttpEngineTest {
 
     @Test
     public void read_shouldReturnResponseStream() throws Exception {
-        engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
+        engine.sendRequest(new Tile(1, 2, (byte) 3));
 
         InputStream responseStream = engine.read();
         String response = new BufferedReader(new InputStreamReader(responseStream)).readLine();
@@ -93,12 +91,12 @@ public class OkHttpEngineTest {
 
     @Test
     public void create_shouldUseTileSourceCache() throws Exception {
-        cache = new HttpResponseCache(new File("tmp"), 1024);
+        Cache cache = new Cache(new File("tmp"), 1024);
         OSciMap4TileSource tileSource =
-                new OSciMap4TileSource(server.getUrl("/tiles/vtm").toString());
+                new OSciMap4TileSource(server.url("/tiles/vtm").toString());
         engine = (OkHttpEngine) new OkHttpEngine.OkHttpFactory(cache).create(tileSource);
-        engine.sendRequest(new Tile(1, 2, new Integer(3).byteValue()));
+        engine.sendRequest(new Tile(1, 2, (byte) 3));
         engine.requestCompleted(true);
-        assertThat(cache.getRequestCount()).isEqualTo(1);
+        assertThat(cache.requestCount()).isEqualTo(1);
     }
 }

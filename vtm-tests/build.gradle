@@ -2,8 +2,8 @@ apply plugin: 'java'
 
 dependencies {
     compile project(':vtm-http')
-    compile 'com.squareup.okhttp:okhttp:1.5.2'
-    testCompile 'com.squareup.okhttp:mockwebserver:1.5.2'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+    testCompile 'com.squareup.okhttp3:mockwebserver:3.6.0'
     testCompile 'junit:junit:4.12'
     testCompile 'org.easytesting:fest-assert-core:2.0M10'
     testCompile 'org.mockito:mockito-all:1.10.19'
