@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -61,9 +61,16 @@ public class MapActivity extends Activity {
 
     @Override
     protected void onPause() {
-        super.onPause();
-
-        mMapView.onPause();
         mPrefs.save(mMapView.map());
+        mMapView.onPause();
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mMapView.onDestroy();
+
+        super.onDestroy();
     }
 }

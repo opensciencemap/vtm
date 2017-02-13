@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -60,14 +61,12 @@ public abstract class MapActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        mMapView.onDestroy();
         super.onDestroy();
-        mMap.destroy();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         Editor editor = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE).edit();
         editor.clear();
 
@@ -82,7 +81,9 @@ public abstract class MapActivity extends Activity {
         editor.putInt(KEY_LONGITUDE, geoPoint.longitudeE6);
         editor.putFloat(KEY_MAP_SCALE, (float) mapPosition.scale);
 
-        editor.commit();
+        editor.apply();
+
+        super.onPause();
     }
 
     @Override
@@ -93,8 +94,8 @@ public abstract class MapActivity extends Activity {
 
     @Override
     protected void onStop() {
-        super.onStop();
         mMapView.onPause();
+        super.onStop();
     }
 
     /**

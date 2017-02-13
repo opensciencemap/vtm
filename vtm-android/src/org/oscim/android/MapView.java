@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -104,8 +104,8 @@ public class MapView extends GLSurfaceView {
         mMotionEvent = new AndroidMotionEvent();
     }
 
-    public void onStop() {
-
+    public void onDestroy() {
+        mMap.destroy();
     }
 
     public void onPause() {
