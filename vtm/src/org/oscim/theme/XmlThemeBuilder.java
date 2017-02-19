@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Longri
  * Copyright 2016 Andrey Novikov
  *
@@ -375,7 +375,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             String value = attributes.getValue(i);
 
             if ("e".equals(name)) {
-                String val = value.toUpperCase();
+                String val = value.toUpperCase(Locale.ENGLISH);
                 if ("WAY".equals(val))
                     element = Rule.Element.WAY;
                 else if ("NODE".equals(val))
@@ -387,7 +387,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             } else if ("cat".equals(name)) {
                 cat = value;
             } else if ("closed".equals(name)) {
-                String val = value.toUpperCase();
+                String val = value.toUpperCase(Locale.ENGLISH);
                 if ("YES".equals(val))
                     closed = Closed.YES;
                 else if ("NO".equals(val))
@@ -514,7 +514,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                         b.strokeWidth = 1;
                 }
             } else if ("cap".equals(name) || "stroke-linecap".equals(name))
-                b.cap = Cap.valueOf(value.toUpperCase());
+                b.cap = Cap.valueOf(value.toUpperCase(Locale.ENGLISH));
 
             else if ("fix".equals(name))
                 b.fixed = parseBoolean(value);
@@ -894,10 +894,10 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.textKey = value.intern();
 
             else if ("font-family".equals(name))
-                b.fontFamily = FontFamily.valueOf(value.toUpperCase());
+                b.fontFamily = FontFamily.valueOf(value.toUpperCase(Locale.ENGLISH));
 
             else if ("style".equals(name))
-                b.fontStyle = FontStyle.valueOf(value.toUpperCase());
+                b.fontStyle = FontStyle.valueOf(value.toUpperCase(Locale.ENGLISH));
 
             else if ("size".equals(name))
                 b.fontSize = Float.parseFloat(value);
