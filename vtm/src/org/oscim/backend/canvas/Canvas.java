@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -41,6 +42,8 @@ public interface Canvas {
      * Draw Bitmap to Canvas.
      */
     void drawBitmap(Bitmap bitmap, float x, float y);
+
+    void drawCircle(float x, float y, float radius, Paint paint);
 
     void drawLine(int x1, int y1, int x2, int y2, Paint paint);
 

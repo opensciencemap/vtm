@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -91,6 +92,11 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
+        // TODO
+    }
+
+    @Override
+    public void drawCircle(float x, float y, float radius, Paint paint) {
         // TODO
     }
 

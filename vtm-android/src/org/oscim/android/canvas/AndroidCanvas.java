@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -59,6 +60,11 @@ public class AndroidCanvas implements Canvas {
     @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
         canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
+    }
+
+    @Override
+    public void drawCircle(float x, float y, float radius, Paint paint) {
+        canvas.drawCircle(x, y, radius, ((AndroidPaint) paint).mPaint);
     }
 
     @Override

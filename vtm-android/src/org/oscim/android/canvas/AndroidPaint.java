@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2016 devemux86
+ * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -137,6 +138,16 @@ class AndroidPaint implements Paint {
     @Override
     public float getStrokeWidth() {
         return mPaint.getStrokeWidth();
+    }
+
+    @Override
+    public Style getStyle() {
+        switch (mPaint.getStyle()) {
+            case STROKE:
+                return Style.STROKE;
+            default:
+                return Style.FILL;
+        }
     }
 
     @Override

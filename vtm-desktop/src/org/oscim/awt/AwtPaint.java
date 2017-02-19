@@ -2,6 +2,7 @@
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -215,6 +216,11 @@ public class AwtPaint implements Paint {
     @Override
     public float getStrokeWidth() {
         return strokeWidth;
+    }
+
+    @Override
+    public Style getStyle() {
+        return style;
     }
 
     @Override
