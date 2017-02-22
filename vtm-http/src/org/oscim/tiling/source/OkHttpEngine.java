@@ -2,6 +2,7 @@
  * Copyright 2014 Charles Greb
  * Copyright 2014 Hannes Janetzek
  * Copyright 2017 devemux86
+ * Copyright 2017 Mathieu De Brito
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -23,6 +24,8 @@ import org.oscim.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,14 +43,27 @@ public class OkHttpEngine implements HttpEngine {
 
     private final OkHttpClient mClient;
     private final UrlTileSource mTileSource;
+    private final boolean mUseTileCache;
 
     public static class OkHttpFactory implements HttpEngine.Factory {
         private final OkHttpClient mClient;
+        private boolean mUseTileCache = false;
 
         public OkHttpFactory() {
             mClient = new OkHttpClient();
         }
 
+        /**
+         * Cache using ITileCache
+         */
+        public OkHttpFactory(boolean useTileCache) {
+            this();
+            mUseTileCache = useTileCache;
+        }
+
+        /**
+         * OkHttp cache implemented through {@link OkHttpClient.Builder#cache(Cache)}.
+         */
         public OkHttpFactory(Cache cache) {
             mClient = new OkHttpClient.Builder()
                     .cache(cache)
@@ -56,15 +72,17 @@ public class OkHttpEngine implements HttpEngine {
 
         @Override
         public HttpEngine create(UrlTileSource tileSource) {
-            return new OkHttpEngine(mClient, tileSource);
+            return new OkHttpEngine(mClient, tileSource, mUseTileCache);
         }
     }
 
     private InputStream inputStream;
+    private byte[] cachedData;
 
-    public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource) {
+    public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource, boolean useTileCache) {
         mClient = client;
         mTileSource = tileSource;
+        mUseTileCache = useTileCache;
     }
 
     @Override
@@ -86,6 +104,21 @@ public class OkHttpEngine implements HttpEngine {
             Request request = builder.build();
             Response response = mClient.newCall(request).execute();
             inputStream = response.body().byteStream();
+
+            if (mUseTileCache) {
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[16384];
+                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+
+                buffer.flush();
+
+                cachedData = buffer.toByteArray();
+                inputStream = new ByteArrayInputStream(cachedData);
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -106,11 +139,15 @@ public class OkHttpEngine implements HttpEngine {
         }).start();
     }
 
-    /**
-     * OkHttp cache implemented through {@link OkHttpClient.Builder#cache(Cache)}.
-     */
     @Override
     public void setCache(OutputStream os) {
+        if (mUseTileCache) {
+            try {
+                os.write(cachedData);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
     }
 
     @Override

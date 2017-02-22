@@ -1,5 +1,6 @@
 /*
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Mathieu De Brito
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,6 +17,7 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
+import org.oscim.android.cache.TileCache;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -26,20 +28,35 @@ import org.oscim.tiling.source.mvt.MapboxTileSource;
 
 public class MapboxMapActivity extends MapActivity {
 
+    private TileCache tileCache;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         UrlTileSource tileSource = MapboxTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
-                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .httpFactory(new OkHttpEngine.OkHttpFactory(true)) // Use TileCache or provide a Cache for OkHttp
                 //.locale("en")
                 .build();
+
+        // Cache the tiles into a local sqlite database
+        tileCache = new TileCache(this, null, "tile_cache.db");
+        tileCache.setCacheSize(512 * (1 << 10));
+        tileSource.setCache(tileCache);
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         mMap.setTheme(VtmThemes.MAPZEN);
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (tileCache != null)
+            tileCache.dispose();
     }
 }
