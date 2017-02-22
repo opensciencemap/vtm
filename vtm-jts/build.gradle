@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     compile project(':vtm')
-    compile 'com.vividsolutions:jts:1.13'
+    compile 'com.vividsolutions:jts-core:1.14.0'
 }
 
 sourceSets {
