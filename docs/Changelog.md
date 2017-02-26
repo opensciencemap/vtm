@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.7.0 (2017-02-26)
+
+- Same as 0.7.0-rc2
+
 ### Version 0.7.0-rc2 (2017-02-20)
 
 - Fix theme parsing in non-Latin locales [#297](https://github.com/mapsforge/vtm/issues/297)
