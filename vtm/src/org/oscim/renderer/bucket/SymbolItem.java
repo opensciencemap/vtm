@@ -1,6 +1,7 @@
 /*
  * Copyright 2012 Hannes Janetzek
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -52,30 +53,27 @@ public class SymbolItem extends Inlist<SymbolItem> {
     public PointF offset;
     public float rotation;
 
-    public void set(float x, float y, TextureRegion texture, float rotation, boolean billboard) {
-        set(x, y, texture, billboard);
-        this.rotation = rotation;
+    public void set(float x, float y, TextureRegion texture, boolean billboard) {
+        set(x, y, texture, 0, billboard);
     }
 
-    public void set(float x, float y, TextureRegion texture, boolean billboard) {
+    public void set(float x, float y, TextureRegion texture, float rotation, boolean billboard) {
         this.x = x;
         this.y = y;
         this.texRegion = texture;
-        this.billboard = billboard;
-        this.rotation = 0;
-    }
-
-    public void set(float x, float y, Bitmap bitmap, float rotation, boolean billboard) {
-        set(x, y, bitmap, billboard);
         this.rotation = rotation;
+        this.billboard = billboard;
     }
 
     public void set(float x, float y, Bitmap bitmap, boolean billboard) {
+        set(x, y, bitmap, 0, billboard);
+    }
+
+    public void set(float x, float y, Bitmap bitmap, float rotation, boolean billboard) {
         this.x = x;
         this.y = y;
         this.bitmap = bitmap;
+        this.rotation = rotation;
         this.billboard = billboard;
-        this.rotation = 0;
     }
-
 }

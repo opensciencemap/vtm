@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Izumi Kawashima
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -164,12 +165,11 @@ public class MarkerRenderer extends BucketRenderer {
 
             SymbolItem s = SymbolItem.pool.get();
             if (marker.isBitmap()) {
-                s.set(it.x, it.y, marker.getBitmap(), marker.rotation, true);
+                s.set(it.x, it.y, marker.getBitmap(), marker.rotation, marker.isBillboard());
             } else {
-                s.set(it.x, it.y, marker.getTextureRegion(), marker.rotation, true);
+                s.set(it.x, it.y, marker.getTextureRegion(), marker.rotation, marker.isBillboard());
             }
             s.offset = marker.getHotspot();
-            s.billboard = marker.isBillboard();
             mSymbolLayer.pushSymbol(s);
         }
 
