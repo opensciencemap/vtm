@@ -1,5 +1,10 @@
 # Changelog
 
+## New since 0.7.0
+
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.8.0)
+
 ## Version 0.7.0 (2017-02-26)
 
 - Same as 0.7.0-rc2
