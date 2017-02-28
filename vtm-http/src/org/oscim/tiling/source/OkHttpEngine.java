@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,22 +42,15 @@ public class OkHttpEngine implements HttpEngine {
 
     private final OkHttpClient mClient;
     private final UrlTileSource mTileSource;
-    private final boolean mUseTileCache;
+
+    private InputStream mInputStream;
+    private byte[] mCachedData;
 
     public static class OkHttpFactory implements HttpEngine.Factory {
         private final OkHttpClient mClient;
-        private boolean mUseTileCache = false;
 
         public OkHttpFactory() {
             mClient = new OkHttpClient();
-        }
-
-        /**
-         * Cache using ITileCache
-         */
-        public OkHttpFactory(boolean useTileCache) {
-            this();
-            mUseTileCache = useTileCache;
         }
 
         /**
@@ -72,22 +64,18 @@ public class OkHttpEngine implements HttpEngine {
 
         @Override
         public HttpEngine create(UrlTileSource tileSource) {
-            return new OkHttpEngine(mClient, tileSource, mUseTileCache);
+            return new OkHttpEngine(mClient, tileSource);
         }
     }
 
-    private InputStream inputStream;
-    private byte[] cachedData;
-
-    public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource, boolean useTileCache) {
+    public OkHttpEngine(OkHttpClient client, UrlTileSource tileSource) {
         mClient = client;
         mTileSource = tileSource;
-        mUseTileCache = useTileCache;
     }
 
     @Override
     public InputStream read() throws IOException {
-        return inputStream;
+        return mInputStream;
     }
 
     @Override
@@ -103,22 +91,11 @@ public class OkHttpEngine implements HttpEngine {
                 builder.addHeader(opt.getKey(), opt.getValue());
             Request request = builder.build();
             Response response = mClient.newCall(request).execute();
-            inputStream = response.body().byteStream();
-
-            if (mUseTileCache) {
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384];
-                while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-
-                buffer.flush();
-
-                cachedData = buffer.toByteArray();
-                inputStream = new ByteArrayInputStream(cachedData);
-            }
-
+            if (mTileSource.tileCache != null) {
+                mCachedData = response.body().bytes();
+                mInputStream = new ByteArrayInputStream(mCachedData);
+            } else
+                mInputStream = response.body().byteStream();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -126,11 +103,11 @@ public class OkHttpEngine implements HttpEngine {
 
     @Override
     public void close() {
-        if (inputStream == null)
+        if (mInputStream == null)
             return;
 
-        final InputStream is = inputStream;
-        inputStream = null;
+        final InputStream is = mInputStream;
+        mInputStream = null;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -141,9 +118,9 @@ public class OkHttpEngine implements HttpEngine {
 
     @Override
     public void setCache(OutputStream os) {
-        if (mUseTileCache) {
+        if (mTileSource.tileCache != null) {
             try {
-                os.write(cachedData);
+                os.write(mCachedData);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
@@ -152,8 +129,8 @@ public class OkHttpEngine implements HttpEngine {
 
     @Override
     public boolean requestCompleted(boolean success) {
-        IOUtils.closeQuietly(inputStream);
-        inputStream = null;
+        IOUtils.closeQuietly(mInputStream);
+        mInputStream = null;
 
         return success;
     }

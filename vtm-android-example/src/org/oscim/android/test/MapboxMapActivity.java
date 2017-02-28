@@ -28,7 +28,9 @@ import org.oscim.tiling.source.mvt.MapboxTileSource;
 
 public class MapboxMapActivity extends MapActivity {
 
-    private TileCache tileCache;
+    private static final boolean USE_CACHE = true;
+
+    private TileCache mCache;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,14 +38,16 @@ public class MapboxMapActivity extends MapActivity {
 
         UrlTileSource tileSource = MapboxTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
-                .httpFactory(new OkHttpEngine.OkHttpFactory(true)) // Use TileCache or provide a Cache for OkHttp
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
                 //.locale("en")
                 .build();
 
-        // Cache the tiles into a local sqlite database
-        tileCache = new TileCache(this, null, "tile_cache.db");
-        tileCache.setCacheSize(512 * (1 << 10));
-        tileSource.setCache(tileCache);
+        if (USE_CACHE) {
+            // Cache the tiles into a local SQLite database
+            mCache = new TileCache(this, null, "tile.db");
+            mCache.setCacheSize(512 * (1 << 10));
+            tileSource.setCache(mCache);
+        }
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         mMap.setTheme(VtmThemes.MAPZEN);
@@ -56,7 +60,7 @@ public class MapboxMapActivity extends MapActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (tileCache != null)
-            tileCache.dispose();
+        if (mCache != null)
+            mCache.dispose();
     }
 }
