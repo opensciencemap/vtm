@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -132,7 +132,21 @@ public class AwtCanvas implements Canvas {
 
     @Override
     public void drawCircle(float x, float y, float radius, Paint paint) {
-        // TODO
+        AwtPaint awtPaint = (AwtPaint) paint;
+        this.canvas.setColor(awtPaint.color);
+        if (awtPaint.stroke != null)
+            this.canvas.setStroke(awtPaint.stroke);
+        float doubleRadius = radius * 2;
+
+        Paint.Style style = paint.getStyle();
+        switch (style) {
+            case FILL:
+                this.canvas.fillOval((int) (x - radius), (int) (y - radius), (int) doubleRadius, (int) doubleRadius);
+                break;
+            case STROKE:
+                this.canvas.drawOval((int) (x - radius), (int) (y - radius), (int) doubleRadius, (int) doubleRadius);
+                break;
+        }
     }
 
     @Override
