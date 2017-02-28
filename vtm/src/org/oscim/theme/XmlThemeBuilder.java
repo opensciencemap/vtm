@@ -2,7 +2,7 @@
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
- * Copyright 2016 Longri
+ * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -120,16 +120,16 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param value          the XML attribute value.
      * @param attributeIndex the XML attribute index position.
      */
-    private static void logUnknownAttribute(String element, String name,
-                                            String value, int attributeIndex) {
+    static void logUnknownAttribute(String element, String name,
+                                    String value, int attributeIndex) {
         log.debug("unknown attribute in element {} () : {} = {}",
                 element, attributeIndex, name, value);
     }
 
-    private final ArrayList<RuleBuilder> mRulesList = new ArrayList<>();
-    private final Stack<Element> mElementStack = new Stack<>();
-    private final Stack<RuleBuilder> mRuleStack = new Stack<>();
-    private final HashMap<String, RenderStyle> mStyles = new HashMap<>(10);
+    final ArrayList<RuleBuilder> mRulesList = new ArrayList<>();
+    final Stack<Element> mElementStack = new Stack<>();
+    final Stack<RuleBuilder> mRuleStack = new Stack<>();
+    final HashMap<String, RenderStyle> mStyles = new HashMap<>(10);
 
     private final HashMap<String, TextStyle.TextBuilder<?>> mTextStyles = new HashMap<>(10);
 
@@ -137,21 +137,22 @@ public class XmlThemeBuilder extends DefaultHandler {
     private final CircleBuilder<?> mCircleBuilder = CircleStyle.builder();
     private final ExtrusionBuilder<?> mExtrusionBuilder = ExtrusionStyle.builder();
     private final LineBuilder<?> mLineBuilder = LineStyle.builder();
-    private final SymbolBuilder<?> mSymbolBuilder = SymbolStyle.builder();
+    final SymbolBuilder<?> mSymbolBuilder = SymbolStyle.builder();
     private final TextBuilder<?> mTextBuilder = TextStyle.builder();
 
     private RuleBuilder mCurrentRule;
-    private TextureAtlas mTextureAtlas;
+    TextureAtlas mTextureAtlas;
 
-    private int mLevels = 0;
-    private int mMapBackground = 0xffffffff;
-    private float mTextScale = 1;
+    int mLevels = 0;
+    int mMapBackground = 0xffffffff;
+    float mTextScale = 1;
 
-    private final ThemeFile mTheme;
+    final ThemeFile mTheme;
     private final ThemeCallback mThemeCallback;
-    private RenderTheme mRenderTheme;
+    RenderTheme mRenderTheme;
 
-    private final float mScale, mScale2;
+    final float mScale;
+    private final float mScale2;
 
     private Set<String> mCategories;
     private XmlRenderThemeStyleLayer mCurrentLayer;
@@ -424,7 +425,7 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b;
     }
 
-    private TextureRegion getAtlasRegion(String src) {
+    TextureRegion getAtlasRegion(String src) {
         if (mTextureAtlas == null)
             return null;
 
@@ -1007,7 +1008,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     /**
      * @return a new Symbol with the given rendering attributes.
      */
-    private SymbolStyle createSymbol(String elementName, Attributes attributes) {
+    SymbolStyle createSymbol(String elementName, Attributes attributes) {
         SymbolBuilder<?> b = mSymbolBuilder.reset();
         String src = null;
 
@@ -1112,7 +1113,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                     + value);
     }
 
-    private static void validateExists(String name, Object obj, String elementName) {
+    static void validateExists(String name, Object obj, String elementName) {
         if (obj == null)
             throw new ThemeException("missing attribute " + name
                     + " for element: " + elementName);

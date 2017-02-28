@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
+ * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -105,6 +106,10 @@ public class RenderTheme implements IRenderTheme {
     @Override
     public int getMapBackground() {
         return mMapBackground;
+    }
+
+    Rule[] getRules() {
+        return mRules;
     }
 
     //AtomicInteger hitCount = new AtomicInteger(0);
