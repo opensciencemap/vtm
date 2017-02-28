@@ -150,12 +150,12 @@ public class AwtCanvas implements Canvas {
     }
 
     @Override
-    public void drawLine(int x1, int y1, int x2, int y2, Paint paint) {
+    public void drawLine(float x1, float y1, float x2, float y2, Paint paint) {
         AwtPaint awtPaint = (AwtPaint) paint;
         this.canvas.setColor(awtPaint.color);
         if (awtPaint.stroke != null)
             this.canvas.setStroke(awtPaint.stroke);
-        this.canvas.drawLine(x1, y1, x2, y2);
+        this.canvas.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
     }
 
     @Override

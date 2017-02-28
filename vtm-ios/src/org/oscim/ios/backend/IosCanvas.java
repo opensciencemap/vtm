@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Longri
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -98,8 +98,7 @@ public class IosCanvas implements Canvas {
     }
 
     @Override
-    public void drawLine(int x1, int y1, int x2, int y2, Paint paint) {
-
+    public void drawLine(float x1, float y1, float x2, float y2, Paint paint) {
         //flip Y-axis
         y1 = (int) (this.cgBitmapContext.getHeight() - y1);
         y2 = (int) (this.cgBitmapContext.getHeight() - y2);
