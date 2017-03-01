@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Longri
+ * Copyright 2016-2017 Longri
  * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
  *
@@ -94,7 +94,22 @@ public class IosCanvas implements Canvas {
 
     @Override
     public void drawCircle(float x, float y, float radius, Paint paint) {
-        // TODO
+        CGRect rect = new CGRect(x - radius, y - radius, x + radius, y + radius);
+
+        switch (paint.getStyle()) {
+            case FILL:
+                setFillColor(this.cgBitmapContext, paint.getColor());
+                this.cgBitmapContext.fillEllipseInRect(rect);
+                break;
+            case STROKE:
+                // set Stroke properties
+                this.cgBitmapContext.setLineWidth(((IosPaint) paint).strokeWidth);
+                this.cgBitmapContext.setLineCap(((IosPaint) paint).getIosStrokeCap());
+                this.cgBitmapContext.setLineJoin(((IosPaint) paint).getIosStrokeJoin());
+                setStrokeColor(this.cgBitmapContext, (paint.getColor()));
+                this.cgBitmapContext.strokeEllipseInRect(rect);
+                break;
+        }
     }
 
     @Override
