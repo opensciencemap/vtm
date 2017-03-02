@@ -18,6 +18,7 @@
  */
 package org.oscim.android.canvas;
 
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -74,7 +75,7 @@ public class AndroidCanvas implements Canvas {
 
     @Override
     public void fillColor(int color) {
-        canvas.drawColor(color, PorterDuff.Mode.CLEAR);
+        canvas.drawColor(color, color == Color.TRANSPARENT ? PorterDuff.Mode.CLEAR : PorterDuff.Mode.SRC_OVER);
     }
 
     @Override
