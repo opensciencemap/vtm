@@ -32,8 +32,13 @@ import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
+import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
+import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.TextureAtlasUtils;
 
 import java.util.ArrayList;
@@ -48,10 +53,13 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
 
     @Override
     void createLayers() {
-        mBitmapLayer.tileRenderer().setBitmapAlpha(0.5f);
-
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
+
+        VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        mMap.layers().add(new LabelLayer(mMap, l));
+        mMap.setTheme(VtmThemes.DEFAULT);
 
         /* directly load bitmap from resources */
         Bitmap bitmapPoi = drawableToBitmap(getResources(), R.drawable.marker_poi);
