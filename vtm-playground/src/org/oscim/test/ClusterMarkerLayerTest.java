@@ -13,11 +13,13 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.test;
+package org.oscim.test;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
+import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.marker.ClusterMarkerRenderer;
 import org.oscim.layers.marker.ItemizedLayer;
@@ -32,15 +34,13 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.oscim.android.canvas.AndroidGraphics.drawableToBitmap;
-
-public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
+public class ClusterMarkerLayerTest extends MarkerLayerTest {
 
     private static final int COUNT = 5;
     private static final float STEP = 100f / 110000f; // roughly 100 meters
 
     @Override
-    void createLayers() {
+    public void createLayers() {
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
@@ -49,7 +49,9 @@ public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
         mMap.layers().add(new LabelLayer(mMap, l));
         mMap.setTheme(VtmThemes.DEFAULT);
 
-        Bitmap bitmapPoi = drawableToBitmap(getResources(), R.drawable.marker_poi);
+        mMap.setMapPosition(53.08, 8.83, 1 << 15);
+
+        Bitmap bitmapPoi = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_poi.png"));
         MarkerSymbol symbol;
         if (BILLBOARDS)
             symbol = new MarkerSymbol(bitmapPoi, MarkerSymbol.HotspotPlace.BOTTOM_CENTER);
@@ -77,14 +79,11 @@ public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
         }
         mMarkerLayer.addItems(pts);
 
-        mMap.layers().add(new TileGridLayer(mMap, getResources().getDisplayMetrics().density));
+        mMap.layers().add(new TileGridLayer(mMap));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        /* ignore saved position */
-        mMap.setMapPosition(53.08, 8.83, 1 << 15);
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new ClusterMarkerLayerTest());
     }
 }

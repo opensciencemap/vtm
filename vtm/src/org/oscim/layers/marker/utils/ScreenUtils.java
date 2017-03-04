@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 nebular
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -26,18 +27,13 @@ import org.oscim.backend.canvas.Paint;
 public class ScreenUtils {
 
     /**
-     * https://developer.android.com/reference/android/util/DisplayMetrics.html#DENSITY_DEFAULT
-     */
-    private static final float REFERENCE_DPI = 160;
-
-    /**
      * Get pixels from DPs
      *
      * @param dp Value in DPs
      * @return Value in PX according to screen density
      */
     public static int getPixels(float dp) {
-        return (int) (CanvasAdapter.dpi / REFERENCE_DPI * dp);
+        return (int) (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI * dp);
     }
 
     public static class ClusterDrawable {
@@ -64,15 +60,12 @@ public class ScreenUtils {
             mPaintText.setTextSize(ScreenUtils.getPixels((int) (sizedp * 0.6666666)));
             mPaintText.setColor(foregroundColor);
 
-            // NOT SUPPORTED on current backends (Feb 2017)
-            // mPaintText.setTextAlign(Paint.Align.CENTER);
-
             mPaintCircle.setColor(backgroundColor);
             mPaintCircle.setStyle(Paint.Style.FILL);
 
             mPaintBorder.setColor(foregroundColor);
             mPaintBorder.setStyle(Paint.Style.STROKE);
-            mPaintBorder.setStrokeWidth(2.0f);
+            mPaintBorder.setStrokeWidth(2.0f * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
         }
 
         private void setText(String text) {
@@ -86,8 +79,11 @@ public class ScreenUtils {
             canvas.drawCircle(halfsize, halfsize, halfsize, mPaintCircle);
             // fill
             canvas.drawCircle(halfsize, halfsize, halfsize, mPaintBorder);
-            // draw the number, the centering is not perfect without a measureText or alignment
-            canvas.drawText(mText, halfsize * 0.6f, halfsize + (halfsize >> 1), mPaintText);
+            // draw the number at the center
+            canvas.drawText(mText,
+                    (canvas.getWidth() - mPaintText.getTextWidth(mText)) * 0.5f,
+                    (canvas.getHeight() + mPaintText.getTextHeight(mText)) * 0.5f,
+                    mPaintText);
         }
 
         public Bitmap getBitmap() {
