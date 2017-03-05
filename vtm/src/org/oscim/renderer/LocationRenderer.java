@@ -226,17 +226,17 @@ public class LocationRenderer extends LayerRenderer {
             gl.uniform1f(hPhase, 1);
         }
 
-        if (viewShed && mLocationIsVisible) {
-            float rotation = 0;
-            if (mCallback != null)
-                rotation = mCallback.getRotation();
-            rotation -= 90;
-            gl.uniform2f(hDirection,
-                    (float) Math.cos(Math.toRadians(rotation)),
-                    (float) Math.sin(Math.toRadians(rotation)));
-        } else {
+        if (viewShed && mLocationIsVisible && mCallback != null) {
+            float rotation = mCallback.getRotation();
+            if (rotation != 0) {
+                rotation -= 90;
+                gl.uniform2f(hDirection,
+                        (float) Math.cos(Math.toRadians(rotation)),
+                        (float) Math.sin(Math.toRadians(rotation)));
+            } else
+                gl.uniform2f(hDirection, 0, 0);
+        } else
             gl.uniform2f(hDirection, 0, 0);
-        }
 
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }

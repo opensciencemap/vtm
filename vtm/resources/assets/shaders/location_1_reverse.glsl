@@ -22,7 +22,7 @@ uniform float u_phase;
 uniform vec2 u_dir;
 void main() {
     float len = 1.0 - length(v_tex);
-    if (u_dir.x == 0.0 && u_dir.y == 0.0){
+    if (u_dir.x == 0.0 && u_dir.y == 0.0) {
         gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * len;
     } else {
         // outer ring
