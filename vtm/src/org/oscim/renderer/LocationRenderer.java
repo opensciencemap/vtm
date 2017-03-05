@@ -226,15 +226,12 @@ public class LocationRenderer extends LayerRenderer {
             gl.uniform1f(hPhase, 1);
         }
 
-        if (viewShed && mLocationIsVisible && mCallback != null) {
+        if (viewShed && mLocationIsVisible && mCallback != null && mCallback.hasRotation()) {
             float rotation = mCallback.getRotation();
-            if (rotation != 0) {
-                rotation -= 90;
-                gl.uniform2f(hDirection,
-                        (float) Math.cos(Math.toRadians(rotation)),
-                        (float) Math.sin(Math.toRadians(rotation)));
-            } else
-                gl.uniform2f(hDirection, 0, 0);
+            rotation -= 90;
+            gl.uniform2f(hDirection,
+                    (float) Math.cos(Math.toRadians(rotation)),
+                    (float) Math.sin(Math.toRadians(rotation)));
         } else
             gl.uniform2f(hDirection, 0, 0);
 
@@ -257,6 +254,11 @@ public class LocationRenderer extends LayerRenderer {
     }
 
     public interface Callback {
+        /**
+         * Usually true, can be used with e.g. Android Location.hasBearing().
+         */
+        boolean hasRotation();
+
         float getRotation();
     }
 }
