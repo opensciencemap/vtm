@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -27,38 +27,30 @@ import org.oscim.renderer.atlas.TextureRegion;
  */
 public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
-    public final String sourceName;
     public final Bitmap bitmap;
     public final TextureRegion texture;
+    public final int hash;
 
     public final int symbolWidth;
     public final int symbolHeight;
     public final int symbolPercent;
 
     public SymbolStyle(Bitmap bitmap) {
-        this.sourceName = null;
-        this.bitmap = bitmap;
-        this.texture = null;
-
-        this.symbolWidth = 0;
-        this.symbolHeight = 0;
-        this.symbolPercent = 100;
+        this(bitmap, null, 0);
     }
 
     public SymbolStyle(TextureRegion texture) {
-        this.sourceName = null;
-        this.bitmap = null;
-        this.texture = texture;
-
-        this.symbolWidth = 0;
-        this.symbolHeight = 0;
-        this.symbolPercent = 100;
+        this(null, texture, 0);
     }
 
-    public SymbolStyle(String sourceName) {
-        this.sourceName = sourceName;
-        this.bitmap = null;
-        this.texture = null;
+    public SymbolStyle(int hash) {
+        this(null, null, hash);
+    }
+
+    private SymbolStyle(Bitmap bitmap, TextureRegion texture, int hash) {
+        this.bitmap = bitmap;
+        this.texture = texture;
+        this.hash = hash;
 
         this.symbolWidth = 0;
         this.symbolHeight = 0;
@@ -66,9 +58,9 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
     }
 
     public SymbolStyle(SymbolBuilder<?> b) {
-        this.sourceName = b.sourceName;
         this.bitmap = b.bitmap;
         this.texture = b.texture;
+        this.hash = b.hash;
 
         this.symbolWidth = b.symbolWidth;
         this.symbolHeight = b.symbolHeight;
@@ -98,9 +90,9 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
     public static class SymbolBuilder<T extends SymbolBuilder<T>> extends StyleBuilder<T> {
 
-        public String sourceName;
         public Bitmap bitmap;
         public TextureRegion texture;
+        public int hash;
 
         public int symbolWidth;
         public int symbolHeight;
@@ -115,6 +107,7 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
             this.bitmap = symbol.bitmap;
             this.texture = symbol.texture;
+            this.hash = symbol.hash;
 
             this.symbolWidth = symbol.symbolWidth;
             this.symbolHeight = symbol.symbolHeight;
@@ -133,8 +126,8 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             return self();
         }
 
-        public T sourceName(String sourceName) {
-            this.sourceName = sourceName;
+        public T hash(int hash) {
+            this.hash = hash;
             return self();
         }
 
@@ -156,7 +149,7 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         public T reset() {
             bitmap = null;
             texture = null;
-            sourceName = null;
+            hash = 0;
 
             symbolWidth = 0;
             symbolHeight = 0;

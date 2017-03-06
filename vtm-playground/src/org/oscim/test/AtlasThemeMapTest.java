@@ -13,24 +13,19 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.android.test;
+package org.oscim.test;
 
-import android.os.Bundle;
-import android.view.Menu;
-
+import org.oscim.gdx.GdxMapApp;
 import org.oscim.theme.ThemeLoader;
 
-public class AtlasThemeMapActivity extends SimpleMapActivity {
+public class AtlasThemeMapTest extends MapTest {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    private AtlasThemeMapTest() {
         ThemeLoader.USE_ATLAS = true;
-
-        super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return false;
+    public static void main(String[] args) {
+        GdxMapApp.init();
+        GdxMapApp.run(new AtlasThemeMapTest());
     }
 }

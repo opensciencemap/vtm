@@ -36,9 +36,6 @@
             android:name=".AtlasThemeMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".AtlasThemeMapActivity$MapFilePicker"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".BitmapTileMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

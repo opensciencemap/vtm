@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -186,10 +186,10 @@ public abstract class CanvasAdapter {
     }
 
     private static InputStream inputStreamFromFile(String relativePathPrefix, String src) throws IOException {
-        File file = getFile(relativePathPrefix, src);
+        File file = getAbsoluteFile(relativePathPrefix, src);
         if (!file.exists()) {
             if (src.length() > 0 && src.charAt(0) == File.separatorChar) {
-                file = getFile(relativePathPrefix, src.substring(1));
+                file = getAbsoluteFile(relativePathPrefix, src.substring(1));
             }
             if (!file.exists()) {
                 file = null;
@@ -203,7 +203,7 @@ public abstract class CanvasAdapter {
         return null;
     }
 
-    private static File getFile(String parentPath, String pathName) {
+    public static File getAbsoluteFile(String parentPath, String pathName) {
         if (pathName.charAt(0) == File.separatorChar) {
             return new File(pathName);
         }

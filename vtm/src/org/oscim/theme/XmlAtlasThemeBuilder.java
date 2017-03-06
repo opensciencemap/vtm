@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -20,42 +21,36 @@ import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
+import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
+import org.oscim.theme.styles.SymbolStyle.SymbolBuilder;
 import org.oscim.utils.TextureAtlasUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class XmlAtlasThemeBuilder extends XmlThemeBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(XmlAtlasThemeBuilder.class);
-
-    private final Map<Object, Bitmap> bitmapMap = new HashMap<>();
-    private final Map<Object, TextureRegion> outputMap;
-    private final List<TextureAtlas> atlasList;
-
-    public XmlAtlasThemeBuilder(ThemeFile theme, ThemeCallback themeCallback,
-                                Map<Object, TextureRegion> outputMap, List<TextureAtlas> atlasList) {
-        super(theme, themeCallback);
-        this.outputMap = outputMap;
-        this.atlasList = atlasList;
+    /**
+     * @param theme an input theme containing valid render theme XML data.
+     * @return a new RenderTheme which is created by parsing the XML data from the input theme.
+     * @throws ThemeException if an error occurs while parsing the render theme XML.
+     */
+    public static IRenderTheme read(ThemeFile theme) throws ThemeException {
+        return read(theme, null);
     }
 
     /**
      * @param theme         an input theme containing valid render theme XML data.
      * @param themeCallback the theme callback.
      * @return a new RenderTheme which is created by parsing the XML data from the input theme.
-     * @throws IRenderTheme.ThemeException if an error occurs while parsing the render theme XML.
+     * @throws ThemeException if an error occurs while parsing the render theme XML.
      */
-    public static IRenderTheme read(ThemeFile theme, ThemeCallback themeCallback) throws IRenderTheme.ThemeException {
+    public static IRenderTheme read(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
         Map<Object, TextureRegion> outputMap = new HashMap<>();
         List<TextureAtlas> atlasList = new ArrayList<>();
         XmlAtlasThemeBuilder renderThemeHandler = new XmlAtlasThemeBuilder(theme, themeCallback, outputMap, atlasList);
@@ -63,108 +58,69 @@ public class XmlAtlasThemeBuilder extends XmlThemeBuilder {
         try {
             new XMLReaderAdapter().parse(renderThemeHandler, theme.getRenderThemeAsStream());
         } catch (Exception e) {
-            throw new IRenderTheme.ThemeException(e.getMessage());
+            throw new ThemeException(e.getMessage());
         }
 
         TextureAtlasUtils.createTextureRegions(renderThemeHandler.bitmapMap, outputMap, atlasList,
                 true, CanvasAdapter.platform == Platform.IOS);
 
-        return replaceSymbolStylesOnTheme(outputMap, renderThemeHandler.mRenderTheme);
+        return replaceThemeSymbols(renderThemeHandler.mRenderTheme, outputMap);
     }
 
-    private static IRenderTheme replaceSymbolStylesOnTheme(Map<Object, TextureRegion> regionMap, RenderTheme theme) {
-        SymbolStyle.SymbolBuilder<?> symbolBuilder = new SymbolStyle.SymbolBuilder();
-        Rule[] rules = theme.getRules();
-        for (Rule rule : rules) {
-            replaceSymbolStylesOnRules(regionMap, symbolBuilder, rule);
+    private static IRenderTheme replaceThemeSymbols(RenderTheme renderTheme, Map<Object, TextureRegion> regionMap) {
+        SymbolBuilder<?> symbolBuilder = SymbolStyle.builder();
+        for (Rule rule : renderTheme.getRules()) {
+            replaceRuleSymbols(rule, regionMap, symbolBuilder);
         }
-        return theme;
+        return renderTheme;
     }
 
-    private static void replaceSymbolStylesOnRules(Map<Object, TextureRegion> regionMap,
-                                                   SymbolStyle.SymbolBuilder<?> symbolBuilder, Rule rule) {
+    private static void replaceRuleSymbols(Rule rule, Map<Object, TextureRegion> regionMap, SymbolBuilder<?> symbolBuilder) {
         for (int i = 0, n = rule.styles.length; i < n; i++) {
             RenderStyle style = rule.styles[i];
             if (style instanceof SymbolStyle) {
-                String sourceName = ((SymbolStyle) style).sourceName;
-
-                TextureRegion region = regionMap.get(sourceName);
+                int hash = ((SymbolStyle) style).hash;
+                TextureRegion region = regionMap.get(hash);
                 if (region != null) {
-                    symbolBuilder = symbolBuilder.reset();
-                    rule.styles[i] = symbolBuilder.texture(region).build();
+                    SymbolBuilder<?> b = symbolBuilder.reset();
+                    rule.styles[i] = b.texture(region).build();
                 }
-
             }
         }
         for (Rule subRule : rule.subRules) {
-            replaceSymbolStylesOnRules(regionMap, symbolBuilder, subRule);
+            replaceRuleSymbols(subRule, regionMap, symbolBuilder);
         }
     }
 
-    /**
-     * @return a new Symbol with the given rendering attributes.
-     */
-    protected SymbolStyle createSymbol(String elementName, Attributes attributes) {
-        SymbolStyle.SymbolBuilder<?> b = mSymbolBuilder.reset();
-        String src = null;
+    private final Map<Object, TextureRegion> regionMap;
+    private final List<TextureAtlas> atlasList;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+    private final Map<Object, Bitmap> bitmapMap = new HashMap<>();
 
-            if ("src".equals(name))
-                src = value;
+    public XmlAtlasThemeBuilder(ThemeFile theme,
+                                Map<Object, TextureRegion> regionMap, List<TextureAtlas> atlasList) {
+        this(theme, null, regionMap, atlasList);
+    }
 
-            else if ("cat".equals(name))
-                b.cat(value);
-
-            else if ("symbol-width".equals(name))
-                b.symbolWidth = (int) (Integer.parseInt(value) * mScale);
-
-            else if ("symbol-height".equals(name))
-                b.symbolHeight = (int) (Integer.parseInt(value) * mScale);
-
-            else if ("symbol-percent".equals(name))
-                b.symbolPercent = Integer.parseInt(value);
-
-            else
-                logUnknownAttribute(elementName, name, value, i);
-        }
-
-        validateExists("src", src, elementName);
-
-        String lowSrc = src.toLowerCase(Locale.ENGLISH);
-        if (lowSrc.endsWith(".png") || lowSrc.endsWith(".svg")) {
-            try {
-                Bitmap bitmap = CanvasAdapter.getBitmapAsset(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
-                if (bitmap != null) {
-                    //create a property depends name! (needed if the same image used with different sizes)
-                    String sourceName = lowSrc + b.symbolWidth + "/" + b.symbolHeight + "/" + b.symbolPercent;
-                    bitmapMap.put(sourceName, bitmap);
-                    return b.sourceName(sourceName).build();
-                }
-
-            } catch (Exception e) {
-                log.debug(e.getMessage());
-            }
-            return null;
-        }
-        return b.texture(getAtlasRegion(src)).build();
+    public XmlAtlasThemeBuilder(ThemeFile theme, ThemeCallback themeCallback,
+                                Map<Object, TextureRegion> regionMap, List<TextureAtlas> atlasList) {
+        super(theme, themeCallback);
+        this.regionMap = regionMap;
+        this.atlasList = atlasList;
     }
 
     @Override
-    public void endDocument() {
-        Rule[] rules = new Rule[mRulesList.size()];
-        for (int i = 0, n = rules.length; i < n; i++)
-            rules[i] = mRulesList.get(i).onComplete(null);
+    RenderTheme createTheme(Rule[] rules) {
+        return new AtlasRenderTheme(mMapBackground, mTextScale, rules, mLevels, regionMap, atlasList);
+    }
 
-        mRenderTheme = new AtlasRenderTheme(mMapBackground, mTextScale, rules, mLevels, this.outputMap, this.atlasList);
-
-        mRulesList.clear();
-        mStyles.clear();
-        mRuleStack.clear();
-        mElementStack.clear();
-
-        mTextureAtlas = null;
+    @Override
+    SymbolStyle buildSymbol(SymbolBuilder<?> b, String src, Bitmap bitmap) {
+        // we need to hash with the width/height included as the same symbol could be required
+        // in a different size and must be cached with a size-specific hash
+        String absoluteName = CanvasAdapter.getAbsoluteFile(mTheme.getRelativePathPrefix(), src).getAbsolutePath();
+        int hash = new StringBuilder().append(absoluteName).append(b.symbolWidth).append(b.symbolHeight).append(b.symbolPercent).toString().hashCode();
+        bitmapMap.put(hash, bitmap);
+        return b.hash(hash).build();
     }
 }
