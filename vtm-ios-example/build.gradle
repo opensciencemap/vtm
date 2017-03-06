@@ -8,14 +8,11 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'robovm'
 
 sourceSets.main.java.srcDirs = ["src/"]
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
-configurations {natives}
 
 ext {
     // Configure your application main class
@@ -33,7 +30,6 @@ dependencies {
     compile project(':vtm-gdx')
     compile project(':vtm-jts')
     compile project(':vtm-ios')
-//    natives project(':vtm-ios')
     compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
     compile "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
     compile "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
@@ -61,7 +57,6 @@ task copyIosNatives(type: Copy) {
     into("${buildDir}/natives/")
 }
 
-
 tasks.withType(JavaCompile) {
     compileTask -> compileTask.dependsOn copyVtmResources
 }
@@ -76,28 +71,4 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(JavaCompile) {
     compileTask -> compileTask.dependsOn copyIosNatives
-}
-
-task nativesJar(type: Jar) {
-    classifier = 'natives'
-    from('natives')
-}
-
-task fatJar(type: Jar, dependsOn: classes) {
-    classifier = 'jar-with-dependencies'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    from('natives')
-    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
-    with jar
-}
-
-artifacts {
-    archives nativesJar
-    //archives fatJar
-}
-
-if (project.hasProperty("SONATYPE_USERNAME")) {
-    afterEvaluate {
-        project.apply from: "${rootProject.projectDir}/deploy.gradle"
-    }
 }
