@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * Based on PixmapPacker from LibGdx converted to use VTM Bitmaps without any LibGdx dependencies:
  * https://github.com/libgdx/libgdx/blob/master/gdx/src/com/badlogic/gdx/graphics/g2d/PixmapPacker.java
@@ -89,7 +90,9 @@ public class BitmapPacker {
         final ArrayList<Object> addedRects = new ArrayList<>();
 
         PackerAtlasItem(BitmapPacker packer) {
-            image = CanvasAdapter.newBitmap(packer.atlasWidth, packer.atlasHeight, 0);
+            // On Desktop we use BufferedImage.TYPE_INT_ARGB_PRE (3) format
+            int format = CanvasAdapter.platform.isDesktop() ? 3 : 0;
+            image = CanvasAdapter.newBitmap(packer.atlasWidth, packer.atlasHeight, format);
             canvas = CanvasAdapter.newCanvas();
             canvas.setBitmap(this.image);
             canvas.fillColor(Color.TRANSPARENT);

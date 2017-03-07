@@ -129,17 +129,21 @@ public class AwtCanvas implements Canvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
-        int intX = (int) x;
-        int intY = (int) y;
         BufferedImage src = ((AwtBitmap) bitmap).bitmap;
-        int[] srcbuf = ((DataBufferInt) src.getRaster().getDataBuffer()).getData();
-        int[] dstbuf = ((DataBufferInt) this.bitmap.getRaster().getDataBuffer()).getData();
-        int width = intX + src.getWidth() > this.bitmap.getWidth() ? this.getWidth() - intX : src.getWidth();
-        int height = intY + src.getHeight() > this.bitmap.getHeight() ? this.getHeight() - intY : src.getHeight();
-        int dstoffs = intX + intY * this.bitmap.getWidth();
-        int srcoffs = 0;
-        for (int i = 0; i < height; i++, dstoffs += this.bitmap.getWidth(), srcoffs += width)
-            System.arraycopy(srcbuf, srcoffs, dstbuf, dstoffs, width);
+        // TODO Need better check
+        if (src.isAlphaPremultiplied()) {
+            int intX = (int) x;
+            int intY = (int) y;
+            int[] srcbuf = ((DataBufferInt) src.getRaster().getDataBuffer()).getData();
+            int[] dstbuf = ((DataBufferInt) this.bitmap.getRaster().getDataBuffer()).getData();
+            int width = intX + src.getWidth() > this.bitmap.getWidth() ? this.getWidth() - intX : src.getWidth();
+            int height = intY + src.getHeight() > this.bitmap.getHeight() ? this.getHeight() - intY : src.getHeight();
+            int dstoffs = intX + intY * this.bitmap.getWidth();
+            int srcoffs = 0;
+            for (int i = 0; i < height; i++, dstoffs += this.bitmap.getWidth(), srcoffs += width)
+                System.arraycopy(srcbuf, srcoffs, dstbuf, dstoffs, width);
+        } else
+            this.canvas.drawImage(src, (int) x, (int) y, null);
     }
 
     @Override
