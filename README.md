@@ -53,7 +53,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 ## Credits
 This library contains code from several projects:
 - **Android** (Apache 2.0): some Matrix code, TimSort (http://source.android.com)
-- **libGDX** (Apache 2.0): AsyncTask, MathUtils, Interpolation, PixmapPacker classes (https://github.com/libgdx)
+- **libGDX** (Apache 2.0): AsyncTask, MathUtils, Interpolation, PixmapPacker (https://github.com/libgdx)
 - **mapsforge** (LGPL3): based on 0.2.4 (https://github.com/mapsforge/mapsforge)
 - **osmdroid** (Apache 2.0): some overlay classes (https://github.com/osmdroid/osmdroid)
 - **tessellate** (SGI Free Software License B 2.0): (https://github.com/cscheid/tessellate)
