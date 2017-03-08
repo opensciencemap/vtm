@@ -49,13 +49,13 @@ public class MapView extends GLSurfaceView {
 
     static final Logger log = LoggerFactory.getLogger(MapView.class);
 
-    static {
+    private static void init() {
         System.loadLibrary("vtm-jni");
     }
 
-    protected final AndroidMap mMap;
+    protected AndroidMap mMap;
     protected GestureDetector mGestureDetector;
-    protected final AndroidMotionEvent mMotionEvent;
+    protected AndroidMotionEvent mMotionEvent;
 
     public MapView(Context context) {
         this(context, null);
@@ -64,13 +64,18 @@ public class MapView extends GLSurfaceView {
     public MapView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
+        if (isInEditMode())
+            return;
+
+        init();
+
         /* Not sure if this makes sense */
         this.setWillNotDraw(true);
         this.setClickable(true);
         this.setFocusable(true);
         this.setFocusableInTouchMode(true);
 
-        /* Setup android backedn */
+        /* Setup android backend */
         AndroidGraphics.init();
         AndroidAssets.init(context);
         GLAdapter.init(new AndroidGL());
@@ -138,8 +143,10 @@ public class MapView extends GLSurfaceView {
 
         super.onSizeChanged(width, height, oldWidth, oldHeight);
 
-        if (width > 0 && height > 0)
-            mMap.viewport().setScreenSize(width, height);
+        if (!isInEditMode()) {
+            if (width > 0 && height > 0)
+                mMap.viewport().setScreenSize(width, height);
+        }
     }
 
     public Map map() {
