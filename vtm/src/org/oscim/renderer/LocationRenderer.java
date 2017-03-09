@@ -47,6 +47,7 @@ public class LocationRenderer extends LayerRenderer {
     private int hScale;
     private int hPhase;
     private int hDirection;
+    private int uMode;
 
     private final Point mIndicatorPosition = new Point();
 
@@ -226,14 +227,18 @@ public class LocationRenderer extends LayerRenderer {
             gl.uniform1f(hPhase, 1);
         }
 
-        if (viewShed && mLocationIsVisible && mCallback != null && mCallback.hasRotation()) {
-            float rotation = mCallback.getRotation();
-            rotation -= 90;
-            gl.uniform2f(hDirection,
-                    (float) Math.cos(Math.toRadians(rotation)),
-                    (float) Math.sin(Math.toRadians(rotation)));
+        if (viewShed && mLocationIsVisible) {
+            if (mCallback != null && mCallback.hasRotation()) {
+                float rotation = mCallback.getRotation();
+                rotation -= 90;
+                gl.uniform2f(hDirection,
+                        (float) Math.cos(Math.toRadians(rotation)),
+                        (float) Math.sin(Math.toRadians(rotation)));
+                gl.uniform1i(uMode, 3); // With bearing
+            } else
+                gl.uniform1i(uMode, 2); // Without bearing
         } else
-            gl.uniform2f(hDirection, 0, 0);
+            gl.uniform1i(uMode, 1); // Outside screen
 
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }
@@ -249,6 +254,7 @@ public class LocationRenderer extends LayerRenderer {
         hPhase = gl.getUniformLocation(program, "u_phase");
         hScale = gl.getUniformLocation(program, "u_scale");
         hDirection = gl.getUniformLocation(program, "u_dir");
+        uMode = gl.getUniformLocation(program, "u_mode");
 
         return true;
     }

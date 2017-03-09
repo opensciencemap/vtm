@@ -20,9 +20,10 @@ varying vec2 v_tex;
 uniform float u_scale;
 uniform float u_phase;
 uniform vec2 u_dir;
+uniform int u_mode;
 void main() {
     float len = 1.0 - length(v_tex);
-    if (u_dir.x == 0.0 && u_dir.y == 0.0) {
+    if (u_mode == 1) {
         gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * len;
     } else {
         // outer ring

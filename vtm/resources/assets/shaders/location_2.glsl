@@ -20,9 +20,10 @@ varying vec2 v_tex;
 uniform float u_scale;
 uniform float u_phase;
 uniform vec2 u_dir;
+uniform int u_mode;
 void main() {
     float len = 1.0 - length(v_tex);
-    if (u_dir.x == 0.0 && u_dir.y == 0.0) {
+    if (u_mode == 1) {
         gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * len;
     } else {
         // outer ring
@@ -34,11 +35,11 @@ void main() {
         vec2 dir = normalize(v_tex);
         float d = dot(dir, u_dir);
         // 0.5 width of viewshed
-        d = clamp(smoothstep(0.7, 0.7 + 2.0/u_scale, d) * len, 0.0, 1.0);
+        d = clamp(smoothstep(0.7, 0.7 + 2.0 / u_scale, d) * len, 0.0, 1.0);
         // - subtract inner from outer to create the outline
         // - multiply by viewshed
         // - add center point
-        a = max(d, (a - (b + c)) + c);
+        a = max(d, (a - (b + c)) + c) + (u_mode == 2 ? c : 0);
         gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * a;
     }
 }
