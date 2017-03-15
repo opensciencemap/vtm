@@ -22,6 +22,22 @@ compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
 compile 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
+### Android (with libGDX)
+```groovy
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
+compile 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi-v7a'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86'
+compile 'com.badlogicgames.gdx:gdx:1.9.5'
+compile 'com.badlogicgames.gdx:gdx-backend-android:1.9.5'
+compile 'com.caverock:androidsvg:1.2.2-beta-1'
+```
+
 ### iOS
 
 Detailed iOS instructions can be found [here](ios.md).
