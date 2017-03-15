@@ -16,23 +16,33 @@ compile 'org.slf4j:slf4j-api:1.7.21'
 ### Android
 ```groovy
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips64'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
 compile 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
 ### Android (with libGDX)
 ```groovy
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips64'
 compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
+compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
 compile 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
 compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-arm64-v8a'
 compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi'
 compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi-v7a'
 compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86'
+compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86_64'
 compile 'com.badlogicgames.gdx:gdx:1.9.6'
 compile 'com.badlogicgames.gdx:gdx-backend-android:1.9.6'
 compile 'com.caverock:androidsvg:1.2.2-beta-1'
