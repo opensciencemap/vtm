@@ -14,7 +14,7 @@ allprojects {
     ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
     ext.androidBuildVersionTools = "25.0.2"
-    ext.gdxVersion = "1.9.5"
+    ext.gdxVersion = "1.9.6"
     ext.gwtVersion = "2.8.0"
 
     if (JavaVersion.current().isJava8Compatible()) {
