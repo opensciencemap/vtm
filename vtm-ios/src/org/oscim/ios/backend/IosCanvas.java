@@ -84,20 +84,20 @@ public class IosCanvas implements Canvas {
     }
 
     @Override
-    public void drawBitmap(Bitmap bitmap) {
-        CGRect rect = new CGRect(0, 0, this.cgBitmapContext.getWidth(), this.cgBitmapContext.getHeight());
-        this.cgBitmapContext.saveGState();
-        this.cgBitmapContext.translateCTM(0, 0);
-        this.cgBitmapContext.drawImage(rect, ((IosBitmap) bitmap).cgBitmapContext.toImage());
-        this.cgBitmapContext.restoreGState();
-    }
-
-    @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
         this.cgBitmapContext.saveGState();
         this.cgBitmapContext.translateCTM(x, y);
         this.cgBitmapContext.drawImage(new CGRect(0, 0, bitmap.getWidth(), bitmap.getHeight()),
                 ((IosBitmap) bitmap).cgBitmapContext.toImage());
+        this.cgBitmapContext.restoreGState();
+    }
+
+    @Override
+    public void drawBitmapScaled(Bitmap bitmap) {
+        CGRect rect = new CGRect(0, 0, this.cgBitmapContext.getWidth(), this.cgBitmapContext.getHeight());
+        this.cgBitmapContext.saveGState();
+        this.cgBitmapContext.translateCTM(0, 0);
+        this.cgBitmapContext.drawImage(rect, ((IosBitmap) bitmap).cgBitmapContext.toImage());
         this.cgBitmapContext.restoreGState();
     }
 

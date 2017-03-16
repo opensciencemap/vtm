@@ -7,6 +7,7 @@
 - Osmagray theme [#300](https://github.com/mapsforge/vtm/issues/300)
 - Symbol rotation [#294](https://github.com/mapsforge/vtm/issues/294)
 - Location custom shaders & improvements [#317](https://github.com/mapsforge/vtm/issues/317) [#321](https://github.com/mapsforge/vtm/issues/321)
+- POT textures [#334](https://github.com/mapsforge/vtm/issues/334)
 - OkHttp external cache [#135](https://github.com/mapsforge/vtm/issues/135)
 - Texture atlas improvements [#301](https://github.com/mapsforge/vtm/pull/301) [#304](https://github.com/mapsforge/vtm/pull/304)
 - vtm-ios-example module [#326](https://github.com/mapsforge/vtm/issues/326)

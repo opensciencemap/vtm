@@ -60,16 +60,16 @@ public class AndroidCanvas implements Canvas {
     }
 
     @Override
-    public void drawBitmap(Bitmap bitmap) {
+    public void drawBitmap(Bitmap bitmap, float x, float y) {
+        canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
+    }
+
+    @Override
+    public void drawBitmapScaled(Bitmap bitmap) {
         android.graphics.Bitmap scaledBitmap = android.graphics.Bitmap.createScaledBitmap(
                 ((AndroidBitmap) bitmap).mBitmap, canvas.getWidth(), canvas.getHeight(), true);
         canvas.drawBitmap(scaledBitmap, 0, 0, null);
         scaledBitmap.recycle();
-    }
-
-    @Override
-    public void drawBitmap(Bitmap bitmap, float x, float y) {
-        canvas.drawBitmap(((AndroidBitmap) bitmap).mBitmap, x, y, null);
     }
 
     @Override

@@ -43,10 +43,13 @@ public class Samples extends Activity {
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.samples);
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
-        linearLayout.addView(createButton(MapsforgeStyleActivity.class));
         linearLayout.addView(createButton(MapboxMapActivity.class));
         linearLayout.addView(createButton(OsmJsonMapActivity.class));
-        linearLayout.addView(createButton(AtlasThemeMapActivity.class));
+
+        linearLayout.addView(createLabel("Vector Features"));
+        linearLayout.addView(createButton(MapsforgeStyleActivity.class));
+        linearLayout.addView(createButton(AtlasThemeActivity.class));
+        linearLayout.addView(createButton(POTTextureActivity.class));
 
         linearLayout.addView(createLabel("Raster Maps"));
         linearLayout.addView(createButton(BitmapTileMapActivity.class));

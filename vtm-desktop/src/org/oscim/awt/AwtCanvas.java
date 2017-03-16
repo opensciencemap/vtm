@@ -129,12 +129,6 @@ public class AwtCanvas implements Canvas {
     }
 
     @Override
-    public void drawBitmap(Bitmap bitmap) {
-        Image scaledImage = ((AwtBitmap) bitmap).bitmap.getScaledInstance(this.bitmap.getWidth(), this.bitmap.getHeight(), Image.SCALE_DEFAULT);
-        this.canvas.drawImage(scaledImage, 0, 0, this.bitmap.getWidth(), this.bitmap.getHeight(), null);
-    }
-
-    @Override
     public void drawBitmap(Bitmap bitmap, float x, float y) {
         BufferedImage src = ((AwtBitmap) bitmap).bitmap;
         // TODO Need better check
@@ -151,6 +145,12 @@ public class AwtCanvas implements Canvas {
                 System.arraycopy(srcbuf, srcoffs, dstbuf, dstoffs, width);
         } else
             this.canvas.drawImage(src, (int) x, (int) y, null);
+    }
+
+    @Override
+    public void drawBitmapScaled(Bitmap bitmap) {
+        Image scaledImage = ((AwtBitmap) bitmap).bitmap.getScaledInstance(this.bitmap.getWidth(), this.bitmap.getHeight(), Image.SCALE_DEFAULT);
+        this.canvas.drawImage(scaledImage, 0, 0, this.bitmap.getWidth(), this.bitmap.getHeight(), null);
     }
 
     @Override

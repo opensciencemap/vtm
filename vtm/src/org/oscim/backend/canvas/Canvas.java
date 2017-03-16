@@ -40,14 +40,14 @@ public interface Canvas {
     void drawText(String string, float x, float y, Paint fill, Paint stroke);
 
     /**
-     * Draw Bitmap to fill target by stretching.
-     */
-    void drawBitmap(Bitmap bitmap);
-
-    /**
      * Draw Bitmap to Canvas.
      */
     void drawBitmap(Bitmap bitmap, float x, float y);
+
+    /**
+     * Draw scaled Bitmap to fill target.
+     */
+    void drawBitmapScaled(Bitmap bitmap);
 
     void drawCircle(float x, float y, float radius, Paint paint);
 

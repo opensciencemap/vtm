@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 Longri
  * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -19,11 +18,11 @@ import android.os.Bundle;
 
 import org.oscim.theme.ThemeLoader;
 
-public class AtlasThemeMapActivity extends SimpleMapActivity {
+public class POTTextureActivity extends SimpleMapActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        ThemeLoader.USE_ATLAS = true;
+        ThemeLoader.POT_TEXTURES = true;
 
         super.onCreate(savedInstanceState);
     }

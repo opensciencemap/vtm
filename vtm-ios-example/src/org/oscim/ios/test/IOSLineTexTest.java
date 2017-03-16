@@ -34,8 +34,8 @@ import org.oscim.layers.vector.geometries.Style;
 import org.oscim.map.Map;
 import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.VtmThemes;
-import org.oscim.theme.XmlThemeBuilder;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public class IOSLineTexTest extends GdxMap {
 
         mMap.setMapPosition(0, 0, 1 << 2);
 
-        tex = XmlThemeBuilder.loadTexture("", "patterns/pike.png", 0, 0, 100);
+        tex = Utils.loadTexture("", "patterns/pike.png", 0, 0, 100);
 //        tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/pike.png"));
         tex.mipmap = true;
 
