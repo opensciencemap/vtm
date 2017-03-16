@@ -28,6 +28,7 @@ import org.oscim.backend.canvas.Paint;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.font.TextLayout;
@@ -125,6 +126,12 @@ public class AwtCanvas implements Canvas {
             canvas.setColor(fillPaint.color);
             canvas.fill(s);
         }
+    }
+
+    @Override
+    public void drawBitmap(Bitmap bitmap) {
+        Image scaledImage = ((AwtBitmap) bitmap).bitmap.getScaledInstance(this.bitmap.getWidth(), this.bitmap.getHeight(), Image.SCALE_DEFAULT);
+        this.canvas.drawImage(scaledImage, 0, 0, this.bitmap.getWidth(), this.bitmap.getHeight(), null);
     }
 
     @Override

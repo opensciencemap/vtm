@@ -24,6 +24,7 @@ import org.oscim.theme.IRenderTheme.ThemeException;
 public class ThemeLoader {
 
     public static boolean USE_ATLAS;
+    public static boolean POT_TEXTURES;
 
     public static IRenderTheme load(String renderThemePath) throws ThemeException {
         return load(new ExternalRenderTheme(renderThemePath));

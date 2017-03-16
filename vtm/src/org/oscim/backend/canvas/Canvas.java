@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
+ * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -37,6 +38,11 @@ public interface Canvas {
      * Draw text to Canvas.
      */
     void drawText(String string, float x, float y, Paint fill, Paint stroke);
+
+    /**
+     * Draw Bitmap to fill target by stretching.
+     */
+    void drawBitmap(Bitmap bitmap);
 
     /**
      * Draw Bitmap to Canvas.
