@@ -16,14 +16,6 @@
 
 ## Version 0.7.0 (2017-02-26)
 
-- Same as 0.7.0-rc2
-
-### Version 0.7.0-rc2 (2017-02-20)
-
-- Fix theme parsing in non-Latin locales [#297](https://github.com/mapsforge/vtm/issues/297)
-
-### Version 0.7.0-rc1 (2017-02-16)
-
 - Mapsforge multiple map files [#208](https://github.com/mapsforge/vtm/issues/208)
 - Improved gestures implementation [#253](https://github.com/mapsforge/vtm/issues/253)
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
@@ -43,24 +35,12 @@
 - Animator enhancements with easing functions [#246](https://github.com/mapsforge/vtm/issues/246)
 - Tile grid layer scaling [#238](https://github.com/mapsforge/vtm/issues/238)
 - Internal render themes new SVG resources [#251](https://github.com/mapsforge/vtm/issues/251)
+- Fix theme parsing in non-Latin locales [#297](https://github.com/mapsforge/vtm/issues/297)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.7.0)
 
-## Version 0.6.0 (2016-10-28) -- VTM revive
-
-- Same as 0.6.0-rc3
-
-### Version 0.6.0-rc3 (2016-10-22)
-
-- Minor improvements and bug fixes
-
-### Version 0.6.0-rc2 (2016-10-16)
-
-- Location layer [#171](https://github.com/mapsforge/vtm/issues/171)
-- Minor improvements and bug fixes
-
-### Version 0.6.0-rc1 (2016-10-08)
+## Version 0.6.0 (2016-10-28) - VTM revive
 
 - Render theme SVG resources [#60](https://github.com/mapsforge/vtm/issues/60)
 - Mapsforge multilingual maps [#34](https://github.com/mapsforge/vtm/issues/34)
@@ -69,7 +49,7 @@
 - Native libraries for all platforms [#14](https://github.com/mapsforge/vtm/issues/14)
 - Line stipple and texture rendering [#105](https://github.com/mapsforge/vtm/issues/105)
 - Layer groups [#99](https://github.com/mapsforge/vtm/issues/99) [#103](https://github.com/mapsforge/vtm/issues/103)
-- Location renderer [#171](https://github.com/mapsforge/vtm/issues/171)
+- Location renderer and layer [#171](https://github.com/mapsforge/vtm/issues/171)
 - Map scale bar [#84](https://github.com/mapsforge/vtm/issues/84)
 - Tile size based on scale factor [#183](https://github.com/mapsforge/vtm/issues/183)
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
