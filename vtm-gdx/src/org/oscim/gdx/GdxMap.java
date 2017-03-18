@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -40,7 +40,7 @@ public abstract class GdxMap implements ApplicationListener {
     protected Map mMap;
     protected GestureDetector mGestureDetector;
 
-    private MapRenderer mMapRenderer;
+    protected MapRenderer mMapRenderer;
 
     public GdxMap() {
     }

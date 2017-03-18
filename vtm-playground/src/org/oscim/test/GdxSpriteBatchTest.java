@@ -40,9 +40,6 @@ public class GdxSpriteBatchTest extends GdxMap {
     private GeoPoint position = new GeoPoint(47.1970869, 18.4398422);
     private int mapScale = 2000 << 6;
 
-    // I'm guessing it is private in GdxMap?
-    private MapRenderer mapRenderer;
-
     private OrthographicCamera camera;
     private Viewport viewport;
     private SpriteBatch spriteBatch;
@@ -59,9 +56,9 @@ public class GdxSpriteBatchTest extends GdxMap {
         viewport = new ScreenViewport(camera);
         spriteBatch = new SpriteBatch();
 
-        mapRenderer = new MapRenderer(mMap);
-        mapRenderer.onSurfaceCreated();
-        mapRenderer.onSurfaceChanged(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mMapRenderer = new MapRenderer(mMap);
+        mMapRenderer.onSurfaceCreated();
+        mMapRenderer.onSurfaceChanged(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         mMap.viewport().setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         // Generate a simple texture for testing
@@ -91,7 +88,7 @@ public class GdxSpriteBatchTest extends GdxMap {
         gl.viewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         gl.frontFace(GL.CW);
 
-        mapRenderer.onDrawFrame();
+        mMapRenderer.onDrawFrame();
 
         gl.flush();
         GLState.bindVertexBuffer(0);
@@ -116,7 +113,7 @@ public class GdxSpriteBatchTest extends GdxMap {
 
     @Override
     public void resize(int w, int h) {
-        mapRenderer.onSurfaceChanged(w, h);
+        mMapRenderer.onSurfaceChanged(w, h);
         mMap.viewport().setScreenSize(w, h);
         viewport.update(w, h);
     }
