@@ -4,12 +4,13 @@ buildscript {
     }
     dependencies {
         classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
+        classpath 'org.akhikhl.gretty:gretty:1.4.2'
     }
 }
 
-apply plugin: 'war'
-apply plugin: 'jetty'
 apply plugin: 'gwt'
+apply plugin: 'war'
+apply plugin: 'org.akhikhl.gretty'
 
 sourceSets {
     main.java.srcDirs = ['src']
@@ -56,11 +57,12 @@ gwt {
     src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
 }
 
-// Run jetty with draft compiled war
-task jettyDraftWar(type: JettyRunWar) {
-    dependsOn draftWar
-    //dependsOn.remove('war')
-    webApp = draftWar.archivePath
+farm {
+    webapp draftWar.archivePath, contextPath: "/$name"
+}
+
+project.afterEvaluate {
+    farmRun.dependsOn draftWar
 }
 
 task copyThemeAssets(type: Copy) {
