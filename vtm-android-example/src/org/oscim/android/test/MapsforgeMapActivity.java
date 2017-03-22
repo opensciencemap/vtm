@@ -58,7 +58,8 @@ public class MapsforgeMapActivity extends MapActivity {
 
     @Override
     protected void onDestroy() {
-        mMapScaleBar.destroy();
+        if (mMapScaleBar != null)
+            mMapScaleBar.destroy();
 
         super.onDestroy();
     }

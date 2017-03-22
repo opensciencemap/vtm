@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -71,7 +71,8 @@ public class LayerGroupActivity extends BaseMapActivity {
 
     @Override
     protected void onDestroy() {
-        mapScaleBar.destroy();
+        if (mapScaleBar != null)
+            mapScaleBar.destroy();
 
         super.onDestroy();
     }
