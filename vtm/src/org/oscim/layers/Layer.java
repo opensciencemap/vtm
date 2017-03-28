@@ -1,5 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,17 +23,13 @@ import org.oscim.renderer.LayerRenderer;
 
 public abstract class Layer {
 
-    public interface EnableChangeHandler{
-        void changed(boolean enabled);
-    }
-
     public Layer(Map map) {
         mMap = map;
     }
 
     private boolean mEnabled = true;
+    private EnableHandler mHandler;
     protected final Map mMap;
-    private EnableChangeHandler handler;
 
     protected LayerRenderer mRenderer;
 
@@ -48,19 +46,16 @@ public abstract class Layer {
     public void setEnabled(boolean enabled) {
         boolean changed = mEnabled != enabled;
         mEnabled = enabled;
-        if (changed && this.handler != null) this.handler.changed(mEnabled);
+        if (mHandler != null && changed)
+            mHandler.changed(enabled);
     }
 
     public boolean isEnabled() {
         return mEnabled;
     }
 
-    public void setChangeHandler(EnableChangeHandler handler) {
-        this.handler = handler;
-    }
-
-    public void removeEnabledChangeHandler() {
-        this.handler = null;
+    public void setEnableHandler(EnableHandler handler) {
+        mHandler = handler;
     }
 
     /**
@@ -71,5 +66,9 @@ public abstract class Layer {
 
     public Map map() {
         return mMap;
+    }
+
+    public interface EnableHandler {
+        void changed(boolean enabled);
     }
 }

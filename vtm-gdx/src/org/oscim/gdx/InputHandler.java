@@ -1,5 +1,7 @@
 /*
+ * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -26,7 +28,6 @@ import org.oscim.layers.GroupLayer;
 import org.oscim.layers.Layer;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.map.Layers;
 import org.oscim.map.Map;
 import org.oscim.map.ViewController;
 import org.oscim.theme.VtmThemes;
@@ -160,38 +161,6 @@ public class InputHandler implements InputProcessor {
         return false;
     }
 
-    private boolean toggleBuildingLayer(Layers layers) {
-        //search building layer
-        for (Layer l : layers) {
-            if (l instanceof BuildingLayer) {
-                l.setEnabled(!l.isEnabled());
-                return true;
-            } else if (l instanceof GroupLayer) {
-                if (toggleBuildingLayer(((GroupLayer) l).layers)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean toggleBuildingLayer(List<Layer> layers) {
-        for (Layer l : layers) {
-            if (l instanceof BuildingLayer) {
-                l.setEnabled(!l.isEnabled());
-                return true;
-            } else if (l instanceof GroupLayer) {
-                if (toggleBuildingLayer(((GroupLayer) l).layers)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    ;
-
-
     @Override
     public boolean keyUp(int keycode) {
         switch (keycode) {
@@ -284,5 +253,19 @@ public class InputHandler implements InputProcessor {
         mMap.animator().animateZoom(250, amount > 0 ? 0.75f : 1.333f, fx, fy, Easing.Type.LINEAR);
         mMap.updateMap(false);
         return true;
+    }
+
+    private boolean toggleBuildingLayer(List<Layer> layers) {
+        for (Layer layer : layers) {
+            if (layer instanceof BuildingLayer) {
+                layer.setEnabled(!layer.isEnabled());
+                return true;
+            } else if (layer instanceof GroupLayer) {
+                if (toggleBuildingLayer(((GroupLayer) layer).layers)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
