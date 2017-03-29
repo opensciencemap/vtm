@@ -7,8 +7,8 @@ uniform float u_scale;
 attribute vec2 a_pos;
 varying vec2 v_tex;
 void main() {
-  gl_Position = u_mvp * vec4(a_pos * u_scale * u_phase, 0.0, 1.0);
-  v_tex = a_pos;
+    gl_Position = u_mvp * vec4(a_pos * u_scale * u_phase, 0.0, 1.0);
+    v_tex = a_pos;
 }
 
 $$
@@ -23,7 +23,7 @@ uniform vec2 u_dir;
 uniform int u_mode;
 void main() {
     float len = 1.0 - length(v_tex);
-    if (u_mode == 1) {
+    if (u_mode == -1) {
         gl_FragColor = vec4(0.2, 0.2, 0.8, 1.0) * len;
     } else {
         // outer ring

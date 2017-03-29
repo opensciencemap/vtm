@@ -234,11 +234,13 @@ public class LocationRenderer extends LayerRenderer {
                 gl.uniform2f(hDirection,
                         (float) Math.cos(Math.toRadians(rotation)),
                         (float) Math.sin(Math.toRadians(rotation)));
-                gl.uniform1i(uMode, 3); // With bearing
-            } else
-                gl.uniform1i(uMode, 2); // Without bearing
+                gl.uniform1i(uMode, 1); // With bearing
+            } else {
+                gl.uniform2f(hDirection, 0, 0);
+                gl.uniform1i(uMode, 0); // Without bearing
+            }
         } else
-            gl.uniform1i(uMode, 1); // Outside screen
+            gl.uniform1i(uMode, -1); // Outside screen
 
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }
