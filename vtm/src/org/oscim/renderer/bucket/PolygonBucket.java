@@ -28,7 +28,6 @@ import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ArrayUtils;
 import org.oscim.utils.geom.LineClipper;
@@ -39,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ShortBuffer;
 
 import static org.oscim.backend.GLAdapter.gl;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.utils.FastMath.clamp;
 
 /**
@@ -51,8 +51,6 @@ public final class PolygonBucket extends RenderBucket {
     public final static int CLIP_STENCIL = 1;
     public final static int CLIP_DEPTH = 2;
     public final static int CLIP_TEST_DEPTH = 3;
-
-    private static final float S = MapRenderer.COORD_SCALE;
 
     public static boolean enableTexture = true;
 
@@ -75,7 +73,7 @@ public final class PolygonBucket extends RenderBucket {
     final float[] bbox = new float[8];
 
     public void addPolygon(float[] points, int[] index) {
-        short center = (short) ((Tile.SIZE >> 1) * S);
+        short center = (short) ((Tile.SIZE >> 1) * COORD_SCALE);
 
         boolean outline = area.strokeWidth > 0;
 
@@ -96,8 +94,8 @@ public final class PolygonBucket extends RenderBucket {
             int inPos = pos;
 
             for (int j = 0; j < length; j += 2) {
-                float x = (points[inPos++] * S);
-                float y = (points[inPos++] * S);
+                float x = (points[inPos++] * COORD_SCALE);
+                float y = (points[inPos++] * COORD_SCALE);
                 xmax = Math.max(xmax, x);
                 xmin = Math.min(xmin, x);
                 ymax = Math.max(ymax, y);
@@ -117,8 +115,8 @@ public final class PolygonBucket extends RenderBucket {
                 }
             }
 
-            vertexItems.add((short) (points[pos + 0] * S),
-                    (short) (points[pos + 1] * S));
+            vertexItems.add((short) (points[pos + 0] * COORD_SCALE),
+                    (short) (points[pos + 1] * COORD_SCALE));
             numVertices++;
 
             pos += length;

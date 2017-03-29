@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ShortBuffer;
 
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.renderer.bucket.RenderBucket.CIRCLE;
 import static org.oscim.renderer.bucket.RenderBucket.HAIRLINE;
 import static org.oscim.renderer.bucket.RenderBucket.LINE;
@@ -434,7 +435,7 @@ public class RenderBuckets extends TileData {
     private static short[] fillCoords;
 
     static {
-        short s = (short) (Tile.SIZE * MapRenderer.COORD_SCALE);
+        short s = (short) (Tile.SIZE * COORD_SCALE);
         fillCoords = new short[]{0, s, s, s, 0, 0, s, 0};
     }
 

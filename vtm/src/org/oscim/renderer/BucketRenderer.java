@@ -33,6 +33,7 @@ import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 import static org.oscim.renderer.bucket.RenderBucket.BITMAP;
 import static org.oscim.renderer.bucket.RenderBucket.CIRCLE;
 import static org.oscim.renderer.bucket.RenderBucket.HAIRLINE;
@@ -173,7 +174,7 @@ public class BucketRenderer extends LayerRenderer {
      * @param project if true apply view- and projection, or just view otherwise.
      */
     protected void setMatrix(GLViewport v, boolean project) {
-        setMatrix(v, project, MapRenderer.COORD_SCALE);
+        setMatrix(v, project, COORD_SCALE);
     }
 
     protected void setMatrix(GLViewport v, boolean project, float coordScale) {

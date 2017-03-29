@@ -247,7 +247,7 @@ public final class LineTexBucket extends LineBucket {
 
         /* factor to normalize extrusion vector and scale to coord scale */
         private final static float COORD_SCALE_BY_DIR_SCALE =
-                MapRenderer.COORD_SCALE / LineBucket.DIR_SCALE;
+                COORD_SCALE / LineBucket.DIR_SCALE;
 
         private static int mVertexFlipID;
 

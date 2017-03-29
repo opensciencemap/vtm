@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.oscim.backend.GLAdapter.gl;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 public abstract class ExtrusionRenderer extends LayerRenderer {
     static final Logger log = LoggerFactory.getLogger(ExtrusionRenderer.class);
@@ -254,7 +255,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
         float x = (float) ((l.x - v.pos.x) * curScale);
         float y = (float) ((l.y - v.pos.y) * curScale);
 
-        v.mvp.setTransScale(x, y, scale / MapRenderer.COORD_SCALE);
+        v.mvp.setTransScale(x, y, scale / COORD_SCALE);
         v.mvp.setValue(10, scale / 10);
         v.mvp.multiplyLhs(v.viewproj);
 

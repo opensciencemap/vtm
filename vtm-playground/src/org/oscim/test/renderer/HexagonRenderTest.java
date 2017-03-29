@@ -33,6 +33,7 @@ import org.oscim.utils.FastMath;
 import java.nio.FloatBuffer;
 
 import static org.oscim.backend.GLAdapter.gl;
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 public class HexagonRenderTest extends GdxMap {
 
@@ -66,7 +67,7 @@ public class HexagonRenderTest extends GdxMap {
         private BufferObject mVBO;
 
         int mZoom = -1;
-        float mCellScale = 60 * MapRenderer.COORD_SCALE;
+        float mCellScale = 60 * COORD_SCALE;
 
         @Override
         public void update(GLViewport v) {

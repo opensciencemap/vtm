@@ -25,7 +25,6 @@ import org.oscim.renderer.GLShader;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.GLUtils;
 import org.oscim.renderer.GLViewport;
-import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.bucket.VertexData.Chunk;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.utils.ColorUtil;
@@ -134,8 +133,7 @@ public class MeshBucket extends RenderBucket {
 
             Chunk chunk = vertexItems.obtainChunk();
 
-            tess.getVertices(chunk.vertices, offset, size,
-                    MapRenderer.COORD_SCALE);
+            tess.getVertices(chunk.vertices, offset, size, COORD_SCALE);
             offset += size;
 
             vertexItems.releaseChunk(size);

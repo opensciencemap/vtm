@@ -83,7 +83,7 @@ public class TextureBucket extends RenderBucket {
     }
 
     static class Shader extends GLShader {
-        int uMV, uProj, uScale, uTexSize, aPos, aTexCoord;
+        int uMV, uProj, uScale, uCoordScale, uTexSize, aPos, aTexCoord;
 
         Shader() {
             if (!create("texture_layer"))
@@ -92,6 +92,7 @@ public class TextureBucket extends RenderBucket {
             uMV = getUniform("u_mv");
             uProj = getUniform("u_proj");
             uScale = getUniform("u_scale");
+            uCoordScale = getUniform("u_coord_scale");
             uTexSize = getUniform("u_div");
             aPos = getAttrib("vertex");
             aTexCoord = getAttrib("tex_coord");
@@ -127,6 +128,7 @@ public class TextureBucket extends RenderBucket {
 
             TextureBucket tb = (TextureBucket) b;
             gl.uniform1f(shader.uScale, tb.fixed ? 1 / scale : 1);
+            gl.uniform1f(shader.uCoordScale, COORD_SCALE);
 
             v.proj.setAsUniform(shader.uProj);
             v.mvp.setAsUniform(shader.uMV);

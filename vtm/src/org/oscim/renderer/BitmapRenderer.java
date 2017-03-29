@@ -21,6 +21,8 @@ package org.oscim.renderer;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.bucket.BitmapBucket;
 
+import static org.oscim.renderer.MapRenderer.COORD_SCALE;
+
 /**
  * RenderLayer to draw a custom Bitmap.
  * NOTE: Only modify the Bitmap within a synchronized block!
@@ -91,7 +93,7 @@ public class BitmapRenderer extends BucketRenderer {
 
     @Override
     public synchronized void render(GLViewport v) {
-        v.useScreenCoordinates(mWidth, mHeight, position, xOffset, yOffset, 8);
+        v.useScreenCoordinates(mWidth, mHeight, position, xOffset, yOffset, COORD_SCALE);
         BitmapBucket.Renderer.draw(buckets.get(), v, 1, 1);
     }
 }
