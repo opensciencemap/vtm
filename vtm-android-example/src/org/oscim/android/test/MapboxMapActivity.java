@@ -18,6 +18,7 @@ package org.oscim.android.test;
 import android.os.Bundle;
 
 import org.oscim.android.cache.TileCache;
+import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -28,7 +29,7 @@ import org.oscim.tiling.source.mvt.MapboxTileSource;
 
 public class MapboxMapActivity extends MapActivity {
 
-    private static final boolean USE_CACHE = true;
+    private static final boolean USE_CACHE = false;
 
     private TileCache mCache;
 
@@ -54,6 +55,8 @@ public class MapboxMapActivity extends MapActivity {
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
+
+        mMap.layers().add(new TileGridLayer(mMap, getResources().getDisplayMetrics().density));
     }
 
     @Override
