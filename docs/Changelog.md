@@ -12,6 +12,7 @@
 - Texture atlas improvements [#301](https://github.com/mapsforge/vtm/pull/301) [#304](https://github.com/mapsforge/vtm/pull/304)
 - vtm-ios-example module [#326](https://github.com/mapsforge/vtm/issues/326)
 - Handle layers enabled state [#342](https://github.com/mapsforge/vtm/issues/342)
+- Fix coord scale short overflow [#343](https://github.com/mapsforge/vtm/issues/343)
 - Gretty plugin at web modules [#338](https://github.com/mapsforge/vtm/issues/338)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.8.0)
