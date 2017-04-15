@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Gerber Lóránt Viktor
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -25,7 +26,6 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import org.oscim.backend.GL;
-import org.oscim.core.GeoPoint;
 import org.oscim.core.Point;
 import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
@@ -37,8 +37,9 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import static org.oscim.backend.GLAdapter.gl;
 
 public class GdxSpriteBatchTest extends GdxMap {
-    private GeoPoint position = new GeoPoint(47.1970869, 18.4398422);
-    private int mapScale = 2000 << 6;
+    private double latitude = 47.1970869;
+    private double longitude = 18.4398422;
+    private double scale = 1 << 17;
 
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -50,7 +51,7 @@ public class GdxSpriteBatchTest extends GdxMap {
     protected void createLayers() {
         TileSource tileSource = new OSciMap4TileSource();
         initDefaultLayers(tileSource, false, true, false);
-        mMap.setMapPosition(position.getLatitude(), position.getLongitude(), mapScale);
+        mMap.setMapPosition(latitude, longitude, scale);
 
         camera = new OrthographicCamera();
         viewport = new ScreenViewport(camera);
@@ -104,10 +105,8 @@ public class GdxSpriteBatchTest extends GdxMap {
         spriteBatch.end();
 
         // Fly over the city.
-        double lon = position.getLongitude();
-        lon += 0.0001;
-        position = new GeoPoint(position.getLatitude(), lon);
-        mMap.setMapPosition(position.getLatitude(), position.getLongitude(), mapScale);
+        longitude += 0.0001;
+        mMap.setMapPosition(latitude, longitude, scale);
         mMap.updateMap(true);
     }
 
