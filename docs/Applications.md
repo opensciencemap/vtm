@@ -10,5 +10,6 @@
 | [Navi Cyprus](https://play.google.com/store/apps/developer?id=Talent+S.A.) | Map and navigation application | Proprietary/Free and Commercial | Android | Closed |
 | [topoGuide](http://www.topoguide.gr/index-en.php) | Digital guides for the outdoor | Proprietary/Free and Commercial | Android | Closed |
 | [Ubitrek](https://play.google.com/store/apps/details?id=ubicarta.ubitrek) | Hiking with IGN maps | Proprietary/Free | Android | Closed |
+| [VTM with Eclipse RCP](https://github.com/wolfgang-ch/vtm-with-rcp) | VTM with an Eclipse RCP application | GPL3/Free | Desktop | Open |
 
 You know an application that is missing here? Please inform us by sending a message via our public [mailing list](https://groups.google.com/group/mapsforge-dev).
