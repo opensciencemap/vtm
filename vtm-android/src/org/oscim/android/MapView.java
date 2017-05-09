@@ -81,7 +81,7 @@ public class MapView extends GLSurfaceView {
         GLAdapter.init(new AndroidGL());
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
+        CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
 
         /* Initialize the Map */
         mMap = new AndroidMap(this);

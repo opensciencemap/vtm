@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -42,7 +42,7 @@ public class MainActivity extends AndroidApplication {
         GLAdapter.init(new AndroidGL());
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        CanvasAdapter.dpi = (int) Math.max(metrics.xdpi, metrics.ydpi);
+        CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
         Tile.SIZE = Tile.calculateTileSize(metrics.scaledDensity);
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
