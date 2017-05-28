@@ -729,27 +729,27 @@
                             <m v="primary">
                                 <line use="primary" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#e46d71"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#e46d71" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="trunk">
                                 <line use="trunk" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#7fc97f"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#7fc97f" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="motorway">
                                 <line use="motorway" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#809bc0"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#809bc0" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>
@@ -863,27 +863,27 @@
                             <m v="primary">
                                 <line cap="square" outline="casing-bridge" use="primary" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#e46d71"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#e46d71" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="trunk">
                                 <line outline="casing-bridge" use="trunk" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#7fc97f"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#7fc97f" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="motorway">
                                 <line cap="square" outline="casing-bridge" use="motorway" />
                                 <m zoom-min="14">
-                                    <text style="bold" k="name" size="16" stroke="#809bc0"
-                                        stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" size="12"
+                                    <text style="bold" k="name" priority="1" size="16"
+                                        stroke="#809bc0" stroke-width="2.0" />
+                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
                                         stroke="#ffffff" stroke-width="2.0" />
                                 </m>
                             </m>

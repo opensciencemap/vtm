@@ -6,10 +6,13 @@
     <style-text style="bold" caption="true" dy="20" fill="#4040ff" id="caption-small-blue" k="name"
         size="16" stroke="#ffffff" stroke-width="2.0" />
 
-    <style-text style="bold" fill="#eeffee" id="road" k="name" size="18" stroke="#606050"
-        stroke-width="2.5" />
-    <style-text style="bold" fill="#ffef7d" id="major-road" k="name" size="19" stroke="#624f00"
-        stroke-width="2.5" />
+    <style-text style="bold" fill="#eeffee" id="road" k="name" priority="2" size="18"
+        stroke="#606050" stroke-width="2.5" />
+
+    <style-text style="bold" fill="#ffef7d" id="major-road" k="name" priority="1" size="19"
+        stroke="#624f00" stroke-width="2.5" />
+    <style-text style="bold" fill="#606060" id="ref" k="ref" priority="2" size="12" stroke="#ffffff"
+        stroke-width="2.0" />
 
     <style-area fade="10" fill="#ff0000" id="residential" />
 
@@ -433,6 +436,7 @@
                     <line use="primary:z11" />
                     <outline use="0" />
                     <text use="major-road" />
+                    <text use="ref" />
                 </m>
 
                 <m v="trunk">
@@ -440,6 +444,7 @@
                     <outline use="0" />
                     <!-- <outline use="glow"/> -->
                     <text use="major-road" />
+                    <text use="ref" />
                 </m>
 
                 <m v="motorway">
@@ -447,6 +452,7 @@
                     <outline use="0" />
                     <!-- <outline use="glow"/> -->
                     <text use="major-road" />
+                    <text use="ref" />
                 </m>
             </m>
 
@@ -682,18 +688,21 @@
                             <line use="primary:z11" />
                             <outline use="primary" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
 
                         <m v="trunk">
                             <line use="trunk" />
                             <outline use="motorway" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
 
                         <m v="motorway">
                             <line use="highway:z11" />
                             <outline use="motorway" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                     </m> <!-- end area=~|no|false -->
                 </m> <!-- end tunnel|bridge=~|no|false -->
@@ -775,18 +784,21 @@
                             <line cap="square" use="primary:z11" />
                             <outline use="bridge" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
 
                         <m v="trunk">
                             <line cap="square" use="trunk" />
                             <outline use="bridge" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
 
                         <m v="motorway">
                             <line cap="square" use="highway:z11" />
                             <outline use="bridge" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                     </m> <!-- end area=~|no|false -->
 

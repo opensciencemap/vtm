@@ -11,6 +11,8 @@
 
     <style-text style="bold" fill="#101010" id="major-road" k="name" priority="1" size="16"
         stroke="#eeeeee" stroke-width="2.0" />
+    <style-text style="bold" fill="#606060" id="ref" k="ref" priority="2" size="12" stroke="#ffffff"
+        stroke-width="2.0" />
 
     <style-text caption="true" dy="20" fill="#404000" id="poi" k="name" size="16" stroke="#aaffffff"
         stroke-width="2.0" />
@@ -488,16 +490,19 @@
                         <m v="primary">
                             <line outline="0" use="primary:z11" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                         <m v="trunk">
                             <line blur="0.3" outline="0" use="trunk" />
                             <!-- <outline use="glow"/> -->
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                         <m v="motorway">
                             <line blur="0.3" outline="0" use="highway:z11" />
                             <!-- <outline use="glow"/> -->
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                     </m>
                     <!-- railway tunnel -->
@@ -710,14 +715,17 @@
                         <m v="primary">
                             <line outline="primary" use="primary:z11" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                         <m v="trunk">
                             <line outline="motorway" use="trunk" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                         <m v="motorway">
                             <line outline="motorway" use="highway:z11" />
                             <text use="major-road" />
+                            <text use="ref" />
                         </m>
                     </m> <!-- end area=~|no|false -->
                 </m><!-- end tunnel|bridge=~|no|false -->
@@ -795,14 +803,17 @@
                                 <m v="primary">
                                     <line cap="square" outline="bridge" use="primary:z11" />
                                     <text use="major-road" />
+                                    <text use="ref" />
                                 </m>
                                 <m v="trunk">
                                     <line cap="square" outline="bridge" use="trunk" />
                                     <text use="major-road" />
+                                    <text use="ref" />
                                 </m>
                                 <m v="motorway">
                                     <line cap="square" outline="bridge" use="highway:z11" />
                                     <text use="major-road" />
+                                    <text use="ref" />
                                 </m>
                             </m>
                         </m><!-- end area=~|no|false -->
