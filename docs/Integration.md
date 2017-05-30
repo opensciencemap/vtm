@@ -10,7 +10,7 @@ Current version is [![Maven Central](https://img.shields.io/maven-central/v/org.
 ```groovy
 compile 'org.mapsforge:vtm:[CURRENT-VERSION]'
 compile 'org.mapsforge:vtm-themes:[CURRENT-VERSION]'
-compile 'org.slf4j:slf4j-api:1.7.21'
+compile 'org.slf4j:slf4j-api:1.7.25'
 ```
 
 ### Android
