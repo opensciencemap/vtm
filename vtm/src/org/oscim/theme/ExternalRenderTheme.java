@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,7 +33,7 @@ public class ExternalRenderTheme implements ThemeFile {
     private static final long serialVersionUID = 1L;
 
     private final long mFileModificationDate;
-    private final XmlRenderThemeMenuCallback mMenuCallback;
+    private XmlRenderThemeMenuCallback mMenuCallback;
     private final String mPath;
 
     /**
@@ -105,5 +105,10 @@ public class ExternalRenderTheme implements ThemeFile {
             throw new ThemeException(e.getMessage());
         }
         return is;
+    }
+
+    @Override
+    public void setMenuCallback(XmlRenderThemeMenuCallback menuCallback) {
+        mMenuCallback = menuCallback;
     }
 }

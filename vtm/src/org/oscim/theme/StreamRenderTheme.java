@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -27,7 +27,7 @@ public class StreamRenderTheme implements ThemeFile {
     private static final long serialVersionUID = 1L;
 
     private final InputStream mInputStream;
-    private final XmlRenderThemeMenuCallback mMenuCallback;
+    private XmlRenderThemeMenuCallback mMenuCallback;
     private final String mRelativePathPrefix;
 
     /**
@@ -79,5 +79,10 @@ public class StreamRenderTheme implements ThemeFile {
     @Override
     public InputStream getRenderThemeAsStream() throws ThemeException {
         return mInputStream;
+    }
+
+    @Override
+    public void setMenuCallback(XmlRenderThemeMenuCallback menuCallback) {
+        mMenuCallback = menuCallback;
     }
 }

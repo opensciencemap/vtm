@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -23,6 +23,9 @@ import org.oscim.theme.IRenderTheme.ThemeException;
 import java.io.InputStream;
 import java.io.Serializable;
 
+/**
+ * Interface for a render theme which is defined in XML.
+ */
 public interface ThemeFile extends Serializable {
     /**
      * @return the interface callback to create a settings menu on the fly.
@@ -39,4 +42,9 @@ public interface ThemeFile extends Serializable {
      * @throws ThemeException if an error occurs while reading the render theme XML.
      */
     InputStream getRenderThemeAsStream() throws ThemeException;
+
+    /**
+     * @param menuCallback the interface callback to create a settings menu on the fly.
+     */
+    void setMenuCallback(XmlRenderThemeMenuCallback menuCallback);
 }

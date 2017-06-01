@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -55,5 +55,9 @@ public enum VtmThemes implements ThemeFile {
     @Override
     public InputStream getRenderThemeAsStream() throws ThemeException {
         return AssetAdapter.readFileAsStream(mPath);
+    }
+
+    @Override
+    public void setMenuCallback(XmlRenderThemeMenuCallback menuCallback) {
     }
 }
