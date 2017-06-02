@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2014 Hannes Janetzek
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -63,7 +64,6 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
         //render TextItems to a bitmap and prepare vertex buffer data.
         mTextLayer.prepare();
-        mTextLayer.clearLabels();
     }
 
     protected void addLine(Task t, Feature f, Rule rule, Geometry g) {
@@ -125,15 +125,17 @@ public class OSMIndoorLayer extends JeoVectorLayer {
                 float x = 0;
                 float y = 0;
                 int n = mGeom.index[0];
-                for (int i = 0; i < n; ) {
-                    x += mGeom.points[i++];
-                    y += mGeom.points[i++];
+                if (n > 0) {
+                    for (int i = 0; i < n; ) {
+                        x += mGeom.points[i++];
+                        y += mGeom.points[i++];
+                    }
+
+                    TextItem ti = TextItem.pool.get();
+                    ti.set(x / (n / 2), y / (n / 2), (String) o, mText);
+
+                    mTextLayer.addText(ti);
                 }
-
-                TextItem ti = TextItem.pool.get();
-                ti.set(x / (n / 2) / 8, y / (n / 2) / 8, (String) o, mText);
-
-                mTextLayer.addText(ti);
             }
         }
     }
