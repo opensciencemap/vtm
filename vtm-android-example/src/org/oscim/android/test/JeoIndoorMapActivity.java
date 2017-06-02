@@ -94,7 +94,7 @@ public class JeoIndoorMapActivity extends BaseMapActivity {
 
         VectorDataset data = JeoTest.readGeoJson(is);
         Style style = JeoTest.getStyle();
-        mIndoorLayer = new OSMIndoorLayer(mMap, data, style);
+        mIndoorLayer = new OSMIndoorLayer(mMap, data, style, getResources().getDisplayMetrics().density);
         mMap.layers().add(mIndoorLayer);
 
         showToast("data ready");

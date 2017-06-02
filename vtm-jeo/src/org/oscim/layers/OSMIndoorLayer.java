@@ -43,13 +43,19 @@ import java.util.HashMap;
 public class OSMIndoorLayer extends JeoVectorLayer {
 
     protected TextBucket mTextLayer;
-    protected TextStyle mText = TextStyle.builder()
-            .fontSize(16).color(Color.BLACK)
-            .strokeWidth(2.2f).strokeColor(Color.WHITE)
-            .build();
+    protected TextStyle mText;
 
     public OSMIndoorLayer(Map map, VectorDataset data, Style style) {
+        this(map, data, style, 1);
+    }
+
+    public OSMIndoorLayer(Map map, VectorDataset data, Style style, float scale) {
         super(map, data, style);
+
+        mText = TextStyle.builder()
+                .fontSize(16 * scale).color(Color.BLACK)
+                .strokeWidth(2.2f * scale).strokeColor(Color.WHITE)
+                .build();
     }
 
     public boolean[] activeLevels = new boolean[10];
