@@ -19,6 +19,7 @@
 package org.oscim.renderer;
 
 import org.oscim.backend.GL;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.Box;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
@@ -35,6 +36,7 @@ public class LocationRenderer extends LayerRenderer {
     private static final long INTERVAL = 2000;
 
     private static final float CIRCLE_SIZE = 60;
+    private static final int COLOR = 0xff3333cc;
     private static final int SHOW_ACCURACY_ZOOM = 16;
 
     private final Map mMap;
@@ -47,6 +49,7 @@ public class LocationRenderer extends LayerRenderer {
     private int hScale;
     private int hPhase;
     private int hDirection;
+    private int uColor;
     private int uMode;
 
     private final Point mIndicatorPosition = new Point();
@@ -62,6 +65,7 @@ public class LocationRenderer extends LayerRenderer {
     private long mAnimStart;
 
     private Callback mCallback;
+    private final float[] mColors = new float[4];
     private final Point mLocation = new Point(Double.NaN, Double.NaN);
     private double mRadius;
     private int mShowAccuracyZoom = SHOW_ACCURACY_ZOOM;
@@ -69,10 +73,24 @@ public class LocationRenderer extends LayerRenderer {
     public LocationRenderer(Map map, Layer layer) {
         mMap = map;
         mLayer = layer;
+
+        float a = Color.aToFloat(COLOR);
+        mColors[0] = a * Color.rToFloat(COLOR);
+        mColors[1] = a * Color.gToFloat(COLOR);
+        mColors[2] = a * Color.bToFloat(COLOR);
+        mColors[3] = a;
     }
 
     public void setCallback(Callback callback) {
         mCallback = callback;
+    }
+
+    public void setColor(int color) {
+        float a = Color.aToFloat(color);
+        mColors[0] = a * Color.rToFloat(color);
+        mColors[1] = a * Color.gToFloat(color);
+        mColors[2] = a * Color.bToFloat(color);
+        mColors[3] = a;
     }
 
     public void setLocation(double x, double y, double radius) {
@@ -242,6 +260,8 @@ public class LocationRenderer extends LayerRenderer {
         } else
             gl.uniform1i(uMode, -1); // Outside screen
 
+        GLUtils.glUniform4fv(uColor, 1, mColors);
+
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -256,6 +276,7 @@ public class LocationRenderer extends LayerRenderer {
         hPhase = gl.getUniformLocation(program, "u_phase");
         hScale = gl.getUniformLocation(program, "u_scale");
         hDirection = gl.getUniformLocation(program, "u_dir");
+        uColor = gl.getUniformLocation(program, "u_color");
         uMode = gl.getUniformLocation(program, "u_mode");
 
         return true;
