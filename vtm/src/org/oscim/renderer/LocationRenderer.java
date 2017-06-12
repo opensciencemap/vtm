@@ -125,7 +125,8 @@ public class LocationRenderer extends LayerRenderer {
 
                 long diff = System.currentTimeMillis() - lastRun;
                 mMap.postDelayed(this, Math.min(ANIM_RATE, diff));
-                mMap.render();
+                if (!mLocationIsVisible)
+                    mMap.render();
                 lastRun = System.currentTimeMillis();
             }
         };
