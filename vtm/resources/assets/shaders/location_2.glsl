@@ -40,7 +40,9 @@ void main() {
         // - subtract inner from outer to create the outline
         // - multiply by viewshed
         // - add center point
-        a = max(d, (a - (b + c)) + c) + (u_mode == 0 ? c : 0);
+        a = max(d, (a - (b + c)) + c);
+        if (u_mode == 0)
+            a += c;
         gl_FragColor = u_color * a;
     }
 }
