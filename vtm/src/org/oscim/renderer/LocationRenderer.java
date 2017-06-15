@@ -18,6 +18,7 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.Box;
@@ -35,12 +36,13 @@ public class LocationRenderer extends LayerRenderer {
     private static final long ANIM_RATE = 50;
     private static final long INTERVAL = 2000;
 
-    private static final float CIRCLE_SIZE = 60;
+    private static final float CIRCLE_SIZE = 40;
     private static final int COLOR = 0xff3333cc;
     private static final int SHOW_ACCURACY_ZOOM = 16;
 
     private final Map mMap;
     private final Layer mLayer;
+    private final float mScale;
 
     private String mShaderFile;
     private int mShaderProgram;
@@ -71,8 +73,13 @@ public class LocationRenderer extends LayerRenderer {
     private int mShowAccuracyZoom = SHOW_ACCURACY_ZOOM;
 
     public LocationRenderer(Map map, Layer layer) {
+        this(map, layer, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
+    }
+
+    public LocationRenderer(Map map, Layer layer, float scale) {
         mMap = map;
         mLayer = layer;
+        mScale = scale;
 
         float a = Color.aToFloat(COLOR);
         mColors[0] = a * Color.rToFloat(COLOR);
@@ -212,7 +219,7 @@ public class LocationRenderer extends LayerRenderer {
         GLState.enableVertexArrays(hVertexPosition, -1);
         MapRenderer.bindQuadVertexVBO(hVertexPosition/*, true*/);
 
-        float radius = CIRCLE_SIZE;
+        float radius = CIRCLE_SIZE * mScale;
 
         animate(true);
         boolean viewShed = false;
@@ -221,7 +228,7 @@ public class LocationRenderer extends LayerRenderer {
         } else {
             if (v.pos.zoomLevel >= mShowAccuracyZoom)
                 radius = (float) (mRadius * v.pos.scale);
-            radius = Math.max(CIRCLE_SIZE, radius);
+            radius = Math.max(CIRCLE_SIZE * mScale, radius);
 
             viewShed = true;
             //animate(false);
