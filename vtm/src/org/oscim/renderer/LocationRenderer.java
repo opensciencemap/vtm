@@ -108,6 +108,7 @@ public class LocationRenderer extends LayerRenderer {
 
     public void setShader(String shaderFile) {
         mShaderFile = shaderFile;
+        mInitialized = false;
     }
 
     public void setShowAccuracyZoom(int showAccuracyZoom) {
