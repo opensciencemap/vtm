@@ -15,6 +15,7 @@
 - Fix coord scale short overflow [#343](https://github.com/mapsforge/vtm/issues/343)
 - Mapsforge map read improvements [#357](https://github.com/mapsforge/vtm/issues/357)
 - Improve canvas DPI setting [#349](https://github.com/mapsforge/vtm/issues/349)
+- OSM indoor layer enhancements [#366](https://github.com/mapsforge/vtm/issues/366)
 - Gretty plugin at web modules [#338](https://github.com/mapsforge/vtm/issues/338)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.8.0)

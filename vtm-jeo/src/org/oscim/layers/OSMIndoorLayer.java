@@ -105,8 +105,8 @@ public class OSMIndoorLayer extends JeoVectorLayer {
             float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
             int color = Color.rainbow((level + 1) / 10f);
 
-            if (level > -2 && !active)
-                color = Color.fade(color, 0.1f);
+            if (/*level > -2 && */!active)
+                color = getInactiveColor(color);
 
             ll.line = new LineStyle(0, color, width);
             ll.heightOffset = level * 4;
@@ -116,8 +116,8 @@ public class OSMIndoorLayer extends JeoVectorLayer {
         MeshBucket mesh = t.buckets.getMeshBucket(level * 3);
         if (mesh.area == null) {
             int color = JeoUtils.color(rule.color(f, CartoCSS.POLYGON_FILL, RGB.red));
-            if (level > -2 && !active)
-                color = Color.fade(color, 0.1f);
+            if (/*level > -2 && */!active)
+                color = getInactiveColor(color);
 
             mesh.area = new AreaStyle(color);
             //mesh.area = new Area(Color.fade(Color.DKGRAY, 0.1f));
@@ -152,6 +152,10 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
     }
 
+    protected int getInactiveColor(int color) {
+        return Color.fade(color, 0.1f);
+    }
+
     private int getLevel(Feature f) {
         /* not sure if one could match these geojson properties with cartocss */
         Object o = f.get("@relations");
@@ -177,5 +181,4 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
         return 0;
     }
-
 }
