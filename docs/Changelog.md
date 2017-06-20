@@ -26,7 +26,7 @@
 - Improved gestures implementation [#253](https://github.com/mapsforge/vtm/issues/253)
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
 - vtm-web modules update [#51](https://github.com/mapsforge/vtm/issues/51)
-- Mapbox (Mapzen) vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
+- Mapzen MVT vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
 - SVG resources scaling in themes [#214](https://github.com/mapsforge/vtm/issues/214)
 - Circle map style [#122](https://github.com/mapsforge/vtm/issues/122)
 - Oneway arrows in themes [#275](https://github.com/mapsforge/vtm/issues/275)

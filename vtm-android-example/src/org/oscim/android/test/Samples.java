@@ -43,7 +43,7 @@ public class Samples extends Activity {
         LinearLayout linearLayout = findViewById(R.id.samples);
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
-        linearLayout.addView(createButton(MapboxMapActivity.class));
+        linearLayout.addView(createButton(MapzenMvtMapActivity.class));
 
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));

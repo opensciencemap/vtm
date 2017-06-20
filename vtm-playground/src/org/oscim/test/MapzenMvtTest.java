@@ -21,7 +21,7 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
-import org.oscim.tiling.source.mvt.MapboxTileSource;
+import org.oscim.tiling.source.mvt.MapzenMvtTileSource;
 
 import java.io.File;
 import java.util.UUID;
@@ -29,7 +29,7 @@ import java.util.UUID;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 
-public class MapboxTest extends GdxMapApp {
+public class MapzenMvtTest extends GdxMapApp {
 
     private static final boolean USE_CACHE = false;
 
@@ -45,7 +45,7 @@ public class MapboxTest extends GdxMapApp {
         }
         OkHttpEngine.OkHttpFactory factory = new OkHttpEngine.OkHttpFactory(builder);
 
-        UrlTileSource tileSource = MapboxTileSource.builder()
+        UrlTileSource tileSource = MapzenMvtTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
                 .httpFactory(factory)
                 //.locale("en")
@@ -60,6 +60,6 @@ public class MapboxTest extends GdxMapApp {
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapboxTest());
+        GdxMapApp.run(new MapzenMvtTest());
     }
 }

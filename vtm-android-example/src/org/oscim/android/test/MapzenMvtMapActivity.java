@@ -25,9 +25,9 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
-import org.oscim.tiling.source.mvt.MapboxTileSource;
+import org.oscim.tiling.source.mvt.MapzenMvtTileSource;
 
-public class MapboxMapActivity extends MapActivity {
+public class MapzenMvtMapActivity extends MapActivity {
 
     private static final boolean USE_CACHE = false;
 
@@ -37,7 +37,7 @@ public class MapboxMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        UrlTileSource tileSource = MapboxTileSource.builder()
+        UrlTileSource tileSource = MapzenMvtTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 //.locale("en")
