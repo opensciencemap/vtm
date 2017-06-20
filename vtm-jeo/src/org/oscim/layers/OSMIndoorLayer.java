@@ -46,17 +46,9 @@ public class OSMIndoorLayer extends JeoVectorLayer {
     protected TextBucket mTextLayer;
     protected TextStyle mText;
 
-    public OSMIndoorLayer(Map map, VectorDataset data, Style style) {
-        this(map, data, style, 1);
-    }
-
-    public OSMIndoorLayer(Map map, VectorDataset data, Style style, float scale) {
+    public OSMIndoorLayer(Map map, VectorDataset data, Style style, TextStyle textStyle) {
         super(map, data, style);
-
-        mText = TextStyle.builder()
-                .fontSize(16 * scale).color(Color.BLACK)
-                .strokeWidth(2.2f * scale).strokeColor(Color.WHITE)
-                .build();
+        mText = textStyle;
     }
 
     public boolean[] activeLevels = new boolean[10];
