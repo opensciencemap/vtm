@@ -69,6 +69,9 @@
             android:name=".MapsforgeStyleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".MapzenGeojsonMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".MapzenMvtMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

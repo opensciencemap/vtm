@@ -50,7 +50,7 @@ public class MapzenMvtTileSource extends UrlTileSource {
 
     private final String locale;
 
-    protected MapzenMvtTileSource(Builder<?> builder) {
+    public MapzenMvtTileSource(Builder<?> builder) {
         super(builder);
         this.locale = builder.locale;
     }

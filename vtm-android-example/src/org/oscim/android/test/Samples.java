@@ -44,6 +44,7 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
         linearLayout.addView(createButton(MapzenMvtMapActivity.class));
+        linearLayout.addView(createButton(MapzenGeojsonMapActivity.class));
 
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));

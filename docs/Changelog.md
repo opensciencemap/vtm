@@ -10,6 +10,8 @@
 - POT textures [#334](https://github.com/mapsforge/vtm/issues/334)
 - OkHttp external cache [#135](https://github.com/mapsforge/vtm/issues/135)
 - Texture atlas improvements [#301](https://github.com/mapsforge/vtm/pull/301) [#304](https://github.com/mapsforge/vtm/pull/304)
+- vtm-json module [#367](https://github.com/mapsforge/vtm/issues/367)
+- Mapzen GeoJSON vector tiles [#55](https://github.com/mapsforge/vtm/issues/55)
 - vtm-ios-example module [#326](https://github.com/mapsforge/vtm/issues/326)
 - Handle layers enabled state [#342](https://github.com/mapsforge/vtm/issues/342)
 - Fix coord scale short overflow [#343](https://github.com/mapsforge/vtm/issues/343)
