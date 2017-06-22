@@ -58,7 +58,7 @@ public class TileDecoder implements ITileDecoder {
     private final static char[] FIELD_COORDINATES = "coordinates".toCharArray();
     private final static char[] FIELD_TYPE = "type".toCharArray();
 
-    private final static char[] LINETRING = "LineString".toCharArray();
+    private final static char[] LINESTRING = "LineString".toCharArray();
     private final static char[] POLYGON = "Polygon".toCharArray();
     private final static char[] POINT = "Point".toCharArray();
     private final static char[] MULTI_LINESTRING = "MultiLineString".toCharArray();
@@ -195,7 +195,7 @@ public class TileDecoder implements ITileDecoder {
 
                     jp.nextToken();
 
-                    if (match(jp, LINETRING))
+                    if (match(jp, LINESTRING))
                         type = GeometryType.LINE;
                     else if (match(jp, POLYGON))
                         type = GeometryType.POLY;
