@@ -15,7 +15,7 @@
 - vtm-ios-example module [#326](https://github.com/mapsforge/vtm/issues/326)
 - Handle layers enabled state [#342](https://github.com/mapsforge/vtm/issues/342)
 - Fix coord scale short overflow [#343](https://github.com/mapsforge/vtm/issues/343)
-- Mapsforge map read improvements [#357](https://github.com/mapsforge/vtm/issues/357)
+- Mapsforge map read improvements [#357](https://github.com/mapsforge/vtm/issues/357) [#370](https://github.com/mapsforge/vtm/issues/370)
 - Improve canvas DPI setting [#349](https://github.com/mapsforge/vtm/issues/349)
 - OSM indoor layer enhancements [#366](https://github.com/mapsforge/vtm/issues/366)
 - Gretty plugin at web modules [#338](https://github.com/mapsforge/vtm/issues/338)
