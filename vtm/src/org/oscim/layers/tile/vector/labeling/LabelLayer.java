@@ -1,5 +1,6 @@
 /*
  * Copyright 2012, 2013 Hannes Janetzek
+ * Copyright 2017 Wolfgang Schramm
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -98,6 +99,9 @@ public class LabelLayer extends Layer implements Map.UpdateListener, TileManager
 
         if (event == Map.CLEAR_EVENT)
             mWorker.cancel(true);
+
+        if (!isEnabled())
+            return;
 
         if (event == Map.POSITION_EVENT)
             mWorker.submit(MAX_RELABEL_DELAY);
