@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.7.0
+## Version 0.8.0 (2017-07-19)
 
 - Real time (SVG) texture atlas [#63](https://github.com/mapsforge/vtm/issues/63)
 - Marker clustering [#312](https://github.com/mapsforge/vtm/issues/312)
