@@ -13,7 +13,7 @@ allprojects {
     version = 'master-SNAPSHOT'
     ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-    ext.androidBuildVersionTools = "26.0.0"
+    ext.androidBuildVersionTools = "26.0.1"
     ext.gdxVersion = "1.9.6"
     ext.gwtVersion = "2.8.0"
     ext.slf4jVersion = "1.7.25"
