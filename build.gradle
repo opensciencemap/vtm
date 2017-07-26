@@ -29,7 +29,8 @@ allprojects {
 
 def androidCompileSdk() { return 26 }
 
-def androidMinSdk() { return 10 }
+// Minimum API Level by Support Library
+def androidMinSdk() { return 14 }
 
 def androidTargetSdk() { return 22 }
 
@@ -40,6 +41,7 @@ def versionName() { return version }
 subprojects {
     repositories {
         jcenter()
+        maven { url 'https://maven.google.com' }
     }
 
     tasks.withType(JavaCompile) {

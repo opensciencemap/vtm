@@ -19,6 +19,7 @@ android {
         versionCode versionCode()
         versionName versionName()
         minSdkVersion androidMinSdk()
+        targetSdkVersion androidTargetSdk()
     }
 
     sourceSets {
