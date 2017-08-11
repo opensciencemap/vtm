@@ -80,6 +80,9 @@
             android:name=".NewGesturesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".OpenMapTilesGeojsonMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".PathOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
