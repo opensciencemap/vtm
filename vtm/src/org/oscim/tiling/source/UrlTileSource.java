@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -33,10 +33,10 @@ public abstract class UrlTileSource extends TileSource {
         protected String tilePath;
         protected String url;
         private HttpEngine.Factory engineFactory;
+        private String keyName = "key";
         private String apiKey;
 
         protected Builder() {
-
         }
 
         protected Builder(String url, String tilePath, int zoomMin, int zoomMax) {
@@ -44,6 +44,11 @@ public abstract class UrlTileSource extends TileSource {
             this.tilePath = tilePath;
             this.zoomMin = zoomMin;
             this.zoomMax = zoomMax;
+        }
+
+        public T keyName(String keyName) {
+            this.keyName = keyName;
+            return self();
         }
 
         public T apiKey(String apiKey) {
@@ -75,6 +80,7 @@ public abstract class UrlTileSource extends TileSource {
     private HttpEngine.Factory mHttpFactory;
     private Map<String, String> mRequestHeaders = Collections.emptyMap();
     private TileUrlFormatter mTileUrlFormatter = URL_FORMATTER;
+    private String mKeyName = "key";
     private String mApiKey;
 
     public interface TileUrlFormatter {
@@ -83,6 +89,7 @@ public abstract class UrlTileSource extends TileSource {
 
     protected UrlTileSource(Builder<?> builder) {
         super(builder);
+        mKeyName = builder.keyName;
         mApiKey = builder.apiKey;
         mUrl = makeUrl(builder.url);
         mTilePath = builder.tilePath.split("\\{|\\}");
@@ -138,7 +145,7 @@ public abstract class UrlTileSource extends TileSource {
         StringBuilder sb = new StringBuilder();
         sb.append(mUrl).append(mTileUrlFormatter.formatTilePath(this, tile));
         if (mApiKey != null) {
-            sb.append("?api_key=").append(mApiKey);
+            sb.append("?").append(mKeyName).append("=").append(mApiKey);
         }
         return sb.toString();
     }

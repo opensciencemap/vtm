@@ -31,6 +31,7 @@ public class MapzenGeojsonTileSource extends GeojsonTileSource {
 
         public Builder() {
             super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
+            keyName("api_key");
         }
 
         public T locale(String locale) {
