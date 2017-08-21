@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -22,9 +23,12 @@ import org.oscim.theme.comparator.vtm.VtmPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
+import javax.swing.WindowConstants;
 
 class MainWindow extends JFrame {
 
@@ -78,6 +82,16 @@ class MainWindow extends JFrame {
         splitPane.setResizeWeight(0.5);
 
         this.add(splitPane);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                mapsforgeMapPanel.destroy();
+                setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                dispose();
+                System.exit(0);
+            }
+        });
     }
 
 }

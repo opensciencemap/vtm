@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -43,6 +44,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.UUID;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -92,7 +94,7 @@ public class MapsforgeMapPanel extends JPanel {
 
     private Layer createTileRendererLayer(TileCache tileCache, MapViewPosition mapViewPosition, File mapFile, File themeFile) {
 
-        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, false, true, true, GRAPHIC_FACTORY);
+        TileRendererLayer tileRendererLayer = new TileRendererLayer(tileCache, new MapFile(mapFile), mapViewPosition, false, true, false, GRAPHIC_FACTORY);
 
         if (themeFile != null) {
 
@@ -120,9 +122,14 @@ public class MapsforgeMapPanel extends JPanel {
 
     private TileCache createTileCache() {
         TileCache firstLevelTileCache = new InMemoryTileCache(64);
-        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), "mapsforge");
+        File cacheDirectory = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
         TileCache secondLevelTileCache = new FileSystemTileCache(1024, cacheDirectory, GRAPHIC_FACTORY);
         return new TwoLevelTileCache(firstLevelTileCache, secondLevelTileCache);
+    }
+
+    public void destroy() {
+        mapView.destroyAll();
+        AwtGraphicFactory.clearResourceMemoryCache();
     }
 
     public void loadMap(File mapFile, File themeFile) {

@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -85,7 +86,7 @@ public class Main {
 
         new SharedLibraryLoader().load("vtm-jni");
         AwtGraphics.init();
-        GdxAssets.init("");
+        GdxAssets.init("assets/");
         GLAdapter.init(new LwjglGL20());
         GLAdapter.GDX_DESKTOP_QUIRKS = true;
         window = new MainWindow();
