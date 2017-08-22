@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -41,7 +42,7 @@ public class BothMapPositionHandler implements LocationDataListener {
             @Override
             public void run() {
                 mapsforgeMapPanel.setCoordinate(latitude, longitude, zoomLevel);
-                vtmPanel.setCoordinate(latitude, longitude, (byte) (zoomLevel - 1));
+                vtmPanel.setCoordinate(latitude, longitude, zoomLevel);
                 storePositionOnPrefs(latitude, longitude, zoomLevel);
             }
         });
@@ -52,7 +53,7 @@ public class BothMapPositionHandler implements LocationDataListener {
         Gdx.app.postRunnable(new Runnable() {
             @Override
             public void run() {
-                vtmPanel.setCoordinate(mapPosition.latLong.latitude, mapPosition.latLong.longitude, (byte) (mapPosition.zoomLevel - 1));
+                vtmPanel.setCoordinate(mapPosition.latLong.latitude, mapPosition.latLong.longitude, mapPosition.zoomLevel);
                 //TODO wy is zoom level on vtm x-1?
                 storePositionOnPrefs(mapPosition.latLong.latitude, mapPosition.latLong.longitude, mapPosition.zoomLevel);
             }
@@ -60,7 +61,7 @@ public class BothMapPositionHandler implements LocationDataListener {
     }
 
     public void mapPositionChangedFromVtmMap(org.oscim.core.MapPosition mapPosition) {
-        mapsforgeMapPanel.setCoordinate(mapPosition.getLatitude(), mapPosition.getLongitude(), (byte) (mapPosition.zoomLevel + 1));
+        mapsforgeMapPanel.setCoordinate(mapPosition.getLatitude(), mapPosition.getLongitude(), (byte) mapPosition.zoomLevel);
         storePositionOnPrefs(mapPosition.getLatitude(), mapPosition.getLongitude(), (byte) (mapPosition.zoomLevel));
     }
 

@@ -36,6 +36,7 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.ExternalRenderTheme;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
+import org.oscim.core.Tile;
 import org.oscim.theme.comparator.BothMapPositionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,9 @@ public class MapsforgeMapPanel extends JPanel {
     public MapsforgeMapPanel() {
         this.setLayout(null);
         mapView = createMapView();
+
+        // Use same tile size with VTM
+        mapView.getModel().displayModel.setFixedTileSize(Tile.SIZE);
 
         PreferencesFacade preferencesFacade = new JavaPreferences(Preferences.userNodeForPackage(MapView.class));
         final Model model = mapView.getModel();
