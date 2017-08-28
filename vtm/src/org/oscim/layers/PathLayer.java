@@ -4,6 +4,7 @@
  * Copyright 2016 devemux86
  * Copyright 2016 Bezzu
  * Copyright 2016 Pedinel
+ * Copyright 2017 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
