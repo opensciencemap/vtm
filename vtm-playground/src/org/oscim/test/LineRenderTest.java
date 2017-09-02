@@ -72,9 +72,9 @@ public class LineRenderTest extends GdxMap {
             line2 = new LineStyle(Color.GREEN, 1);
             line4 = new LineStyle(Color.LTGRAY, 3);
         } else {
-            line1 = new LineStyle(0, null, Color.fade(Color.RED, 0.5f), 4.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null, true);
-            line2 = new LineStyle(0, null, Color.GREEN, 6.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null, true);
-            line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, false, null, true);
+            line1 = new LineStyle(0, null, Color.fade(Color.RED, 0.5f), 4.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null, true, null);
+            line2 = new LineStyle(0, null, Color.GREEN, 6.0f, Cap.BUTT, false, 0, 0, 0, 0, 1f, false, null, true, null);
+            line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, false, null, true, null);
         }
 
         TextureItem tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/dot.png"));
@@ -90,8 +90,8 @@ public class LineRenderTest extends GdxMap {
                 .randomOffset(true)
                 .build();
 
-        LineStyle outline = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, true, null, true);
-        LineStyle outline2 = new LineStyle(0, null, Color.RED, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 0, true, null, true);
+        LineStyle outline = new LineStyle(0, null, Color.BLUE, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, true, null, true, null);
+        LineStyle outline2 = new LineStyle(0, null, Color.RED, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 0, true, null, true, null);
 
         LineBucket ol = l.buckets.addLineBucket(0, outline);
         LineBucket ol2 = l.buckets.addLineBucket(5, outline2);

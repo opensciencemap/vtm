@@ -48,25 +48,26 @@ public final class LineStyle extends RenderStyle<LineStyle> {
     public final int symbolWidth;
     public final int symbolHeight;
     public final int symbolPercent;
-    public boolean dashTexture;
+
+    public final float[] dashArray;
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
+        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null);
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true);
+        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null);
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true);
+        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true, null);
     }
 
     public LineStyle(int level, String style, int color, float width,
                      Cap cap, boolean fixed,
                      int stipple, int stippleColor, float stippleWidth,
                      int fadeScale, float blur, boolean isOutline, TextureItem texture,
-                     boolean randomOffset) {
+                     boolean randomOffset, float[] dashArray) {
 
         this.level = level;
         this.style = style;
@@ -91,6 +92,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.symbolWidth = 0;
         this.symbolHeight = 0;
         this.symbolPercent = 100;
+
+        this.dashArray = dashArray;
     }
 
     private LineStyle(LineBuilder<?> b) {
@@ -114,7 +117,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.symbolWidth = b.symbolWidth;
         this.symbolHeight = b.symbolHeight;
         this.symbolPercent = b.symbolPercent;
-        this.dashTexture = b.strokeDasharray != null;
+
+        this.dashArray = b.dashArray;
     }
 
     @Override
@@ -146,7 +150,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         public int symbolWidth;
         public int symbolHeight;
         public int symbolPercent;
-        public float[] strokeDasharray;
+
+        public float[] dashArray;
 
         public LineBuilder() {
         }
@@ -175,6 +180,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.symbolWidth = line.symbolWidth;
             this.symbolHeight = line.symbolHeight;
             this.symbolPercent = line.symbolPercent;
+
+            this.dashArray = line.dashArray;
 
             return self();
         }
@@ -254,6 +261,11 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             return self();
         }
 
+        public T dashArray(float[] dashArray) {
+            this.dashArray = dashArray;
+            return self();
+        }
+
         public T reset() {
             level = -1;
             style = null;
@@ -277,7 +289,9 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             symbolWidth = 0;
             symbolHeight = 0;
             symbolPercent = 100;
-            strokeDasharray = null;
+
+            dashArray = null;
+
             return self();
         }
 

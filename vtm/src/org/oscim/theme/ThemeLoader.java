@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -18,20 +18,10 @@
  */
 package org.oscim.theme;
 
-
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.theme.IRenderTheme.ThemeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 public class ThemeLoader {
-
-    private static final Logger log = LoggerFactory.getLogger(ThemeLoader.class);
 
     public static boolean USE_ATLAS;
     public static boolean POT_TEXTURES;
@@ -56,21 +46,12 @@ public class ThemeLoader {
         return load(theme, null);
     }
 
-
-
     public static IRenderTheme load(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
-        IRenderTheme t = null;
-
-        try {
-            if(ThemeUtils.isMapsforgeTheme(theme.getRenderThemeAsStream())){
-                t = USE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
-            }else{
-                t = USE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);
-            }
-        } catch (IOException | ParserConfigurationException | SAXException e) {
-            e.printStackTrace();
-        }
-
+        IRenderTheme t;
+        if (ThemeUtils.isMapsforgeTheme(theme.getRenderThemeAsStream()))
+            t = USE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
+        else
+            t = USE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);
         if (t != null)
             t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1));
         return t;

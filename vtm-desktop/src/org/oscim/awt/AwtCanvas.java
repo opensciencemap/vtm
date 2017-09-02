@@ -187,6 +187,16 @@ public class AwtCanvas implements Canvas {
     }
 
     @Override
+    public void fillRectangle(float x, float y, float width, float height, int color) {
+        java.awt.Color awtColor = color == Color.TRANSPARENT ? TRANSPARENT : new java.awt.Color(color);
+        Composite originalComposite = this.canvas.getComposite();
+        this.canvas.setComposite(AlphaComposite.getInstance(color == Color.TRANSPARENT ? AlphaComposite.CLEAR : AlphaComposite.SRC_OVER));
+        this.canvas.setColor(awtColor);
+        this.canvas.fillRect((int) x, (int) y, (int) width, (int) height);
+        this.canvas.setComposite(originalComposite);
+    }
+
+    @Override
     public int getHeight() {
         return this.bitmap != null ? this.bitmap.getHeight() : 0;
     }
@@ -194,15 +204,5 @@ public class AwtCanvas implements Canvas {
     @Override
     public int getWidth() {
         return this.bitmap != null ? this.bitmap.getWidth() : 0;
-    }
-
-    @Override
-    public void fillRectangle(int x, int y, int width, int height, int color) {
-        java.awt.Color awtColor = color == Color.TRANSPARENT ? TRANSPARENT : new java.awt.Color(color);
-        Composite originalComposite = this.canvas.getComposite();
-        this.canvas.setComposite(AlphaComposite.getInstance(color == Color.TRANSPARENT ? AlphaComposite.CLEAR : AlphaComposite.SRC_OVER));
-        this.canvas.setColor(awtColor);
-        this.canvas.fillRect(x, y, width, height);
-        this.canvas.setComposite(originalComposite);
     }
 }

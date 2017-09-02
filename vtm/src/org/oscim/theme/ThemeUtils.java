@@ -1,7 +1,6 @@
 /*
  * Copyright 2017 Longri
- *
- * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,63 +15,59 @@
  */
 package org.oscim.theme;
 
+import org.oscim.utils.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 /**
- * Created by Longri on 30.08.2017.
+ * A utility class with theme specific helper methods.
  */
+public final class ThemeUtils {
 
-public class ThemeUtils {
-
-    public static class SAXTerminatorException extends SAXException {
-        public SAXTerminatorException() {
-            super();
-        }
-    }
-
+    private static final Logger log = LoggerFactory.getLogger(ThemeUtils.class);
 
     /**
-     * Return true, if the given InputStream a Mapsforge render theme!
-     *
-     * @param stream
-     * @return TRUE or FALSE
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
+     * Check if the given InputStream is a Mapsforge render theme.
      */
-    public static boolean isMapsforgeTheme(InputStream stream) throws IOException, SAXException, ParserConfigurationException {
-        final AtomicBoolean isMapsforgeTheme = new AtomicBoolean(false);
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setNamespaceAware(true);
-
-        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-        xmlReader.setContentHandler(new DefaultHandler() {
-            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                if (localName.equals("rendertheme")) {
-                    isMapsforgeTheme.set(uri.equals("http://mapsforge.org/renderTheme"));
-                    //we have all info's, break parsing
-                    throw new SAXTerminatorException();
-                }
-            }
-        });
+    public static boolean isMapsforgeTheme(InputStream is) {
         try {
-            xmlReader.parse(new InputSource(stream));
-        } catch (SAXTerminatorException e) {
-            // do nothing
+            final AtomicBoolean isMapsforgeTheme = new AtomicBoolean(false);
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+            xmlReader.setContentHandler(new DefaultHandler() {
+                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                    if (localName.equals("rendertheme")) {
+                        isMapsforgeTheme.set(uri.equals("http://mapsforge.org/renderTheme"));
+                        // We have all info, break parsing
+                        throw new SAXTerminationException();
+                    }
+                }
+            });
+            try {
+                xmlReader.parse(new InputSource(is));
+            } catch (SAXTerminationException e) {
+                // Do nothing
+            }
+            return isMapsforgeTheme.get();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        } finally {
+            IOUtils.closeQuietly(is);
         }
-        stream.close();
-        return isMapsforgeTheme.get();
     }
 
+    private ThemeUtils() {
+    }
 }

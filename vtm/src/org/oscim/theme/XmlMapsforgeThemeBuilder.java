@@ -25,7 +25,6 @@ import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Color;
-import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
@@ -65,7 +64,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Float.parseFloat;
@@ -74,11 +72,7 @@ import static java.lang.Integer.parseInt;
 public class XmlMapsforgeThemeBuilder extends DefaultHandler {
     private static final Logger log = LoggerFactory.getLogger(XmlMapsforgeThemeBuilder.class);
 
-    private static final int RENDER_THEME_VERSION = 4;
-    private static final Pattern SPLIT_PATTERN = Pattern.compile(",");
-    private static final float REPEAT_GAP_DEFAULT = 200f;
-    private static final float REPEAT_START_DEFAULT = 30f;
-
+    private static final int RENDER_THEME_VERSION = 6;
 
     private enum Element {
         RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS, RENDERING_STYLE
@@ -92,6 +86,9 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
     private static final String LINE_STYLE = "L";
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
+
+    private static final float REPEAT_GAP_DEFAULT = 200f;
+    private static final float REPEAT_START_DEFAULT = 30f;
 
     /**
      * @param theme an input theme containing valid render theme XML data.
@@ -139,7 +136,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
     private final Stack<RuleBuilder> mRuleStack = new Stack<>();
     private final HashMap<String, RenderStyle> mStyles = new HashMap<>(10);
 
-    private final HashMap<String, TextBuilder<?>> mTextStyles = new HashMap<>(10);
+    private final HashMap<String, TextStyle.TextBuilder<?>> mTextStyles = new HashMap<>(10);
 
     private final AreaBuilder<?> mAreaBuilder = AreaStyle.builder();
     private final CircleBuilder<?> mCircleBuilder = CircleStyle.builder();
@@ -415,7 +412,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 if ("when-matched".equals(value))
                     selector |= Selector.WHEN_MATCHED;
             } else {
-                XmlMapsforgeThemeBuilder.logUnknownAttribute(localName, name, value, i);
+                logUnknownAttribute(localName, name, value, i);
             }
         }
 
@@ -424,8 +421,8 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         else if (closed == Closed.NO)
             element = Rule.Element.LINE;
 
-        XmlMapsforgeThemeBuilder.validateNonNegative("zoom-min", zoomMin);
-        XmlMapsforgeThemeBuilder.validateNonNegative("zoom-max", zoomMax);
+        validateNonNegative("zoom-min", zoomMin);
+        validateNonNegative("zoom-max", zoomMax);
         if (zoomMin > zoomMax)
             throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 
@@ -449,7 +446,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         return texture;
     }
 
-    private void handleLineElement(String localName, Attributes attributes, boolean isStyle, boolean symbolLine)
+    private void handleLineElement(String localName, Attributes attributes, boolean isStyle, boolean hasSymbol)
             throws SAXException {
 
         String use = attributes.getValue("use");
@@ -463,7 +460,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             }
         }
 
-        LineStyle line = createLine(style, localName, attributes, mLevels++, false, symbolLine);
+        LineStyle line = createLine(style, localName, attributes, mLevels++, false, hasSymbol);
 
         if (isStyle) {
             mStyles.put(LINE_STYLE + line.style, line);
@@ -489,7 +486,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
      * @return a new Line with the given rendering attributes.
      */
     private LineStyle createLine(LineStyle line, String elementName, Attributes attributes,
-                                 int level, boolean isOutline, boolean symbolLine) {
+                                 int level, boolean isOutline, boolean hasSymbol) {
         LineBuilder<?> b = mLineBuilder.set(line);
         b.isOutline(isOutline);
         b.level(level);
@@ -556,10 +553,13 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("style".equals(name))
                 ; // ignore
 
-            else if ("dasharray".equals(name))
-                ; // TBD
+            else if ("stroke-dasharray".equals(name)) {
+                b.dashArray = parseFloatArray(value);
+                for (int j = 0; j < b.dashArray.length; ++j) {
+                    b.dashArray[j] = b.dashArray[j] * mScale;
+                }
 
-            else if ("symbol-width".equals(name))
+            } else if ("symbol-width".equals(name))
                 b.symbolWidth = (int) (Integer.parseInt(value) * mScale);
 
             else if ("symbol-height".equals(name))
@@ -568,31 +568,22 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
-            else if ("stroke-dasharray".equals(name)) {
-                b.strokeDasharray = parseFloatArray(value);
-                for (int j = 0; j < b.strokeDasharray.length; ++j) {
-                    b.strokeDasharray[j] = b.strokeDasharray[j] * mScale;
-                }
-            } else if ("dy".equals(name)) {
-                // NB: minus..
-                //TODO   b.dy = -Float.parseFloat(value) * mScale;
-            } else if ("align-center".equals(name)) {
-                //TODO   handle align-center
-            } else if ("repeat".equals(name)) {
-                //TODO   handle repeat
-            } else if ("display".equals(name)) {
-                //TODO  handle display
-            } else
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
+            else
                 logUnknownAttribute(elementName, name, value, i);
         }
 
-
-        if (b.strokeDasharray != null) {//create a dashed texture
+        if (b.dashArray != null) {
+            // Create a dashed texture
             int bmpWidth = 0;
             int bmpHeight = (int) (b.strokeWidth);
-            if (bmpHeight < 1) bmpHeight = 2;
-            for (float f : b.strokeDasharray) {
-                if (f < 1) f = 1;
+            if (bmpHeight < 1)
+                bmpHeight = 2;
+            for (float f : b.dashArray) {
+                if (f < 1)
+                    f = 1;
                 bmpWidth += f;
             }
 
@@ -603,9 +594,10 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
 
             boolean bw = false;
             int x = 0;
-            for (float f : b.strokeDasharray) {
-                if (f < 1) f = 1;
-                canvas.fillRectangle(x * factor, 0, (int) f * factor, bmpHeight * factor, (bw ? Color.TRANSPARENT : Color.WHITE));
+            for (float f : b.dashArray) {
+                if (f < 1)
+                    f = 1;
+                canvas.fillRectangle(x * factor, 0, f * factor, bmpHeight * factor, (bw ? Color.TRANSPARENT : Color.WHITE));
                 x += f;
                 bw = !bw;
             }
@@ -619,13 +611,12 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             b.stippleColor = b.fillColor;
             b.fillColor = Color.TRANSPARENT;
             b.strokeColor = Color.TRANSPARENT;
-
         } else {
             b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
-            if (symbolLine) {
 
-                // we have no way to set a repeatGap for the renderer,
-                // so we create a texture that already contains this repeatGap.
+            if (hasSymbol) {
+                // We have no way to set a repeat gap for the renderer,
+                // so we create a texture that already contains this repeat gap.
                 float repeatGap = REPEAT_GAP_DEFAULT * mScale;
                 float repeatStart = REPEAT_START_DEFAULT * mScale;
                 int width = (int) (b.texture.width + repeatGap);
@@ -636,13 +627,13 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 canvas.drawBitmap(b.texture.bitmap, repeatStart, 0);
                 b.texture = new TextureItem(bmp);
 
-                // we must set stipple values
+                // We must set stipple values
                 // The multipliers are determined empirically to
-                // correspond to the representation at Mapsforge!
+                // correspond to the representation at Mapsforge.
                 b.stipple = b.texture.width * 3;
                 b.strokeWidth *= 2 * mScale;
 
-                // use texture color
+                // Use texture color
                 b.stippleColor = Color.WHITE;
                 b.fillColor = Color.TRANSPARENT;
                 b.strokeColor = Color.TRANSPARENT;
@@ -736,9 +727,10 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
-            else if ("symbol-scaling".equals(name)) {
-                // no-op
-            } else
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
+            else
                 logUnknownAttribute(elementName, name, value, i);
         }
 
@@ -781,7 +773,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             if ("img".equals(name)) {
                 img = value;
             } else {
-                XmlMapsforgeThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+                logUnknownAttribute(elementName, name, value, i);
             }
         }
         validateExists("img", img, elementName);
@@ -813,7 +805,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                             Integer.parseInt(pos[3]));
                 }
             } else {
-                XmlMapsforgeThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+                logUnknownAttribute(elementName, name, value, i);
             }
         }
         validateExists("id", regionName, elementName);
@@ -899,18 +891,15 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("base-text-scale".equals(name))
                 baseTextScale = Float.parseFloat(value);
 
-            else if ("map-background-outside".equals(name)) {
-                //TODO handle map-background-outside
-            } else
-                XmlMapsforgeThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+            else
+                logUnknownAttribute(elementName, name, value, i);
 
         }
 
         validateExists("version", version, elementName);
 
-        if (version != RENDER_THEME_VERSION)
-            throw new ThemeException("invalid render theme version:"
-                    + version);
+        if (version > RENDER_THEME_VERSION)
+            throw new ThemeException("invalid render theme version:" + version);
 
         validateNonNegative("base-stroke-width", baseStrokeWidth);
         validateNonNegative("base-text-scale", baseTextScale);
@@ -1018,12 +1007,17 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
-            else if ("display".equals(name)) {
-                //TODO Handle display attribute NEVER, ALWAYS, IFSPACE;
-            } else if ("symbol-id".equals(name)) {
-                //TODO Handle  symbol-id;
-            } else if ("position".equals(name)) {
-                //TODO Handle  position: AUTO, CENTER, BELOW, BELOW_LEFT, BELOW_RIGHT, ABOVE, ABOVE_LEFT, ABOVE_RIGHT, LEFT, RIGHT
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
+            else if ("position".equals(name)) {
+                // Until implement position..
+                if (b.dy == 0) {
+                    value = "below".equals(value) ? "-20" : "20";
+                    // NB: minus..
+                    b.dy = -Float.parseFloat(value) * mScale;
+                }
+
             } else
                 logUnknownAttribute(elementName, name, value, i);
         }
@@ -1115,15 +1109,10 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
-            else if ("symbol-scaling".equals(name)) {
-                // no-op
-            } else if ("display".equals(name)) {
-                //TODO Handle display attribute NEVER, ALWAYS, IFSPACE;
-            } else if ("id".equals(name)) {
-                //TODO Handle 'id'
-            } else if ("priority".equals(name)) {
-                //TODO Handle 'priority'
-            } else
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
+            else
                 logUnknownAttribute(elementName, name, value, i);
         }
 
@@ -1203,6 +1192,15 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         return mCategories == null || rule.cat == null || mCategories.contains(rule.cat);
     }
 
+    private static float[] parseFloatArray(String dashString) {
+        String[] dashEntries = dashString.split(",");
+        float[] dashIntervals = new float[dashEntries.length];
+        for (int i = 0; i < dashEntries.length; ++i) {
+            dashIntervals[i] = Float.parseFloat(dashEntries[i]);
+        }
+        return dashIntervals;
+    }
+
     private static void validateNonNegative(String name, float value) {
         if (value < 0)
             throw new ThemeException(name + " must not be negative: "
@@ -1213,14 +1211,5 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         if (obj == null)
             throw new ThemeException("missing attribute " + name
                     + " for element: " + elementName);
-    }
-
-    private static float[] parseFloatArray(String dashString) {
-        String[] dashEntries = SPLIT_PATTERN.split(dashString);
-        float[] dashIntervals = new float[dashEntries.length];
-        for (int i = 0; i < dashEntries.length; ++i) {
-            dashIntervals[i] = Float.parseFloat(dashEntries[i]);
-        }
-        return dashIntervals;
     }
 }

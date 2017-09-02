@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -359,7 +359,7 @@ public final class LineTexBucket extends LineBucket {
                 LineTexBucket lb = (LineTexBucket) b;
                 LineStyle line = lb.line.current();
 
-                gl.uniform1f(shader.uMode, line.dashTexture? 3 : line.texture != null ? 1 : 0);
+                gl.uniform1f(shader.uMode, line.dashArray != null ? 2 : (line.texture != null ? 1 : 0));
 
                 if (line.texture != null)
                     line.texture.bind();

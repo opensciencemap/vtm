@@ -117,6 +117,11 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
     }
 
     @Override
+    public void fillRectangle(float x, float y, float width, float height, int color) {
+        // TODO
+    }
+
+    @Override
     public int getHeight() {
         return this.bitmap != null ? this.bitmap.getHeight() : 0;
     }
@@ -124,10 +129,5 @@ public class GwtCanvas implements org.oscim.backend.canvas.Canvas {
     @Override
     public int getWidth() {
         return this.bitmap != null ? this.bitmap.getWidth() : 0;
-    }
-
-    @Override
-    public void fillRectangle(int x, int y, int width, int height, int color) {
-        // TODO
     }
 }

@@ -43,11 +43,10 @@ public final class ValidRenderTheme implements ValidFileFilter {
         try {
             ThemeFile theme = new ExternalRenderTheme(file.getAbsolutePath());
             DefaultHandler renderThemeHandler;
-            if(ThemeUtils.isMapsforgeTheme(new FileInputStream(file))) {
+            if (ThemeUtils.isMapsforgeTheme(new FileInputStream(file)))
                 renderThemeHandler = new XmlMapsforgeThemeBuilder(theme);
-            }else{
+            else
                 renderThemeHandler = new XmlThemeBuilder(theme);
-            }
             XMLReader xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             xmlReader.setContentHandler(renderThemeHandler);
             xmlReader.parse(new InputSource(theme.getRenderThemeAsStream()));

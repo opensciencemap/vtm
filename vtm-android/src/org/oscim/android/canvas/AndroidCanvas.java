@@ -89,6 +89,14 @@ public class AndroidCanvas implements Canvas {
     }
 
     @Override
+    public void fillRectangle(float x, float y, float width, float height, int color) {
+        RectF rect = new RectF(x, y, x + width, y + height);
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setColor(color);
+        canvas.drawRect(rect, paint);
+    }
+
+    @Override
     public int getHeight() {
         return canvas.getHeight();
     }
@@ -96,13 +104,5 @@ public class AndroidCanvas implements Canvas {
     @Override
     public int getWidth() {
         return canvas.getWidth();
-    }
-
-    @Override
-    public void fillRectangle(int x, int y, int width, int height, int color) {
-        RectF rec = new RectF(x, y, x + width, y + height);
-        android.graphics.Paint paint = new android.graphics.Paint();
-        paint.setColor(color);
-        canvas.drawRect(rec, paint);
     }
 }

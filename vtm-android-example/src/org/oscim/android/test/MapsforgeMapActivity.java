@@ -51,6 +51,7 @@ public class MapsforgeMapActivity extends MapActivity {
 
     private TileGridLayer mGridLayer;
     private DefaultMapScaleBar mMapScaleBar;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,7 @@ public class MapsforgeMapActivity extends MapActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.theme_menu, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -117,8 +119,8 @@ public class MapsforgeMapActivity extends MapActivity {
                 item.setChecked(true);
                 return true;
 
-            case R.id.theme_load:
-                startActivityForResult(new Intent(MapsforgeMapActivity.this, ThemeFilePicker.class),
+            case R.id.theme_external:
+                startActivityForResult(new Intent(this, ThemeFilePicker.class),
                         SELECT_THEME_FILE);
                 return true;
 
@@ -181,18 +183,13 @@ public class MapsforgeMapActivity extends MapActivity {
             }
         } else if (requestCode == SELECT_THEME_FILE) {
             if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
-                finish();
                 return;
             }
 
-            String themePath = intent.getStringExtra(FilePicker.SELECTED_FILE);
-
-            ExternalRenderTheme externalRenderTheme = new ExternalRenderTheme(themePath);
-            try {
-                mMap.setTheme(externalRenderTheme, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
+            ExternalRenderTheme externalRenderTheme = new ExternalRenderTheme(file);
+            mMap.setTheme(externalRenderTheme);
+            mMenu.findItem(R.id.theme_external).setChecked(true);
         }
     }
 

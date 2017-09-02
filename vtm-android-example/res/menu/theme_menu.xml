@@ -21,8 +21,8 @@
             android:id="@+id/theme_newtron"
             android:title="@string/theme_newtron" />
         <item
-            android:id="@+id/theme_load"
-            android:title="@string/theme_load" />
+            android:id="@+id/theme_external"
+            android:title="@string/theme_external" />
     </group>
 
     <item

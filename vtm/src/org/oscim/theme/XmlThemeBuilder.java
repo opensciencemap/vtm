@@ -405,7 +405,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 if ("when-matched".equals(value))
                     selector |= Selector.WHEN_MATCHED;
             } else {
-                XmlThemeBuilder.logUnknownAttribute(localName, name, value, i);
+                logUnknownAttribute(localName, name, value, i);
             }
         }
 
@@ -414,8 +414,8 @@ public class XmlThemeBuilder extends DefaultHandler {
         else if (closed == Closed.NO)
             element = Rule.Element.LINE;
 
-        XmlThemeBuilder.validateNonNegative("zoom-min", zoomMin);
-        XmlThemeBuilder.validateNonNegative("zoom-max", zoomMax);
+        validateNonNegative("zoom-min", zoomMin);
+        validateNonNegative("zoom-max", zoomMax);
         if (zoomMin > zoomMax)
             throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 
@@ -462,9 +462,12 @@ public class XmlThemeBuilder extends DefaultHandler {
                 mCurrentRule.addStyle(line);
                 /* Note 'outline' will not be inherited, it's just a
                  * shortcut to add the outline RenderInstruction. */
-                LineStyle outline = createOutline(attributes.getValue("outline"), attributes);
-                if (outline != null)
-                    mCurrentRule.addStyle(outline);
+                String outlineValue = attributes.getValue("outline");
+                if (outlineValue != null) {
+                    LineStyle outline = createOutline(outlineValue, attributes);
+                    if (outline != null)
+                        mCurrentRule.addStyle(outline);
+                }
             }
         }
     }
@@ -554,6 +557,9 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
+
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
 
             else
                 logUnknownAttribute(elementName, name, value, i);
@@ -648,6 +654,9 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
             else
                 logUnknownAttribute(elementName, name, value, i);
         }
@@ -691,7 +700,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             if ("img".equals(name)) {
                 img = value;
             } else {
-                XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+                logUnknownAttribute(elementName, name, value, i);
             }
         }
         validateExists("img", img, elementName);
@@ -723,7 +732,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                             Integer.parseInt(pos[3]));
                 }
             } else {
-                XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+                logUnknownAttribute(elementName, name, value, i);
             }
         }
         validateExists("id", regionName, elementName);
@@ -810,15 +819,14 @@ public class XmlThemeBuilder extends DefaultHandler {
                 baseTextScale = Float.parseFloat(value);
 
             else
-                XmlThemeBuilder.logUnknownAttribute(elementName, name, value, i);
+                logUnknownAttribute(elementName, name, value, i);
 
         }
 
         validateExists("version", version, elementName);
 
-        if (version != RENDER_THEME_VERSION)
-            throw new ThemeException("invalid render theme version:"
-                    + version);
+        if (version > RENDER_THEME_VERSION)
+            throw new ThemeException("invalid render theme version:" + version);
 
         validateNonNegative("base-stroke-width", baseStrokeWidth);
         validateNonNegative("base-text-scale", baseTextScale);
@@ -926,6 +934,9 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
 
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
+
             else
                 logUnknownAttribute(elementName, name, value, i);
         }
@@ -1016,6 +1027,9 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             else if ("symbol-percent".equals(name))
                 b.symbolPercent = Integer.parseInt(value);
+
+            else if ("symbol-scaling".equals(name))
+                ; // no-op
 
             else
                 logUnknownAttribute(elementName, name, value, i);
