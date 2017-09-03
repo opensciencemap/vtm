@@ -217,8 +217,6 @@
         <xs:attribute name="symbol-width" type="xs:positiveInteger" use="optional" />
         <xs:attribute name="symbol-height" type="xs:positiveInteger" use="optional" />
         <xs:attribute name="symbol-percent" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="align-center" default="false" type="xs:boolean" use="optional" />
-        <xs:attribute name="repeat" default="false" type="xs:boolean" use="optional" />
     </xs:complexType>
 
     <xs:complexType name="text">

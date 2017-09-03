@@ -23,6 +23,7 @@ package org.oscim.theme;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
+import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.backend.canvas.Paint.FontFamily;
@@ -30,6 +31,7 @@ import org.oscim.backend.canvas.Paint.FontStyle;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.atlas.TextureRegion;
+import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.Rule.Closed;
@@ -84,6 +86,9 @@ public class XmlThemeBuilder extends DefaultHandler {
     private static final String LINE_STYLE = "L";
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
+
+    private static final float REPEAT_GAP_DEFAULT = 200f;
+    private static final float REPEAT_START_DEFAULT = 30f;
 
     /**
      * @param theme an input theme containing valid render theme XML data.
@@ -249,11 +254,11 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             } else if ("style-line".equals(localName)) {
                 checkState(localName, Element.STYLE);
-                handleLineElement(localName, attributes, true);
+                handleLineElement(localName, attributes, true, false);
 
             } else if ("outline-layer".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
-                LineStyle line = createLine(null, localName, attributes, mLevels++, true);
+                LineStyle line = createLine(null, localName, attributes, mLevels++, true, false);
                 mStyles.put(OUTLINE_STYLE + line.style, line);
 
             } else if ("area".equals(localName)) {
@@ -272,7 +277,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             } else if ("line".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleLineElement(localName, attributes, false);
+                handleLineElement(localName, attributes, false, false);
 
             } else if ("text".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
@@ -298,7 +303,7 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             } else if ("lineSymbol".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
-                log.error("unknown element: {}", localName);
+                handleLineElement(localName, attributes, false, true);
 
             } else if ("atlas".equals(localName)) {
                 checkState(localName, Element.ATLAS);
@@ -439,7 +444,7 @@ public class XmlThemeBuilder extends DefaultHandler {
         return texture;
     }
 
-    private void handleLineElement(String localName, Attributes attributes, boolean isStyle)
+    private void handleLineElement(String localName, Attributes attributes, boolean isStyle, boolean hasSymbol)
             throws SAXException {
 
         String use = attributes.getValue("use");
@@ -453,7 +458,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             }
         }
 
-        LineStyle line = createLine(style, localName, attributes, mLevels++, false);
+        LineStyle line = createLine(style, localName, attributes, mLevels++, false, hasSymbol);
 
         if (isStyle) {
             mStyles.put(LINE_STYLE + line.style, line);
@@ -479,7 +484,7 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @return a new Line with the given rendering attributes.
      */
     private LineStyle createLine(LineStyle line, String elementName, Attributes attributes,
-                                 int level, boolean isOutline) {
+                                 int level, boolean isOutline, boolean hasSymbol) {
         LineBuilder<?> b = mLineBuilder.set(line);
         b.isOutline(isOutline);
         b.level(level);
@@ -546,10 +551,13 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("style".equals(name))
                 ; // ignore
 
-            else if ("dasharray".equals(name))
-                ; // TBD
+            else if ("dasharray".equals(name)) {
+                b.dashArray = parseFloatArray(value);
+                for (int j = 0; j < b.dashArray.length; ++j) {
+                    b.dashArray[j] = b.dashArray[j] * mScale;
+                }
 
-            else if ("symbol-width".equals(name))
+            } else if ("symbol-width".equals(name))
                 b.symbolWidth = (int) (Integer.parseInt(value) * mScale);
 
             else if ("symbol-height".equals(name))
@@ -565,9 +573,72 @@ public class XmlThemeBuilder extends DefaultHandler {
                 logUnknownAttribute(elementName, name, value, i);
         }
 
-        b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
-        /*if (b.texture != null)
-            b.texture.mipmap = true;*/
+        if (b.dashArray != null) {
+            // Create a dashed texture
+            int bmpWidth = 0;
+            int bmpHeight = (int) (b.strokeWidth);
+            if (bmpHeight < 1)
+                bmpHeight = 2;
+            for (float f : b.dashArray) {
+                if (f < 1)
+                    f = 1;
+                bmpWidth += f;
+            }
+
+            int factor = 10;
+            Bitmap bmp = CanvasAdapter.newBitmap(bmpWidth * factor, bmpHeight * factor, 0);
+            Canvas canvas = CanvasAdapter.newCanvas();
+            canvas.setBitmap(bmp);
+
+            boolean bw = false;
+            int x = 0;
+            for (float f : b.dashArray) {
+                if (f < 1)
+                    f = 1;
+                canvas.fillRectangle(x * factor, 0, f * factor, bmpHeight * factor, (bw ? Color.TRANSPARENT : Color.WHITE));
+                x += f;
+                bw = !bw;
+            }
+            b.texture = new TextureItem(bmp);
+            b.texture.mipmap = false;
+            b.stipple = (int) (bmpWidth * 1.2f);
+            b.stippleWidth = bmpWidth;
+            b.fixed = false;
+            b.randomOffset = false;
+
+            b.stippleColor = b.fillColor;
+            b.fillColor = Color.TRANSPARENT;
+            b.strokeColor = Color.TRANSPARENT;
+        } else {
+            b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
+
+            if (hasSymbol) {
+                // We have no way to set a repeat gap for the renderer,
+                // so we create a texture that already contains this repeat gap.
+                float repeatGap = REPEAT_GAP_DEFAULT * mScale;
+                float repeatStart = REPEAT_START_DEFAULT * mScale;
+                int width = (int) (b.texture.width + repeatGap);
+                int height = b.texture.height;
+                Bitmap bmp = CanvasAdapter.newBitmap(width, height, 0);
+                Canvas canvas = CanvasAdapter.newCanvas();
+                canvas.setBitmap(bmp);
+                canvas.drawBitmap(b.texture.bitmap, repeatStart, 0);
+                b.texture = new TextureItem(bmp);
+
+                // We must set stipple values
+                // The multipliers are determined empirically to
+                // correspond to the representation at Mapsforge.
+                b.stipple = b.texture.width * 3;
+                b.strokeWidth *= 2 * mScale;
+
+                // Use texture color
+                b.stippleColor = Color.WHITE;
+                b.fillColor = Color.TRANSPARENT;
+                b.strokeColor = Color.TRANSPARENT;
+
+                b.fixed = false;
+            }
+        }
 
         return b.build();
     }
@@ -1109,6 +1180,15 @@ public class XmlThemeBuilder extends DefaultHandler {
      */
     private boolean isVisible(RuleBuilder rule) {
         return mCategories == null || rule.cat == null || mCategories.contains(rule.cat);
+    }
+
+    private static float[] parseFloatArray(String dashString) {
+        String[] dashEntries = dashString.split(",");
+        float[] dashIntervals = new float[dashEntries.length];
+        for (int i = 0; i < dashEntries.length; ++i) {
+            dashIntervals[i] = Float.parseFloat(dashEntries[i]);
+        }
+        return dashIntervals;
     }
 
     private static void validateNonNegative(String name, float value) {
