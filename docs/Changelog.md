@@ -3,6 +3,8 @@
 ## New since 0.8.0
 
 - Mapsforge themes compatibility [#100](https://github.com/mapsforge/vtm/issues/100)
+- Render themes: line symbol [#124](https://github.com/mapsforge/vtm/issues/124)
+- Render themes: stroke dash array [#131](https://github.com/mapsforge/vtm/issues/131)
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.9.0)
