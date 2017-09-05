@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -37,6 +37,7 @@ public class MapFileTileSource extends TileSource implements IMapFileTileSource 
      * Amount of cache blocks that the index cache should store.
      */
     private static final int INDEX_CACHE_SIZE = 64;
+    static final int MAX_ZOOM_LEVEL = 17;
     private static final String READ_ONLY_MODE = "r";
 
     MapFileHeader fileHeader;
@@ -53,7 +54,7 @@ public class MapFileTileSource extends TileSource implements IMapFileTileSource 
     private Callback callback;
 
     public MapFileTileSource() {
-        this(0, 17);
+        this(0, MAX_ZOOM_LEVEL);
     }
 
     public MapFileTileSource(int zoomMin, int zoomMax) {

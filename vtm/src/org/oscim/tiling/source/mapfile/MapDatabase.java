@@ -874,10 +874,13 @@ public class MapDatabase implements ITileDataSource {
                     e.setLabelPosition(e.points[0] + labelPosition[0], e.points[1] + labelPosition[1]);
                 mTileProjection.project(e);
 
-                if (!e.tags.containsKey("building"))
+                // At large query zoom levels clip everything
+                if (!e.tags.containsKey("building")
+                        || queryParameters.queryZoomLevel > MapFileTileSource.MAX_ZOOM_LEVEL) {
                     if (!mTileClipper.clip(e)) {
                         continue;
                     }
+                }
                 e.simplify(1, true);
 
                 e.setLayer(layer);
