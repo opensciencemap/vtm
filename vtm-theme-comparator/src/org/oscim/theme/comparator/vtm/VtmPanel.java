@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -34,6 +35,7 @@ public class VtmPanel extends JPanel {
 
     public VtmPanel(MapApplicationAdapter.MapReadyCallback callback) {
         this.setLayout(null);
+        LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 300;
         config.height = 300;

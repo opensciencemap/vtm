@@ -33,8 +33,8 @@ import javax.swing.WindowConstants;
 class MainWindow extends JFrame {
 
     private final VtmPanel vtmPanel;
-    private final MapLoader mapLoader;
-    private final BothMapPositionHandler bothMapPositionHandler;
+    final MapLoader mapLoader;
+    final BothMapPositionHandler bothMapPositionHandler;
     private final MapsforgeMapPanel mapsforgeMapPanel;
     private final InfoPanel infoPanel;
     private final MapsPanel mapsPanel;
@@ -66,7 +66,7 @@ class MainWindow extends JFrame {
 
         mapLoader = new MapLoader(mapsforgeMapPanel, vtmPanel, bothMapPositionHandler);
 
-        MainMenu mainMenu = new MainMenu(mapLoader, bothMapPositionHandler);
+        MainMenu mainMenu = new MainMenu(this);
         setJMenuBar(mainMenu);
 
         infoPanel = new InfoPanel(vtmPanel, mapsforgeMapPanel, mainMenu);
@@ -86,12 +86,15 @@ class MainWindow extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                mapsforgeMapPanel.destroy();
-                setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-                dispose();
-                System.exit(0);
+                exit();
             }
         });
     }
 
+    void exit() {
+        mapsforgeMapPanel.destroy();
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        dispose();
+        System.exit(0);
+    }
 }

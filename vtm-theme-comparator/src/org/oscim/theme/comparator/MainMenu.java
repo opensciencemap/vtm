@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -35,15 +36,15 @@ import javax.swing.JMenuItem;
 
 public class MainMenu extends JMenuBar {
 
-    private final MapLoader mapLoader;
+    private final MainWindow mainWindow;
     private final JMenu fileMenu = new JMenu("File");
     private final JMenu viewMenu = new JMenu("View");
     private final JMenu posMenu = new JMenu("Pos");
     private ThemeLoader themeLoader;
 
-    MainMenu(MapLoader mapLoader, BothMapPositionHandler mapPosition) {
-        this.mapLoader = mapLoader;
-        mapPosition.setCallBack(this);
+    MainMenu(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+        mainWindow.bothMapPositionHandler.setCallBack(this);
         addFileEntrys();
         addViewEntrys();
         addPosEntrys();
@@ -86,7 +87,7 @@ public class MainMenu extends JMenuBar {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                mainWindow.exit();
             }
         });
         return item;
@@ -114,7 +115,7 @@ public class MainMenu extends JMenuBar {
                         ex.printStackTrace();
                     }
 
-                    mapLoader.loadMap(new File(mapPath), true);
+                    mainWindow.mapLoader.loadMap(new File(mapPath), true);
                 }
             }
         });
