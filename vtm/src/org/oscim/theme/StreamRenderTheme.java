@@ -17,6 +17,8 @@ package org.oscim.theme;
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.utils.Utils;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -45,7 +47,8 @@ public class StreamRenderTheme implements ThemeFile {
      */
     public StreamRenderTheme(String relativePathPrefix, InputStream inputStream, XmlRenderThemeMenuCallback menuCallback) {
         mRelativePathPrefix = relativePathPrefix;
-        mInputStream = inputStream;
+        mInputStream = new BufferedInputStream(inputStream);
+        mInputStream.mark(0);
         mMenuCallback = menuCallback;
     }
 
@@ -78,6 +81,11 @@ public class StreamRenderTheme implements ThemeFile {
 
     @Override
     public InputStream getRenderThemeAsStream() throws ThemeException {
+        try {
+            mInputStream.reset();
+        } catch (IOException e) {
+            throw new ThemeException(e.getMessage());
+        }
         return mInputStream;
     }
 

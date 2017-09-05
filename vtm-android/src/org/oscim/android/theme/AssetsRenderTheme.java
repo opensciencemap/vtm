@@ -15,7 +15,7 @@
  */
 package org.oscim.android.theme;
 
-import android.content.Context;
+import android.content.res.AssetManager;
 import android.text.TextUtils;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
@@ -33,36 +33,33 @@ import java.io.InputStream;
 public class AssetsRenderTheme implements ThemeFile {
     private static final long serialVersionUID = 1L;
 
-    private final InputStream mInputStream;
+    private final AssetManager mAssetManager;
+    private final String mFileName;
     private XmlRenderThemeMenuCallback mMenuCallback;
     private final String mRelativePathPrefix;
 
     /**
-     * @param context            the Android context.
+     * @param assetManager       the Android asset manager.
      * @param relativePathPrefix the prefix for all relative resource paths.
      * @param fileName           the path to the XML render theme file.
      * @throws ThemeException if an error occurs while reading the render theme XML.
      */
-    public AssetsRenderTheme(Context context, String relativePathPrefix, String fileName) throws ThemeException {
-        this(context, relativePathPrefix, fileName, null);
+    public AssetsRenderTheme(AssetManager assetManager, String relativePathPrefix, String fileName) throws ThemeException {
+        this(assetManager, relativePathPrefix, fileName, null);
     }
 
     /**
-     * @param context            the Android context.
+     * @param assetManager       the Android asset manager.
      * @param relativePathPrefix the prefix for all relative resource paths.
      * @param fileName           the path to the XML render theme file.
      * @param menuCallback       the interface callback to create a settings menu on the fly.
      * @throws ThemeException if an error occurs while reading the render theme XML.
      */
-    public AssetsRenderTheme(Context context, String relativePathPrefix, String fileName, XmlRenderThemeMenuCallback menuCallback) throws ThemeException {
+    public AssetsRenderTheme(AssetManager assetManager, String relativePathPrefix, String fileName, XmlRenderThemeMenuCallback menuCallback) throws ThemeException {
+        mAssetManager = assetManager;
         mRelativePathPrefix = relativePathPrefix;
+        mFileName = fileName;
         mMenuCallback = menuCallback;
-
-        try {
-            mInputStream = context.getAssets().open((TextUtils.isEmpty(mRelativePathPrefix) ? "" : mRelativePathPrefix) + fileName);
-        } catch (IOException e) {
-            throw new ThemeException(e.getMessage());
-        }
     }
 
     @Override
@@ -73,7 +70,7 @@ public class AssetsRenderTheme implements ThemeFile {
             return false;
         }
         AssetsRenderTheme other = (AssetsRenderTheme) obj;
-        if (mInputStream != other.mInputStream) {
+        if (getRenderThemeAsStream() != other.getRenderThemeAsStream()) {
             return false;
         }
         if (!Utils.equals(mRelativePathPrefix, other.mRelativePathPrefix)) {
@@ -94,7 +91,11 @@ public class AssetsRenderTheme implements ThemeFile {
 
     @Override
     public InputStream getRenderThemeAsStream() throws ThemeException {
-        return mInputStream;
+        try {
+            return mAssetManager.open((TextUtils.isEmpty(mRelativePathPrefix) ? "" : mRelativePathPrefix) + mFileName);
+        } catch (IOException e) {
+            throw new ThemeException(e.getMessage());
+        }
     }
 
     @Override

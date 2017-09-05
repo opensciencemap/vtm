@@ -48,7 +48,7 @@ public class ThemeLoader {
 
     public static IRenderTheme load(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
         IRenderTheme t;
-        if (ThemeUtils.isMapsforgeTheme(theme.getRenderThemeAsStream()))
+        if (ThemeUtils.isMapsforgeTheme(theme))
             t = USE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
         else
             t = USE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);

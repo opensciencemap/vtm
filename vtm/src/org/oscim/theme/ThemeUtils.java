@@ -15,19 +15,14 @@
  */
 package org.oscim.theme;
 
-import org.oscim.utils.IOUtils;
+import org.oscim.backend.XMLReaderAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.xml.parsers.SAXParserFactory;
 
 /**
  * A utility class with theme specific helper methods.
@@ -37,25 +32,21 @@ public final class ThemeUtils {
     private static final Logger log = LoggerFactory.getLogger(ThemeUtils.class);
 
     /**
-     * Check if the given InputStream is a Mapsforge render theme.
+     * Check if the given theme is a Mapsforge one.
      */
-    public static boolean isMapsforgeTheme(InputStream is) {
+    public static boolean isMapsforgeTheme(ThemeFile theme) {
         try {
             final AtomicBoolean isMapsforgeTheme = new AtomicBoolean(false);
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-            xmlReader.setContentHandler(new DefaultHandler() {
-                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                    if (localName.equals("rendertheme")) {
-                        isMapsforgeTheme.set(uri.equals("http://mapsforge.org/renderTheme"));
-                        // We have all info, break parsing
-                        throw new SAXTerminationException();
-                    }
-                }
-            });
             try {
-                xmlReader.parse(new InputSource(is));
+                new XMLReaderAdapter().parse(new DefaultHandler() {
+                    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                        if (localName.equals("rendertheme")) {
+                            isMapsforgeTheme.set(uri.equals("http://mapsforge.org/renderTheme"));
+                            // We have all info, break parsing
+                            throw new SAXTerminationException();
+                        }
+                    }
+                }, theme.getRenderThemeAsStream());
             } catch (SAXTerminationException e) {
                 // Do nothing
             }
@@ -63,8 +54,6 @@ public final class ThemeUtils {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;
-        } finally {
-            IOUtils.closeQuietly(is);
         }
     }
 
