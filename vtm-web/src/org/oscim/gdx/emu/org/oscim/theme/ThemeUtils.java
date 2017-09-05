@@ -15,17 +15,15 @@
  */
 package org.oscim.theme;
 
-import java.io.InputStream;
-
 /**
  * A utility class with theme specific helper methods.
  */
 public final class ThemeUtils {
 
     /**
-     * Check if the given InputStream is a Mapsforge render theme.
+     * Check if the given theme is a Mapsforge one.
      */
-    public static boolean isMapsforgeTheme(InputStream is) {
+    public static boolean isMapsforgeTheme(ThemeFile theme) {
         // TODO
         return false;
     }

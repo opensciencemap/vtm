@@ -93,4 +93,5 @@ tasks.withType(JavaCompile) { compileTask ->
 
 clean {
     delete "assets"
+    delete "war/WEB-INF"
 }
