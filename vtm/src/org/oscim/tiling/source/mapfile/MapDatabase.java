@@ -372,8 +372,12 @@ public class MapDatabase implements ITileDataSource {
 
         //log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
 
-        // Buffer based on dpi
-        int buffer = (int) (16 * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI + 0.5f);
+        // At large query zoom levels use enlarged buffer
+        int buffer;
+        if (queryParameters.queryZoomLevel > MapFileTileSource.MAX_ZOOM_LEVEL)
+            buffer = Tile.SIZE / 2;
+        else
+            buffer = (int) (16 * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI + 0.5f);
 
         xmin = -buffer;
         ymin = -buffer;
