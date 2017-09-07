@@ -22,18 +22,56 @@ package org.oscim.android.test;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * A simple start screen for the sample activities.
+ * Start screen for the sample activities.
  */
 public class Samples extends Activity {
+
+    private Button createButton(Class<?> clazz) {
+        return this.createButton(clazz, null, null);
+    }
+
+    private Button createButton(final Class<?> clazz, String text, View.OnClickListener customListener) {
+        Button button = new Button(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+            button.setAllCaps(false);
+        if (text == null) {
+            button.setText(clazz.getSimpleName());
+        } else {
+            button.setText(text);
+        }
+        if (customListener == null) {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(Samples.this, clazz));
+                }
+            });
+        } else {
+            button.setOnClickListener(customListener);
+        }
+        return button;
+    }
+
+    private TextView createLabel(String text) {
+        TextView textView = new TextView(this);
+        textView.setGravity(Gravity.CENTER);
+        if (text == null) {
+            textView.setText("----------");
+        } else {
+            textView.setText(text);
+        }
+        return textView;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +84,14 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(MapzenMvtMapActivity.class));
         linearLayout.addView(createButton(MapzenGeojsonMapActivity.class));
         linearLayout.addView(createButton(OpenMapTilesGeojsonMapActivity.class));
+
+        linearLayout.addView(createLabel("Features"));
+        linearLayout.addView(createButton(null, "GraphHopper Routing", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/graphhopper/graphhopper/tree/master/android")));
+            }
+        }));
 
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));
@@ -79,36 +125,5 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(S3DBMapActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));
-    }
-
-    private Button createButton(final Class<?> clazz) {
-        return this.createButton(clazz, null);
-    }
-
-    private Button createButton(final Class<?> clazz, String text) {
-        Button button = new Button(this);
-        if (text == null) {
-            button.setText(clazz.getSimpleName());
-        } else {
-            button.setText(text);
-        }
-        button.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(Samples.this, clazz));
-            }
-        });
-        return button;
-    }
-
-    private TextView createLabel(String text) {
-        TextView textView = new TextView(this);
-        textView.setGravity(Gravity.CENTER);
-        if (text == null) {
-            textView.setText("---------------");
-        } else {
-            textView.setText(text);
-        }
-        return textView;
     }
 }
