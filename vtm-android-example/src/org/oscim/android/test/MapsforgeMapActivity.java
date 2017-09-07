@@ -46,8 +46,9 @@ import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
 
 public class MapsforgeMapActivity extends MapActivity {
-    private static final int SELECT_MAP_FILE = 0;
-    private static final int SELECT_THEME_FILE = 1;
+
+    static final int SELECT_MAP_FILE = 0;
+    static final int SELECT_THEME_FILE = SELECT_MAP_FILE + 1;
 
     private TileGridLayer mGridLayer;
     private DefaultMapScaleBar mMapScaleBar;

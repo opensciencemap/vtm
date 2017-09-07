@@ -89,6 +89,12 @@
             android:name=".PathOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".PoiSearchActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".PoiSearchActivity$PoiFilePicker"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".POTTextureActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

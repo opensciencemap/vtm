@@ -92,6 +92,7 @@ public class Samples extends Activity {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/graphhopper/graphhopper/tree/master/android")));
             }
         }));
+        linearLayout.addView(createButton(PoiSearchActivity.class));
 
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));
