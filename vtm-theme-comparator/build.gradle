@@ -1,16 +1,20 @@
 apply plugin: 'java'
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
 dependencies {
     compile project(':vtm-desktop')
     compile 'ch.qos.logback:logback-classic:1.2.3'
     compile 'com.fifesoft:rsyntaxtextarea:2.6.1'
     compile 'com.jtattoo:JTattoo:1.6.11'
 
-    compile 'org.mapsforge:mapsforge-core:0.8.0'
-    compile 'org.mapsforge:mapsforge-map:0.8.0'
-    compile("org.mapsforge:mapsforge-map-awt:0.8.0")
-    compile 'org.mapsforge:mapsforge-map-reader:0.8.0'
-    compile 'org.mapsforge:mapsforge-themes:0.8.0'
+    compile 'org.mapsforge:mapsforge-core:master-SNAPSHOT'
+    compile 'org.mapsforge:mapsforge-map:master-SNAPSHOT'
+    compile("org.mapsforge:mapsforge-map-awt:master-SNAPSHOT")
+    compile 'org.mapsforge:mapsforge-map-reader:master-SNAPSHOT'
+    compile 'org.mapsforge:mapsforge-themes:master-SNAPSHOT'
     compile 'net.sf.kxml:kxml2:2.3.0'
 }
 
