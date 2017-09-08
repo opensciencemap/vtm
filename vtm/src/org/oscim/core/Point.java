@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -37,11 +38,11 @@ public class Point {
     }
 
     public double distance(Point other) {
-        return Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) + (y - other.y));
+        return Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
     }
 
     public double distanceSq(Point other) {
-        return (x - other.x) * (x - other.x) + (y - other.y) + (y - other.y);
+        return (x - other.x) * (x - other.x) + (y - other.y) * (y - other.y);
     }
 
     @Override
