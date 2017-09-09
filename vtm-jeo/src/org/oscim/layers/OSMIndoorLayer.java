@@ -95,7 +95,8 @@ public class OSMIndoorLayer extends JeoVectorLayer {
 
         if (ll.line == null) {
             float width = rule.number(f, CartoCSS.LINE_WIDTH, 1.2f);
-            int color = Color.rainbow((level + 1) / 10f);
+            //int color = Color.rainbow((level + 1) / 10f);
+            int color = JeoUtils.color(rule.color(f, CartoCSS.LINE_COLOR, RGB.black));
 
             if (/*level > -2 && */!active)
                 color = getInactiveColor(color);
