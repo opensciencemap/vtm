@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013-2014 Ludwig M Brinckmann
- * Copyright 2014-2016 devemux86
+ * Copyright 2014-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -78,7 +78,7 @@ public class AndroidSvgBitmap extends AndroidBitmap {
 
     private static android.graphics.Bitmap getResourceBitmapImpl(InputStream inputStream, int width, int height, int percent) throws IOException {
         synchronized (SVG.getVersion()) {
-            return getResourceBitmap(inputStream, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI, DEFAULT_SIZE, width, height, percent);
+            return getResourceBitmap(inputStream, CanvasAdapter.getScale(), DEFAULT_SIZE, width, height, percent);
         }
     }
 

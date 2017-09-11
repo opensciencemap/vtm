@@ -169,8 +169,8 @@ public class XmlThemeBuilder extends DefaultHandler {
     public XmlThemeBuilder(ThemeFile theme, ThemeCallback themeCallback) {
         mTheme = theme;
         mThemeCallback = themeCallback;
-        mScale = CanvasAdapter.scale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1);
-        mScale2 = CanvasAdapter.scale + (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI - 1) * 0.5f;
+        mScale = CanvasAdapter.scale + (CanvasAdapter.getScale() - 1);
+        mScale2 = CanvasAdapter.scale + (CanvasAdapter.getScale() - 1) * 0.5f;
     }
 
     @Override

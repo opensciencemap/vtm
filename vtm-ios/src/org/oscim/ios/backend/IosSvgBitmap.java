@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Longri
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -90,7 +90,7 @@ public class IosSvgBitmap extends IosBitmap {
     }
 
     private static UIImage getResourceBitmapImpl(InputStream inputStream, int width, int height, int percent) {
-        return getResourceBitmap(inputStream, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI, DEFAULT_SIZE, width, height, percent);
+        return getResourceBitmap(inputStream, CanvasAdapter.getScale(), DEFAULT_SIZE, width, height, percent);
     }
 
     public IosSvgBitmap(InputStream inputStream, int width, int height, int percent) throws IOException {

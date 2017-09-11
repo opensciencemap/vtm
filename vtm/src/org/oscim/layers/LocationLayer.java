@@ -25,7 +25,7 @@ public class LocationLayer extends Layer {
     public final LocationRenderer locationRenderer;
 
     public LocationLayer(Map map) {
-        this(map, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
+        this(map, CanvasAdapter.getScale());
     }
 
     public LocationLayer(Map map, float scale) {

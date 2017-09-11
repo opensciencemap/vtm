@@ -86,7 +86,7 @@ public class ReverseGeocodeActivity extends MapsforgeMapActivity {
                 GeoPoint p = mMap.viewport().fromScreenPoint(e.getX(), e.getY());
 
                 // Read all labeled POI and ways for the area covered by the tiles under touch
-                float touchRadius = TOUCH_RADIUS * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI;
+                float touchRadius = TOUCH_RADIUS * CanvasAdapter.getScale();
                 long mapSize = MercatorProjection.getMapSize((byte) mMap.getMapPosition().getZoomLevel());
                 double pixelX = MercatorProjection.longitudeToPixelX(p.getLongitude(), mapSize);
                 double pixelY = MercatorProjection.latitudeToPixelY(p.getLatitude(), mapSize);

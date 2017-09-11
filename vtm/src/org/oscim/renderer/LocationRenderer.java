@@ -73,7 +73,7 @@ public class LocationRenderer extends LayerRenderer {
     private int mShowAccuracyZoom = SHOW_ACCURACY_ZOOM;
 
     public LocationRenderer(Map map, Layer layer) {
-        this(map, layer, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
+        this(map, layer, CanvasAdapter.getScale());
     }
 
     public LocationRenderer(Map map, Layer layer, float scale) {

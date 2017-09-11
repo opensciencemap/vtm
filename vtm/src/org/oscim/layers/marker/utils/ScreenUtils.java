@@ -34,7 +34,7 @@ public class ScreenUtils {
      * @return Value in PX according to screen density
      */
     public static int getPixels(float dp) {
-        return (int) (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI * dp);
+        return (int) (CanvasAdapter.getScale() * dp);
     }
 
     public static class ClusterDrawable {
@@ -66,7 +66,7 @@ public class ScreenUtils {
 
             mPaintBorder.setColor(foregroundColor);
             mPaintBorder.setStyle(Paint.Style.STROKE);
-            mPaintBorder.setStrokeWidth(2.0f * CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
+            mPaintBorder.setStrokeWidth(2.0f * CanvasAdapter.getScale());
         }
 
         private void setText(String text) {

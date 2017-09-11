@@ -210,6 +210,10 @@ public abstract class CanvasAdapter {
         return new File(parentPath, pathName);
     }
 
+    public static float getScale() {
+        return CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI;
+    }
+
     protected static void init(CanvasAdapter adapter) {
         g = adapter;
     }

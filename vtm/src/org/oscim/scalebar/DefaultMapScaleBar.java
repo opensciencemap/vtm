@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2014 Ludwig M Brinckmann
- * Copyright 2014-2016 devemux86
+ * Copyright 2014-2017 devemux86
  * Copyright 2014 Erik Duisters
  * Copyright 2014 Christian Pesch
  *
@@ -49,7 +49,7 @@ public class DefaultMapScaleBar extends MapScaleBar {
     private final Paint paintScaleTextStroke;
 
     public DefaultMapScaleBar(Map map) {
-        this(map, CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI);
+        this(map, CanvasAdapter.getScale());
     }
 
     public DefaultMapScaleBar(Map map, float scale) {
