@@ -43,7 +43,7 @@ public class MainActivity extends AndroidApplication {
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
-        Tile.SIZE = Tile.calculateTileSize(metrics.scaledDensity);
+        Tile.SIZE = Tile.calculateTileSize();
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.stencil = 8;

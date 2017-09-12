@@ -18,6 +18,8 @@
  */
 package org.oscim.core;
 
+import org.oscim.backend.CanvasAdapter;
+
 /**
  * A tile represents a rectangular part of the world map. All tiles can be
  * identified by their X and Y number together with their zoom level. The actual
@@ -123,8 +125,8 @@ public class Tile {
      * Calculate tile size (256px) with a scale factor.
      * Clamp tile size to a preset multiple, e.g. 64px.
      */
-    public static int calculateTileSize(float scaleFactor) {
-        float scaled = DEFAULT_TILE_SIZE * scaleFactor;
+    public static int calculateTileSize() {
+        float scaled = DEFAULT_TILE_SIZE * CanvasAdapter.getScale();
         return Math.max(TILE_SIZE_MULTIPLE,
                 Math.round(scaled / TILE_SIZE_MULTIPLE) * TILE_SIZE_MULTIPLE);
     }

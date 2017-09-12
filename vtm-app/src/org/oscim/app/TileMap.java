@@ -1,6 +1,6 @@
 /* Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -40,7 +40,6 @@ import org.oscim.app.location.LocationDialog;
 import org.oscim.app.location.LocationHandler;
 import org.oscim.app.preferences.EditPreferences;
 import org.oscim.core.GeoPoint;
-import org.oscim.core.Tile;
 import org.oscim.overlay.DistanceTouchOverlay;
 import org.osmdroid.location.POI;
 import org.osmdroid.overlays.MapEventsReceiver;
@@ -74,7 +73,6 @@ public class TileMap extends MapActivity implements MapEventsReceiver {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Tile.SIZE = Tile.calculateTileSize(getResources().getDisplayMetrics().scaledDensity);
         setContentView(R.layout.activity_tilemap);
         App.view = (MapView) findViewById(R.id.mapView);
         registerMapView(App.view);

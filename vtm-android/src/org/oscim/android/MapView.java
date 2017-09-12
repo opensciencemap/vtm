@@ -31,6 +31,7 @@ import org.oscim.android.input.AndroidMotionEvent;
 import org.oscim.android.input.GestureHandler;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
+import org.oscim.core.Tile;
 import org.oscim.map.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,7 @@ public class MapView extends GLSurfaceView {
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
+        Tile.SIZE = Tile.calculateTileSize();
 
         /* Initialize the Map */
         mMap = new AndroidMap(this);

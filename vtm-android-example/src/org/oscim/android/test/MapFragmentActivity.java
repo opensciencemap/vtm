@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
 import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
 import org.oscim.layers.GroupLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -38,7 +37,6 @@ public class MapFragmentActivity extends FragmentActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Tile.SIZE = Tile.calculateTileSize(getResources().getDisplayMetrics().scaledDensity);
         setContentView(R.layout.activity_map_fragment);
 
         setTitle(getClass().getSimpleName());
