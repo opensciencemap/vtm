@@ -70,6 +70,11 @@ public abstract class CanvasAdapter {
     public static float textScale = 1;
 
     /**
+     * The user scale.
+     */
+    public static float userScale = 1;
+
+    /**
      * Create a Canvas.
      *
      * @return the canvas
@@ -211,7 +216,7 @@ public abstract class CanvasAdapter {
     }
 
     public static float getScale() {
-        return CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI;
+        return (CanvasAdapter.dpi / CanvasAdapter.DEFAULT_DPI) * userScale;
     }
 
     protected static void init(CanvasAdapter adapter) {
