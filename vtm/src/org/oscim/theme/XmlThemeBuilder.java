@@ -169,8 +169,8 @@ public class XmlThemeBuilder extends DefaultHandler {
     public XmlThemeBuilder(ThemeFile theme, ThemeCallback themeCallback) {
         mTheme = theme;
         mThemeCallback = themeCallback;
-        mScale = CanvasAdapter.scale + (CanvasAdapter.getScale() - 1);
-        mScale2 = CanvasAdapter.scale + (CanvasAdapter.getScale() - 1) * 0.5f;
+        mScale = CanvasAdapter.getScale();
+        mScale2 = CanvasAdapter.getScale() * 0.5f;
     }
 
     @Override
@@ -702,7 +702,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("stroke-width".equals(name)) {
                 float strokeWidth = Float.parseFloat(value);
                 validateNonNegative("stroke-width", strokeWidth);
-                b.strokeWidth = strokeWidth * mScale2;
+                b.strokeWidth = strokeWidth * mScale;
 
             } else if ("fade".equals(name))
                 b.fadeScale = Integer.parseInt(value);
@@ -975,7 +975,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.strokeColor = Color.parseColor(value);
 
             else if ("stroke-width".equals(name))
-                b.strokeWidth = Float.parseFloat(value) * mScale2;
+                b.strokeWidth = Float.parseFloat(value) * mScale;
 
             else if ("caption".equals(name))
                 b.caption = Boolean.parseBoolean(value);
@@ -1045,7 +1045,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             String value = attributes.getValue(i);
 
             if ("r".equals(name) || "radius".equals(name))
-                b.radius(Float.parseFloat(value) * mScale2);
+                b.radius(Float.parseFloat(value) * mScale);
 
             else if ("cat".equals(name))
                 b.cat(value);
@@ -1060,7 +1060,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 b.strokeColor(Color.parseColor(value));
 
             else if ("stroke-width".equals(name))
-                b.strokeWidth(Float.parseFloat(value) * mScale2);
+                b.strokeWidth(Float.parseFloat(value) * mScale);
 
             else
                 logUnknownAttribute(elementName, name, value, i);

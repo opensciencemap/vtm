@@ -60,11 +60,6 @@ public abstract class CanvasAdapter {
     public static Platform platform = Platform.UNKNOWN;
 
     /**
-     * The scale.
-     */
-    public static float scale = 1;
-
-    /**
      * The text scale.
      */
     public static float textScale = 1;

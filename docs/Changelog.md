@@ -8,6 +8,7 @@
 - POI Search example [#394](https://github.com/mapsforge/vtm/issues/394)
 - Mapsforge Reverse Geocoding [#383](https://github.com/mapsforge/vtm/issues/383)
 - Core utilities [#396](https://github.com/mapsforge/vtm/issues/396)
+- Map scaling improvements [#401](https://github.com/mapsforge/vtm/issues/401)
 - Mapsforge fix artifacts zoom > 17 [#231](https://github.com/mapsforge/vtm/issues/231)
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Many other minor improvements and bug fixes
