@@ -974,18 +974,18 @@
     <m e="node" select="first">
 
         <m k="barrier">
-            <m zoom-min="10">
+            <m zoom-min="16">
                 <m v="bollard">
-                    <circle fill="#909090" radius="1.5" />
+                    <symbol src="assets:symbols/barrier/bollard.svg" />
                 </m>
                 <m v="block">
-                    <circle fill="#909090" radius="1.5" />
+                    <symbol src="assets:symbols/barrier/blocks.svg" />
                 </m>
                 <m v="gate">
-                    <circle fill="#909090" radius="1.5" />
+                    <symbol src="assets:symbols/barrier/gate.svg" />
                 </m>
                 <m v="lift_gate">
-                    <circle fill="#909090" radius="1.5" />
+                    <symbol src="assets:symbols/barrier/lift_gate.svg" />
                 </m>
             </m>
         </m>

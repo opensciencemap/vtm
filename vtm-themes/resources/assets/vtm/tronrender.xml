@@ -1124,10 +1124,13 @@
             </m>
         </m>
 
-        <m k="barrier" v="bollard">
-            <circle fill="#707070" radius="1.5" />
+        <m k="barrier">
+            <m zoom-min="16">
+                <m v="bollard">
+                    <symbol src="assets:symbols/barrier/bollard.svg" />
+                </m>
+            </m>
         </m>
-
 
         <m k="highway">
             <m v="bus_stop" zoom-min="16">
