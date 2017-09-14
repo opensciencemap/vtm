@@ -154,7 +154,7 @@ public class MapsforgeMapActivity extends MapActivity {
             }
 
             mTileSource = new MapFileTileSource();
-            mTileSource.setPreferredLanguage("en");
+            //mTileSource.setPreferredLanguage("en");
             String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
             if (mTileSource.setMapFile(file)) {
 

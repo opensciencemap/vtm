@@ -44,7 +44,7 @@ public class MapsforgeTest extends GdxMap {
     public void createLayers() {
         MapFileTileSource tileSource = new MapFileTileSource();
         tileSource.setMapFile(mapFile.getAbsolutePath());
-        tileSource.setPreferredLanguage("en");
+        //tileSource.setPreferredLanguage("en");
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         mMap.setTheme(VtmThemes.DEFAULT);

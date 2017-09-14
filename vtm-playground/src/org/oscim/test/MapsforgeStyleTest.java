@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -41,7 +41,7 @@ public class MapsforgeStyleTest extends GdxMap {
     public void createLayers() {
         MapFileTileSource tileSource = new MapFileTileSource();
         tileSource.setMapFile(mapFile.getAbsolutePath());
-        tileSource.setPreferredLanguage("en");
+        //tileSource.setPreferredLanguage("en");
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         loadTheme(null);
