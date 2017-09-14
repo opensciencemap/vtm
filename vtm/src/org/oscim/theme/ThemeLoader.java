@@ -53,7 +53,7 @@ public class ThemeLoader {
         else
             t = USE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);
         if (t != null)
-            t.scaleTextSize(CanvasAdapter.textScale + (CanvasAdapter.getScale() - 1));
+            t.scaleTextSize(CanvasAdapter.getScale() * CanvasAdapter.textScale);
         return t;
     }
 }
