@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -90,10 +90,28 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                         return false;
                 }
 
-                if (label == null)
-                    label = PolyLabel.get(element);
+                float x = 0;
+                float y = 0;
+                if (label == null) {
+                    if (LabelLayer.POLY_LABEL) {
+                        label = PolyLabel.get(element);
+                        x = label.x;
+                        y = label.y;
+                    } else {
+                        int n = element.index[0];
+                        for (int i = 0; i < n; ) {
+                            x += element.points[i++];
+                            y += element.points[i++];
+                        }
+                        x /= (n / 2);
+                        y /= (n / 2);
+                    }
+                } else {
+                    x = label.x;
+                    y = label.y;
+                }
 
-                ld.labels.push(TextItem.pool.get().set(label.x, label.y, value, text));
+                ld.labels.push(TextItem.pool.get().set(x, y, value, text));
             } else if (element.type == POINT) {
                 String value = element.tags.getValue(text.textKey);
                 if (value == null || value.length() == 0)

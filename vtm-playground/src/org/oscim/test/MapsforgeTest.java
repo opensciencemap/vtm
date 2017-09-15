@@ -40,6 +40,10 @@ public class MapsforgeTest extends GdxMap {
 
     private static File mapFile;
 
+    private MapsforgeTest() {
+        //LabelLayer.POLY_LABEL = true;
+    }
+
     @Override
     public void createLayers() {
         MapFileTileSource tileSource = new MapFileTileSource();

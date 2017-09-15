@@ -59,6 +59,8 @@ public class MapsforgeMapActivity extends MapActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //LabelLayer.POLY_LABEL = true;
+
         startActivityForResult(new Intent(this, MapFilePicker.class),
                 SELECT_MAP_FILE);
     }

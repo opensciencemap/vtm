@@ -34,9 +34,11 @@ public class LabelLayer extends Layer implements Map.UpdateListener, TileManager
 
     static final Logger log = LoggerFactory.getLogger(LabelLayer.class);
 
-    public final static String LABEL_DATA = LabelLayer.class.getName();
+    static final String LABEL_DATA = LabelLayer.class.getName();
 
-    private final static long MAX_RELABEL_DELAY = 100;
+    private static final long MAX_RELABEL_DELAY = 100;
+
+    public static boolean POLY_LABEL;
 
     private final LabelPlacement mLabelPlacer;
     private final Worker mWorker;
