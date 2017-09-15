@@ -6,7 +6,6 @@ repositories {
 
 dependencies {
     compile project(':vtm-android')
-    compile project(':vtm-extras')
     compile project(':vtm-http')
     compile(project(':vtm-jeo')) {
         exclude group: 'com.vividsolutions', module: 'jts'
