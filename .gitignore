@@ -11,8 +11,10 @@ robovm-build
 /vtm-web/war/
 /vtm-web/assets/
 /vtm-web/gwt-unitCache
+/vtm-web-app/war/WEB-INF/
 /vtm-web-app/assets/
 /vtm-web-app/src/main/webapp/
+/vtm-web-js/war/WEB-INF/
 /vtm-web-js/assets/
 /vtm-web-js/src/main/webapp/
 /vtm-spatialite/
