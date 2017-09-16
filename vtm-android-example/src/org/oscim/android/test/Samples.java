@@ -96,6 +96,7 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));
+        linearLayout.addView(createButton(MapsforgePolyLabelActivity.class));
         linearLayout.addView(createButton(AtlasThemeActivity.class));
         linearLayout.addView(createButton(POTTextureActivity.class));
 

@@ -38,10 +38,10 @@ import java.io.File;
 
 public class MapsforgeTest extends GdxMap {
 
-    private static File mapFile;
+    private File mapFile;
 
-    private MapsforgeTest() {
-        //LabelLayer.POLY_LABEL = true;
+    MapsforgeTest(File mapFile) {
+        this.mapFile = mapFile;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class MapsforgeTest extends GdxMap {
         //tileSource.setPreferredLanguage("en");
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
-        mMap.setTheme(VtmThemes.DEFAULT);
+        loadTheme(null);
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
@@ -74,7 +74,7 @@ public class MapsforgeTest extends GdxMap {
         mMap.setMapPosition(pos);
     }
 
-    private static File getMapFile(String[] args) {
+    static File getMapFile(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException("missing argument: <mapFile>");
         }
@@ -90,10 +90,12 @@ public class MapsforgeTest extends GdxMap {
         return file;
     }
 
-    public static void main(String[] args) {
-        mapFile = getMapFile(args);
+    protected void loadTheme(final String styleId) {
+        mMap.setTheme(VtmThemes.DEFAULT);
+    }
 
+    public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapsforgeTest());
+        GdxMapApp.run(new MapsforgeTest(getMapFile(args)));
     }
 }

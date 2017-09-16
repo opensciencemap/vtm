@@ -16,62 +16,23 @@ package org.oscim.test;
 
 import com.badlogic.gdx.Input;
 
-import org.oscim.core.MapPosition;
-import org.oscim.core.Tile;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.StreamRenderTheme;
 import org.oscim.theme.XmlRenderThemeMenuCallback;
 import org.oscim.theme.XmlRenderThemeStyleLayer;
 import org.oscim.theme.XmlRenderThemeStyleMenu;
-import org.oscim.tiling.source.mapfile.MapFileTileSource;
-import org.oscim.tiling.source.mapfile.MapInfo;
 
 import java.io.File;
 import java.util.Set;
 
-public class MapsforgeStyleTest extends GdxMap {
+public class MapsforgeStyleTest extends MapsforgeTest {
 
-    private static File mapFile;
+    private MapsforgeStyleTest(File mapFile) {
+        super(mapFile);
+    }
 
     @Override
-    public void createLayers() {
-        MapFileTileSource tileSource = new MapFileTileSource();
-        tileSource.setMapFile(mapFile.getAbsolutePath());
-        //tileSource.setPreferredLanguage("en");
-
-        VectorTileLayer l = mMap.setBaseMap(tileSource);
-        loadTheme(null);
-
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        mMap.layers().add(new LabelLayer(mMap, l));
-
-        MapInfo info = tileSource.getMapInfo();
-        MapPosition pos = new MapPosition();
-        pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
-        mMap.setMapPosition(pos);
-    }
-
-    private static File getMapFile(String[] args) {
-        if (args.length == 0) {
-            throw new IllegalArgumentException("missing argument: <mapFile>");
-        }
-
-        File file = new File(args[0]);
-        if (!file.exists()) {
-            throw new IllegalArgumentException("file does not exist: " + file);
-        } else if (!file.isFile()) {
-            throw new IllegalArgumentException("not a file: " + file);
-        } else if (!file.canRead()) {
-            throw new IllegalArgumentException("cannot read file: " + file);
-        }
-        return file;
-    }
-
-    private void loadTheme(final String styleId) {
+    protected void loadTheme(final String styleId) {
         mMap.setTheme(new StreamRenderTheme("", getClass().getResourceAsStream("/assets/vtm/stylemenu.xml"), new XmlRenderThemeMenuCallback() {
             @Override
             public Set<String> getCategories(XmlRenderThemeStyleMenu renderThemeStyleMenu) {
@@ -118,9 +79,7 @@ public class MapsforgeStyleTest extends GdxMap {
     }
 
     public static void main(String[] args) {
-        mapFile = getMapFile(args);
-
         GdxMapApp.init();
-        GdxMapApp.run(new MapsforgeStyleTest());
+        GdxMapApp.run(new MapsforgeStyleTest(getMapFile(args)));
     }
 }
