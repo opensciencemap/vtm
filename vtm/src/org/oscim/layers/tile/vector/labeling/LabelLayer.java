@@ -38,8 +38,6 @@ public class LabelLayer extends Layer implements Map.UpdateListener, TileManager
 
     private static final long MAX_RELABEL_DELAY = 100;
 
-    public static boolean POLY_LABEL;
-
     private final LabelPlacement mLabelPlacer;
     private final Worker mWorker;
 

@@ -17,13 +17,13 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.theme.ThemeLoader;
+import org.oscim.utils.Parameters;
 
 public class AtlasThemeActivity extends SimpleMapActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        ThemeLoader.USE_ATLAS = true;
+        Parameters.TEXTURE_ATLAS = true;
 
         super.onCreate(savedInstanceState);
     }

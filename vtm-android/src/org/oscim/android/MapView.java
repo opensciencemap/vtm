@@ -33,6 +33,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
+import org.oscim.utils.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ public class MapView extends GLSurfaceView {
         mMap.clearMap();
         mMap.updateMap(false);
 
-        if (!Map.NEW_GESTURES) {
+        if (!Parameters.MAP_EVENT_LAYER2) {
             GestureHandler gestureHandler = new GestureHandler(mMap);
             mGestureDetector = new GestureDetector(context, gestureHandler);
             mGestureDetector.setOnDoubleTapListener(gestureHandler);

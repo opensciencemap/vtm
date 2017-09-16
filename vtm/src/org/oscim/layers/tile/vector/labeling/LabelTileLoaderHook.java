@@ -29,6 +29,7 @@ import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
+import org.oscim.utils.Parameters;
 import org.oscim.utils.geom.PolyLabel;
 
 import static org.oscim.core.GeometryBuffer.GeometryType.LINE;
@@ -93,7 +94,7 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                 float x = 0;
                 float y = 0;
                 if (label == null) {
-                    if (LabelLayer.POLY_LABEL) {
+                    if (Parameters.POLY_LABEL) {
                         label = PolyLabel.get(element);
                         x = label.x;
                         y = label.y;

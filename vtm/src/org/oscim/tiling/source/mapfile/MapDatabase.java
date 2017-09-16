@@ -32,6 +32,7 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.source.mapfile.header.SubFileParameter;
+import org.oscim.utils.Parameters;
 import org.oscim.utils.geom.TileClipper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -532,7 +533,7 @@ public class MapDatabase implements ITileDataSource {
                 } else if (blockSize == 0) {
                     /* the current block is empty, continue with the next block */
                     continue;
-                } else if (blockSize > ReadBuffer.MAXIMUM_BUFFER_SIZE) {
+                } else if (blockSize > Parameters.MAXIMUM_BUFFER_SIZE) {
                     /* the current block is too large, continue with the next
                      * block */
                     log.warn("current block size too large: " + blockSize);

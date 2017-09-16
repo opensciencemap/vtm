@@ -20,11 +20,9 @@ package org.oscim.theme;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.theme.IRenderTheme.ThemeException;
+import org.oscim.utils.Parameters;
 
 public class ThemeLoader {
-
-    public static boolean USE_ATLAS;
-    public static boolean POT_TEXTURES;
 
     public static IRenderTheme load(String renderThemePath) throws ThemeException {
         return load(new ExternalRenderTheme(renderThemePath));
@@ -49,9 +47,9 @@ public class ThemeLoader {
     public static IRenderTheme load(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
         IRenderTheme t;
         if (ThemeUtils.isMapsforgeTheme(theme))
-            t = USE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
+            t = Parameters.TEXTURE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
         else
-            t = USE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);
+            t = Parameters.TEXTURE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);
         if (t != null)
             t.scaleTextSize(CanvasAdapter.getScale() * CanvasAdapter.textScale);
         return t;

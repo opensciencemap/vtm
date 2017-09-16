@@ -12,6 +12,7 @@
 - Mapsforge fix artifacts zoom > 17 [#231](https://github.com/mapsforge/vtm/issues/231)
 - PolyLabel default disabled [#402](https://github.com/mapsforge/vtm/issues/402)
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
+- Feature parameters [#403](https://github.com/mapsforge/vtm/issues/403)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.9.0)

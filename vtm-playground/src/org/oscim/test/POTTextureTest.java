@@ -18,12 +18,12 @@
 package org.oscim.test;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.theme.ThemeLoader;
+import org.oscim.utils.Parameters;
 
 public class POTTextureTest extends MapTest {
 
     private POTTextureTest() {
-        ThemeLoader.POT_TEXTURES = true;
+        Parameters.POT_TEXTURES = true;
     }
 
     public static void main(String[] args) {

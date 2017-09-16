@@ -16,13 +16,13 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.utils.Parameters;
 
 public class MapsforgePolyLabelActivity extends MapsforgeMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LabelLayer.POLY_LABEL = true;
+        Parameters.POLY_LABEL = true;
 
         super.onCreate(savedInstanceState);
     }

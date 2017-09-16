@@ -34,6 +34,7 @@ import org.oscim.map.Map;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
+import org.oscim.utils.Parameters;
 
 public abstract class GdxMap implements ApplicationListener {
 
@@ -85,7 +86,7 @@ public abstract class GdxMap implements ApplicationListener {
         mMapRenderer.onSurfaceChanged(w, h);
 
         InputMultiplexer mux = new InputMultiplexer();
-        if (!Map.NEW_GESTURES) {
+        if (!Parameters.MAP_EVENT_LAYER2) {
             mGestureDetector = new GestureDetector(new GestureHandlerImpl(mMap));
             mux.addProcessor(mGestureDetector);
         }

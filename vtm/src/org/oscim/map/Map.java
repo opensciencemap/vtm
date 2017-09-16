@@ -2,7 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
  * Copyright 2016 Stephan Leuschner
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -40,6 +40,7 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeFile;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.TileSource;
+import org.oscim.utils.Parameters;
 import org.oscim.utils.ThreadUtils;
 import org.oscim.utils.async.AsyncExecutor;
 import org.oscim.utils.async.TaskQueue;
@@ -49,11 +50,6 @@ import org.slf4j.LoggerFactory;
 public abstract class Map implements TaskQueue {
 
     private static final Logger log = LoggerFactory.getLogger(Map.class);
-
-    /**
-     * If true the {@link MapEventLayer2} will be used instead of default {@link MapEventLayer}.
-     */
-    public static boolean NEW_GESTURES = false;
 
     /**
      * Listener interface for map update notifications.
@@ -157,7 +153,7 @@ public abstract class Map implements TaskQueue {
         mAsyncExecutor = new AsyncExecutor(4, this);
         mMapPosition = new MapPosition();
 
-        if (NEW_GESTURES)
+        if (Parameters.MAP_EVENT_LAYER2)
             mEventLayer = new MapEventLayer2(this);
         else
             mEventLayer = new MapEventLayer(this);

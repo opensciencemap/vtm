@@ -16,13 +16,13 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
-import org.oscim.theme.ThemeLoader;
+import org.oscim.utils.Parameters;
 
 public class POTTextureActivity extends SimpleMapActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        ThemeLoader.POT_TEXTURES = true;
+        Parameters.POT_TEXTURES = true;
 
         super.onCreate(savedInstanceState);
     }

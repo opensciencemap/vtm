@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,13 +14,13 @@
  */
 package org.oscim.android.test;
 
-import org.oscim.map.Map;
+import org.oscim.utils.Parameters;
 
 public class NewGesturesActivity extends MarkerOverlayActivity {
 
     public NewGesturesActivity() {
         super();
-        Map.NEW_GESTURES = true;
+        Parameters.MAP_EVENT_LAYER2 = true;
     }
 
     @Override
@@ -28,6 +28,6 @@ public class NewGesturesActivity extends MarkerOverlayActivity {
         super.onDestroy();
 
         // Revert gestures for other activities
-        Map.NEW_GESTURES = false;
+        Parameters.MAP_EVENT_LAYER2 = false;
     }
 }

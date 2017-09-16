@@ -15,7 +15,7 @@
 package org.oscim.test;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.utils.Parameters;
 
 import java.io.File;
 
@@ -24,7 +24,7 @@ public class MapsforgePolyLabelTest extends MapsforgeTest {
     private MapsforgePolyLabelTest(File mapFile) {
         super(mapFile);
 
-        LabelLayer.POLY_LABEL = true;
+        Parameters.POLY_LABEL = true;
     }
 
     public static void main(String[] args) {

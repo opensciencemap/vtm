@@ -1,5 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -18,6 +19,7 @@ package org.oscim.tiling.source.mapfile;
 
 import org.oscim.core.Tag;
 import org.oscim.core.TagSet;
+import org.oscim.utils.Parameters;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -30,11 +32,6 @@ import java.util.logging.Logger;
 public class ReadBuffer {
     private static final String CHARSET_UTF8 = "UTF-8";
     private static final Logger LOG = Logger.getLogger(ReadBuffer.class.getName());
-
-    /**
-     * Maximum buffer size which is supported by this implementation.
-     */
-    static final int MAXIMUM_BUFFER_SIZE = 8000000;
 
     private byte[] mBufferData;
     private int mBufferPosition;
@@ -67,7 +64,7 @@ public class ReadBuffer {
         // ensure that the read buffer is large enough
         if (mBufferData == null || mBufferData.length < length) {
             // ensure that the read buffer is not too large
-            if (length > MAXIMUM_BUFFER_SIZE) {
+            if (length > Parameters.MAXIMUM_BUFFER_SIZE) {
                 LOG.warning("invalid read length: " + length);
                 return false;
             }

@@ -16,12 +16,12 @@
 package org.oscim.test;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.theme.ThemeLoader;
+import org.oscim.utils.Parameters;
 
 public class AtlasThemeMapTest extends MapTest {
 
     private AtlasThemeMapTest() {
-        ThemeLoader.USE_ATLAS = true;
+        Parameters.TEXTURE_ATLAS = true;
     }
 
     public static void main(String[] args) {
