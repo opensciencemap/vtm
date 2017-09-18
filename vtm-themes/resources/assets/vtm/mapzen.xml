@@ -963,8 +963,8 @@
             <m k="area" v="~|false|no">
                 <m k="kind_detail">
                     <m k="oneway" v="yes|true" zoom-min="16">
-                        <line fix="true" src="assets:patterns/oneway.svg" stipple="240"
-                            stipple-stroke="#666666" width="9" />
+                        <line fix="true" src="assets:patterns/oneway.svg" stipple="320"
+                            stipple-stroke="#666666" width="12" />
                     </m>
                 </m>
             </m>
