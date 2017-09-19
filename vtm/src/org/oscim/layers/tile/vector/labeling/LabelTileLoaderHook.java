@@ -56,14 +56,14 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                            RenderStyle style, int level) {
 
         if (style instanceof TextStyle) {
-            LabelTileData ld = get(tile);
-
             TextStyle text = (TextStyle) style.current();
-            if (element.type == LINE) {
-                String value = element.tags.getValue(text.textKey);
-                if (value == null || value.length() == 0)
-                    return false;
 
+            String value = element.tags.getValue(text.textKey);
+            if (value == null || value.length() == 0)
+                return false;
+
+            LabelTileData ld = get(tile);
+            if (element.type == LINE) {
                 int offset = 0;
                 for (int i = 0, n = element.index.length; i < n; i++) {
                     int length = element.index[i];
@@ -75,10 +75,6 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                     offset += length;
                 }
             } else if (element.type == POLY) {
-                String value = element.tags.getValue(text.textKey);
-                if (value == null || value.length() == 0)
-                    return false;
-
                 PointF label = element.labelPosition;
                 // skip unnecessary calculations if label is outside of visible area
                 if (label != null && (label.x < 0 || label.x > Tile.SIZE || label.y < 0 || label.y > Tile.SIZE))
@@ -114,10 +110,6 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 
                 ld.labels.push(TextItem.pool.get().set(x, y, value, text));
             } else if (element.type == POINT) {
-                String value = element.tags.getValue(text.textKey);
-                if (value == null || value.length() == 0)
-                    return false;
-
                 for (int i = 0, n = element.getNumPoints(); i < n; i++) {
                     PointF p = element.getPoint(i);
                     ld.labels.push(TextItem.pool.get().set(p.x, p.y, value, text));
@@ -130,8 +122,42 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                 return false;
 
             LabelTileData ld = get(tile);
+            if (element.type == LINE) {
+                // TODO
+            } else if (element.type == POLY) {
+                PointF centroid = element.labelPosition;
+                // skip unnecessary calculations if centroid is outside of visible area
+                if (centroid != null && (centroid.x < 0 || centroid.x > Tile.SIZE || centroid.y < 0 || centroid.y > Tile.SIZE))
+                    return false;
 
-            if (element.type == POINT) {
+                float x = 0;
+                float y = 0;
+                if (centroid == null) {
+                    if (Parameters.POLY_LABEL) {
+                        centroid = PolyLabel.get(element);
+                        x = centroid.x;
+                        y = centroid.y;
+                    } else {
+                        int n = element.index[0];
+                        for (int i = 0; i < n; ) {
+                            x += element.points[i++];
+                            y += element.points[i++];
+                        }
+                        x /= (n / 2);
+                        y /= (n / 2);
+                    }
+                } else {
+                    x = centroid.x;
+                    y = centroid.y;
+                }
+
+                SymbolItem it = SymbolItem.pool.get();
+                if (symbol.bitmap != null)
+                    it.set(x, y, symbol.bitmap, true);
+                else
+                    it.set(x, y, symbol.texture, true);
+                ld.symbols.push(it);
+            } else if (element.type == POINT) {
                 for (int i = 0, n = element.getNumPoints(); i < n; i++) {
                     PointF p = element.getPoint(i);
 
@@ -142,22 +168,6 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                         it.set(p.x, p.y, symbol.texture, true);
                     ld.symbols.push(it);
                 }
-            } else if (element.type == LINE) {
-                //TODO: implement
-            } else if (element.type == POLY) {
-                PointF centroid = element.labelPosition;
-                if (centroid == null)
-                    return false;
-
-                if (centroid.x < 0 || centroid.x > Tile.SIZE || centroid.y < 0 || centroid.y > Tile.SIZE)
-                    return false;
-
-                SymbolItem it = SymbolItem.pool.get();
-                if (symbol.bitmap != null)
-                    it.set(centroid.x, centroid.y, symbol.bitmap, true);
-                else
-                    it.set(centroid.x, centroid.y, symbol.texture, true);
-                ld.symbols.push(it);
             }
         }
         return false;
