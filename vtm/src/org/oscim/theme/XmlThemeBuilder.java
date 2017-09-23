@@ -87,9 +87,6 @@ public class XmlThemeBuilder extends DefaultHandler {
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
 
-    private static final float REPEAT_GAP_DEFAULT = 200f;
-    private static final float REPEAT_START_DEFAULT = 30f;
-
     /**
      * @param theme an input theme containing valid render theme XML data.
      * @return a new RenderTheme which is created by parsing the XML data from the input theme.
@@ -569,6 +566,12 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("symbol-scaling".equals(name))
                 ; // no-op
 
+            else if ("repeat-start".equals(name))
+                b.repeatStart = Float.parseFloat(value) * mScale;
+
+            else if ("repeat-gap".equals(name))
+                b.repeatGap = Float.parseFloat(value) * mScale;
+
             else
                 logUnknownAttribute(elementName, name, value, i);
         }
@@ -609,30 +612,23 @@ public class XmlThemeBuilder extends DefaultHandler {
             b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
 
             if (hasSymbol) {
-                // We have no way to set a repeat gap for the renderer,
-                // so we create a texture that already contains this repeat gap.
-                float repeatGap = REPEAT_GAP_DEFAULT * mScale;
-                float repeatStart = REPEAT_START_DEFAULT * mScale;
-                int width = (int) (b.texture.width + repeatGap);
+                // Line symbol
+                int width = (int) (b.texture.width + b.repeatGap);
                 int height = b.texture.height;
-                Bitmap bmp = CanvasAdapter.newBitmap(width, height, 0);
+                Bitmap bitmap = CanvasAdapter.newBitmap(width, height, 0);
                 Canvas canvas = CanvasAdapter.newCanvas();
-                canvas.setBitmap(bmp);
-                canvas.drawBitmap(b.texture.bitmap, repeatStart, 0);
-                b.texture = new TextureItem(bmp);
-
-                // We must set stipple values
-                // The multipliers are determined empirically to
-                // correspond to the representation at Mapsforge.
-                b.stipple = b.texture.width * 3;
-                b.strokeWidth *= 2 * mScale;
-
-                // Use texture color
+                canvas.setBitmap(bitmap);
+                canvas.drawBitmap(b.texture.bitmap, b.repeatStart, 0);
+                b.texture = new TextureItem(bitmap);
+                b.texture.mipmap = true;
+                b.fixed = true;
+                b.randomOffset = false;
+                b.stipple = width;
+                b.stippleWidth = 1;
+                b.strokeWidth = height * 0.5f;
                 b.stippleColor = Color.WHITE;
                 b.fillColor = Color.TRANSPARENT;
                 b.strokeColor = Color.TRANSPARENT;
-
-                b.fixed = false;
             }
         }
 

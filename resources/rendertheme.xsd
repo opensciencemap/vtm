@@ -190,6 +190,8 @@
         <xs:attribute name="fade" default="-1" type="xs:integer" use="optional" />
         <xs:attribute name="blur" default="-1" type="xs:float" use="optional" />
         <xs:attribute name="fix" default="false" type="xs:boolean" use="optional" />
+        <xs:attribute name="repeat-gap" default="200" type="xs:float" use="optional" />
+        <xs:attribute name="repeat-start" default="30" type="xs:float" use="optional" />
 
         <!-- stipple repeat in 'pixel' -->
         <xs:attribute name="stipple" default="0" type="xs:integer" use="optional" />
@@ -198,25 +200,6 @@
         <!-- stipple width relative to line width, i.e 0.0-1.0 -->
         <xs:attribute name="stipple-width" default="0" type="xs:float" use="optional" />
 
-    </xs:complexType>
-
-    <!--<xs:complexType name="outline">
-        <xs:attribute name="cat" type="xs:string" use="optional" />
-        <xs:attribute name="name" default="0" type="xs:string" use="optional" />
-        <xs:attribute name="src" type="tns:src" use="optional" />
-        <xs:attribute name="symbol-width" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="symbol-height" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="symbol-percent" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="stroke" default="#000000" type="tns:color" use="optional" />
-        <xs:attribute name="stroke-width" default="0" type="tns:nonNegativeFloat" use="optional" />
-    </xs:complexType>-->
-
-    <xs:complexType name="lineSymbol">
-        <xs:attribute name="cat" type="xs:string" use="optional" />
-        <xs:attribute name="src" type="tns:src" use="required" />
-        <xs:attribute name="symbol-width" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="symbol-height" type="xs:positiveInteger" use="optional" />
-        <xs:attribute name="symbol-percent" type="xs:positiveInteger" use="optional" />
     </xs:complexType>
 
     <xs:complexType name="text">
@@ -266,7 +249,7 @@
             <xs:element name="circle" type="tns:circle" />
             <xs:element name="line" type="tns:line" />
             <xs:element name="outline" type="tns:line" />
-            <xs:element name="lineSymbol" type="tns:lineSymbol" />
+            <xs:element name="lineSymbol" type="tns:line" />
             <xs:element name="text" type="tns:text" />
             <xs:element name="extrusion" type="tns:extrusion" />
             <xs:element name="symbol" type="tns:symbol" />

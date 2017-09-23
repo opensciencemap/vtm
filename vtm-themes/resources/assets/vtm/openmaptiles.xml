@@ -962,8 +962,7 @@
             <m k="area" v="~|false|no">
                 <m k="highway">
                     <m k="oneway" v="yes|true" zoom-min="16">
-                        <line fix="true" src="assets:patterns/oneway.svg" stipple="320"
-                            stipple-stroke="#666666" width="12" />
+                        <lineSymbol src="assets:symbols/oneway.svg" />
                     </m>
                 </m>
             </m>

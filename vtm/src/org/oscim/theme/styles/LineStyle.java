@@ -27,6 +27,9 @@ import static org.oscim.backend.canvas.Color.parseColor;
 
 public final class LineStyle extends RenderStyle<LineStyle> {
 
+    public static final float REPEAT_START_DEFAULT = 30f;
+    public static final float REPEAT_GAP_DEFAULT = 200f;
+
     private final int level;
     public final String style;
     public final float width;
@@ -50,24 +53,26 @@ public final class LineStyle extends RenderStyle<LineStyle> {
     public final int symbolPercent;
 
     public final float[] dashArray;
+    public final float repeatStart;
+    public final float repeatGap;
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null);
+        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null);
+        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true, null);
+        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int level, String style, int color, float width,
                      Cap cap, boolean fixed,
                      int stipple, int stippleColor, float stippleWidth,
                      int fadeScale, float blur, boolean isOutline, TextureItem texture,
-                     boolean randomOffset, float[] dashArray) {
+                     boolean randomOffset, float[] dashArray, float repeatStart, float repeatGap) {
 
         this.level = level;
         this.style = style;
@@ -94,6 +99,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.symbolPercent = 100;
 
         this.dashArray = dashArray;
+        this.repeatStart = repeatStart;
+        this.repeatGap = repeatGap;
     }
 
     private LineStyle(LineBuilder<?> b) {
@@ -119,6 +126,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.symbolPercent = b.symbolPercent;
 
         this.dashArray = b.dashArray;
+        this.repeatStart = b.repeatStart;
+        this.repeatGap = b.repeatGap;
     }
 
     @Override
@@ -152,6 +161,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         public int symbolPercent;
 
         public float[] dashArray;
+        public float repeatStart;
+        public float repeatGap;
 
         public LineBuilder() {
         }
@@ -182,6 +193,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.symbolPercent = line.symbolPercent;
 
             this.dashArray = line.dashArray;
+            this.repeatStart = line.repeatStart;
+            this.repeatGap = line.repeatGap;
 
             return self();
         }
@@ -266,6 +279,16 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             return self();
         }
 
+        public T repeatStart(float repeatStart) {
+            this.repeatStart = repeatStart;
+            return self();
+        }
+
+        public T repeatGap(float repeatGap) {
+            this.repeatGap = repeatGap;
+            return self();
+        }
+
         public T reset() {
             level = -1;
             style = null;
@@ -291,6 +314,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             symbolPercent = 100;
 
             dashArray = null;
+            repeatStart = REPEAT_START_DEFAULT;
+            repeatGap = REPEAT_GAP_DEFAULT;
 
             return self();
         }
