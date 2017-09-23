@@ -553,7 +553,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("style".equals(name))
                 ; // ignore
 
-            else if ("stroke-dasharray".equals(name)) {
+            else if ("dasharray".equals(name) || "stroke-dasharray".equals(name)) {
                 b.dashArray = parseFloatArray(value);
                 for (int j = 0; j < b.dashArray.length; ++j) {
                     b.dashArray[j] = b.dashArray[j] * mScale;
@@ -576,38 +576,34 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         }
 
         if (b.dashArray != null) {
-            // Create a dashed texture
-            int bmpWidth = 0;
-            int bmpHeight = (int) (b.strokeWidth);
-            if (bmpHeight < 1)
-                bmpHeight = 2;
+            // Stroke dash array
+            int width = 0;
+            int height = (int) (b.strokeWidth);
+            if (height < 1)
+                height = 1;
             for (float f : b.dashArray) {
                 if (f < 1)
                     f = 1;
-                bmpWidth += f;
+                width += f;
             }
-
-            int factor = 10;
-            Bitmap bmp = CanvasAdapter.newBitmap(bmpWidth * factor, bmpHeight * factor, 0);
+            Bitmap bitmap = CanvasAdapter.newBitmap(width, height, 0);
             Canvas canvas = CanvasAdapter.newCanvas();
-            canvas.setBitmap(bmp);
-
-            boolean bw = false;
+            canvas.setBitmap(bitmap);
             int x = 0;
+            boolean transparent = false;
             for (float f : b.dashArray) {
                 if (f < 1)
                     f = 1;
-                canvas.fillRectangle(x * factor, 0, f * factor, bmpHeight * factor, (bw ? Color.TRANSPARENT : Color.WHITE));
+                canvas.fillRectangle(x, 0, f, height, transparent ? Color.TRANSPARENT : Color.WHITE);
                 x += f;
-                bw = !bw;
+                transparent = !transparent;
             }
-            b.texture = new TextureItem(bmp);
-            b.texture.mipmap = false;
-            b.stipple = (int) (bmpWidth * 1.2f);
-            b.stippleWidth = bmpWidth;
+            b.texture = new TextureItem(bitmap);
+            b.texture.mipmap = true;
             b.fixed = false;
             b.randomOffset = false;
-
+            b.stipple = width;
+            b.stippleWidth = 1;
             b.stippleColor = b.fillColor;
             b.fillColor = Color.TRANSPARENT;
             b.strokeColor = Color.TRANSPARENT;
