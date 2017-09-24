@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  * 
@@ -86,6 +86,13 @@ public class RuleBuilder {
     }
 
     public static RuleBuilder create(String keys, String values) {
+        return create(keys, values, false);
+    }
+
+    /**
+     * Mapsforge themes don't support (-) 'exclusive negation'.
+     */
+    public static RuleBuilder create(String keys, String values, boolean isMapsforge) {
 
         String[] keyList = EMPTY_KV;
         String[] valueList = EMPTY_KV;
@@ -97,7 +104,7 @@ public class RuleBuilder {
                 if (values.length() > 2)
                     valueList = values.substring(2)
                             .split(SEPARATOR);
-            } else if (values.startsWith(STRING_EXCLUSIVE)) {
+            } else if (values.startsWith(STRING_EXCLUSIVE) && !isMapsforge) {
                 type = RuleType.EXCLUDE;
                 if (values.length() > 2)
                     valueList = values.substring(2)
