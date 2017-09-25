@@ -50,6 +50,7 @@ import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.SymbolStyle.SymbolBuilder;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,8 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
     private static final String LINE_STYLE = "L";
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
+
+    private static final int DEFAULT_PRIORITY = Integer.MAX_VALUE / 2;
 
     /**
      * @param theme an input theme containing valid render theme XML data.
@@ -940,6 +943,9 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         b.themeCallback(mThemeCallback);
         String symbol = null;
 
+        // Reset default priority
+        b.priority = DEFAULT_PRIORITY;
+
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
@@ -974,10 +980,14 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("caption".equals(name))
                 b.caption = Boolean.parseBoolean(value);
 
-            else if ("priority".equals(name))
+            else if ("priority".equals(name)) {
                 b.priority = Integer.parseInt(value);
 
-            else if ("area-size".equals(name))
+                // Mapsforge: higher priorities are drawn first (0 = default priority)
+                // VTM: lower priorities are drawn first (0 = highest priority)
+                b.priority = FastMath.clamp(DEFAULT_PRIORITY - b.priority, 0, Integer.MAX_VALUE);
+
+            } else if ("area-size".equals(name))
                 b.areaSize = Float.parseFloat(value);
 
             else if ("dy".equals(name))
