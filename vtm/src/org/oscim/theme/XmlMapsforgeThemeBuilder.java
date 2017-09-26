@@ -606,13 +606,10 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             }
             b.texture = new TextureItem(bitmap);
             b.texture.mipmap = true;
-            b.fixed = false;
             b.randomOffset = false;
             b.stipple = width;
             b.stippleWidth = 1;
             b.stippleColor = b.fillColor;
-            b.fillColor = Color.TRANSPARENT;
-            b.strokeColor = Color.TRANSPARENT;
         } else {
             b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
 
