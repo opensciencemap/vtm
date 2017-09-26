@@ -629,8 +629,6 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 b.stippleWidth = 1;
                 b.strokeWidth = height * 0.5f;
                 b.stippleColor = Color.WHITE;
-                b.fillColor = Color.TRANSPARENT;
-                b.strokeColor = Color.TRANSPARENT;
             }
         }
 
