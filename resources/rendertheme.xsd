@@ -236,6 +236,8 @@
         <xs:attribute name="line-color" type="tns:color" use="optional" />
         <xs:attribute name="side-color" type="tns:color" use="required" />
         <xs:attribute name="top-color" type="tns:color" use="required" />
+        <!-- 12m default -->
+        <xs:attribute name="default-height" default="12" type="xs:positiveInteger" use="optional" />
     </xs:complexType>
 
     <!-- match elements -->

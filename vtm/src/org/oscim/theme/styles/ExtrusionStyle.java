@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -154,7 +154,7 @@ public class ExtrusionStyle extends RenderStyle<ExtrusionStyle> {
             colorSide = Color.TRANSPARENT;
             colorTop = Color.TRANSPARENT;
             colorLine = Color.TRANSPARENT;
-            defaultHeight = 0;
+            defaultHeight = 12; // 12m default
             return self();
         }
 
