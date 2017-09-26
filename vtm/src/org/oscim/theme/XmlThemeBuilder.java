@@ -578,6 +578,13 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         if (b.dashArray != null) {
             // Stroke dash array
+            if (b.dashArray.length % 2 != 0) {
+                // Odd number of entries is duplicated
+                float[] newDashArray = new float[b.dashArray.length * 2];
+                System.arraycopy(b.dashArray, 0, newDashArray, 0, b.dashArray.length);
+                System.arraycopy(b.dashArray, 0, newDashArray, b.dashArray.length, b.dashArray.length);
+                b.dashArray = newDashArray;
+            }
             int width = 0;
             int height = (int) (b.strokeWidth);
             if (height < 1)
