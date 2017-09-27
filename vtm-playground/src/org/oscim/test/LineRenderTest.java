@@ -34,6 +34,8 @@ import org.oscim.renderer.bucket.LineTexBucket;
 import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.styles.LineStyle;
 
+import java.io.IOException;
+
 public class LineRenderTest extends GdxMap {
 
     GeometryBuffer mGeom = new GeometryBuffer(2, 1);
@@ -78,8 +80,13 @@ public class LineRenderTest extends GdxMap {
             line4 = new LineStyle(0, null, Color.LTGRAY, 2.0f, Cap.ROUND, false, 0, 0, 0, 0, 1f, false, null, true, null, LineStyle.REPEAT_START_DEFAULT, LineStyle.REPEAT_GAP_DEFAULT);
         }
 
-        TextureItem tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/dot.png"));
-        tex.mipmap = true;
+        TextureItem tex = null;
+        try {
+            tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/dot.png"));
+            tex.mipmap = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         line3 = LineStyle.builder()
                 .stippleColor(Color.CYAN)
                 .stipple(8)

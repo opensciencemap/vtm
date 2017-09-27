@@ -32,6 +32,7 @@ import org.oscim.map.Map;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,38 +46,42 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
 
     @Override
     public void createLayers() {
-        // Map events receiver
-        mMap.layers().add(new MapEventsReceiver(mMap));
+        try {
+            // Map events receiver
+            mMap.layers().add(new MapEventsReceiver(mMap));
 
-        VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        mMap.layers().add(new LabelLayer(mMap, l));
-        mMap.setTheme(VtmThemes.DEFAULT);
+            VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
+            mMap.layers().add(new BuildingLayer(mMap, l));
+            mMap.layers().add(new LabelLayer(mMap, l));
+            mMap.setTheme(VtmThemes.DEFAULT);
 
-        mMap.setMapPosition(0, 0, 1 << 2);
+            mMap.setMapPosition(0, 0, 1 << 2);
 
-        Bitmap bitmapPoi = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_poi.png"));
-        MarkerSymbol symbol;
-        if (BILLBOARDS)
-            symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.BOTTOM_CENTER);
-        else
-            symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.CENTER, false);
+            Bitmap bitmapPoi = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_poi.png"));
+            MarkerSymbol symbol;
+            if (BILLBOARDS)
+                symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.BOTTOM_CENTER);
+            else
+                symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.CENTER, false);
 
-        Bitmap bitmapFocus = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_focus.png"));
-        if (BILLBOARDS)
-            mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.BOTTOM_CENTER);
-        else
-            mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.CENTER, false);
+            Bitmap bitmapFocus = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_focus.png"));
+            if (BILLBOARDS)
+                mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.BOTTOM_CENTER);
+            else
+                mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.CENTER, false);
 
-        mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
-        mMap.layers().add(mMarkerLayer);
+            mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
+            mMap.layers().add(mMarkerLayer);
 
-        List<MarkerItem> pts = new ArrayList<>();
-        for (double lat = -90; lat <= 90; lat += 5) {
-            for (double lon = -180; lon <= 180; lon += 5)
-                pts.add(new MarkerItem(lat + "/" + lon, "", new GeoPoint(lat, lon)));
+            List<MarkerItem> pts = new ArrayList<>();
+            for (double lat = -90; lat <= 90; lat += 5) {
+                for (double lon = -180; lon <= 180; lon += 5)
+                    pts.add(new MarkerItem(lat + "/" + lon, "", new GeoPoint(lat, lon)));
+            }
+            mMarkerLayer.addItems(pts);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        mMarkerLayer.addItems(pts);
     }
 
     @Override

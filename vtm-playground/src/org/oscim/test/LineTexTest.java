@@ -33,6 +33,7 @@ import org.oscim.renderer.bucket.TextureItem;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,8 +53,12 @@ public class LineTexTest extends GdxMapApp {
 
         mMap.setMapPosition(0, 0, 1 << 2);
 
-        tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/pike.png"));
-        tex.mipmap = true;
+        try {
+            tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/pike.png"));
+            tex.mipmap = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         createLayers(1, true);
 

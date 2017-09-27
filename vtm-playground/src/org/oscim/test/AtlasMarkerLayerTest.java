@@ -31,6 +31,7 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 import org.oscim.utils.TextureAtlasUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,51 +42,55 @@ public class AtlasMarkerLayerTest extends MarkerLayerTest {
 
     @Override
     public void createLayers() {
-        // Map events receiver
-        mMap.layers().add(new MapEventsReceiver(mMap));
+        try {
+            // Map events receiver
+            mMap.layers().add(new MapEventsReceiver(mMap));
 
-        VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        mMap.layers().add(new LabelLayer(mMap, l));
-        mMap.setTheme(VtmThemes.DEFAULT);
+            VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
+            mMap.layers().add(new BuildingLayer(mMap, l));
+            mMap.layers().add(new LabelLayer(mMap, l));
+            mMap.setTheme(VtmThemes.DEFAULT);
 
-        mMap.setMapPosition(0, 0, 1 << 2);
+            mMap.setMapPosition(0, 0, 1 << 2);
 
-        Bitmap bitmapPoi = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_poi.png"));
-        Bitmap bitmapFocus = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_focus.png"));
+            Bitmap bitmapPoi = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_poi.png"));
+            Bitmap bitmapFocus = CanvasAdapter.decodeBitmap(getClass().getResourceAsStream("/res/marker_focus.png"));
 
-        // Create Atlas from Bitmaps
-        java.util.Map<Object, Bitmap> inputMap = new LinkedHashMap<>();
-        java.util.Map<Object, TextureRegion> regionsMap = new LinkedHashMap<>();
-        List<TextureAtlas> atlasList = new ArrayList<>();
+            // Create Atlas from Bitmaps
+            java.util.Map<Object, Bitmap> inputMap = new LinkedHashMap<>();
+            java.util.Map<Object, TextureRegion> regionsMap = new LinkedHashMap<>();
+            List<TextureAtlas> atlasList = new ArrayList<>();
 
-        inputMap.put("poi", bitmapPoi);
-        inputMap.put("focus", bitmapFocus);
+            inputMap.put("poi", bitmapPoi);
+            inputMap.put("focus", bitmapFocus);
 
-        // Bitmaps will never used any more
-        // With iOS we must flip the Y-Axis
-        TextureAtlasUtils.createTextureRegions(inputMap, regionsMap, atlasList, true, false);
+            // Bitmaps will never used any more
+            // With iOS we must flip the Y-Axis
+            TextureAtlasUtils.createTextureRegions(inputMap, regionsMap, atlasList, true, false);
 
-        MarkerSymbol symbol;
-        if (BILLBOARDS)
-            symbol = new MarkerSymbol(regionsMap.get("poi"), HotspotPlace.BOTTOM_CENTER);
-        else
-            symbol = new MarkerSymbol(regionsMap.get("poi"), HotspotPlace.CENTER, false);
+            MarkerSymbol symbol;
+            if (BILLBOARDS)
+                symbol = new MarkerSymbol(regionsMap.get("poi"), HotspotPlace.BOTTOM_CENTER);
+            else
+                symbol = new MarkerSymbol(regionsMap.get("poi"), HotspotPlace.CENTER, false);
 
-        if (BILLBOARDS)
-            mFocusMarker = new MarkerSymbol(regionsMap.get("focus"), HotspotPlace.BOTTOM_CENTER);
-        else
-            mFocusMarker = new MarkerSymbol(regionsMap.get("focus"), HotspotPlace.CENTER, false);
+            if (BILLBOARDS)
+                mFocusMarker = new MarkerSymbol(regionsMap.get("focus"), HotspotPlace.BOTTOM_CENTER);
+            else
+                mFocusMarker = new MarkerSymbol(regionsMap.get("focus"), HotspotPlace.CENTER, false);
 
-        mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
-        mMap.layers().add(mMarkerLayer);
+            mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
+            mMap.layers().add(mMarkerLayer);
 
-        List<MarkerItem> pts = new ArrayList<>();
-        for (double lat = -90; lat <= 90; lat += 5) {
-            for (double lon = -180; lon <= 180; lon += 5)
-                pts.add(new MarkerItem(lat + "/" + lon, "", new GeoPoint(lat, lon)));
+            List<MarkerItem> pts = new ArrayList<>();
+            for (double lat = -90; lat <= 90; lat += 5) {
+                for (double lon = -180; lon <= 180; lon += 5)
+                    pts.add(new MarkerItem(lat + "/" + lon, "", new GeoPoint(lat, lon)));
+            }
+            mMarkerLayer.addItems(pts);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        mMarkerLayer.addItems(pts);
     }
 
     public static void main(String[] args) {
