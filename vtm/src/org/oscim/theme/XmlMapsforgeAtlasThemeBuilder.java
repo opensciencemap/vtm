@@ -111,7 +111,7 @@ public class XmlMapsforgeAtlasThemeBuilder extends XmlMapsforgeThemeBuilder {
 
     @Override
     RenderTheme createTheme(Rule[] rules) {
-        return new AtlasRenderTheme(mMapBackground, mTextScale, rules, mLevels, regionMap, atlasList);
+        return new AtlasRenderTheme(mMapBackground, mTextScale, rules, mLevels, true, regionMap, atlasList);
     }
 
     @Override

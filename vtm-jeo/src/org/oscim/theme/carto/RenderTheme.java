@@ -243,6 +243,11 @@ public class RenderTheme implements IRenderTheme {
     }
 
     @Override
+    public boolean isMapsforgeTheme() {
+        return false;
+    }
+
+    @Override
     public void scaleTextSize(float scaleFactor) {
     }
 

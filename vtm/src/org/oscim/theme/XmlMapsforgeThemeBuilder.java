@@ -193,7 +193,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
     }
 
     RenderTheme createTheme(Rule[] rules) {
-        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels);
+        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels, true);
     }
 
     @Override

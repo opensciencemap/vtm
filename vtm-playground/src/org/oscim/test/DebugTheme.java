@@ -1,8 +1,9 @@
-package org.oscim.theme;
+package org.oscim.test;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer.GeometryType;
 import org.oscim.core.TagSet;
+import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.RenderStyle;
@@ -37,12 +38,15 @@ public class DebugTheme implements IRenderTheme {
     }
 
     @Override
+    public boolean isMapsforgeTheme() {
+        return false;
+    }
+
+    @Override
     public void scaleTextSize(float scaleFactor) {
     }
 
     @Override
     public void updateStyles() {
-
     }
-
 }

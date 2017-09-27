@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -29,35 +30,40 @@ public interface IRenderTheme {
      * @param zoomLevel the zoom level at which the way should be matched.
      * @return matching render instructions
      */
-    public abstract RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
+    RenderStyle[] matchElement(GeometryType type, TagSet tags, int zoomLevel);
 
     /**
      * Must be called when this RenderTheme gets destroyed to clean up and free
      * resources.
      */
-    public abstract void dispose();
+    void dispose();
 
     /**
      * @return the number of distinct drawing levels required by this
      * RenderTheme.
      */
-    public abstract int getLevels();
+    int getLevels();
 
     /**
      * @return the map background color of this RenderTheme.
      */
-    public abstract int getMapBackground();
+    int getMapBackground();
 
-    public void updateStyles();
+    /**
+     * Is Mapsforge or VTM theme.
+     */
+    boolean isMapsforgeTheme();
+
+    void updateStyles();
 
     /**
      * Scales the text size of this RenderTheme by the given factor.
      *
      * @param scaleFactor the factor by which the text size should be scaled.
      */
-    public abstract void scaleTextSize(float scaleFactor);
+    void scaleTextSize(float scaleFactor);
 
-    public static class ThemeException extends IllegalArgumentException {
+    class ThemeException extends IllegalArgumentException {
         public ThemeException(String string) {
             super(string);
         }

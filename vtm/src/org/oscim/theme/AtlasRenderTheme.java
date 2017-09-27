@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -28,7 +29,12 @@ public class AtlasRenderTheme extends RenderTheme {
 
     public AtlasRenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels,
                             Map<Object, TextureRegion> textureRegionMap, List<TextureAtlas> atlasList) {
-        super(mapBackground, baseTextSize, rules, levels);
+        this(mapBackground, baseTextSize, rules, levels, false, textureRegionMap, atlasList);
+    }
+
+    public AtlasRenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels, boolean mapsforgeTheme,
+                            Map<Object, TextureRegion> textureRegionMap, List<TextureAtlas> atlasList) {
+        super(mapBackground, baseTextSize, rules, levels, mapsforgeTheme);
         this.textureRegionMap = textureRegionMap;
         this.atlasList = atlasList;
     }

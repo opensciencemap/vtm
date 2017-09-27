@@ -1,6 +1,7 @@
 /*
  * Copyright 2014 Hannes Janetzek
  * Copyright 2017 Longri
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -41,6 +42,7 @@ public class RenderTheme implements IRenderTheme {
 
     private final int mLevels;
     private final Rule[] mRules;
+    private final boolean mMapsforgeTheme;
 
     class RenderStyleCache {
         final int matchType;
@@ -74,6 +76,10 @@ public class RenderTheme implements IRenderTheme {
     private final RenderStyleCache[] mStyleCache;
 
     public RenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels) {
+        this(mapBackground, baseTextSize, rules, levels, false);
+    }
+
+    public RenderTheme(int mapBackground, float baseTextSize, Rule[] rules, int levels, boolean mapsforgeTheme) {
         if (rules == null)
             throw new IllegalArgumentException("rules missing");
 
@@ -81,6 +87,7 @@ public class RenderTheme implements IRenderTheme {
         mBaseTextSize = baseTextSize;
         mLevels = levels;
         mRules = rules;
+        mMapsforgeTheme = mapsforgeTheme;
 
         mStyleCache = new RenderStyleCache[3];
         mStyleCache[0] = new RenderStyleCache(Element.NODE);
@@ -110,6 +117,11 @@ public class RenderTheme implements IRenderTheme {
 
     Rule[] getRules() {
         return mRules;
+    }
+
+    @Override
+    public boolean isMapsforgeTheme() {
+        return mMapsforgeTheme;
     }
 
     //AtomicInteger hitCount = new AtomicInteger(0);
