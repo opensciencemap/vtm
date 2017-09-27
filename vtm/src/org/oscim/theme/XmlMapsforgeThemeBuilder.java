@@ -175,9 +175,12 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
 
     @Override
     public void endDocument() {
+        // Building rule for Mapsforge themes
+        mRulesList.add(buildingRule());
+
         Rule[] rules = new Rule[mRulesList.size()];
         for (int i = 0, n = rules.length; i < n; i++)
-            rules[i] = mRulesList.get(i).onComplete(null);
+            rules[i] = mRulesList.get(i).onComplete(new int[1]);
 
         mRenderTheme = createTheme(rules);
 
@@ -1215,5 +1218,20 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         if (obj == null)
             throw new ThemeException("missing attribute " + name
                     + " for element: " + elementName);
+    }
+
+    /**
+     * Building rule for Mapsforge themes.
+     */
+    private RuleBuilder buildingRule() {
+        ExtrusionBuilder<?> b = mExtrusionBuilder.reset();
+        b.level(mLevels++);
+        b.themeCallback(mThemeCallback);
+        b.colorLine(0xffd9d8d6);
+        b.colorSide(0xeaecebe9);
+        b.colorTop(0xeaf9f8f6);
+        RuleBuilder rule = new RuleBuilder(RuleBuilder.RuleType.POSITIVE, new String[]{"building"}, new String[]{});
+        rule.element(Rule.Element.WAY).zoom((byte) 17, Byte.MAX_VALUE).style(b);
+        return rule;
     }
 }
