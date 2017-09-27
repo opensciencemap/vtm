@@ -1,6 +1,6 @@
 /*
  * Copyright 2012-2014 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -307,6 +307,8 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
             return;
 
         int nLevel = mCurBucket + level;
+
+        mTileLayer.callThemeHooks(mTile, mBuckets, mElement, area, nLevel);
 
         if (USE_MESH_POLY || area.mesh) {
             MeshBucket mb = mBuckets.getMeshBucket(nLevel);

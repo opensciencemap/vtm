@@ -76,7 +76,7 @@ public class AreaStyle extends RenderStyle<AreaStyle> {
     /**
      * Tessellation
      */
-    public final boolean mesh;
+    public boolean mesh;
 
     public final float heightOffset;
 
