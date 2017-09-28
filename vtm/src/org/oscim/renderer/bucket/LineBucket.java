@@ -306,10 +306,10 @@ public class LineBucket extends RenderBucket {
             float tx = vPrevX;
             float ty = vPrevY;
 
-            if (squared) {
+            if (!rounded && !squared) {
                 tx = 0;
                 ty = 0;
-            } else if (!outside) {
+            } else if (rounded) {
                 tx *= 0.5;
                 ty *= 0.5;
             }
@@ -475,10 +475,10 @@ public class LineBucket extends RenderBucket {
             dy = (short) (0 | ddy & DIR_MASK);
 
         } else {
-            if (squared) {
+            if (!rounded && !squared) {
                 vPrevX = 0;
                 vPrevY = 0;
-            } else if (!outside) {
+            } else if (rounded) {
                 vPrevX *= 0.5;
                 vPrevY *= 0.5;
             }
@@ -679,13 +679,12 @@ public class LineBucket extends RenderBucket {
                     }
 
                     /* Cap mode */
-                    //if (line.width < 1.5/* || line.fixed*/) {
-                    //    if (capMode != CAP_THIN) {
-                    //        capMode = CAP_THIN;
-                    //        gl.uniform1f(uLineMode, capMode);
-                    //    }
-                    //} else
-                    if (lb.roundCap) {
+                    if (lb.scale < 1.5/* || lb.line.fixed*/) {
+                        if (capMode != CAP_THIN) {
+                            capMode = CAP_THIN;
+                            gl.uniform1f(uLineMode, capMode);
+                        }
+                    } else if (lb.roundCap) {
                         if (capMode != CAP_ROUND) {
                             capMode = CAP_ROUND;
                             gl.uniform1f(uLineMode, capMode);
