@@ -429,7 +429,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         if (zoomMin > zoomMax)
             throw new ThemeException("zoom-min must be less or equal zoom-max: " + zoomMin);
 
-        RuleBuilder b = RuleBuilder.create(keys, values, true);
+        RuleBuilder b = RuleBuilder.create(keys, values);
         b.cat(cat);
         b.zoom(zoomMin, zoomMax);
         b.element(element);

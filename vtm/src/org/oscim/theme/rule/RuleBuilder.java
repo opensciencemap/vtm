@@ -28,7 +28,9 @@ import org.oscim.theme.styles.RenderStyle;
 import org.oscim.theme.styles.RenderStyle.StyleBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class RuleBuilder {
 
@@ -85,45 +87,35 @@ public class RuleBuilder {
         this.values = EMPTY_KV;
     }
 
-    public static RuleBuilder create(String keys, String values) {
-        return create(keys, values, false);
-    }
-
-    /**
-     * Mapsforge themes don't support (-) 'exclusive negation'.
-     */
-    public static RuleBuilder create(String keys, String values, boolean isMapsforge) {
-
-        String[] keyList = EMPTY_KV;
-        String[] valueList = EMPTY_KV;
+    public static RuleBuilder create(String k, String v) {
+        String[] keys = EMPTY_KV;
+        String[] values = EMPTY_KV;
         RuleType type = RuleType.POSITIVE;
 
-        if (values != null) {
-            if (values.startsWith(STRING_NEGATION)) {
+        if (v != null) {
+            String[] split = v.split(SEPARATOR);
+            List<String> valueList = new ArrayList<>(Arrays.asList(split));
+            if (valueList.remove(STRING_NEGATION)) {
                 type = RuleType.NEGATIVE;
-                if (values.length() > 2)
-                    valueList = values.substring(2)
-                            .split(SEPARATOR);
-            } else if (values.startsWith(STRING_EXCLUSIVE) && !isMapsforge) {
+                values = valueList.toArray(new String[valueList.size()]);
+            } else if (valueList.remove(STRING_EXCLUSIVE)) {
                 type = RuleType.EXCLUDE;
-                if (values.length() > 2)
-                    valueList = values.substring(2)
-                            .split(SEPARATOR);
+                values = valueList.toArray(new String[valueList.size()]);
             } else {
-                valueList = values.split(SEPARATOR);
+                values = split;
             }
         }
 
-        if (keys != null) {
-            keyList = keys.split(SEPARATOR);
+        if (k != null) {
+            keys = k.split(SEPARATOR);
         }
 
         if (type != RuleType.POSITIVE) {
-            if (keyList == null || keyList.length == 0)
+            if (keys == null || keys.length == 0)
                 throw new ThemeException("negative rule requires key");
         }
 
-        return new RuleBuilder(type, keyList, valueList);
+        return new RuleBuilder(type, keys, values);
     }
 
     public RuleBuilder zoom(byte zoomMin, byte zoomMax) {
