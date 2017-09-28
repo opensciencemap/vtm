@@ -816,14 +816,14 @@
                                 </m>
                             </m>
                             <m v="tertiary|tertiary_link">
-                                <line cap="square" outline="casing-bridge" use="tertiary" />
+                                <line cap="butt" outline="casing-bridge" use="tertiary" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#ffff90"
                                         stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="secondary_link">
-                                <line cap="square" outline="casing-bridge" use="secondary"
+                                <line cap="butt" outline="casing-bridge" use="secondary"
                                     width="-0.1" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#fdbf6f"
@@ -831,7 +831,7 @@
                                 </m>
                             </m>
                             <m v="primary_link">
-                                <line cap="square" outline="casing-bridge" use="primary"
+                                <line cap="butt" outline="casing-bridge" use="primary"
                                     width="-0.1" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#e46d71"
@@ -839,14 +839,14 @@
                                 </m>
                             </m>
                             <m v="trunk_link">
-                                <line cap="square" outline="casing-bridge" use="trunk" />
+                                <line cap="butt" outline="casing-bridge" use="trunk" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#7fc97f"
                                         stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="motorway_link">
-                                <line cap="square" outline="casing-bridge" use="motorway"
+                                <line cap="butt" outline="casing-bridge" use="motorway"
                                     width="-0.2" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#809bc0"
@@ -854,14 +854,14 @@
                                 </m>
                             </m>
                             <m v="secondary">
-                                <line cap="square" outline="casing-bridge" use="secondary" />
+                                <line cap="butt" outline="casing-bridge" use="secondary" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" size="16" stroke="#fdbf6f"
                                         stroke-width="2.0" />
                                 </m>
                             </m>
                             <m v="primary">
-                                <line cap="square" outline="casing-bridge" use="primary" />
+                                <line cap="butt" outline="casing-bridge" use="primary" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#e46d71" stroke-width="2.0" />
@@ -870,7 +870,7 @@
                                 </m>
                             </m>
                             <m v="trunk">
-                                <line outline="casing-bridge" use="trunk" />
+                                <line cap="butt" outline="casing-bridge" use="trunk" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#7fc97f" stroke-width="2.0" />
@@ -879,7 +879,7 @@
                                 </m>
                             </m>
                             <m v="motorway">
-                                <line cap="square" outline="casing-bridge" use="motorway" />
+                                <line cap="butt" outline="casing-bridge" use="motorway" />
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#809bc0" stroke-width="2.0" />

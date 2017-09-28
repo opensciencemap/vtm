@@ -62,11 +62,11 @@
     <style-area fade="10" fill="#ddddcc" id="quarry" />
     <style-area fade="10" fill="#eeedea" id="military" />
     <style-line id="residential" stroke="#ffffff" width="1.3" />
-    <style-line cap="square" id="residential:bridge" use="residential" />
+    <style-line cap="butt" id="residential:bridge" use="residential" />
 
     <!-- when inheriting another style with 'from' then 'width' is relative to the parent -->
     <style-line id="pedestrian" use="residential" width="-0.4" />
-    <style-line cap="square" id="pedestrian:bridge" use="pedestrian" />
+    <style-line cap="butt" id="pedestrian:bridge" use="pedestrian" />
     <style-line id="highway:z11" stroke="#fcba5a" width="1.8" />
     <!-- <style-line id="highway:z11:bridge" use="highway:z11" cap="butt" /> -->
     <style-line cap="butt" id="trunk_link" stroke="#fee16e" width="1.3" />
@@ -765,10 +765,10 @@
                                     <line use="bridleway" />
                                 </m>
                                 <m v="construction">
-                                    <line cap="square" outline="bridge" use="construction" />
+                                    <line cap="butt" outline="bridge" use="construction" />
                                 </m>
                                 <m v="service">
-                                    <line cap="square" outline="bridge" use="highway-service" />
+                                    <line cap="butt" outline="bridge" use="highway-service" />
                                 </m>
                             </m>
 
@@ -785,29 +785,29 @@
 
                             <m select="first">
                                 <m v="tertiary|secondary_link">
-                                    <line cap="square" outline="bridge" use="tertiary" />
+                                    <line cap="butt" outline="bridge" use="tertiary" />
                                     <text use="road" />
                                 </m>
                                 <m v="trunk_link|motorway_link">
-                                    <line cap="square" outline="bridge" use="trunk_link" />
+                                    <line cap="butt" outline="bridge" use="trunk_link" />
                                     <text use="major-road" />
                                 </m>
                                 <m v="secondary|primary_link">
-                                    <line cap="square" outline="bridge" use="secondary:z11" />
+                                    <line cap="butt" outline="bridge" use="secondary:z11" />
                                     <text use="major-road" />
                                 </m>
                                 <m v="primary">
-                                    <line cap="square" outline="bridge" use="primary:z11" />
+                                    <line cap="butt" outline="bridge" use="primary:z11" />
                                     <text use="major-road" />
                                     <text use="ref" />
                                 </m>
                                 <m v="trunk">
-                                    <line cap="square" outline="bridge" use="trunk" />
+                                    <line cap="butt" outline="bridge" use="trunk" />
                                     <text use="major-road" />
                                     <text use="ref" />
                                 </m>
                                 <m v="motorway">
-                                    <line cap="square" outline="bridge" use="highway:z11" />
+                                    <line cap="butt" outline="bridge" use="highway:z11" />
                                     <text use="major-road" />
                                     <text use="ref" />
                                 </m>
