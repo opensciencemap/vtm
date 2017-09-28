@@ -17,7 +17,6 @@
  */
 package org.oscim.android.test;
 
-import android.graphics.drawable.Drawable;
 import android.widget.Toast;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -59,21 +58,18 @@ public class MarkerOverlayActivity extends SimpleMapActivity
         mMap.layers().add(new LabelLayer(mMap, l));
         mMap.setTheme(VtmThemes.DEFAULT);
 
-        /* directly load bitmap from resources */
-        Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
-
+        Bitmap bitmapPoi = drawableToBitmap(getResources().getDrawable(R.drawable.marker_poi));
         MarkerSymbol symbol;
         if (BILLBOARDS)
-            symbol = new MarkerSymbol(bitmap, HotspotPlace.BOTTOM_CENTER);
+            symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.BOTTOM_CENTER);
         else
-            symbol = new MarkerSymbol(bitmap, HotspotPlace.CENTER, false);
+            symbol = new MarkerSymbol(bitmapPoi, HotspotPlace.CENTER, false);
 
-        /* another option: use some bitmap drawable */
-        Drawable d = getResources().getDrawable(R.drawable.marker_focus);
+        Bitmap bitmapFocus = drawableToBitmap(getResources().getDrawable(R.drawable.marker_focus));
         if (BILLBOARDS)
-            mFocusMarker = new MarkerSymbol(drawableToBitmap(d), HotspotPlace.BOTTOM_CENTER);
+            mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.BOTTOM_CENTER);
         else
-            mFocusMarker = new MarkerSymbol(drawableToBitmap(d), HotspotPlace.CENTER, false);
+            mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.CENTER, false);
 
         mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
         mMap.layers().add(mMarkerLayer);

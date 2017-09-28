@@ -62,6 +62,8 @@ public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedL
     private static final String POI_CATEGORY = "Restaurants";
     private static final int SELECT_POI_FILE = MapsforgeMapActivity.SELECT_THEME_FILE + 1;
 
+    private ItemizedLayer<MarkerItem> mMarkerLayer;
+
     public static class PoiFilePicker extends FilePicker {
         public PoiFilePicker() {
             setFileDisplayFilter(new FilterByFileExtension(".poi"));
@@ -98,6 +100,11 @@ public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedL
             }
 
             POI_FILE = intent.getStringExtra(FilePicker.SELECTED_FILE);
+
+            Bitmap bitmap = drawableToBitmap(getResources().getDrawable(R.drawable.marker_green));
+            MarkerSymbol symbol = new MarkerSymbol(bitmap, MarkerSymbol.HotspotPlace.BOTTOM_CENTER);
+            mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
+            mMap.layers().add(mMarkerLayer);
         }
     }
 
@@ -121,6 +128,9 @@ public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedL
         @Override
         public boolean onGesture(Gesture g, MotionEvent e) {
             if (g instanceof Gesture.LongPress) {
+                // Clear overlays
+                mMarkerLayer.removeAllItems();
+                mMap.render();
                 // POI search
                 new PoiSearchTask(PoiSearchActivity.this, POI_CATEGORY).execute(mMap.getBoundingBox(0));
                 return true;
@@ -146,7 +156,7 @@ public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedL
                 persistenceManager = AndroidPoiPersistenceManagerFactory.getPoiPersistenceManager(POI_FILE);
                 PoiCategoryManager categoryManager = persistenceManager.getCategoryManager();
                 PoiCategoryFilter categoryFilter = new ExactMatchPoiCategoryFilter();
-                categoryFilter.addCategory(categoryManager.getPoiCategoryByTitle(this.category));
+                categoryFilter.addCategory(categoryManager.getPoiCategoryByTitle(category));
                 org.mapsforge.core.model.BoundingBox bb = new org.mapsforge.core.model.BoundingBox(
                         params[0].getMinLatitude(), params[0].getMinLongitude(),
                         params[0].getMaxLatitude(), params[0].getMaxLongitude());
@@ -173,14 +183,10 @@ public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedL
             }
 
             // Overlay POI
-            Bitmap bitmap = drawableToBitmap(getResources(), R.drawable.marker_poi);
-            MarkerSymbol symbol = new MarkerSymbol(bitmap, MarkerSymbol.HotspotPlace.CENTER);
-            ItemizedLayer<MarkerItem> markerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, PoiSearchActivity.this);
-            mMap.layers().add(markerLayer);
             List<MarkerItem> pts = new ArrayList<>();
             for (PointOfInterest pointOfInterest : pointOfInterests)
                 pts.add(new MarkerItem(pointOfInterest.getName(), "", new GeoPoint(pointOfInterest.getLatitude(), pointOfInterest.getLongitude())));
-            markerLayer.addItems(pts);
+            mMarkerLayer.addItems(pts);
             mMap.render();
         }
     }

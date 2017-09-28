@@ -48,7 +48,7 @@ public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
         mMap.layers().add(new LabelLayer(mMap, l));
         mMap.setTheme(VtmThemes.DEFAULT);
 
-        Bitmap bitmapPoi = drawableToBitmap(getResources(), R.drawable.marker_poi);
+        Bitmap bitmapPoi = drawableToBitmap(getResources().getDrawable(R.drawable.marker_poi));
         MarkerSymbol symbol;
         if (BILLBOARDS)
             symbol = new MarkerSymbol(bitmapPoi, MarkerSymbol.HotspotPlace.BOTTOM_CENTER);

@@ -18,8 +18,6 @@
  */
 package org.oscim.android.test;
 
-import android.graphics.drawable.Drawable;
-
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.marker.ItemizedLayer;
@@ -53,12 +51,8 @@ public class AtlasMarkerOverlayActivity extends MarkerOverlayActivity {
         mMap.layers().add(new LabelLayer(mMap, l));
         mMap.setTheme(VtmThemes.DEFAULT);
 
-        /* directly load bitmap from resources */
-        Bitmap bitmapPoi = drawableToBitmap(getResources(), R.drawable.marker_poi);
-
-        /* another option: use some bitmap drawable */
-        Drawable d = getResources().getDrawable(R.drawable.marker_focus);
-        Bitmap bitmapFocus = drawableToBitmap(d);
+        Bitmap bitmapPoi = drawableToBitmap(getResources().getDrawable(R.drawable.marker_poi));
+        Bitmap bitmapFocus = drawableToBitmap(getResources().getDrawable(R.drawable.marker_focus));
 
         // Create Atlas from Bitmaps
         java.util.Map<Object, Bitmap> inputMap = new LinkedHashMap<>();

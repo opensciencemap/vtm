@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -102,7 +102,7 @@ public final class AndroidGraphics extends CanvasAdapter {
     }
 
     public static Bitmap drawableToBitmap(Resources res, int resId) {
-        return new AndroidBitmap(res.openRawResource(resId));
+        return drawableToBitmap(res.getDrawable(resId));
     }
 
     /**
