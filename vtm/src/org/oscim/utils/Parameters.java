@@ -17,6 +17,11 @@ package org.oscim.utils;
 public final class Parameters {
 
     /**
+     * Allow custom tile size instead of the calculated one.
+     */
+    public static boolean CUSTOM_TILE_SIZE = false;
+
+    /**
      * If true the <code>MapEventLayer2</code> will be used instead of default <code>MapEventLayer</code>.
      */
     public static boolean MAP_EVENT_LAYER2 = false;
