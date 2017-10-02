@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -23,6 +24,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.source.PbfDecoder;
+import org.oscim.utils.math.MathUtils;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
@@ -249,6 +251,17 @@ public class TileDecoder extends PbfDecoder {
 
             if (!hasName && fallbackName != null)
                 f.elem.tags.add(new Tag(Tag.KEY_NAME, fallbackName, false));
+
+            // Calculate height of building parts
+            if (!f.elem.tags.containsKey(Tag.KEY_HEIGHT)) {
+                if (f.elem.tags.containsKey(Tag.KEY_VOLUME)
+                        && f.elem.tags.containsKey(Tag.KEY_AREA)) {
+                    float volume = Float.parseFloat(f.elem.tags.getValue(Tag.KEY_VOLUME));
+                    float area = Float.parseFloat(f.elem.tags.getValue(Tag.KEY_AREA));
+                    String heightStr = String.valueOf(MathUtils.round2(volume / area));
+                    f.elem.tags.add(new Tag(Tag.KEY_HEIGHT, heightStr, false));
+                }
+            }
 
             // FIXME extract layer tag here
             f.elem.setLayer(5);

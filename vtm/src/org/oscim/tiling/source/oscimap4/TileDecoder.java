@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -24,6 +25,7 @@ import org.oscim.core.TagSet;
 import org.oscim.core.Tile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.source.PbfDecoder;
+import org.oscim.utils.math.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,13 +222,15 @@ public class TileDecoder extends PbfDecoder {
             // FIXME filter out all variable tags
             // might depend on theme though
             if (Tag.KEY_NAME.equals(key)
-                    || Tag.KEY_HEIGHT.equals(key)
-                    || Tag.KEY_MIN_HEIGHT.equals(key)
                     || Tag.KEY_HOUSE_NUMBER.equals(key)
                     || Tag.KEY_REF.equals(key)
                     || Tag.KEY_ELE.equals(key))
                 tag = new Tag(key, val, false);
-            else
+            else if (Tag.KEY_HEIGHT.equals(key)
+                    || Tag.KEY_MIN_HEIGHT.equals(key)) {
+                // Reformat values to established meters in OSM
+                tag = new Tag(key, String.valueOf(MathUtils.round2(Float.valueOf(val) / 100)), false);
+            } else
                 tag = new Tag(key, val, false, true);
 
             mTileTags.add(tag);

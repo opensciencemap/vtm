@@ -1,7 +1,8 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -46,11 +47,14 @@ public class Tag {
     public static final String KEY_ELE = "ele";
 
     public static final String KEY_AMENITY = "amenity";
+    public static final String KEY_AREA = "area";
     public static final String KEY_BUILDING = "building";
+    public static final String KEY_BUILDING_LEVELS = "building:levels";
     public static final String KEY_HIGHWAY = "highway";
     public static final String KEY_LANDUSE = "landuse";
     public static final String KEY_HEIGHT = "height";
     public static final String KEY_MIN_HEIGHT = "min_height";
+    public static final String KEY_VOLUME = "volume";
 
     public static final String VALUE_YES = "yes";
     public static final String VALUE_NO = "no";

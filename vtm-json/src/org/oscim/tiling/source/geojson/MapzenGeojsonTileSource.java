@@ -1,5 +1,6 @@
 /*
  * Copyright 2017 devemux86
+ * Copyright 2017 Gustl22
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -17,6 +18,7 @@ package org.oscim.tiling.source.geojson;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.tiling.source.UrlTileSource;
+import org.oscim.utils.math.MathUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -105,5 +107,18 @@ public class MapzenGeojsonTileSource extends GeojsonTileSource {
 
         if (!hasName && fallbackName != null)
             mapElement.tags.add(new Tag(Tag.KEY_NAME, fallbackName, false));
+
+        // Calculate height of building parts
+        if (!properties.containsKey(Tag.KEY_HEIGHT)) {
+            if (properties.containsKey(Tag.KEY_VOLUME) && properties.containsKey(Tag.KEY_AREA)) {
+                Object volume = properties.get(Tag.KEY_VOLUME);
+                String volumeStr = (volume instanceof String) ? (String) volume : String.valueOf(volume);
+                Object area = properties.get(Tag.KEY_AREA);
+                String areaStr = (area instanceof String) ? (String) area : String.valueOf(area);
+                float height = Float.parseFloat(volumeStr) / Float.parseFloat(areaStr);
+                String heightStr = String.valueOf(MathUtils.round2(height));
+                mapElement.tags.add(new Tag(Tag.KEY_HEIGHT, heightStr, false));
+            }
+        }
     }
 }

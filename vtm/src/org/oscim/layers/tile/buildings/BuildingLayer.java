@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
  * Copyright 2016 Robin Boldt
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -74,18 +75,24 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
         ExtrusionStyle extrusion = (ExtrusionStyle) style.current();
 
-        int height = 0;
-        int minHeight = 0;
+        int height = 0; // cm
+        int minHeight = 0; // cm
 
         String v = element.tags.getValue(Tag.KEY_HEIGHT);
         if (v != null)
-            height = (int) Float.parseFloat(v);
+            height = (int) (Float.parseFloat(v) * 100);
+        else {
+            // FIXME load from theme or decode tags to generalize level/height tags
+            if ((v = element.tags.getValue(Tag.KEY_BUILDING_LEVELS)) != null)
+                height = (int) (Float.parseFloat(v) * 280); // 2.8m level height
+        }
 
         v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
         if (v != null)
-            minHeight = (int) Float.parseFloat(v);
+            minHeight = (int) (Float.parseFloat(v) * 100);
 
         if (height == 0)
+            // FIXME ignore buildings containing building parts
             height = extrusion.defaultHeight * 100;
 
         ExtrusionBuckets ebs = get(tile);

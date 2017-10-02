@@ -295,6 +295,10 @@ public class MathUtils {
         return (int) (x + BIG_ENOUGH_ROUND) - BIG_ENOUGH_INT;
     }
 
+    public static float round2(float value) {
+        return Math.round(value * 100) / 100f;
+    }
+
     /**
      * Returns the closest integer to the specified float. This method will only
      * properly round floats that are positive.
