@@ -11,6 +11,7 @@
 - Core utilities [#396](https://github.com/mapsforge/vtm/issues/396)
 - Map scaling improvements [#401](https://github.com/mapsforge/vtm/issues/401)
 - Mapsforge fix artifacts zoom >17 [#231](https://github.com/mapsforge/vtm/issues/231)
+- Mapzen building extrusions [#419](https://github.com/mapsforge/vtm/issues/419)
 - PolyLabel default disabled [#402](https://github.com/mapsforge/vtm/issues/402)
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Feature parameters [#403](https://github.com/mapsforge/vtm/issues/403)
