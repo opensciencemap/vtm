@@ -71,6 +71,7 @@ import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
 
 public class XmlMapsforgeThemeBuilder extends DefaultHandler {
+
     private static final Logger log = LoggerFactory.getLogger(XmlMapsforgeThemeBuilder.class);
 
     private static final int RENDER_THEME_VERSION = 6;
@@ -150,6 +151,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
 
     int mLevels = 0;
     int mMapBackground = 0xffffffff;
+    private float mStrokeScale = 1;
     float mTextScale = 1;
 
     final ThemeFile mTheme;
@@ -282,7 +284,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
                 handleLineElement(localName, attributes, false, false);
 
-            } else if ("pathText".equals(localName)) {
+            } else if ("text".equals(localName) || "pathText".equals(localName)) {
                 checkState(localName, Element.RENDERING_INSTRUCTION);
                 handleTextElement(localName, attributes, false, false);
 
@@ -519,7 +521,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 b.color(value);
 
             else if ("width".equals(name) || "stroke-width".equals(name)) {
-                b.strokeWidth = parseFloat(value) * mScale2;
+                b.strokeWidth = parseFloat(value) * mScale2 * mStrokeScale;
                 if (line == null) {
                     if (!isOutline)
                         validateNonNegative("width", b.strokeWidth);
@@ -536,7 +538,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 b.fixed = parseBoolean(value);
 
             else if ("stipple".equals(name))
-                b.stipple = Math.round(parseInt(value) * mScale2);
+                b.stipple = Math.round(parseInt(value) * mScale2 * mStrokeScale);
 
             else if ("stipple-stroke".equals(name))
                 b.stippleColor(value);
@@ -559,7 +561,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("dasharray".equals(name) || "stroke-dasharray".equals(name)) {
                 b.dashArray = parseFloatArray(value);
                 for (int j = 0; j < b.dashArray.length; ++j) {
-                    b.dashArray[j] = b.dashArray[j] * mScale;
+                    b.dashArray[j] = b.dashArray[j] * mScale * mStrokeScale;
                 }
 
             } else if ("symbol-width".equals(name))
@@ -704,7 +706,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("stroke-width".equals(name)) {
                 float strokeWidth = Float.parseFloat(value);
                 validateNonNegative("stroke-width", strokeWidth);
-                b.strokeWidth = strokeWidth * mScale;
+                b.strokeWidth = strokeWidth * mScale * mStrokeScale;
 
             } else if ("fade".equals(name))
                 b.fadeScale = Integer.parseInt(value);
@@ -885,10 +887,11 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 mapBackground = Color.parseColor(value);
                 if (mThemeCallback != null)
                     mapBackground = mThemeCallback.getColor(mapBackground);
+
             } else if ("base-stroke-width".equals(name))
                 baseStrokeWidth = Float.parseFloat(value);
 
-            else if ("base-text-scale".equals(name))
+            else if ("base-text-scale".equals(name) || "base-text-size".equals(name))
                 baseTextScale = Float.parseFloat(value);
 
             else
@@ -905,6 +908,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         validateNonNegative("base-text-scale", baseTextScale);
 
         mMapBackground = mapBackground;
+        mStrokeScale = baseStrokeWidth;
         mTextScale = baseTextScale;
     }
 
@@ -967,10 +971,10 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("font-family".equals(name))
                 b.fontFamily = FontFamily.valueOf(value.toUpperCase(Locale.ENGLISH));
 
-            else if ("font-style".equals(name))
+            else if ("style".equals(name) || "font-style".equals(name))
                 b.fontStyle = FontStyle.valueOf(value.toUpperCase(Locale.ENGLISH));
 
-            else if ("font-size".equals(name))
+            else if ("size".equals(name) || "font-size".equals(name))
                 b.fontSize = Float.parseFloat(value);
 
             else if ("fill".equals(name))
@@ -1062,7 +1066,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             String value = attributes.getValue(i);
 
             if ("r".equals(name) || "radius".equals(name))
-                b.radius(Float.parseFloat(value) * mScale);
+                b.radius(Float.parseFloat(value) * mScale * mStrokeScale);
 
             else if ("cat".equals(name))
                 b.cat(value);
@@ -1077,7 +1081,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
                 b.strokeColor(Color.parseColor(value));
 
             else if ("stroke-width".equals(name))
-                b.strokeWidth(Float.parseFloat(value) * mScale);
+                b.strokeWidth(Float.parseFloat(value) * mScale * mStrokeScale);
 
             else
                 logUnknownAttribute(elementName, name, value, i);
