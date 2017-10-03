@@ -932,6 +932,10 @@
         <!-- non-physical routes -->
         <m k="route" v="ferry">
             <line cap="butt" dasharray="15,10" stroke="#707070" width="0.3" />
+            <m zoom-min="13">
+                <text style="bold" fill="#606060" id="ferry" k="name" size="12" stroke="#ffffff"
+                    stroke-width="2.0" />
+            </m>
         </m>
 
 

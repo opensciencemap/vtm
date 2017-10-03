@@ -14,6 +14,9 @@
     <style-text style="bold" fill="#606060" id="ref" k="ref" priority="2" size="12" stroke="#ffffff"
         stroke-width="2.0" />
 
+    <style-text style="bold" fill="#606060" id="ferry" k="name" size="12" stroke="#ffffff"
+        stroke-width="2.0" />
+
     <style-text caption="true" dy="20" fill="#404000" id="poi" k="name" size="16" stroke="#aaffffff"
         stroke-width="2.0" />
 
@@ -970,6 +973,14 @@
         <m k="highway" v="track">
             <m k="area" v="yes">
                 <area fill="#aaff0000" />
+            </m>
+        </m>
+
+        <!-- non-physical routes -->
+        <m k="route" v="ferry">
+            <line cap="butt" dasharray="15,10" stroke="#707070" width="0.3" />
+            <m zoom-min="13">
+                <text use="ferry" />
             </m>
         </m>
 
