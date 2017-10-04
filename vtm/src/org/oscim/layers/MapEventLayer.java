@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2016 Longri
  *
@@ -59,6 +59,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
     private boolean mDown;
     private boolean mDoubleTap;
     private boolean mDragZoom;
+    private boolean mTwoFingersDone;
 
     private float mPrevX1;
     private float mPrevY1;
@@ -157,6 +158,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
             mStartMove = -1;
             mDoubleTap = false;
             mDragZoom = false;
+            mTwoFingersDone = false;
 
             mPrevX1 = e.getX(0);
             mPrevY1 = e.getY(0);
@@ -211,6 +213,11 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
             return true;
         }
         if (action == MotionEvent.ACTION_POINTER_UP) {
+            if (e.getPointerCount() == 2 && !mTwoFingersDone) {
+                if (!mMap.handleGesture(Gesture.TWO_FINGER_TAP, e)) {
+                    mMap.animator().animateZoom(300, 0.5, 0f, 0f);
+                }
+            }
             updateMulti(e);
             return true;
         }
@@ -306,6 +313,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
                     mCanScale = false;
                     mCanRotate = false;
                     mDoTilt = true;
+                    mTwoFingersDone = true;
                 }
             }
         }
@@ -332,6 +340,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
                     /* start rotate, disable tilt */
                     mDoRotate = true;
                     mCanTilt = false;
+                    mTwoFingersDone = true;
 
                     mAngle = rad;
                 } else if (!mDoScale) {
@@ -351,6 +360,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
                 mDoRotate = true;
                 mCanRotate = true;
                 mAngle = rad;
+                mTwoFingersDone = true;
             }
         }
 
@@ -366,6 +376,7 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
 
                     mCanTilt = false;
                     mDoScale = true;
+                    mTwoFingersDone = true;
                 }
             }
             if (mDoScale || mDoRotate) {
