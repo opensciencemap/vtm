@@ -11,8 +11,10 @@
 
     <style-text style="bold" fill="#101010" id="major-road" k="name" priority="1" size="16"
         stroke="#eeeeee" stroke-width="2.0" />
-    <style-text style="bold" fill="#606060" id="ref" k="ref" priority="2" size="12" stroke="#ffffff"
+
+    <style-text style="bold" fill="#ffffff" id="ref" k="ref" priority="2" size="12" stroke="#215e8f"
         stroke-width="2.0" />
+    <style-text caption="true" id="ref-caption" use="ref" />
 
     <style-text style="bold" fill="#606060" id="ferry" k="name" size="12" stroke="#ffffff"
         stroke-width="2.0" />
@@ -489,19 +491,34 @@
                         <m v="primary">
                             <line outline="0" use="primary:z11" />
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                         <m v="trunk">
                             <line blur="0.3" outline="0" use="trunk" />
                             <!-- <outline use="glow"/> -->
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                         <m v="motorway">
                             <line blur="0.3" outline="0" use="highway:z11" />
                             <!-- <outline use="glow"/> -->
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                     </m>
                     <!-- railway tunnel -->
@@ -726,17 +743,32 @@
                         <m v="primary">
                             <line outline="primary" use="primary:z11" />
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                         <m v="trunk">
                             <line outline="motorway" use="trunk" />
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                         <m v="motorway">
                             <line outline="motorway" use="highway:z11" />
                             <text use="major-road" />
-                            <text use="ref" />
+                            <m zoom-max="12">
+                                <text use="ref-caption" />
+                            </m>
+                            <m zoom-min="13">
+                                <text use="ref" />
+                            </m>
                         </m>
                     </m> <!-- end area=~|no|false -->
                 </m><!-- end tunnel|bridge=~|no|false -->
@@ -814,17 +846,32 @@
                                 <m v="primary">
                                     <line cap="butt" outline="bridge" use="primary:z11" />
                                     <text use="major-road" />
-                                    <text use="ref" />
+                                    <m zoom-max="12">
+                                        <text use="ref-caption" />
+                                    </m>
+                                    <m zoom-min="13">
+                                        <text use="ref" />
+                                    </m>
                                 </m>
                                 <m v="trunk">
                                     <line cap="butt" outline="bridge" use="trunk" />
                                     <text use="major-road" />
-                                    <text use="ref" />
+                                    <m zoom-max="12">
+                                        <text use="ref-caption" />
+                                    </m>
+                                    <m zoom-min="13">
+                                        <text use="ref" />
+                                    </m>
                                 </m>
                                 <m v="motorway">
                                     <line cap="butt" outline="bridge" use="highway:z11" />
                                     <text use="major-road" />
-                                    <text use="ref" />
+                                    <m zoom-max="12">
+                                        <text use="ref-caption" />
+                                    </m>
+                                    <m zoom-min="13">
+                                        <text use="ref" />
+                                    </m>
                                 </m>
                             </m>
                         </m><!-- end area=~|no|false -->

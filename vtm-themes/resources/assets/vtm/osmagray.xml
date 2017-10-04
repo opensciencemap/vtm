@@ -17,6 +17,10 @@
     <style-text style="bold" id="highway-track" k="name" size="16" stroke="#f3f3f3"
         stroke-width="2.0" />
 
+    <style-text style="bold" fill="#ffffff" id="ref" k="ref" priority="2" size="12" stroke="#606060"
+        stroke-width="2.0" />
+    <style-text caption="true" id="ref-caption" use="ref" />
+
     <m e="way" k="natural" v="issea|sea">
         <area fill="#d0d0d0" mesh="true" />
     </m>
@@ -731,8 +735,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#868686" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
                             <m v="trunk">
@@ -740,8 +748,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#b4b4b4" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
                             <m v="motorway">
@@ -749,8 +761,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#979797" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
 
@@ -865,8 +881,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#868686" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
                             <m v="trunk">
@@ -874,8 +894,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#b4b4b4" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
                             <m v="motorway">
@@ -883,8 +907,12 @@
                                 <m zoom-min="14">
                                     <text style="bold" k="name" priority="1" size="16"
                                         stroke="#979797" stroke-width="2.0" />
-                                    <text style="bold" fill="#606060" k="ref" priority="2" size="12"
-                                        stroke="#ffffff" stroke-width="2.0" />
+                                </m>
+                                <m zoom-max="12">
+                                    <text use="ref-caption" />
+                                </m>
+                                <m zoom-min="13">
+                                    <text use="ref" />
                                 </m>
                             </m>
                         </m>
