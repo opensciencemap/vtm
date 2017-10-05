@@ -17,7 +17,7 @@
     <style-text style="bold" id="highway-track" k="name" size="16" stroke="#fff2de"
         stroke-width="2.0" />
 
-    <style-text style="bold" fill="#ffffff" id="ref" k="ref" priority="2" size="12" stroke="#215e8f"
+    <style-text style="bold" fill="#606060" id="ref" k="ref" priority="2" size="12" stroke="#ffffff"
         stroke-width="2.0" />
     <style-text caption="true" id="ref-caption" use="ref" />
 
