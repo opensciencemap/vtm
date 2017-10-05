@@ -2,7 +2,7 @@
  * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
  * 
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  * Copyright 2016 Stephan Leuschner 
  * Copyright 2016 Pedinel
  *
@@ -21,6 +21,7 @@
  */
 package org.oscim.layers.marker;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.Box;
 import org.oscim.core.Point;
 import org.oscim.event.Gesture;
@@ -197,8 +198,9 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
         int inside = -1;
         double insideY = -Double.MAX_VALUE;
 
-        /* squared dist: 50*50 pixel ~ 2mm on 400dpi */
-        double dist = 2500;
+        // squared dist: 50x50 px ~ 2mm on 400dpi
+        // 20x20 px on baseline mdpi (160dpi)
+        double dist = 20 * 20 * CanvasAdapter.getScale();
 
         for (int i = 0; i < size; i++) {
             Item item = mItemList.get(i);
