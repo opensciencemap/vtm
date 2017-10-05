@@ -20,3 +20,9 @@ after_success:
 - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     ./gradlew uploadArchives -PSONATYPE_USERNAME="${SONATYPE_USERNAME}" -PSONATYPE_PASSWORD="${SONATYPE_PASSWORD}";
   fi
+notifications:
+  email:
+    recipients:
+    - secure: fOInp4SGBqiIMgnsGceQTa0SuFLaAoxAF15W0crhuljGlqSgnbnBjh0xFEF4P5+q3VT3DgDZs53GVVo6S9gEl8AWJy84KGuUX1M/CQKUQC4bwNXJdHfY3MIy6D50da6UfwWeNS4ienKh2Rj6w2TapN9M8C9nJJZk9aJFc9NWZmWTVboHZd4oUDeeRBJ6KSk1Ay7L/mmxv4cMCXaW7pPJixvUFESKNYgK4KAN3zYpym2UijrQ8zf7OVcYnTorcAuXUZDk8EvwdHl3rIAdlbVqvyZ8rmoQ2Da/Q2VlWUL/HrHUVJtCPZ+T+dNUag4a8joIDqWKwcyk76PElmgft3azb7GERb+bkZz1ToQc2IvuOeUk2SsuXWZugoEQImKWl/yWeirWBLrwzieaVh4j04dMSn/Npc1yL5kjX9EuiM6MFHdYPianMpvhFiaYKihjzW0GPV6sfuY7xS8cA9L9DjAsXoHIXIxc/+hRA+bpPUl+qMaQdGjJmNJJ2VPFnOY0XCsDDQDIVa3nZOA6aXMUG2c4H26RJZPe7uvfRiuL86n3KAmkoXSwne9t8WYMgl89LMsU5XxjBvwz2Qa1HqG09tVs6nhB23easrhEYEf/ZsGg0DIIL1FImUHj+wUUfZXeyFmbiE6lD/i2+3a5DqzZGHbXUDCoUIagObMf8fe2z5+0K/Q=
+    on_success: always
+    on_failure: always
