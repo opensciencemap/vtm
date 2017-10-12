@@ -1024,7 +1024,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("position".equals(name)) {
                 // Until implement position..
                 if (b.dy == 0) {
-                    value = "below".equals(value) ? "-20" : "20";
+                    value = "above".equals(value) ? "20" : "-20";
                     // NB: minus..
                     b.dy = -Float.parseFloat(value) * mScale;
                 }
