@@ -1126,13 +1126,13 @@
         <m k="railway">
             <m v="station" zoom-min="14">
                 <symbol src="assets:symbols/transport/train_station2.svg" />
-                <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
+                <caption style="bold" dy="20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
 
             <m v="halt|tram_stop">
                 <symbol src="assets:symbols/transport/tram_stop.svg" />
-                <caption style="bold" dy="-20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
+                <caption style="bold" dy="20" fill="#ec2d2d" k="name" size="14" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m v="level_crossing">
@@ -1353,9 +1353,9 @@
 
         <m k="natural" v="peak" zoom-min="12">
             <symbol src="assets:symbols/peak.svg" />
-            <caption style="bold" dy="12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
+            <caption style="bold" dy="12" fill="#4D2F08" k="name" size="14" stroke="#ffffff"
                 stroke-width="2.0" />
-            <caption style="bold" dy="-12" fill="#4D2F08" k="name" size="14" stroke="#ffffff"
+            <caption style="bold" dy="-12" fill="#4D2F08" k="ele" size="12" stroke="#ffffff"
                 stroke-width="2.0" />
         </m>
 

@@ -1008,7 +1008,7 @@
         <!-- historic -->
         <!-- <m k="historic"> <circle r="3" fill="#4040ff" stroke="#606060"
           width="1.5" /> <m zoom-min="17"> <caption
-          k="name" dy="-10" style="bold" size="10" fill="#4040ff" stroke="#ffffff"
+          k="name" dy="10" style="bold" size="10" fill="#4040ff" stroke="#ffffff"
           width="2.0" /> </m> </m> -->
 
         <!-- house numbers -->
@@ -1054,13 +1054,13 @@
         <m k="railway">
             <m v="station" zoom-min="14">
                 <circle fill="#ec2d2d" radius="6" stroke="#606060" stroke-width="1.5" />
-                <caption style="bold" dy="-10" fill="#ec2d2d" k="name" size="13" stroke="#ffffff"
+                <caption style="bold" dy="15" fill="#ec2d2d" k="name" size="13" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
 
             <m v="halt|tram_stop">
                 <circle fill="#ec2d2d" radius="4" stroke="#606060" stroke-width="1.5" />
-                <caption style="bold" dy="-15" fill="#ec2d2d" k="name" size="11" stroke="#ffffff"
+                <caption style="bold" dy="10" fill="#ec2d2d" k="name" size="11" stroke="#ffffff"
                     stroke-width="2.0" />
             </m>
             <m v="level_crossing">
