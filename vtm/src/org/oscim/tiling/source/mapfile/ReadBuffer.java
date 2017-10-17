@@ -25,7 +25,6 @@ import org.oscim.utils.Parameters;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -40,6 +39,8 @@ public class ReadBuffer {
     private byte[] mBufferData;
     private int mBufferPosition;
     private final RandomAccessFile mInputFile;
+
+    private final List<Integer> mTagIds = new ArrayList<>();
 
     ReadBuffer(RandomAccessFile inputFile) {
         mInputFile = inputFile;
@@ -56,14 +57,13 @@ public class ReadBuffer {
 
     /**
      * Converts four bytes from the read buffer to a float.
+     * <p/>
+     * The byte order is big-endian.
      *
      * @return the float value.
      */
     public float readFloat() {
-        byte[] bytes = new byte[4];
-        System.arraycopy(mBufferData, mBufferPosition, bytes, 0, 4);
-        mBufferPosition += 4;
-        return ByteBuffer.wrap(bytes).getFloat();
+        return Float.intBitsToFloat(readInt());
     }
 
     /**
@@ -408,11 +408,11 @@ public class ReadBuffer {
         mBufferPosition += bytes;
     }
 
-    boolean readTags(TagSet tags, Tag[] wayTags, byte numberOfTags) {
+    boolean readTags(TagSet tags, Tag[] tagsArray, byte numberOfTags) {
         tags.clear();
-        List<Integer> ids = new ArrayList<>();
+        mTagIds.clear();
 
-        int maxTag = wayTags.length;
+        int maxTag = tagsArray.length;
 
         for (byte i = 0; i < numberOfTags; i++) {
             int tagId = readUnsignedInt();
@@ -420,11 +420,11 @@ public class ReadBuffer {
                 LOG.warning("invalid tag ID: " + tagId);
                 break;
             }
-            ids.add(tagId);
+            mTagIds.add(tagId);
         }
 
-        for (Integer id : ids) {
-            Tag tag = wayTags[id];
+        for (int tagId : mTagIds) {
+            Tag tag = tagsArray[tagId];
             // Decode variable values of tags
             if (tag.value.charAt(0) == '%' && tag.value.length() == 2) {
                 String value = tag.value;
