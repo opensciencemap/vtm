@@ -21,6 +21,9 @@ import org.oscim.core.GeoPoint;
 import org.oscim.layers.marker.ClusterMarkerRenderer;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
+import org.oscim.layers.marker.MarkerLayer;
+import org.oscim.layers.marker.MarkerRenderer;
+import org.oscim.layers.marker.MarkerRendererFactory;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -49,16 +52,28 @@ public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
         mMap.setTheme(VtmThemes.DEFAULT);
 
         Bitmap bitmapPoi = drawableToBitmap(getResources().getDrawable(R.drawable.marker_poi));
-        MarkerSymbol symbol;
+        final MarkerSymbol symbol;
         if (BILLBOARDS)
             symbol = new MarkerSymbol(bitmapPoi, MarkerSymbol.HotspotPlace.BOTTOM_CENTER);
         else
             symbol = new MarkerSymbol(bitmapPoi, MarkerSymbol.HotspotPlace.CENTER, false);
 
+        MarkerRendererFactory markerRendererFactory = new MarkerRendererFactory() {
+            @Override
+            public MarkerRenderer create(MarkerLayer markerLayer) {
+                return new ClusterMarkerRenderer(markerLayer, symbol, new ClusterMarkerRenderer.ClusterStyle(Color.WHITE, Color.BLUE)) {
+                    @Override
+                    protected Bitmap getClusterBitmap(int size) {
+                        // Can customize cluster bitmap here
+                        return super.getClusterBitmap(size);
+                    }
+                };
+            }
+        };
         mMarkerLayer = new ItemizedLayer<>(
                 mMap,
                 new ArrayList<MarkerItem>(),
-                ClusterMarkerRenderer.factory(symbol, new ClusterMarkerRenderer.ClusterStyle(Color.WHITE, Color.BLUE)),
+                markerRendererFactory,
                 this);
         mMap.layers().add(mMarkerLayer);
 

@@ -40,7 +40,7 @@ public class ClusterMarkerRenderer extends MarkerRenderer {
     /**
      * Max number to display inside a cluster icon
      */
-    private static final int CLUSTER_MAXSIZE = 10;
+    protected static final int CLUSTER_MAXSIZE = 10;
 
     /**
      * default color of number inside the icon. Would be super-cool to cook this into the map theme
@@ -55,7 +55,7 @@ public class ClusterMarkerRenderer extends MarkerRenderer {
     /**
      * Map Cluster Icon Size. This is the biggest size for clusters of CLUSTER_MAXSIZE elements. Smaller clusters will be slightly smaller
      */
-    private static final int MAP_MARKER_CLUSTER_SIZE_DP = 64;
+    protected static final int MAP_MARKER_CLUSTER_SIZE_DP = 64;
 
     /**
      * Clustering grid square size, decrease to cluster more aggresively. Ideally this value is the typical marker size
@@ -66,9 +66,9 @@ public class ClusterMarkerRenderer extends MarkerRenderer {
      * cached bitmaps database, we will cache cluster bitmaps from 1 to MAX_SIZE
      * and always use same bitmap for efficiency
      */
-    private static Bitmap[] mClusterBitmaps = new Bitmap[CLUSTER_MAXSIZE + 1];
+    protected static Bitmap[] mClusterBitmaps = new Bitmap[CLUSTER_MAXSIZE + 1];
 
-    private int mStyleBackground = CLUSTER_COLORBACK, mStyleForeground = CLUSTER_COLORTEXT;
+    protected int mStyleBackground = CLUSTER_COLORBACK, mStyleForeground = CLUSTER_COLORTEXT;
 
     /**
      * Discrete scale step, used to trigger reclustering on significant scale change
@@ -368,7 +368,7 @@ public class ClusterMarkerRenderer extends MarkerRenderer {
      * @param size The cluster size. Can be greater than CLUSTER_MAXSIZE.
      * @return A somewhat cool bitmap to be used as the cluster marker
      */
-    private Bitmap getClusterBitmap(int size) {
+    protected Bitmap getClusterBitmap(int size) {
         final String strValue;
 
         if (size >= CLUSTER_MAXSIZE) {
