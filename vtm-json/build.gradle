@@ -1,9 +1,9 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm')
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+    api project(':vtm')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
 }
 
 sourceSets {

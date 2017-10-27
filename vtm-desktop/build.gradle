@@ -1,14 +1,15 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm-gdx')
+    api project(':vtm-gdx')
     file('natives').eachDir() { dir ->
-        compile files(dir.path)
+        api files(dir.path)
     }
-    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-    compile 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 
 sourceSets {
@@ -26,21 +27,6 @@ file('natives').eachDir() { dir ->
     artifacts {
         archives tasks["nativesJar-${dir.name}"]
     }
-}
-
-task fatJar(type: Jar, dependsOn: classes) {
-    classifier = 'jar-with-dependencies'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    // Natives come from compile configuration
-    /*file('natives').eachDir() { dir ->
-        fatJar.from(dir.path)
-    }*/
-    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
-    with jar
-}
-
-artifacts {
-    archives fatJar
 }
 
 if (project.hasProperty("SONATYPE_USERNAME")) {

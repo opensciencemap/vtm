@@ -1,21 +1,23 @@
-apply plugin: 'java'
+apply plugin: 'application'
 
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
-    compile project(':vtm-desktop')
-    compile 'ch.qos.logback:logback-classic:1.2.3'
-    compile 'com.fifesoft:rsyntaxtextarea:2.6.1'
-    compile 'com.jtattoo:JTattoo:1.6.11'
+    implementation project(':vtm-desktop')
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation 'com.fifesoft:rsyntaxtextarea:2.6.1'
+    implementation 'com.jtattoo:JTattoo:1.6.11'
 
-    compile 'org.mapsforge:mapsforge-core:master-SNAPSHOT'
-    compile 'org.mapsforge:mapsforge-map:master-SNAPSHOT'
-    compile("org.mapsforge:mapsforge-map-awt:master-SNAPSHOT")
-    compile 'org.mapsforge:mapsforge-map-reader:master-SNAPSHOT'
-    compile 'org.mapsforge:mapsforge-themes:master-SNAPSHOT'
-    compile 'net.sf.kxml:kxml2:2.3.0'
+    implementation 'org.mapsforge:mapsforge-core:master-SNAPSHOT'
+    implementation 'org.mapsforge:mapsforge-map:master-SNAPSHOT'
+    implementation 'org.mapsforge:mapsforge-map-awt:master-SNAPSHOT'
+    implementation 'org.mapsforge:mapsforge-map-reader:master-SNAPSHOT'
+    implementation 'org.mapsforge:mapsforge-themes:master-SNAPSHOT'
+    implementation 'net.sf.kxml:kxml2:2.3.0'
 }
 
 sourceSets {
@@ -27,10 +29,12 @@ sourceSets {
 
 task fatJar(type: Jar, dependsOn: classes) {
     classifier = 'jar-with-dependencies'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
     manifest {
         attributes('Main-Class': 'org.oscim.theme.comparator.Main')
     }
     with jar
 }
+
+mainClassName = "org.oscim.theme.comparator.Main"

@@ -1,18 +1,38 @@
-apply plugin: 'java'
+apply plugin: 'application'
 
 dependencies {
-    compile project(':vtm-desktop')
-    compile project(':vtm-extras')
-    compile project(':vtm-http')
-    compile project(':vtm-jeo')
-    compile project(':vtm-json')
-    compile project(':vtm-jts')
-    compile "org.slf4j:slf4j-simple:$slf4jVersion"
+    implementation project(':vtm-desktop')
+    implementation project(':vtm-extras')
+    implementation project(':vtm-http')
+    implementation(project(':vtm-jeo')) {
+        exclude group: 'com.vividsolutions', module: 'jts'
+    }
+    implementation project(':vtm-json')
+    implementation project(':vtm-jts')
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation 'com.squareup.okhttp3:okhttp:3.8.0'
+    implementation('org.jeo:jeo:0-SNAPSHOT') {
+        exclude group: 'com.vividsolutions', module: 'jts'
+        exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+    }
+    implementation('org.jeo:jeo-render:0-SNAPSHOT') {
+        exclude group: 'com.vividsolutions', module: 'jts'
+        exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+    }
+    implementation "org.slf4j:slf4j-simple:$slf4jVersion"
 }
 
 sourceSets {
     main {
         java.srcDirs = ['src']
         resources.srcDirs = ['resources']
+    }
+}
+
+mainClassName = "org.oscim.test.MapsforgeMultiTest"
+run {
+    if (project.hasProperty("args")) {
+        args project.getProperty("args").split(",")
     }
 }

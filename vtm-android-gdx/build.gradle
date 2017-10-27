@@ -2,10 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
-    compile project(':vtm-android')
-    compile project(':vtm-gdx')
-    compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    compile 'com.noveogroup.android:android-logger:1.3.6'
+    api project(':vtm-android')
+    api project(':vtm-gdx')
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    runtimeOnly 'com.noveogroup.android:android-logger:1.3.6'
 }
 
 android {
@@ -47,35 +47,21 @@ android {
 
 android.applicationVariants.all { variant ->
     def name = variant.buildType.name
-    if (name.equals("debug")) {
-        print "Skipping debug jar"
-        return; // Skip debug builds.
-    }
+    if (name == "debug")
+        return
 
     def jar = project.tasks.create "jar${name.capitalize()}", Jar
-    jar.dependsOn variant.javaCompile
-    jar.from variant.javaCompile.destinationDir
+    jar.dependsOn variant.javaCompiler
+    jar.from variant.javaCompiler.destinationDir
     jar.exclude 'android-logger.properties'
-    artifacts.add('archives', jar);
+    artifacts.add('archives', jar)
 
     file('natives').eachDir() { dir ->
         def nativesJar = project.tasks.create "nativesJar${name.capitalize()}-${dir.name}", Jar
         nativesJar.classifier = "natives-${dir.name}"
         nativesJar.from(dir.path)
-        artifacts.add('archives', nativesJar);
+        artifacts.add('archives', nativesJar)
     }
-
-    def fatJar = project.tasks.create "fatJar${name.capitalize()}", Jar
-    fatJar.classifier = 'jar-with-dependencies'
-    fatJar.dependsOn variant.javaCompile
-    fatJar.from variant.javaCompile.destinationDir
-    fatJar.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    file('natives').eachDir() { dir ->
-        fatJar.from(dir.path)
-        fatJar.from("${rootProject.projectDir}/vtm-android/natives/${dir.name}")
-    }
-    fatJar.exclude 'android-logger.properties'
-    artifacts.add('archives', fatJar);
 }
 
 afterEvaluate {

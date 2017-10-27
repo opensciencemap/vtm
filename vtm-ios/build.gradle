@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 apply plugin: 'robovm'
 
@@ -26,11 +26,12 @@ launchIOSDevice.dependsOn build
 createIPA.dependsOn build
 
 dependencies {
-    compile project(':vtm-gdx')
-    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
-    compile "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
-    compile "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
-    compile "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+    api project(':vtm-gdx')
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+    implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+    implementation "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
+    implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 
 task copyVtmResources(type: Copy) {
@@ -57,17 +58,8 @@ task nativesJar(type: Jar) {
     from('natives')
 }
 
-task fatJar(type: Jar, dependsOn: classes) {
-    classifier = 'jar-with-dependencies'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    from('natives')
-    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
-    with jar
-}
-
 artifacts {
     archives nativesJar
-    //archives fatJar
 }
 
 if (project.hasProperty("SONATYPE_USERNAME")) {

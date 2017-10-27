@@ -1,8 +1,8 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm')
+    api project(':vtm')
 }
 
 sourceSets {

@@ -1,12 +1,12 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm')
-    compile('org.jeo:jeo:0-SNAPSHOT') {
+    api project(':vtm')
+    implementation('org.jeo:jeo:0-SNAPSHOT') {
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
-    compile('org.jeo:jeo-carto:0-SNAPSHOT') {
+    implementation('org.jeo:jeo-carto:0-SNAPSHOT') {
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
 }

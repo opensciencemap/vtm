@@ -2,8 +2,9 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
-    compile project(':vtm')
-    compile 'com.caverock:androidsvg:1.2.2-beta-1'
+    api project(':vtm')
+    implementation 'com.caverock:androidsvg:1.2.2-beta-1'
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 
 android {
@@ -39,32 +40,20 @@ android {
 
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
-    if (name.equals("debug")) {
-        print "Skipping debug jar"
-        return; // Skip debug builds.
-    }
+    if (name == "debug")
+        return
 
     def jar = project.tasks.create "jar${name.capitalize()}", Jar
-    jar.dependsOn variant.javaCompile
-    jar.from variant.javaCompile.destinationDir
-    artifacts.add('archives', jar);
+    jar.dependsOn variant.javaCompiler
+    jar.from variant.javaCompiler.destinationDir
+    artifacts.add('archives', jar)
 
     file('natives').eachDir() { dir ->
         def nativesJar = project.tasks.create "nativesJar${name.capitalize()}-${dir.name}", Jar
         nativesJar.classifier = "natives-${dir.name}"
         nativesJar.from(dir.path)
-        artifacts.add('archives', nativesJar);
+        artifacts.add('archives', nativesJar)
     }
-
-    def fatJar = project.tasks.create "fatJar${name.capitalize()}", Jar
-    fatJar.classifier = 'jar-with-dependencies'
-    fatJar.dependsOn variant.javaCompile
-    fatJar.from variant.javaCompile.destinationDir
-    fatJar.from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    file('natives').eachDir() { dir ->
-        fatJar.from(dir.path)
-    }
-    artifacts.add('archives', fatJar);
 }
 
 if (project.hasProperty("SONATYPE_USERNAME")) {

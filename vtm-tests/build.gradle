@@ -1,13 +1,13 @@
 apply plugin: 'java'
 
 dependencies {
-    compile project(':vtm-http')
-    compile 'com.squareup.okhttp3:okhttp:3.8.0'
-    testCompile 'com.squareup.okhttp3:mockwebserver:3.8.0'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.easytesting:fest-assert-core:2.0M10'
-    testCompile 'org.mockito:mockito-all:1.10.19'
-    testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
+    implementation project(':vtm-http')
+    implementation 'com.squareup.okhttp3:okhttp:3.8.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.8.0'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.easytesting:fest-assert-core:2.0M10'
+    testImplementation 'org.mockito:mockito-all:1.10.19'
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
 }
 
 sourceSets {

@@ -1,12 +1,13 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm')
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.4'
-    compile 'com.google.protobuf:protobuf-java:2.6.1'
-    compile 'com.vividsolutions:jts-core:1.14.0'
-    compile 'org.openstreetmap.osmosis:osmosis-osm-binary:0.45'
+    api project(':vtm')
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+    implementation 'com.google.protobuf:protobuf-java:2.6.1'
+    implementation 'com.vividsolutions:jts-core:1.14.0'
+    implementation 'org.openstreetmap.osmosis:osmosis-osm-binary:0.45'
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 
 sourceSets {

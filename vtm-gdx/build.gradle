@@ -1,10 +1,11 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    compile project(':vtm')
-    compile project(':vtm-themes')
-    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    api project(':vtm')
+    api project(':vtm-themes')
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 
 sourceSets {

@@ -8,42 +8,42 @@ Current version is [![Maven Central](https://img.shields.io/maven-central/v/org.
 
 ### Core
 ```groovy
-compile 'org.mapsforge:vtm:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-themes:[CURRENT-VERSION]'
-compile 'org.slf4j:slf4j-api:1.7.25'
+implementation 'org.mapsforge:vtm:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-themes:[CURRENT-VERSION]'
+implementation 'org.slf4j:slf4j-api:1.7.25'
 ```
 
 ### Android
 ```groovy
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips64'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
-compile 'com.caverock:androidsvg:1.2.2-beta-1'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips64'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
+implementation 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
 ### Android (with libGDX)
 ```groovy
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
-compile 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
-compile 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-arm64-v8a'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi-v7a'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86'
-compile 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86_64'
-compile 'com.badlogicgames.gdx:gdx:1.9.6'
-compile 'com.badlogicgames.gdx:gdx-backend-android:1.9.6'
-compile 'com.caverock:androidsvg:1.2.2-beta-1'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi-v7a'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
+implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
+implementation 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-arm64-v8a'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-armeabi-v7a'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86'
+implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86_64'
+implementation 'com.badlogicgames.gdx:gdx:1.9.6'
+implementation 'com.badlogicgames.gdx:gdx-backend-android:1.9.6'
+implementation 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
 ### iOS
@@ -52,19 +52,19 @@ Detailed iOS instructions can be found [here](ios.md).
 
 ### Desktop
 ```groovy
-compile 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]'
-compile 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-linux'
-compile 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-osx'
-compile 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-windows'
-compile 'com.badlogicgames.gdx:gdx:1.9.6'
-compile 'com.badlogicgames.gdx:gdx-platform:1.9.6:natives-desktop'
-compile 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.9.6'
-compile 'org.lwjgl.lwjgl:lwjgl:2.9.3'
-compile 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
-compile 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-osx'
-compile 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
-compile 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
+implementation 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-linux'
+implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-osx'
+implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-windows'
+implementation 'com.badlogicgames.gdx:gdx:1.9.6'
+implementation 'com.badlogicgames.gdx:gdx-platform:1.9.6:natives-desktop'
+implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.9.6'
+implementation 'org.lwjgl.lwjgl:lwjgl:2.9.3'
+implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
+implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-osx'
+implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
+implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
 ```
 
 ## Snapshots
@@ -80,7 +80,7 @@ repositories {
 
 And declare the dependencies like:
 ```groovy
-compile 'org.mapsforge:vtm:master-SNAPSHOT'
+implementation 'org.mapsforge:vtm:master-SNAPSHOT'
 ...
 ```
 
