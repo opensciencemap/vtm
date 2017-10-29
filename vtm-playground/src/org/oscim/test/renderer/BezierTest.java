@@ -19,8 +19,8 @@ package org.oscim.test.renderer;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Point;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -30,7 +30,7 @@ import org.oscim.utils.geom.BezierPath;
 
 import java.util.List;
 
-public class BezierTest extends GdxMap {
+public class BezierTest extends GdxMapImpl {
 
     @Override
     protected void createLayers() {

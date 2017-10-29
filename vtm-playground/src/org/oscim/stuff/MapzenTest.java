@@ -16,8 +16,8 @@
  */
 package org.oscim.stuff;
 
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -25,7 +25,7 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class MapzenTest extends GdxMap {
+public class MapzenTest extends GdxMapImpl {
 
     @Override
     public void createLayers() {

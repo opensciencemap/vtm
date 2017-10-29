@@ -68,6 +68,7 @@ public class GdxMapApp extends GdxMap {
         cfg.samples = 2;
         cfg.foregroundFPS = 30;
         cfg.backgroundFPS = 10;
+        cfg.forceExit = false;
         return cfg;
     }
 
@@ -78,5 +79,10 @@ public class GdxMapApp extends GdxMap {
         initDefaultLayers(tileSource, false, true, true);
 
         mMap.setMapPosition(0, 0, 1 << 2);
+    }
+
+    @Override
+    public void dispose() {
+        System.exit(0);
     }
 }

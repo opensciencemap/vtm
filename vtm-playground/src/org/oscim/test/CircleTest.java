@@ -17,8 +17,8 @@ package org.oscim.test;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -26,7 +26,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.bucket.CircleBucket;
 import org.oscim.theme.styles.CircleStyle;
 
-public class CircleTest extends GdxMap {
+public class CircleTest extends GdxMapImpl {
 
     private final GeometryBuffer geom = new GeometryBuffer(2, 1);
     private final Renderer renderer = new Renderer();

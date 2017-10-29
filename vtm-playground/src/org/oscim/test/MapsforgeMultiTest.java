@@ -16,8 +16,8 @@ package org.oscim.test;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -29,7 +29,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsforgeMultiTest extends GdxMap {
+public class MapsforgeMultiTest extends GdxMapImpl {
 
     private final List<File> mapFiles;
 

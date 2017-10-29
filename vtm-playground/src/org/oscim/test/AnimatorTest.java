@@ -3,13 +3,13 @@ package org.oscim.test;
 import com.badlogic.gdx.Input;
 
 import org.oscim.core.BoundingBox;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class AnimatorTest extends GdxMap {
+public class AnimatorTest extends GdxMapImpl {
 
     @Override
     public void createLayers() {

@@ -23,8 +23,8 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
-import org.oscim.gdx.GdxMap;
 import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -36,7 +36,7 @@ import org.oscim.theme.styles.LineStyle;
 
 import java.io.IOException;
 
-public class LineRenderTest extends GdxMap {
+public class LineRenderTest extends GdxMapImpl {
 
     GeometryBuffer mGeom = new GeometryBuffer(2, 1);
     GeometryBuffer mLine = new GeometryBuffer(2, 1);
