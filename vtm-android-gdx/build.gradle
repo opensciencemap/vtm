@@ -1,11 +1,8 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
-    api project(':vtm-android')
-    api project(':vtm-gdx')
-    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
-    runtimeOnly 'com.noveogroup.android:android-logger:1.3.6'
+    api project(':vtm')
 }
 
 android {
@@ -29,14 +26,6 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             resources.srcDirs = ['src']
-            aidl.srcDirs = ['src', 'assets']
-            renderscript.srcDirs = ['src', 'assets']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
-            file('natives').eachDir() { dir ->
-                jniLibs.srcDirs += "${dir.path}/lib"
-                jniLibs.srcDirs += "${rootDir}/vtm-android/natives/${dir.name}/lib"
-            }
         }
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
@@ -45,7 +34,7 @@ android {
     lintOptions { abortOnError false }
 }
 
-android.applicationVariants.all { variant ->
+android.libraryVariants.all { variant ->
     def name = variant.buildType.name
     if (name == "debug")
         return
@@ -53,7 +42,6 @@ android.applicationVariants.all { variant ->
     def jar = project.tasks.create "jar${name.capitalize()}", Jar
     jar.dependsOn variant.javaCompiler
     jar.from variant.javaCompiler.destinationDir
-    jar.exclude 'android-logger.properties'
     artifacts.add('archives', jar)
 
     file('natives').eachDir() { dir ->
@@ -61,22 +49,6 @@ android.applicationVariants.all { variant ->
         nativesJar.classifier = "natives-${dir.name}"
         nativesJar.from(dir.path)
         artifacts.add('archives', nativesJar)
-    }
-}
-
-afterEvaluate {
-    configurations.archives.artifacts.removeAll { it.file =~ 'apk' }
-}
-
-task run(dependsOn: 'installDebug') {
-    doFirst {
-        println(">> adb run...")
-        String adb = System.getenv()['ANDROID_HOME'] + '/platform-tools/adb'
-        String cmd = "${adb} shell am start -n org.oscim.gdx/.MainActivity"
-        def proc = cmd.execute()
-        proc.in.eachLine { line -> println line }
-        proc.err.eachLine { line -> System.err.println('ERROR: ' + line) }
-        proc.waitFor()
     }
 }
 

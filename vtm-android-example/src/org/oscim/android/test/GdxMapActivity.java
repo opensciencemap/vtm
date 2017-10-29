@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.gdx;
+package org.oscim.android.test;
 
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -28,10 +28,13 @@ import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
+import org.oscim.gdx.AndroidGL;
+import org.oscim.gdx.GdxAssets;
+import org.oscim.gdx.GdxMap;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class MainActivity extends AndroidApplication {
+public class GdxMapActivity extends AndroidApplication {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -21,6 +21,7 @@
 - PolyLabel default disabled [#402](https://github.com/mapsforge/vtm/issues/402)
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Feature parameters [#403](https://github.com/mapsforge/vtm/issues/403)
+- vtm-android-gdx module enhancements [#435](https://github.com/mapsforge/vtm/issues/435)
 - Gradle 4 / Android plugin 3 support [#433](https://github.com/mapsforge/vtm/issues/433)
 - libGDX 1.9.7 [#434](https://github.com/mapsforge/vtm/issues/434)
 - Internal render themes various improvements [#41](https://github.com/mapsforge/vtm/issues/41)

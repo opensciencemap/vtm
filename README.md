@@ -29,15 +29,16 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
   - HTML5/WebGL (using libGDX/GWT, [instructions](docs/web.md))
 
 ### Projects
-- **vtm** contains the core library
+- **vtm** core library
 - **vtm-android** Android backend
-- **vtm-android-example** provides examples using vtm-android
+- **vtm-android-example** Android examples
 - **vtm-gdx** common libGDX backend
-- **vtm-android-gdx** Android backend (with libGDX)
-- **vtm-desktop** Desktop backend
-- **vtm-ios** iOS backend
-- **vtm-ios-example** provides examples using vtm-ios
-- **vtm-web** HTML5/GWT backend
+- **vtm-android-gdx** Android libGDX backend
+- **vtm-desktop** Desktop libGDX backend
+- **vtm-playground** Desktop examples
+- **vtm-ios** iOS libGDX backend
+- **vtm-ios-example** iOS examples
+- **vtm-web** HTML5/GWT libGDX backend
 - **vtm-web-app** HTML5/GWT application
 
 ## WebGL Demo

@@ -38,6 +38,9 @@
             android:name=".ClusterMarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".GdxMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".JeoIndoorMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
