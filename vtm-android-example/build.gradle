@@ -7,32 +7,23 @@ repositories {
 dependencies {
     implementation project(':vtm-android')
     implementation project(':vtm-http')
-    implementation(project(':vtm-jeo')) {
-        exclude group: 'com.vividsolutions', module: 'jts'
-    }
+    implementation project(':vtm-jeo')
     implementation project(':vtm-json')
     implementation project(':vtm-jts')
     implementation project(':vtm-themes')
-    implementation 'com.noveogroup.android:android-logger:1.3.6'
-    implementation 'com.vividsolutions:jts-core:1.14.0'
     implementation('org.jeo:jeo:0-SNAPSHOT') {
-        exclude group: 'com.vividsolutions', module: 'jts'
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
     implementation('org.jeo:jeo-render:0-SNAPSHOT') {
-        exclude group: 'com.vividsolutions', module: 'jts'
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
-    implementation 'com.android.support:support-v4:27.0.0'
+    implementation "org.slf4j:slf4j-android:$slf4jVersion"
 
     implementation project(':vtm-android-gdx')
     implementation project(':vtm-gdx')
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
 
-    implementation 'org.mapsforge:mapsforge-core:master-SNAPSHOT'
-    implementation 'org.mapsforge:mapsforge-poi:master-SNAPSHOT'
     implementation 'org.mapsforge:mapsforge-poi-android:master-SNAPSHOT'
-    implementation 'org.mapsforge:spatialite-android:master-SNAPSHOT'
     implementation 'org.mapsforge:spatialite-android:master-SNAPSHOT:natives-armeabi'
     implementation 'org.mapsforge:spatialite-android:master-SNAPSHOT:natives-armeabi-v7a'
     implementation 'org.mapsforge:spatialite-android:master-SNAPSHOT:natives-x86'
@@ -78,6 +69,14 @@ android {
         exclude 'META-INF/services/org.jeo.data.Driver'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
+    }
+
+    buildTypes {
+        all {
+            minifyEnabled true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 }
 

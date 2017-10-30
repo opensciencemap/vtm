@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm')
-    implementation 'com.vividsolutions:jts-core:1.14.0'
+    implementation 'com.vividsolutions:jts:1.13'
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
 }
 

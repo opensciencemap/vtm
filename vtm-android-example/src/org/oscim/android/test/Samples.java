@@ -118,14 +118,12 @@ public class Samples extends Activity {
         linearLayout.addView(createLabel("User Interaction"));
         linearLayout.addView(createButton(NewGesturesActivity.class));
         linearLayout.addView(createButton(LayerGroupActivity.class));
-        linearLayout.addView(createButton(MapFragmentActivity.class));
 
         linearLayout.addView(createLabel("Dual Map Views"));
         linearLayout.addView(createButton(MultiMapActivity.class));
 
         linearLayout.addView(createLabel("Experiments"));
         linearLayout.addView(createButton(ReverseGeocodeActivity.class));
-        linearLayout.addView(createButton(MapPositionActivity.class));
         linearLayout.addView(createButton(S3DBMapActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(JeoIndoorMapActivity.class));

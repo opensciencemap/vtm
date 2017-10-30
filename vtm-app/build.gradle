@@ -4,8 +4,8 @@ dependencies {
     implementation project(':vtm-android')
     implementation project(':vtm-themes')
     implementation project(':vtm-extras')
-    implementation 'com.noveogroup.android:android-logger:1.3.6'
     implementation 'com.squareup.okhttp3:okhttp:3.8.0'
+    implementation "org.slf4j:slf4j-android:$slf4jVersion"
 }
 
 android {
