@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2017 Andrey Novikov
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -37,7 +38,7 @@ public class BitmapTileLayer extends TileLayer {
     private final static int CACHE_LIMIT = 40;
 
     protected final TileSource mTileSource;
-    private float mBitmapAlpha;
+    private float mBitmapAlpha = 1.0f;
 
     public static class FadeStep {
         public final double scaleStart, scaleEnd;
@@ -67,7 +68,7 @@ public class BitmapTileLayer extends TileLayer {
     }
 
     public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
-        this(map, tileSource, cacheLimit, 0f);
+        this(map, tileSource, cacheLimit, 1.0f);
     }
 
     public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit, float bitmapAlpha) {
