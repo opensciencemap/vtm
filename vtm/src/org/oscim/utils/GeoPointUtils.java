@@ -1,4 +1,5 @@
 /*
+ * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -17,7 +18,30 @@ package org.oscim.utils;
 import org.oscim.core.GeoPoint;
 import org.oscim.core.Point;
 
+/**
+ * The coordinate validation functions come from Mapsforge <a href="https://github.com/mapsforge/mapsforge/blob/master/mapsforge-core/src/main/java/org/mapsforge/core/util/LatLongUtils.java">LatLongUtils</a> class.
+ */
 public final class GeoPointUtils {
+
+    /**
+     * Maximum possible latitude coordinate.
+     */
+    public static final double LATITUDE_MAX = 90;
+
+    /**
+     * Minimum possible latitude coordinate.
+     */
+    public static final double LATITUDE_MIN = -LATITUDE_MAX;
+
+    /**
+     * Maximum possible longitude coordinate.
+     */
+    public static final double LONGITUDE_MAX = 180;
+
+    /**
+     * Minimum possible longitude coordinate.
+     */
+    public static final double LONGITUDE_MIN = -LONGITUDE_MAX;
 
     /**
      * Find if the given point lies within this polygon.
@@ -71,6 +95,30 @@ public final class GeoPointUtils {
         if (t < 0) return new Point(startX, startY);
         if (t > 1) return new Point(endX, endY);
         return new Point(startX + t * (endX - startX), startY + t * (endY - startY));
+    }
+
+    /**
+     * @param latitude the latitude coordinate in degrees which should be validated.
+     * @return the latitude value
+     * @throws IllegalArgumentException if the latitude coordinate is invalid or {@link Double#NaN}.
+     */
+    public static double validateLatitude(double latitude) {
+        if (Double.isNaN(latitude) || latitude < LATITUDE_MIN || latitude > LATITUDE_MAX) {
+            throw new IllegalArgumentException("invalid latitude: " + latitude);
+        }
+        return latitude;
+    }
+
+    /**
+     * @param longitude the longitude coordinate in degrees which should be validated.
+     * @return the longitude value
+     * @throws IllegalArgumentException if the longitude coordinate is invalid or {@link Double#NaN}.
+     */
+    public static double validateLongitude(double longitude) {
+        if (Double.isNaN(longitude) || longitude < LONGITUDE_MIN || longitude > LONGITUDE_MAX) {
+            throw new IllegalArgumentException("invalid longitude: " + longitude);
+        }
+        return longitude;
     }
 
     private GeoPointUtils() {

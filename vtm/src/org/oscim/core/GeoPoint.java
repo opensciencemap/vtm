@@ -3,6 +3,7 @@
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
  * Copyright 2016 devemux86
+ * Copyright 2017 Luca Osten
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -21,11 +22,18 @@ package org.oscim.core;
 
 import org.oscim.utils.FastMath;
 
+import java.io.Serializable;
+
 /**
  * A GeoPoint represents an immutable pair of latitude and longitude
  * coordinates.
  */
-public class GeoPoint implements Comparable<GeoPoint> {
+public class GeoPoint implements Comparable<GeoPoint>, Serializable {
+    /**
+     * Generated serial version UID
+     */
+    private static final long serialVersionUID = 8965378345755560352L;
+
     /**
      * Conversion factor from degrees to microdegrees.
      */
@@ -109,7 +117,10 @@ public class GeoPoint implements Comparable<GeoPoint> {
 
     @Override
     public int compareTo(GeoPoint geoPoint) {
-        if (this.longitudeE6 > geoPoint.longitudeE6) {
+        // equals method will resolve Java double precision problem (see equals method)
+        if (this.equals(geoPoint)) {
+            return 0;
+        } else if (this.longitudeE6 > geoPoint.longitudeE6) {
             return 1;
         } else if (this.longitudeE6 < geoPoint.longitudeE6) {
             return -1;
@@ -162,10 +173,17 @@ public class GeoPoint implements Comparable<GeoPoint> {
         } else if (!(obj instanceof GeoPoint)) {
             return false;
         }
+        /*
+         * problem is that the Java double precision problem can cause two coordinates that represent 
+         * the same geographical position to have a different latitudeE6/longitudeE6. therefore a difference 
+         * of 1 in the latitudeE6/longitudeE6 can be the result of this rounding effect
+         * see https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+         * see https://stackoverflow.com/questions/179427/how-to-resolve-a-java-rounding-double-issue
+         */
         GeoPoint other = (GeoPoint) obj;
-        if (this.latitudeE6 != other.latitudeE6) {
+        if (Math.abs(this.latitudeE6 - other.latitudeE6) > 1) {
             return false;
-        } else if (this.longitudeE6 != other.longitudeE6) {
+        } else if (Math.abs(this.longitudeE6 - other.longitudeE6) > 1) {
             return false;
         }
         return true;
