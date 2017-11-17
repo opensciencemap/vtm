@@ -1,6 +1,7 @@
 /*
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,6 +17,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.core;
+
+import java.util.Arrays;
 
 /**
  * The MapElement class is a reusable containter for a geometry
@@ -64,5 +67,21 @@ public class MapElement extends GeometryBuffer {
 
         return tags.toString() + '\n' + super.toString() + '\n';
 
+    }
+
+    /**
+     * @return a deep copy of this MapElement
+     */
+    public MapElement clone() {
+        MapElement copy = new MapElement();
+        copy.tags.set(this.tags.asArray());
+        copy.points = Arrays.copyOf(this.points, this.points.length);
+        copy.pointPos = this.pointPos;
+        copy.labelPosition = this.labelPosition;
+        copy.setLayer(this.layer);
+        copy.index = Arrays.copyOf(this.index, this.index.length);
+        copy.indexPos = this.indexPos;
+        copy.type = this.type;
+        return copy;
     }
 }

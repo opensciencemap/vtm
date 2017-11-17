@@ -36,6 +36,12 @@ import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.pool.Inlist;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
     private final static int BUILDING_LEVEL_HEIGHT = 280; // cm
@@ -47,6 +53,21 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
     public static boolean TRANSLUCENT = true;
 
     private static final Object BUILDING_DATA = BuildingLayer.class.getName();
+
+    // Can replace with Multimap in Java 8
+    private HashMap<Integer, List<BuildingElement>> mBuildings = new HashMap<>();
+
+    class BuildingElement {
+        MapElement element;
+        ExtrusionStyle style;
+        boolean isPart;
+
+        BuildingElement(MapElement element, ExtrusionStyle style, boolean isPart) {
+            this.element = element;
+            this.style = style;
+            this.isPart = isPart;
+        }
+    }
 
     public BuildingLayer(Map map, VectorTileLayer tileLayer) {
         this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
@@ -77,6 +98,36 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
         ExtrusionStyle extrusion = (ExtrusionStyle) style.current();
 
+        // Filter all building elements
+        // TODO #TagFromTheme: load from theme or decode tags to generalize mapsforge tags
+        boolean isBuildingPart = element.tags.containsKey(Tag.KEY_BUILDING_PART)
+                || (element.tags.containsKey("kind") && element.tags.getValue("kind").equals("building_part")); // Mapzen
+        if (element.tags.containsKey(Tag.KEY_BUILDING) || isBuildingPart
+                || (element.tags.containsKey("kind") && element.tags.getValue("kind").equals("building"))) { // Mapzen
+            List<BuildingElement> buildingElements = mBuildings.get(tile.hashCode());
+            if (buildingElements == null) {
+                buildingElements = new ArrayList<>();
+                mBuildings.put(tile.hashCode(), buildingElements);
+            }
+            element = element.clone(); // Deep copy, because element will be cleared
+            buildingElements.add(new BuildingElement(element, extrusion, isBuildingPart));
+            return true;
+        }
+
+        // Process other elements immediately
+        processElement(element, extrusion, tile);
+
+        return true;
+    }
+
+    /**
+     * Process map element.
+     *
+     * @param element   the map element
+     * @param extrusion the style of map element
+     * @param tile      the tile which contains map element
+     */
+    private void processElement(MapElement element, ExtrusionStyle extrusion, MapTile tile) {
         int height = 0; // cm
         int minHeight = 0; // cm
 
@@ -84,7 +135,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         if (v != null)
             height = (int) (Float.parseFloat(v) * 100);
         else {
-            // FIXME load from theme or decode tags to generalize level/height tags
+            // #TagFromTheme: generalize level/height tags
             if ((v = element.tags.getValue(Tag.KEY_BUILDING_LEVELS)) != null)
                 height = (int) (Float.parseFloat(v) * BUILDING_LEVEL_HEIGHT);
         }
@@ -92,9 +143,13 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         v = element.tags.getValue(Tag.KEY_MIN_HEIGHT);
         if (v != null)
             minHeight = (int) (Float.parseFloat(v) * 100);
+        else {
+            // #TagFromTheme: level/height tags
+            if ((v = element.tags.getValue(Tag.KEY_BUILDING_MIN_LEVEL)) != null)
+                minHeight = (int) (Float.parseFloat(v) * BUILDING_LEVEL_HEIGHT);
+        }
 
         if (height == 0)
-            // FIXME ignore buildings containing building parts
             height = extrusion.defaultHeight * 100;
 
         ExtrusionBuckets ebs = get(tile);
@@ -102,7 +157,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         for (ExtrusionBucket b = ebs.buckets; b != null; b = b.next()) {
             if (b.colors == extrusion.colors) {
                 b.add(element, height, minHeight);
-                return true;
+                return;
             }
         }
 
@@ -115,8 +170,45 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
                         extrusion.colors));
 
         ebs.buckets.add(element, height, minHeight);
+    }
 
-        return true;
+    /**
+     * Process all stored map elements (here only buildings).
+     *
+     * @param tile the tile which contains stored map elements
+     */
+    private void processElements(MapTile tile) {
+        if (!mBuildings.containsKey(tile.hashCode()))
+            return;
+
+        List<BuildingElement> tileBuildings = mBuildings.get(tile.hashCode());
+        Set<BuildingElement> rootBuildings = new HashSet<>();
+        for (BuildingElement partBuilding : tileBuildings) {
+            if (!partBuilding.isPart)
+                continue;
+
+            String refId = partBuilding.element.tags.getValue(Tag.KEY_REF); // #TagFromTheme
+            refId = refId == null ? partBuilding.element.tags.getValue("root_id") : refId; // Mapzen
+            if (refId == null)
+                continue;
+
+            // Search buildings which inherit parts
+            for (BuildingElement rootBuilding : tileBuildings) {
+                if (rootBuilding.isPart
+                        || !(refId.equals(rootBuilding.element.tags.getValue(Tag.KEY_ID))))
+                    continue;
+
+                rootBuildings.add(rootBuilding);
+                break;
+            }
+        }
+
+        tileBuildings.removeAll(rootBuildings); // root buildings aren't rendered
+
+        for (BuildingElement buildingElement : tileBuildings) {
+            processElement(buildingElement.element, buildingElement.style, tile);
+        }
+        mBuildings.remove(tile.hashCode());
     }
 
     public static ExtrusionBuckets get(MapTile tile) {
@@ -130,9 +222,10 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
     @Override
     public void complete(MapTile tile, boolean success) {
-        if (success)
+        if (success) {
+            processElements(tile);
             get(tile).prepare();
-        else
+        } else
             get(tile).setBuckets(null);
     }
 
