@@ -543,7 +543,7 @@
 
 
         <!-- building -->
-        <m k="building">
+        <m k="building|building:part">
             <m select="first">
                 <m closed="yes">
                     <area fill="#f3d6b6" stroke="#6a5a8e" stroke-width="1.0" />

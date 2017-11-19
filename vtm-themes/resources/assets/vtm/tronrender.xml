@@ -528,7 +528,7 @@
           </m> -->
 
         <!-- building -->
-        <m k="building">
+        <m k="building|building:part">
 
             <m zoom-min="15">
                 <area fade="15" use="building" />
