@@ -15,8 +15,11 @@
  */
 package org.oscim.utils;
 
+import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MercatorProjection;
 import org.oscim.core.Point;
+import org.oscim.core.Tile;
 
 /**
  * The coordinate validation functions come from Mapsforge <a href="https://github.com/mapsforge/mapsforge/blob/master/mapsforge-core/src/main/java/org/mapsforge/core/util/LatLongUtils.java">LatLongUtils</a> class.
@@ -95,6 +98,28 @@ public final class GeoPointUtils {
         if (t < 0) return new Point(startX, startY);
         if (t > 1) return new Point(endX, endY);
         return new Point(startX + t * (endX - startX), startY + t * (endY - startY));
+    }
+
+    /**
+     * Calculates the scale that allows to display the {@link BoundingBox} on a view with width and
+     * height.
+     *
+     * @param bbox       the {@link BoundingBox} to display.
+     * @param viewWidth  the width of the view.
+     * @param viewHeight the height of the view.
+     * @return the scale that allows to display the {@link BoundingBox} on a view with width and
+     * height.
+     */
+    public static double scaleForBounds(BoundingBox bbox, int viewWidth, int viewHeight) {
+        double minx = MercatorProjection.longitudeToX(bbox.getMinLongitude());
+        double miny = MercatorProjection.latitudeToY(bbox.getMaxLatitude());
+
+        double dx = Math.abs(MercatorProjection.longitudeToX(bbox.getMaxLongitude()) - minx);
+        double dy = Math.abs(MercatorProjection.latitudeToY(bbox.getMinLatitude()) - miny);
+        double zx = viewWidth / (dx * Tile.SIZE);
+        double zy = viewHeight / (dy * Tile.SIZE);
+
+        return Math.min(zx, zy);
     }
 
     /**
