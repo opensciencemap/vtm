@@ -2,6 +2,7 @@
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -42,6 +43,13 @@ public interface ThemeFile extends Serializable {
      * @throws ThemeException if an error occurs while reading the render theme XML.
      */
     InputStream getRenderThemeAsStream() throws ThemeException;
+
+    /**
+     * Tells ThemeLoader if theme file is in Mapsforge format
+     *
+     * @return true if theme file is in Mapsforge format
+     */
+    boolean isMapsforgeTheme();
 
     /**
      * @param menuCallback the interface callback to create a settings menu on the fly.

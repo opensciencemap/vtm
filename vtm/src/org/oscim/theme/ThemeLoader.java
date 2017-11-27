@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
  * Copyright 2017 Longri
+ * Copyright 2017 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -46,7 +47,7 @@ public class ThemeLoader {
 
     public static IRenderTheme load(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
         IRenderTheme t;
-        if (ThemeUtils.isMapsforgeTheme(theme))
+        if (theme.isMapsforgeTheme())
             t = Parameters.TEXTURE_ATLAS ? XmlMapsforgeAtlasThemeBuilder.read(theme, themeCallback) : XmlMapsforgeThemeBuilder.read(theme, themeCallback);
         else
             t = Parameters.TEXTURE_ATLAS ? XmlAtlasThemeBuilder.read(theme, themeCallback) : XmlThemeBuilder.read(theme, themeCallback);

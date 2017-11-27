@@ -1,6 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Andrey Novikov
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -20,6 +21,7 @@ import android.text.TextUtils;
 
 import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.ThemeFile;
+import org.oscim.theme.ThemeUtils;
 import org.oscim.theme.XmlRenderThemeMenuCallback;
 import org.oscim.utils.Utils;
 
@@ -96,6 +98,11 @@ public class AssetsRenderTheme implements ThemeFile {
         } catch (IOException e) {
             throw new ThemeException(e.getMessage());
         }
+    }
+
+    @Override
+    public boolean isMapsforgeTheme() {
+        return ThemeUtils.isMapsforgeTheme(this);
     }
 
     @Override

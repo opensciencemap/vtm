@@ -2,6 +2,7 @@
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -105,6 +106,11 @@ public class ExternalRenderTheme implements ThemeFile {
             throw new ThemeException(e.getMessage());
         }
         return is;
+    }
+
+    @Override
+    public boolean isMapsforgeTheme() {
+        return ThemeUtils.isMapsforgeTheme(this);
     }
 
     @Override
