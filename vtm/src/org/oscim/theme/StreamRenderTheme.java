@@ -1,5 +1,6 @@
 /*
  * Copyright 2016-2017 devemux86
+ * Copyright 2017 Andrey Novikov
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -87,6 +88,11 @@ public class StreamRenderTheme implements ThemeFile {
             throw new ThemeException(e.getMessage());
         }
         return mInputStream;
+    }
+
+    @Override
+    public boolean isMapsforgeTheme() {
+        return ThemeUtils.isMapsforgeTheme(this);
     }
 
     @Override
