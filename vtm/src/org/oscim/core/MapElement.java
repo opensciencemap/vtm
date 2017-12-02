@@ -43,8 +43,12 @@ public class MapElement extends GeometryBuffer {
         super(1024, 16);
     }
 
-    public MapElement(int points, int indices) {
-        super(points, indices);
+    public MapElement(int numPoints, int numIndices) {
+        super(numPoints, numIndices);
+    }
+
+    public MapElement(float[] points, int[] index) {
+        super(points, index);
     }
 
     public void setLabelPosition(float x, float y) {
@@ -73,13 +77,21 @@ public class MapElement extends GeometryBuffer {
      * @return a deep copy of this MapElement
      */
     public MapElement clone() {
-        MapElement copy = new MapElement();
+        int indexSize = this.indexPos + 1;
+        for (int i = 0; i < this.index.length; i++) {
+            if (this.index[i] == -1) {
+                indexSize = i;
+                break;
+            }
+        }
+        float[] copyPoints = Arrays.copyOf(this.points, this.pointPos);
+        int[] copyIndex = Arrays.copyOf(this.index, indexSize);
+
+        MapElement copy = new MapElement(copyPoints, copyIndex);
         copy.tags.set(this.tags.asArray());
-        copy.points = Arrays.copyOf(this.points, this.points.length);
         copy.pointPos = this.pointPos;
         copy.labelPosition = this.labelPosition;
         copy.setLayer(this.layer);
-        copy.index = Arrays.copyOf(this.index, this.index.length);
         copy.indexPos = this.indexPos;
         copy.type = this.type;
         return copy;
