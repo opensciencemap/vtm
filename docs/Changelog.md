@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.8.0
+## Version 0.9.0 (2017-12-03)
 
 - Mapsforge maps **v5 beta** support [#429](https://github.com/mapsforge/vtm/issues/429)
 - Mapsforge themes compatibility [#100](https://github.com/mapsforge/vtm/issues/100)
