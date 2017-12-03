@@ -24,12 +24,8 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.RenderTheme;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ThemeBuilderTest extends GdxMapImpl {
-
-    final Logger log = LoggerFactory.getLogger(S3DBLayerTest.class);
 
     static class MyTheme extends ThemeBuilder {
         public MyTheme() {
