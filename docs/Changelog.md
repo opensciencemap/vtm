@@ -2,6 +2,7 @@
 
 ## New since 0.9.0
 
+- S3DBLayer renamed to S3DBTileLayer [#452](https://github.com/mapsforge/vtm/issues/452)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
 
