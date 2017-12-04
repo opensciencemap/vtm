@@ -67,6 +67,32 @@ implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
 implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
 ```
 
+### Optional
+
+- JTS geometries
+
+```groovy
+implementation 'org.mapsforge:vtm-jts:[CURRENT-VERSION]'
+implementation 'com.vividsolutions:jts:1.13'
+```
+
+- Online tiles
+
+```groovy
+implementation 'org.mapsforge:vtm-http:[CURRENT-VERSION]'
+implementation 'com.squareup.okhttp3:okhttp:3.8.0'
+implementation 'com.squareup.okio:okio:1.13.0'
+```
+
+- GeoJSON tiles
+
+```groovy
+implementation 'org.mapsforge:vtm-json:[CURRENT-VERSION]'
+implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.4'
+implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
+```
+
 ## Snapshots
 
 We publish SNAPSHOT builds to Sonatype OSS Repository Hosting.

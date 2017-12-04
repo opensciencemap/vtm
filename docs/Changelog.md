@@ -1,5 +1,10 @@
 # Changelog
 
+## New since 0.9.0
+
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
+
 ## Version 0.9.0 (2017-12-03)
 
 - Mapsforge maps **v5 beta** support [#429](https://github.com/mapsforge/vtm/issues/429)
