@@ -27,6 +27,8 @@ import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
 import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MultiMapActivity extends Activity {
@@ -43,7 +45,10 @@ public class MultiMapActivity extends Activity {
         mMapView1 = (MapView) findViewById(R.id.mapView1);
         Map map1 = mMapView1.map();
         mPrefs1 = new MapPreferences(MultiMapActivity.class.getName() + "1", this);
-        VectorTileLayer baseLayer1 = map1.setBaseMap(new OSciMap4TileSource());
+        TileSource tileSource1 = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
+        VectorTileLayer baseLayer1 = map1.setBaseMap(tileSource1);
         map1.layers().add(new BuildingLayer(map1, baseLayer1));
         map1.layers().add(new LabelLayer(map1, baseLayer1));
         map1.setTheme(VtmThemes.DEFAULT);
@@ -52,7 +57,10 @@ public class MultiMapActivity extends Activity {
         mMapView2 = (MapView) findViewById(R.id.mapView2);
         Map map2 = mMapView2.map();
         mPrefs2 = new MapPreferences(MultiMapActivity.class.getName() + "2", this);
-        VectorTileLayer baseLayer2 = map2.setBaseMap(new OSciMap4TileSource());
+        TileSource tileSource2 = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
+        VectorTileLayer baseLayer2 = map2.setBaseMap(tileSource2);
         map2.layers().add(new BuildingLayer(map2, baseLayer2));
         map2.layers().add(new LabelLayer(map2, baseLayer2));
         map2.setTheme(VtmThemes.DEFAULT);

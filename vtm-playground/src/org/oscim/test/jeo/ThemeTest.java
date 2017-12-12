@@ -20,6 +20,7 @@ import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.carto.RenderTheme;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
@@ -32,7 +33,9 @@ public class ThemeTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
-        UrlTileSource ts = new OSciMap4TileSource();
+        UrlTileSource ts = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
 
         VectorTileLayer l = mMap.setBaseMap(ts);
 

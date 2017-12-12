@@ -31,6 +31,8 @@ import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import java.io.IOException;
@@ -48,7 +50,10 @@ public class ClusterMarkerLayerTest extends MarkerLayerTest {
             // Map events receiver
             mMap.layers().add(new MapEventsReceiver(mMap));
 
-            VectorTileLayer l = mMap.setBaseMap(new OSciMap4TileSource());
+            TileSource tileSource = OSciMap4TileSource.builder()
+                    .httpFactory(new OkHttpEngine.OkHttpFactory())
+                    .build();
+            VectorTileLayer l = mMap.setBaseMap(tileSource);
             mMap.layers().add(new BuildingLayer(mMap, l));
             mMap.layers().add(new LabelLayer(mMap, l));
             mMap.setTheme(VtmThemes.DEFAULT);

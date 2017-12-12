@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -62,7 +62,9 @@ public class ExternalRenderThemeTest extends GdxMapImpl {
     public void createLayers() {
         mMap.setMapPosition(53.08, 8.83, 1 << 14);
 
-        // TileSource tileSource = new OSciMap4TileSource();
+        /*TileSource tileSource = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();*/
 
         MapFileTileSource tileSource = new MapFileTileSource();
         // tileSource.setMapFile("/home/jeff/src/vtm/Freizeitkarte_DEU_NW.map");

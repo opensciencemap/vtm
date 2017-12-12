@@ -36,6 +36,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.QueryResult;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class TileRenderTest extends GdxMapApp {
@@ -92,7 +93,9 @@ public class TileRenderTest extends GdxMapApp {
         TestVectorTileLayer tileLayer = new TestVectorTileLayer(mMap, tileManager);
         tileLoader[0] = tileLayer.getTileLoader();
 
-        TileSource tileSource = new OSciMap4TileSource();
+        TileSource tileSource = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
         //TileSource tileSource = new TestTileSource();
 
         tileLayer.setTileSource(tileSource);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -30,6 +30,8 @@ import org.oscim.scalebar.MapScaleBar;
 import org.oscim.scalebar.MapScaleBarLayer;
 import org.oscim.scalebar.MetricUnitAdapter;
 import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class MapTest extends GdxMapApp {
@@ -38,7 +40,10 @@ public class MapTest extends GdxMapApp {
     public void createLayers() {
         Map map = getMap();
 
-        VectorTileLayer l = map.setBaseMap(new OSciMap4TileSource());
+        TileSource tileSource = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
+        VectorTileLayer l = map.setBaseMap(tileSource);
 
         GroupLayer groupLayer = new GroupLayer(mMap);
         groupLayer.layers.add(new BuildingLayer(map, l));

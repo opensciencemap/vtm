@@ -32,6 +32,7 @@ import org.oscim.gdx.GdxMapImpl;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import static org.oscim.backend.GLAdapter.gl;
@@ -49,7 +50,9 @@ public class GdxSpriteBatchTest extends GdxMapImpl {
 
     @Override
     protected void createLayers() {
-        TileSource tileSource = new OSciMap4TileSource();
+        TileSource tileSource = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
         initDefaultLayers(tileSource, false, true, false);
         mMap.setMapPosition(latitude, longitude, scale);
 

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2014 Hannes Janetzek
+ * Copyright 2017 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test;
 
 import com.badlogic.gdx.Input;
@@ -7,6 +24,7 @@ import org.oscim.gdx.GdxMapApp;
 import org.oscim.gdx.GdxMapImpl;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class AnimatorTest extends GdxMapImpl {
@@ -15,7 +33,9 @@ public class AnimatorTest extends GdxMapImpl {
     public void createLayers() {
         MapRenderer.setBackgroundColor(0xff000000);
 
-        TileSource ts = new OSciMap4TileSource();
+        TileSource ts = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
         initDefaultLayers(ts, false, false, false);
 
         mMap.setMapPosition(0, 0, 1 << 4);

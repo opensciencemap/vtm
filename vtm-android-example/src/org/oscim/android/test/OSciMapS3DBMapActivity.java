@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -24,6 +24,7 @@ import org.oscim.layers.tile.buildings.S3DBTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class OSciMapS3DBMapActivity extends BaseMapActivity {
@@ -37,6 +38,7 @@ public class OSciMapS3DBMapActivity extends BaseMapActivity {
         mMap.setTheme(VtmThemes.DEFAULT);
 
         TileSource ts = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .url("http://opensciencemap.org/tiles/s3db")
                 .zoomMin(16)
                 .zoomMax(16)

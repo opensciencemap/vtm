@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,18 +20,24 @@ import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.buildings.S3DBTileLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class OSciMapS3DBTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
-        mMap.setBaseMap(new OSciMap4TileSource());
+        TileSource tileSource = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
+                .build();
+        mMap.setBaseMap(tileSource);
         mMap.setTheme(VtmThemes.DEFAULT);
 
-        TileSource ts = OSciMap4TileSource
-                .builder()
+        TileSource ts = OSciMap4TileSource.builder()
+                .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .url("http://opensciencemap.org/tiles/s3db")
+                .zoomMin(16)
+                .zoomMax(16)
                 .build();
 
         S3DBTileLayer tl = new S3DBTileLayer(mMap, ts);

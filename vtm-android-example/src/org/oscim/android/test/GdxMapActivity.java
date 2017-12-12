@@ -32,6 +32,7 @@ import org.oscim.gdx.AndroidGL;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
 import org.oscim.tiling.TileSource;
+import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class GdxMapActivity extends AndroidApplication {
@@ -60,7 +61,9 @@ public class GdxMapActivity extends AndroidApplication {
     class GdxMapAndroid extends GdxMap {
         @Override
         public void createLayers() {
-            TileSource ts = new OSciMap4TileSource();
+            TileSource ts = OSciMap4TileSource.builder()
+                    .httpFactory(new OkHttpEngine.OkHttpFactory())
+                    .build();
             initDefaultLayers(ts, true, true, true, getResources().getDisplayMetrics().density);
         }
     }
