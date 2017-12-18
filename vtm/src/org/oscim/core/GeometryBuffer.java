@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
+ * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,6 +17,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.oscim.core;
+
+import java.util.Arrays;
 
 /* TODO
  * - check indexPos < Short.Max
@@ -126,6 +129,22 @@ public class GeometryBuffer {
         this.indexCurrentPos = 0;
         this.pointNextPos = 0;
         this.pointLimit = points.length - 2;
+    }
+
+    /**
+     * @param buffer the buffer to copy
+     */
+    public GeometryBuffer(GeometryBuffer buffer) {
+        int indexSize = 0;
+        while (indexSize < buffer.index.length && buffer.index[indexSize] != -1) {
+            indexSize++;
+        }
+        this.points = Arrays.copyOf(buffer.points, buffer.pointNextPos);
+        this.index = Arrays.copyOf(buffer.index, indexSize);
+
+        this.pointNextPos = buffer.pointNextPos;
+        this.indexCurrentPos = buffer.indexCurrentPos;
+        this.type = buffer.type;
     }
 
     /**
