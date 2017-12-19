@@ -139,15 +139,15 @@ class S3DBTileLoader extends TileLoader {
             String roofShape = element.tags.getValue(Tag.KEY_ROOF_SHAPE);
 
             if (isRoof && (roofShape == null || Tag.VALUE_FLAT.equals(roofShape)))
-                mRoofs.add(element);
+                mRoofs.addMesh(element);
             else
-                mParts.add(element);
+                mParts.addMesh(element);
             return;
         }
 
         for (ExtrusionBucket l = mParts; l != null; l = l.next()) {
-            if (l.color == c) {
-                l.add(element);
+            if (l.getColor() == c) {
+                l.addMesh(element);
                 return;
             }
         }
@@ -156,7 +156,7 @@ class S3DBTileLoader extends TileLoader {
         l.next = mParts.next;
         mParts.next = l;
 
-        l.add(element);
+        l.addMesh(element);
     }
 
     @Override

@@ -95,7 +95,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
     @Override
     public void render(GLViewport v) {
 
-        float[] currentColor = null;
+        float[] currentColors = null;
         float currentAlpha = 0;
 
         gl.depthMask(true);
@@ -171,11 +171,11 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 
             for (; eb != null; eb = eb.next()) {
 
-                if (eb.colors != currentColor) {
-                    currentColor = eb.colors;
+                if (eb.getColors() != currentColors) {
+                    currentColors = eb.getColors();
                     GLUtils.glUniform4fv(s.uColor,
                             mMode == 0 ? 4 : 1,
-                            eb.colors);
+                            currentColors);
                 }
 
                 gl.vertexAttribPointer(s.aPos, 3, GL.SHORT,

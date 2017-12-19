@@ -159,8 +159,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
         ExtrusionBuckets ebs = get(tile);
 
         for (ExtrusionBucket b = ebs.buckets; b != null; b = b.next()) {
-            if (b.colors == extrusion.colors) {
-                b.add(element, height, minHeight);
+            if (b.getColors() == extrusion.colors) {
+                b.addPoly(element, height, minHeight);
                 return;
             }
         }
@@ -173,7 +173,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
                 new ExtrusionBucket(0, groundScale,
                         extrusion.colors));
 
-        ebs.buckets.add(element, height, minHeight);
+        ebs.buckets.addPoly(element, height, minHeight);
     }
 
     /**
