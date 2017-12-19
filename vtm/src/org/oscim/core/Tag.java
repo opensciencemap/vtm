@@ -70,10 +70,13 @@ public class Tag {
     public static final String KEY_MATERIAL = "material";
     public static final String KEY_MIN_HEIGHT = "min_height";
     public static final String KEY_ROOF = "roof";
+    public static final String KEY_ROOF_ANGLE = "roof:angle";
     public static final String KEY_ROOF_COLOR = "roof:colour";
+    public static final String KEY_ROOF_DIRECTION = "roof:direction";
     public static final String KEY_ROOF_HEIGHT = "roof:height";
     public static final String KEY_ROOF_LEVELS = "roof:levels";
     public static final String KEY_ROOF_MATERIAL = "roof:material";
+    public static final String KEY_ROOF_ORIENTATION = "roof:orientation";
     public static final String KEY_ROOF_SHAPE = "roof:shape";
     public static final String KEY_VOLUME = "volume";
 
@@ -89,7 +92,9 @@ public class Tag {
     public static final String VALUE_PYRAMIDAL = "pyramidal";
     public static final String VALUE_ROUND = "round";
     public static final String VALUE_SALTBOX = "saltbox";
-    public static final String VALUE_SKILLON = "skillion";
+    public static final String VALUE_SKILLION = "skillion";
+
+    public static final String VALUE_ACROSS = "across"; // orientation across
 
     /**
      * The key of this tag.
