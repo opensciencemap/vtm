@@ -49,7 +49,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
     private final static int MIN_ZOOM = 17;
     private final static int MAX_ZOOM = 17;
 
-    private final static boolean POST_AA = false;
+    public static boolean POST_AA = false;
     public static boolean TRANSLUCENT = true;
 
     private static final Object BUILDING_DATA = BuildingLayer.class.getName();
