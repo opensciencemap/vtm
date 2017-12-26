@@ -5,6 +5,7 @@ uniform mat4 u_mvp;
 uniform vec4 u_color[4];
 uniform int u_mode;
 uniform float u_alpha;
+uniform float u_zlimit;
 attribute vec4 a_pos;
 attribute vec2 a_light;
 varying vec4 color;
@@ -13,7 +14,11 @@ const float ff = 255.0;
 void
 main(){
   //   change height by u_alpha
-  gl_Position = u_mvp * vec4(a_pos.xy, a_pos.z * u_alpha, 1.0);
+  float height = a_pos.z * u_alpha;
+  if (height > u_zlimit) {
+    height = u_zlimit;
+  }
+  gl_Position = u_mvp * vec4(a_pos.xy, height, 1.0);
   //  depth = gl_Position.z;
   if (u_mode == -1) {
     ;

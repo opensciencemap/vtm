@@ -1,5 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2017 Izumi Kawashima
+ * Copyright 2017 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -38,13 +40,15 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
     protected int mBucketsCnt;
     protected float mAlpha = 1;
 
+    private float mZLimit = Float.MAX_VALUE;
+
     public ExtrusionRenderer(boolean mesh, boolean alpha) {
         mMode = mesh ? 1 : 0;
         mTranslucent = alpha;
     }
 
     public static class Shader extends GLShader {
-        int uMVP, uColor, uAlpha, uMode, aPos, aLight;
+        int uMVP, uColor, uAlpha, uMode, aPos, aLight, uZLimit;
 
         public Shader(String shader) {
             if (!create(shader))
@@ -54,6 +58,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
             uColor = getUniform("u_color");
             uAlpha = getUniform("u_alpha");
             uMode = getUniform("u_mode");
+            uZLimit = getUniform("u_zlimit");
             aPos = getAttrib("a_pos");
             aLight = getAttrib("a_light");
         }
@@ -114,6 +119,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 
         gl.depthFunc(GL.LESS);
         gl.uniform1f(s.uAlpha, mAlpha);
+        gl.uniform1f(s.uZLimit, mZLimit);
 
         ExtrusionBuckets[] ebs = mExtrusionBucketSet;
 
@@ -267,5 +273,9 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
             v.mvp.addDepthOffset(delta);
         }
         v.mvp.setAsUniform(s.uMVP);
+    }
+
+    public void setZLimit(float zLimit) {
+        mZLimit = zLimit;
     }
 }
