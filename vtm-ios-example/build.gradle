@@ -16,7 +16,7 @@ sourceSets.main.java.srcDirs = ["src/"]
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 ext {
-    roboVMVersion = "2.3.2"
+    roboVMVersion = "2.3.3"
 }
 
 launchIPhoneSimulator.dependsOn build
