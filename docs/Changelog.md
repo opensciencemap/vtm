@@ -1,11 +1,11 @@
 # Changelog
 
-## New since 0.9.0
+## Version 0.9.1 (2017-12-29)
 
 - LwHttp engine fix http headers [#460](https://github.com/mapsforge/vtm/issues/460)
 - S3DBLayer renamed to S3DBTileLayer [#452](https://github.com/mapsforge/vtm/issues/452)
 - Many other minor improvements and bug fixes
-- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.9.1)
 
 ## Version 0.9.0 (2017-12-03)
 
