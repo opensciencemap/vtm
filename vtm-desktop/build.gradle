@@ -3,13 +3,8 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm-gdx')
-    file('natives').eachDir() { dir ->
-        api files(dir.path)
-    }
-    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-    implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    api 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
 }
 
 sourceSets {

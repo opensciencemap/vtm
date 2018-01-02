@@ -4,8 +4,7 @@ apply plugin: 'maven'
 dependencies {
     api project(':vtm')
     api project(':vtm-themes')
-    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
 }
 
 sourceSets {

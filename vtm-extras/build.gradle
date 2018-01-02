@@ -3,11 +3,10 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm')
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
-    implementation 'com.google.protobuf:protobuf-java:2.6.1'
-    implementation 'com.vividsolutions:jts:1.13'
-    implementation 'org.openstreetmap.osmosis:osmosis-osm-binary:0.45'
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+    api 'com.google.protobuf:protobuf-java:2.6.1'
+    api 'com.vividsolutions:jts:1.13'
+    api 'org.openstreetmap.osmosis:osmosis-osm-binary:0.45'
 }
 
 sourceSets {

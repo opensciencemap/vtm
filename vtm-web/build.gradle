@@ -17,12 +17,9 @@ sourceSets {
 
 dependencies {
     api project(':vtm-gdx')
-    api project(':vtm-extras')
-    implementation "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
-    implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
-    implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation 'ru.finam:slf4j-gwt:1.7.7.1'
+    api "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+    api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
 }
 
 // explicit dependencies for org.gradle.configureondemand=true

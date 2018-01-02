@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation project(':vtm-android')
-    implementation project(':vtm-themes')
     implementation project(':vtm-extras')
+    implementation project(':vtm-themes')
     implementation 'com.squareup.okhttp3:okhttp:3.8.0'
     implementation "org.slf4j:slf4j-android:$slf4jVersion"
 }

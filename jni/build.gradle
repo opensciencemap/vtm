@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 
 dependencies {
-    implementation "com.badlogicgames.gdx:gdx-jnigen:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-jnigen:$gdxVersion"
 }
 
 sourceSets {

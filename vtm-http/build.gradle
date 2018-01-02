@@ -3,8 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm')
-    implementation 'com.squareup.okhttp3:okhttp:3.8.0'
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api 'com.squareup.okhttp3:okhttp:3.8.0'
 }
 
 sourceSets {

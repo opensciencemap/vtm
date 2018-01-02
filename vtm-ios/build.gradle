@@ -27,11 +27,10 @@ createIPA.dependsOn build
 
 dependencies {
     api project(':vtm-gdx')
-    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
-    implementation "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
-    implementation "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
-    implementation "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
+    api "com.badlogicgames.gdx:gdx-backend-robovm:$gdxVersion"
+    api "com.mobidevelop.robovm:robovm-cocoatouch:$roboVMVersion"
+    api "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"
 }
 
 task copyVtmResources(type: Copy) {

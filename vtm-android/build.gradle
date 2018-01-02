@@ -3,8 +3,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     api project(':vtm')
-    implementation 'com.caverock:androidsvg:1.2.2-beta-1'
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api 'com.caverock:androidsvg:1.2.2-beta-1'
 }
 
 android {

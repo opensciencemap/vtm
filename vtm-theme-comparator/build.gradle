@@ -6,9 +6,11 @@ repositories {
 
 dependencies {
     implementation project(':vtm-desktop')
+    file("${rootDir}/vtm-desktop/natives").eachDir() { dir ->
+        implementation files(dir.path)
+    }
     implementation 'ch.qos.logback:logback-classic:1.2.3'
-    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
-    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     implementation 'com.fifesoft:rsyntaxtextarea:2.6.1'
     implementation 'com.jtattoo:JTattoo:1.6.11'
 

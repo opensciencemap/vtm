@@ -18,11 +18,6 @@ sourceSets {
 
 dependencies {
     providedCompile project(':vtm-web')
-    providedCompile project(':vtm-extras')
-    providedCompile "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
-    providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
-    providedCompile "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
-    providedCompile "org.slf4j:slf4j-api:$slf4jVersion"
     providedCompile 'org.timepedia.exporter:gwtexporter:2.5.1'
     providedCompile 'ru.finam:slf4j-gwt:1.7.7.1'
 }

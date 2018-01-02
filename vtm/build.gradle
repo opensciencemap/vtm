@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven'
 
 dependencies {
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    api "org.slf4j:slf4j-api:$slf4jVersion"
     compileOnly 'com.google.code.findbugs:jsr305:3.0.1'
 }
 
