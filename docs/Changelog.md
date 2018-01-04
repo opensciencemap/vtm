@@ -1,5 +1,11 @@
 # Changelog
 
+## New since 0.9.2
+
+- OpenMapTiles GeoJSON vector tiles [#385](https://github.com/mapsforge/vtm/issues/385)
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
+
 ## Version 0.9.2 (2018-01-04)
 
 - Gradle fix transitive dependencies [#433](https://github.com/mapsforge/vtm/issues/433)
