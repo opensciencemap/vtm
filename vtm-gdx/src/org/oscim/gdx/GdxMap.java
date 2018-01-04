@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -112,8 +112,9 @@ public abstract class GdxMap implements ApplicationListener {
 
     @Override
     public void render() {
-        if (!mRenderRequest)
-            return;
+        // Workaround for flickering
+        /*if (!mRenderRequest)
+            return;*/
 
         mMapRenderer.onDrawFrame();
     }

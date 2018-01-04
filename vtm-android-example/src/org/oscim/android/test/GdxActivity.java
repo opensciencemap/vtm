@@ -51,7 +51,7 @@ public class GdxActivity extends AndroidApplication {
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.stencil = 8;
-        cfg.numSamples = 2;
+        //cfg.numSamples = 2;
 
         new SharedLibraryLoader().load("vtm-jni");
 
