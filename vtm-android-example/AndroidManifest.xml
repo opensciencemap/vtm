@@ -67,12 +67,12 @@
         <activity
             android:name=".MapsforgeStyleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
+        <!--<activity
             android:name=".MapzenGeojsonMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MapzenMvtMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />-->
         <activity
             android:name=".MarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
