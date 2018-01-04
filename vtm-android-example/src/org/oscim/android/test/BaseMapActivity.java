@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class BaseMapActivity extends MapActivity {
     static final Logger log = LoggerFactory.getLogger(BaseMapActivity.class);
 
-    final static boolean USE_CACHE = true;
+    final static boolean USE_CACHE = false;
 
     VectorTileLayer mBaseLayer;
     TileSource mTileSource;

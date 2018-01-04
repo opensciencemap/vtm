@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -31,7 +31,7 @@ public class BitmapTileMapActivity extends MapActivity {
 
     static final Logger log = LoggerFactory.getLogger(BitmapTileMapActivity.class);
 
-    private final static boolean USE_CACHE = true;
+    private final static boolean USE_CACHE = false;
 
     private final BitmapTileSource mTileSource;
     protected BitmapTileLayer mBitmapLayer;
