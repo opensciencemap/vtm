@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 Izumi Kawashima
- * Copyright 2017 devemux86
+ * Copyright 2016-2018 Izumi Kawashima
+ * Copyright 2017-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -52,6 +52,7 @@ class GwtMap extends GdxMap {
 
     BuildingLayer mBuildingLayer;
     BuildingSolutionControl mBuildingSolutionControl;
+    CameraRollControl mCameraRollControl;
     SearchBox mSearchBox;
 
     @Override
@@ -175,6 +176,17 @@ class GwtMap extends GdxMap {
                 mMap.updateMap(true);
             }
         });
+
+        mCameraRollControl = new CameraRollControl("#camera-roll-input");
+        mCameraRollControl.addValueChangeListener(new BuildingSolutionControl.ValueChangeListener() {
+            @Override
+            public void onValueChange(int val, int max) {
+                mMap.viewport().setRoll((float) val / (float) max * 180.0f);
+                mMap.updateMap(true);
+            }
+        });
+
         mBuildingSolutionControl.init();
+        mCameraRollControl.init();
     }
 }

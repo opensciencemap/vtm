@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2018 devemux86
+ * Copyright 2018 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -27,7 +28,7 @@ import org.oscim.map.Map;
 import java.util.HashMap;
 
 public class MapUrl extends Timer {
-    private int curLon, curLat, curZoom, curTilt, curRot;
+    private int curLon, curLat, curZoom, curTilt, curRot, curRoll;
     private MapPosition pos = new MapPosition();
     private final Map mMap;
     private String mParams = "";
@@ -57,6 +58,7 @@ public class MapUrl extends Timer {
         double lat = pos.getLatitude(), lon = pos.getLongitude();
         float rotation = pos.bearing;
         float tilt = pos.tilt;
+        float roll = pos.roll;
 
         //String themeName = "";
         //String mapName = "";
@@ -76,6 +78,8 @@ public class MapUrl extends Timer {
                     rotation = Float.parseFloat(p.substring(4));
                 else if (p.startsWith("tilt="))
                     tilt = Float.parseFloat(p.substring(5));
+                else if (p.startsWith("roll="))
+                    roll = Float.parseFloat(p.substring(5));
                     //    else if (p.startsWith("theme="))
                     //        themeName = p.substring(6);
                     //    else if (p.startsWith("map="))
@@ -100,7 +104,7 @@ public class MapUrl extends Timer {
                 MercatorProjection.latitudeToY(lat),
                 1 << zoom,
                 rotation,
-                tilt);
+                tilt, roll);
 
     }
 
@@ -111,14 +115,16 @@ public class MapUrl extends Timer {
         int lon = (int) (pos.getLongitude() * 1000);
         int tilt = (int) (pos.tilt);
         int rot = (int) (pos.bearing);
+        int roll = (int) (pos.roll);
 
         if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
-                || curTilt != tilt || curRot != rot) {
+                || curTilt != tilt || curRot != rot || curRoll != roll) {
             curLat = lat;
             curLon = lon;
             curZoom = pos.zoomLevel;
             curTilt = tilt;
             curRot = rot;
+            curRoll = roll;
 
             String newURL = Window.Location
                     .createUrlBuilder()
@@ -126,6 +132,7 @@ public class MapUrl extends Timer {
                             + "scale=" + pos.zoomLevel
                             + "&rot=" + curRot
                             + "&tilt=" + curTilt
+                            + "&roll=" + curRoll
                             + "&lat=" + (curLat / 1000f)
                             + "&lon=" + (curLon / 1000f))
                     .buildString();

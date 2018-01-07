@@ -1,6 +1,7 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Luca Osten
+ * Copyright 2018 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -200,6 +201,23 @@ public class ViewController extends Viewport {
         updateMatrices();
     }
 
+    public void rollMap(float move) {
+        setRoll(mPos.roll + move);
+    }
+
+    public void setRoll(double degree) {
+        ThreadUtils.assertMainThread();
+
+        while (degree > 360)
+            degree -= 360;
+        while (degree < 0)
+            degree += 360;
+
+        mPos.roll = (float) degree;
+
+        updateMatrices();
+    }
+
     public boolean tiltMap(float move) {
         return setTilt(mPos.tilt + move);
     }
@@ -233,13 +251,16 @@ public class ViewController extends Viewport {
 
     private void updateMatrices() {
         /* - view matrix:
-         * 0. apply rotate
-         * 1. apply tilt */
+         * 0. apply yaw
+         * 1. apply pitch
+         * 2. apply roll */
 
         mRotationMatrix.setRotation(mPos.bearing, 0, 0, 1);
-        mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
 
-        /* apply first rotation, then tilt */
+        mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
+        mRotationMatrix.multiplyLhs(mTmpMatrix);
+
+        mTmpMatrix.setRotation(mPos.roll, 0, 1, 0);
         mRotationMatrix.multiplyLhs(mTmpMatrix);
 
         mViewMatrix.copy(mRotationMatrix);
