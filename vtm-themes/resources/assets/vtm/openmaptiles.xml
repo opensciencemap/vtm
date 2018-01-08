@@ -343,11 +343,11 @@
         </m>
     </m>
     <!-- housenumber -->
-    <m k="layer" v="housenumber" zoom-min="14">
-        <!-- TODO it's weird that not all housenumbers are shown... also needed to put zoom-min to 14 -->
+    <!-- TODO it's weird that not all housenumbers are shown... also needed to put zoom-min to 14 -->
+    <!--<m k="layer" v="housenumber" zoom-min="14">
         <caption style="bold" fill="#606060" k="housenumber" size="12" stroke="#ffffff"
             stroke-width="2.0" />
-    </m>
+    </m>-->
     <m k="layer" v="poi" zoom-min="14">
         <m k="subclass">
 
@@ -377,7 +377,7 @@
             </m>
 
             <!-- Tourism -->
-            <m select="first" zoom-min="15">
+            <m select="first" zoom-min="14">
                 <m v="alpine_hut">
                     <symbol src="assets:symbols/accommodation/alpinehut.svg" />
                 </m>
