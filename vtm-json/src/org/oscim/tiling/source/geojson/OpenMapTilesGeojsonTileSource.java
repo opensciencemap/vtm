@@ -33,7 +33,7 @@ public class OpenMapTilesGeojsonTileSource extends GeojsonTileSource {
         private String locale = "";
 
         public Builder() {
-            super(DEFAULT_URL, DEFAULT_PATH, 1, 16);
+            super(DEFAULT_URL, DEFAULT_PATH, 1, 14);
         }
 
         public T locale(String locale) {
