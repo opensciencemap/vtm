@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -164,6 +164,13 @@ public abstract class CanvasAdapter {
 
             if (inputStream == null)
                 inputStream = inputStreamFromAssets(relativePathPrefix, src);
+        }
+
+        // Fallback to internal resources
+        if (inputStream == null) {
+            inputStream = inputStreamFromAssets("", src);
+            if (inputStream != null)
+                log.info("internal resource: " + src);
         }
 
         if (inputStream == null) {

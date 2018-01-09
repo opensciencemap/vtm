@@ -4,6 +4,7 @@
 
 - S3DB layer [#475](https://github.com/mapsforge/vtm/pull/475)
 - OpenMapTiles GeoJSON vector tiles [#385](https://github.com/mapsforge/vtm/issues/385)
+- Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
 
@@ -113,6 +114,7 @@
 - Tile size based on scale factor [#183](https://github.com/mapsforge/vtm/issues/183)
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
+- Render theme resources optional location prefixes [#66](https://github.com/mapsforge/vtm/issues/66)
 - Graphics API platform enhancements [#92](https://github.com/mapsforge/vtm/issues/92)
 - GeoPoint & BoundingBox improvements [#201](https://github.com/mapsforge/vtm/issues/201) [#200](https://github.com/mapsforge/vtm/issues/200)
 - vtm-jts module [#53](https://github.com/mapsforge/vtm/issues/53)
