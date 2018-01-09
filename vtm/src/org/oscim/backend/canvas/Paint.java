@@ -3,6 +3,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
  * Copyright 2017 nebular
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -41,7 +42,7 @@ public interface Paint {
     }
 
     enum FontFamily {
-        DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF
+        DEFAULT, DEFAULT_BOLD, MONOSPACE, SANS_SERIF, SERIF, THIN, LIGHT, MEDIUM, BLACK, CONDENSED
     }
 
     enum FontStyle {

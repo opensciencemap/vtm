@@ -3,6 +3,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2017 devemux86
  * Copyright 2017 nebular
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -48,20 +49,37 @@ public class AwtPaint implements Paint {
         throw new IllegalArgumentException("unknown cap: " + cap);
     }
 
-    private static String getFontName(FontFamily fontFamily) {
+    private static Font getFont(FontFamily fontFamily, FontStyle fontStyle, int textSize) {
+        final Map<Attribute, Object> attributes;
+        String name = null;
         switch (fontFamily) {
             case MONOSPACE:
-                return Font.MONOSPACED;
-            case DEFAULT:
-            case DEFAULT_BOLD:
-                return null;
+                attributes = TEXT_ATTRIBUTES;
+                name = Font.MONOSPACED;
+                break;
             case SANS_SERIF:
-                return Font.SANS_SERIF;
+                attributes = TEXT_ATTRIBUTES;
+                name = Font.SANS_SERIF;
+                break;
             case SERIF:
-                return Font.SERIF;
+                attributes = TEXT_ATTRIBUTES;
+                name = Font.SERIF;
+                break;
+            case MEDIUM: // Java deriveFont does not differ this weight
+            case BLACK:
+                attributes = new HashMap<>(TEXT_ATTRIBUTES);
+                attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+                break;
+            case CONDENSED:
+                attributes = new HashMap<>(TEXT_ATTRIBUTES);
+                attributes.put(TextAttribute.WIDTH, TextAttribute.WIDTH_CONDENSED);
+                break;
+            default:
+                // THIN and LIGHT aren't differed from DEFAULT in Java deriveFont
+                attributes = TEXT_ATTRIBUTES;
+                break;
         }
-
-        throw new IllegalArgumentException("unknown fontFamily: " + fontFamily);
+        return new Font(name, getFontStyle(fontStyle), textSize).deriveFont(attributes);
     }
 
     private static int getFontStyle(FontStyle fontStyle) {
@@ -108,8 +126,6 @@ public class AwtPaint implements Paint {
     Stroke stroke;
     Style style = Style.FILL;
     private int cap = getCap(Cap.BUTT);
-    private String fontName = DEFAULT_FONT.getFontName();
-    private int fontStyle = DEFAULT_FONT.getStyle();
     private int join = getJoin(Join.MITER);
     private float strokeWidth;
     private float textSize = DEFAULT_FONT.getSize();
@@ -169,9 +185,7 @@ public class AwtPaint implements Paint {
 
     @Override
     public void setTypeface(FontFamily fontFamily, FontStyle fontStyle) {
-        this.fontName = getFontName(fontFamily);
-        this.fontStyle = getFontStyle(fontStyle);
-        this.font = new Font(this.fontName, this.fontStyle, (int) this.textSize).deriveFont(this.TEXT_ATTRIBUTES);
+        this.font = getFont(fontFamily, fontStyle, (int) this.textSize);
     }
 
     @Override

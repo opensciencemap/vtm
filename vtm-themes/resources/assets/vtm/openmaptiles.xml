@@ -6,6 +6,9 @@
     <!-- base style for fixed width lines -->
     <style-line cap="butt" fix="true" id="fix" width="1.0" />
 
+    <style-text caption="true" dy="20" fill="#2d51bc" font-family="medium" id="caption-small-blue"
+        k="name" size="14" stroke="#ffffff" stroke-width="2.0" />
+
     <style-text fill="#101010" id="road" k="name" priority="2" size="16" stroke="#eeeeee"
         stroke-width="2.0" />
 
@@ -403,6 +406,9 @@
                 <symbol src="assets:symbols/tourist/museum.svg" />
             </m>
 
+            <m zoom-min="14">
+                <text use="caption-small-blue" />
+            </m>
         </m>
     </m>
 </rendertheme>
