@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -34,6 +34,7 @@ import org.oscim.core.Tile;
 import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.BitmapRenderer;
@@ -64,8 +65,18 @@ public class MapsforgeMapActivity extends MapActivity {
     private TileGridLayer mGridLayer;
     private DefaultMapScaleBar mMapScaleBar;
     private Menu mMenu;
+    private boolean mS3db;
     private VectorTileLayer mTileLayer;
     MapFileTileSource mTileSource;
+
+    public MapsforgeMapActivity() {
+        this(false);
+    }
+
+    public MapsforgeMapActivity(boolean s3db) {
+        super();
+        mS3db = s3db;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +184,10 @@ public class MapsforgeMapActivity extends MapActivity {
                 mTileLayer = mMap.setBaseMap(mTileSource);
                 loadTheme(null);
 
-                mMap.layers().add(new BuildingLayer(mMap, mTileLayer));
+                if (mS3db)
+                    mMap.layers().add(new S3DBLayer(mMap, mTileLayer));
+                else
+                    mMap.layers().add(new BuildingLayer(mMap, mTileLayer));
                 mMap.layers().add(new LabelLayer(mMap, mTileLayer));
 
                 mMapScaleBar = new DefaultMapScaleBar(mMap);

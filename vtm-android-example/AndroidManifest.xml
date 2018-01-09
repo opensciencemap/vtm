@@ -64,6 +64,9 @@
             android:name=".MapsforgePolyLabelActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".MapsforgeS3DBActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".MapsforgeStyleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <!--<activity

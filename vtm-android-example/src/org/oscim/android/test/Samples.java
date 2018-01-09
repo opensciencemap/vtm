@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  * Copyright 2017 nebular
  *
@@ -98,6 +98,7 @@ public class Samples extends Activity {
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));
         linearLayout.addView(createButton(MapsforgePolyLabelActivity.class));
+        linearLayout.addView(createButton(MapsforgeS3DBActivity.class));
         linearLayout.addView(createButton(AtlasThemeActivity.class));
         linearLayout.addView(createButton(POTTextureActivity.class));
 
