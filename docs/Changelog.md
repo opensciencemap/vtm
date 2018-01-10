@@ -2,7 +2,7 @@
 
 ## New since 0.9.2
 
-- S3DB layer [#475](https://github.com/mapsforge/vtm/pull/475)
+- Mapsforge maps **v5 beta** S3DB layer [#475](https://github.com/mapsforge/vtm/pull/475)
 - OpenMapTiles GeoJSON vector tiles [#385](https://github.com/mapsforge/vtm/issues/385)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Many other minor improvements and bug fixes

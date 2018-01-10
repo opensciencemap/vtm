@@ -43,8 +43,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
     protected final static int BUILDING_LEVEL_HEIGHT = 280; // cm
 
-    private final static int MIN_ZOOM = 17;
-    private final static int MAX_ZOOM = 17;
+    protected final static int MIN_ZOOM = 17;
+    protected final static int MAX_ZOOM = 17;
 
     public static boolean POST_AA = false;
     public static boolean TRANSLUCENT = true;

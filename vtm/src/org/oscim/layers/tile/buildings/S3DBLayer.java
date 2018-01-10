@@ -1,5 +1,6 @@
 /*
  * Copyright 2018 Gustl22
+ * Copyright 2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -46,7 +47,11 @@ public class S3DBLayer extends BuildingLayer {
     private boolean mColored = true;
 
     public S3DBLayer(Map map, VectorTileLayer tileLayer) {
-        super(map, tileLayer, true);
+        this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
+    }
+
+    public S3DBLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
+        super(map, tileLayer, zoomMin, zoomMax, true);
     }
 
     public boolean isColored() {
