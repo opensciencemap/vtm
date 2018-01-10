@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -25,5 +25,12 @@ public class POTTextureActivity extends SimpleMapActivity {
         Parameters.POT_TEXTURES = true;
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Parameters.POT_TEXTURES = false;
     }
 }

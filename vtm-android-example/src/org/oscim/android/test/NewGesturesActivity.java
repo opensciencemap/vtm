@@ -27,7 +27,6 @@ public class NewGesturesActivity extends MarkerOverlayActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        // Revert gestures for other activities
         Parameters.MAP_EVENT_LAYER2 = false;
     }
 }
