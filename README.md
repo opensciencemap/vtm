@@ -25,7 +25,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 - Backends:
   - Android
   - iOS (using libGDX/RoboVM, [instructions](docs/ios.md))
-  - Desktop (using libGDX/LWJGL)
+  - Desktop (using libGDX/LWJGL, [instructions](docs/desktop.md))
   - HTML5/WebGL (using libGDX/GWT, [instructions](docs/web.md))
 
 ### Projects
