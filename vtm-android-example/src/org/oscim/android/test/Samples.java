@@ -83,6 +83,7 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(MapsforgeMapActivity.class));
         /*linearLayout.addView(createButton(MapzenMvtMapActivity.class));
         linearLayout.addView(createButton(MapzenGeojsonMapActivity.class));*/
+        linearLayout.addView(createButton(OpenMapTilesMvtMapActivity.class));
         linearLayout.addView(createButton(OpenMapTilesGeojsonMapActivity.class));
         linearLayout.addView(createButton(GdxMapActivity.class));
 

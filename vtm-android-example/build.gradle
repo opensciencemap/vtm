@@ -10,6 +10,7 @@ dependencies {
     implementation project(':vtm-jeo')
     implementation project(':vtm-json')
     implementation project(':vtm-jts')
+    implementation project(':vtm-mvt')
     implementation project(':vtm-themes')
     implementation "org.slf4j:slf4j-android:$slf4jVersion"
 
@@ -35,7 +36,9 @@ android {
     defaultConfig {
         versionCode versionCode()
         versionName versionName()
-        minSdkVersion androidMinSdk()
+        // FIXME Minimum API Level by mapbox-vector-tile
+        //minSdkVersion androidMinSdk()
+        minSdkVersion 26
         targetSdkVersion androidTargetSdk()
     }
 
@@ -63,6 +66,14 @@ android {
         exclude 'META-INF/services/org.jeo.data.Driver'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
+    }
+
+    buildTypes {
+        all {
+            minifyEnabled true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 }
 

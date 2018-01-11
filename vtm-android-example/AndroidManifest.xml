@@ -88,6 +88,9 @@
             android:name=".OpenMapTilesGeojsonMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".OpenMapTilesMvtMapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".OSciMapS3DBMapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
