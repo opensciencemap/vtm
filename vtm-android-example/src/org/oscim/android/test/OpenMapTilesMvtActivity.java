@@ -1,6 +1,5 @@
 /*
  * Copyright 2016-2017 devemux86
- * Copyright 2017 Mathieu De Brito
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -25,9 +24,9 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
-import org.oscim.tiling.source.mvt.MapzenMvtTileSource;
+import org.oscim.tiling.source.mvt.OpenMapTilesMvtTileSource;
 
-public class MapzenMvtMapActivity extends MapActivity {
+public class OpenMapTilesMvtActivity extends MapActivity {
 
     private static final boolean USE_CACHE = false;
 
@@ -37,8 +36,8 @@ public class MapzenMvtMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        UrlTileSource tileSource = MapzenMvtTileSource.builder()
-                .apiKey("mapzen-xxxxxxx") // Put a proper API key
+        UrlTileSource tileSource = OpenMapTilesMvtTileSource.builder()
+                .apiKey("xxxxxxx") // Put a proper API key
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 //.locale("en")
                 .build();
@@ -51,7 +50,7 @@ public class MapzenMvtMapActivity extends MapActivity {
         }
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
-        mMap.setTheme(VtmThemes.MAPZEN);
+        mMap.setTheme(VtmThemes.OPENMAPTILES);
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));

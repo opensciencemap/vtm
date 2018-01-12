@@ -1,7 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
- *
- * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ * Copyright 2017 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,54 +17,52 @@ package org.oscim.android.test;
 import android.os.Bundle;
 
 import org.oscim.android.cache.TileCache;
-import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.buildings.S3DBTileLayer;
+import org.oscim.layers.TileGridLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.UrlTileSource;
+import org.oscim.tiling.source.geojson.MapzenGeojsonTileSource;
 
-public class OSciMapS3DBMapActivity extends BaseMapActivity {
+public class MapzenGeojsonActivity extends MapActivity {
 
-    TileCache mS3dbCache;
+    private static final boolean USE_CACHE = false;
+
+    private TileCache mCache;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMap.setTheme(VtmThemes.DEFAULT);
-
-        TileSource ts = OSciMap4TileSource.builder()
+        UrlTileSource tileSource = MapzenGeojsonTileSource.builder()
+                .apiKey("mapzen-xxxxxxx") // Put a proper API key
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
-                .url("http://opensciencemap.org/tiles/s3db")
-                .zoomMin(16)
-                .zoomMax(16)
+                //.locale("en")
                 .build();
 
         if (USE_CACHE) {
-            mS3dbCache = new TileCache(this, null, "s3db.db");
-            mS3dbCache.setCacheSize(512 * (1 << 10));
-            ts.setCache(mS3dbCache);
+            // Cache the tiles into a local SQLite database
+            mCache = new TileCache(this, null, "tile.db");
+            mCache.setCacheSize(512 * (1 << 10));
+            tileSource.setCache(mCache);
         }
-        TileLayer tl = new S3DBTileLayer(mMap, ts, true, false);
-        mMap.layers().add(tl);
-        mMap.layers().add(new LabelLayer(mMap, mBaseLayer));
+
+        VectorTileLayer l = mMap.setBaseMap(tileSource);
+        mMap.setTheme(VtmThemes.MAPZEN);
+
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        mMap.layers().add(new LabelLayer(mMap, l));
+
+        mMap.layers().add(new TileGridLayer(mMap, getResources().getDisplayMetrics().density));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mS3dbCache != null)
-            mS3dbCache.dispose();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        /* ignore saved position */
-        mMap.setMapPosition(53.5620092, 9.9866457, 1 << 16);
+        if (mCache != null)
+            mCache.dispose();
     }
 }

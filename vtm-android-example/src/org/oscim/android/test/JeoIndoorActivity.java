@@ -42,15 +42,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 
-public class JeoIndoorMapActivity extends BaseMapActivity {
-    public static final Logger log = LoggerFactory.getLogger(JeoIndoorMapActivity.class);
+public class JeoIndoorActivity extends BaseMapActivity {
+    public static final Logger log = LoggerFactory.getLogger(JeoIndoorActivity.class);
 
     // from http://overpass-turbo.eu/s/2vp
     String PATH = "https://gist.githubusercontent.com/anonymous/09062103a66844a96048f25626078c8d/raw/1d3af6a5a55e9ea4adc9551fa633a051a44a5a9c/overpass.geojson";
 
     private OSMIndoorLayer mIndoorLayer;
 
-    public JeoIndoorMapActivity() {
+    public JeoIndoorActivity() {
         super(R.layout.jeo_indoor_map);
     }
 

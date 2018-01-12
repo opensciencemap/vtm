@@ -46,7 +46,7 @@ import java.util.List;
  * - POI in specified radius.<br/>
  * - Ways containing touch point.
  */
-public class ReverseGeocodeActivity extends MapsforgeMapActivity {
+public class ReverseGeocodeActivity extends MapsforgeActivity {
 
     private static final int TOUCH_RADIUS = 32 / 2;
 

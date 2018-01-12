@@ -25,7 +25,7 @@ import org.oscim.layers.vector.geometries.PointDrawable;
 import org.oscim.layers.vector.geometries.Style;
 import org.oscim.utils.ColorUtil;
 
-public class VectorLayerMapActivity extends SimpleMapActivity {
+public class VectorLayerActivity extends SimpleMapActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

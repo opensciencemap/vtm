@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * Load render theme from Android assets folder and show a configuration menu based on stylemenu.
  */
-public class MapsforgeStyleActivity extends MapsforgeMapActivity {
+public class MapsforgeStyleActivity extends MapsforgeActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

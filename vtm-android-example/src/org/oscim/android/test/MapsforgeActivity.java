@@ -53,7 +53,7 @@ import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
 
-public class MapsforgeMapActivity extends MapActivity {
+public class MapsforgeActivity extends MapActivity {
 
     static final int SELECT_MAP_FILE = 0;
     static final int SELECT_THEME_FILE = SELECT_MAP_FILE + 1;
@@ -69,11 +69,11 @@ public class MapsforgeMapActivity extends MapActivity {
     private VectorTileLayer mTileLayer;
     MapFileTileSource mTileSource;
 
-    public MapsforgeMapActivity() {
+    public MapsforgeActivity() {
         this(false);
     }
 
-    public MapsforgeMapActivity(boolean s3db) {
+    public MapsforgeActivity(boolean s3db) {
         super();
         mS3db = s3db;
     }

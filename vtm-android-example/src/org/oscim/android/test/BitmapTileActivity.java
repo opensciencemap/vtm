@@ -27,20 +27,20 @@ import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BitmapTileMapActivity extends MapActivity {
+public class BitmapTileActivity extends MapActivity {
 
-    static final Logger log = LoggerFactory.getLogger(BitmapTileMapActivity.class);
+    static final Logger log = LoggerFactory.getLogger(BitmapTileActivity.class);
 
     private final static boolean USE_CACHE = false;
 
     private final BitmapTileSource mTileSource;
     protected BitmapTileLayer mBitmapLayer;
 
-    public BitmapTileMapActivity() {
+    public BitmapTileActivity() {
         this(DefaultSources.OPENSTREETMAP.build());
     }
 
-    public BitmapTileMapActivity(BitmapTileSource tileSource) {
+    public BitmapTileActivity(BitmapTileSource tileSource) {
         super(R.layout.activity_map);
         mTileSource = tileSource;
     }

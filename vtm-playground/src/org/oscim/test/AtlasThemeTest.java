@@ -18,14 +18,14 @@ package org.oscim.test;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.utils.Parameters;
 
-public class AtlasThemeMapTest extends MapTest {
+public class AtlasThemeTest extends SimpleMapTest {
 
-    private AtlasThemeMapTest() {
+    private AtlasThemeTest() {
         Parameters.TEXTURE_ATLAS = true;
     }
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new AtlasThemeMapTest());
+        GdxMapApp.run(new AtlasThemeTest());
     }
 }

@@ -31,7 +31,7 @@ import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class MultiMapActivity extends Activity {
+public class MultiMapViewActivity extends Activity {
     private MapView mMapView1, mMapView2;
     private MapPreferences mPrefs1, mPrefs2;
 
@@ -44,7 +44,7 @@ public class MultiMapActivity extends Activity {
         // 1st map view
         mMapView1 = (MapView) findViewById(R.id.mapView1);
         Map map1 = mMapView1.map();
-        mPrefs1 = new MapPreferences(MultiMapActivity.class.getName() + "1", this);
+        mPrefs1 = new MapPreferences(MultiMapViewActivity.class.getName() + "1", this);
         TileSource tileSource1 = OSciMap4TileSource.builder()
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
@@ -56,7 +56,7 @@ public class MultiMapActivity extends Activity {
         // 2nd map view
         mMapView2 = (MapView) findViewById(R.id.mapView2);
         Map map2 = mMapView2.map();
-        mPrefs2 = new MapPreferences(MultiMapActivity.class.getName() + "2", this);
+        mPrefs2 = new MapPreferences(MultiMapViewActivity.class.getName() + "2", this);
         TileSource tileSource2 = OSciMap4TileSource.builder()
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();

@@ -54,13 +54,13 @@ import static org.oscim.android.canvas.AndroidGraphics.drawableToBitmap;
  * Long press on map to search inside visible bounding box.<br/>
  * Tap on POIs to show their name (in default locale).
  */
-public class PoiSearchActivity extends MapsforgeMapActivity implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
+public class PoiSearchActivity extends MapsforgeActivity implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
 
     private static final Logger log = LoggerFactory.getLogger(PoiSearchActivity.class);
 
     private static String POI_FILE;
     private static final String POI_CATEGORY = "Restaurants";
-    private static final int SELECT_POI_FILE = MapsforgeMapActivity.SELECT_THEME_FILE + 1;
+    private static final int SELECT_POI_FILE = MapsforgeActivity.SELECT_THEME_FILE + 1;
 
     private ItemizedLayer<MarkerItem> mMarkerLayer;
 

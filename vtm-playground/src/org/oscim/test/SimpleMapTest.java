@@ -34,7 +34,7 @@ import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class MapTest extends GdxMapApp {
+public class SimpleMapTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
@@ -68,6 +68,6 @@ public class MapTest extends GdxMapApp {
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapTest());
+        GdxMapApp.run(new SimpleMapTest());
     }
 }

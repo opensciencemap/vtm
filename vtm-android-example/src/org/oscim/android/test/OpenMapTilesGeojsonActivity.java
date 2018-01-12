@@ -26,7 +26,7 @@ import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.geojson.OpenMapTilesGeojsonTileSource;
 
-public class OpenMapTilesGeojsonMapActivity extends MapActivity {
+public class OpenMapTilesGeojsonActivity extends MapActivity {
 
     private static final boolean USE_CACHE = false;
 

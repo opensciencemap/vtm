@@ -93,7 +93,7 @@ implementation 'com.vividsolutions:jts:1.13'
 implementation 'com.wdtinc:mapbox-vector-tile:2.0.0'
 ```
 
-- GeoJSON tiles
+- GeoJSON vector tiles
 
 ```groovy
 implementation 'org.mapsforge:vtm-json:[CURRENT-VERSION]'

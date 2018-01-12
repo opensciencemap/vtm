@@ -20,7 +20,7 @@ package org.oscim.test;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.utils.Parameters;
 
-public class POTTextureTest extends MapTest {
+public class POTTextureTest extends SimpleMapTest {
 
     private POTTextureTest() {
         Parameters.POT_TEXTURES = true;

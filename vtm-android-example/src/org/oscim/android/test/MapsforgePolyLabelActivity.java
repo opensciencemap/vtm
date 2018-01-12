@@ -18,7 +18,7 @@ import android.os.Bundle;
 
 import org.oscim.utils.Parameters;
 
-public class MapsforgePolyLabelActivity extends MapsforgeMapActivity {
+public class MapsforgePolyLabelActivity extends MapsforgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

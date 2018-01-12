@@ -31,16 +31,16 @@
             android:name=".AtlasThemeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".BitmapTileMapActivity"
+            android:name=".BitmapTileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".ClusterMarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".GdxMapActivity"
+            android:name=".GdxActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".JeoIndoorMapActivity"
+            android:name=".JeoIndoorActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".LayerGroupActivity"
@@ -52,13 +52,13 @@
             android:name=".LocationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapsforgeMapActivity"
+            android:name=".MapsforgeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapsforgeMapActivity$MapFilePicker"
+            android:name=".MapsforgeActivity$MapFilePicker"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapsforgeMapActivity$ThemeFilePicker"
+            android:name=".MapsforgeActivity$ThemeFilePicker"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MapsforgePolyLabelActivity"
@@ -69,29 +69,29 @@
         <activity
             android:name=".MapsforgeStyleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <!--<activity
-            android:name=".MapzenGeojsonMapActivity"
+        <activity
+            android:name=".MapzenGeojsonActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapzenMvtMapActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />-->
+            android:name=".MapzenMvtActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MultiMapActivity"
+            android:name=".MultiMapViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".NewGesturesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".OpenMapTilesGeojsonMapActivity"
+            android:name=".OpenMapTilesGeojsonActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".OpenMapTilesMvtMapActivity"
+            android:name=".OpenMapTilesMvtActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".OSciMapS3DBMapActivity"
+            android:name=".OSciMapS3DBActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".PathOverlayActivity"
@@ -118,7 +118,7 @@
             android:name=".ThemeStylerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".VectorLayerMapActivity"
+            android:name=".VectorLayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
     </application>
 

@@ -1,5 +1,6 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2016-2017 devemux86
+ * Copyright 2017 Mathieu De Brito
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -24,9 +25,9 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.UrlTileSource;
-import org.oscim.tiling.source.geojson.MapzenGeojsonTileSource;
+import org.oscim.tiling.source.mvt.MapzenMvtTileSource;
 
-public class MapzenGeojsonMapActivity extends MapActivity {
+public class MapzenMvtActivity extends MapActivity {
 
     private static final boolean USE_CACHE = false;
 
@@ -36,7 +37,7 @@ public class MapzenGeojsonMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        UrlTileSource tileSource = MapzenGeojsonTileSource.builder()
+        UrlTileSource tileSource = MapzenMvtTileSource.builder()
                 .apiKey("mapzen-xxxxxxx") // Put a proper API key
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 //.locale("en")

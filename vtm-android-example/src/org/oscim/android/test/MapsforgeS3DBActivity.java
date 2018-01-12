@@ -14,7 +14,7 @@
  */
 package org.oscim.android.test;
 
-public class MapsforgeS3DBActivity extends MapsforgeMapActivity {
+public class MapsforgeS3DBActivity extends MapsforgeActivity {
 
     public MapsforgeS3DBActivity() {
         super(true);
