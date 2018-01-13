@@ -4,8 +4,7 @@
 
 - S3DB layer [#475](https://github.com/mapsforge/vtm/pull/475)
 - vtm-mvt module with MVT tile decoder [#481](https://github.com/mapsforge/vtm/pull/481)
-- OpenMapTiles MVT vector tiles [#481](https://github.com/mapsforge/vtm/pull/481)
-- OpenMapTiles GeoJSON vector tiles [#385](https://github.com/mapsforge/vtm/issues/385)
+- OpenMapTiles MVT vector tiles [#482](https://github.com/mapsforge/vtm/issues/482)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)

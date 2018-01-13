@@ -85,9 +85,6 @@
             android:name=".NewGesturesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".OpenMapTilesGeojsonActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".OpenMapTilesMvtActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
