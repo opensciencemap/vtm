@@ -1,9 +1,8 @@
 package org.oscim.layers.vector.geometries;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
-
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 

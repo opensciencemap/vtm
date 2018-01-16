@@ -1,6 +1,6 @@
 package org.oscim.layers.vector.geometries;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public interface Drawable {
 

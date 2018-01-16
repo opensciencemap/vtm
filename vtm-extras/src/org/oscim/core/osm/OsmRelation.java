@@ -16,8 +16,7 @@
  */
 package org.oscim.core.osm;
 
-import com.vividsolutions.jts.geom.Geometry;
-
+import org.locationtech.jts.geom.Geometry;
 import org.oscim.core.TagSet;
 
 import java.util.ArrayList;

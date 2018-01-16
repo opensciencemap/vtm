@@ -1,7 +1,6 @@
 package org.oscim.layers.vector.geometries;
 
-import com.vividsolutions.jts.geom.Geometry;
-
+import org.locationtech.jts.geom.Geometry;
 import org.oscim.core.GeoPoint;
 import org.oscim.utils.geom.GeomBuilder;
 

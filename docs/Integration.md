@@ -73,7 +73,7 @@ implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
 
 ```groovy
 implementation 'org.mapsforge:vtm-jts:[CURRENT-VERSION]'
-implementation 'com.vividsolutions:jts:1.13'
+implementation 'org.locationtech.jts:jts-core:1.15.0'
 ```
 
 - Online tiles

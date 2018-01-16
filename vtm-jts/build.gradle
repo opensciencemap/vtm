@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm')
-    api 'com.vividsolutions:jts:1.13'
+    api 'org.locationtech.jts:jts-core:1.15.0'
 }
 
 sourceSets {
