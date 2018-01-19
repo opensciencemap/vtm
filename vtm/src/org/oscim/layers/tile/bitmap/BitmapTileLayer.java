@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2017 Andrey Novikov
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -68,7 +68,7 @@ public class BitmapTileLayer extends TileLayer {
     }
 
     public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit) {
-        this(map, tileSource, cacheLimit, 1.0f);
+        this(map, tileSource, cacheLimit, tileSource.getAlpha());
     }
 
     public BitmapTileLayer(Map map, TileSource tileSource, int cacheLimit, float bitmapAlpha) {

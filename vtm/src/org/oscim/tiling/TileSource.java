@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -25,10 +25,16 @@ import java.util.HashMap;
 public abstract class TileSource {
 
     public abstract static class Builder<T extends Builder<T>> {
+        protected float alpha = 1;
         protected int zoomMin, zoomMax;
         protected FadeStep[] fadeSteps;
         protected String name;
-        protected int tileSize;
+        protected int tileSize = 256;
+
+        public T alpha(float alpha) {
+            this.alpha = alpha;
+            return self();
+        }
 
         public T zoomMin(int zoom) {
             zoomMin = zoom;
@@ -63,6 +69,7 @@ public abstract class TileSource {
         public abstract TileSource build();
     }
 
+    protected float mAlpha = 1;
     protected int mZoomMin = 0;
     protected int mZoomMax = 20;
     protected String mName;
@@ -77,6 +84,7 @@ public abstract class TileSource {
     }
 
     public TileSource(Builder<?> builder) {
+        mAlpha = builder.alpha;
         mZoomMin = builder.zoomMin;
         mZoomMax = builder.zoomMax;
         mFadeSteps = builder.fadeSteps;
@@ -95,6 +103,10 @@ public abstract class TileSource {
     public ITileCache tileCache;
 
     private FadeStep[] mFadeSteps;
+
+    public float getAlpha() {
+        return mAlpha;
+    }
 
     /**
      * Cache MUST be set before TileSource is added to a TileLayer!
