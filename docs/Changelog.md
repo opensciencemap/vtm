@@ -8,6 +8,7 @@
 - Improved theme styles [#479](https://github.com/mapsforge/vtm/pull/479)
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
+- Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)
 - Fix libGDX flickering [#148](https://github.com/mapsforge/vtm/issues/148) [#149](https://github.com/mapsforge/vtm/issues/149)
 - JTS (LocationTech) [#484](https://github.com/mapsforge/vtm/issues/484)
 - Many other minor improvements and bug fixes

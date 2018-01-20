@@ -42,11 +42,14 @@ public class BitmapTileLayer extends TileLayer {
 
     public static class FadeStep {
         public final double scaleStart, scaleEnd;
+        public final double zoomStart, zoomEnd;
         public final float alphaStart, alphaEnd;
 
         public FadeStep(int zoomStart, int zoomEnd, float alphaStart, float alphaEnd) {
             this.scaleStart = 1 << zoomStart;
             this.scaleEnd = 1 << zoomEnd;
+            this.zoomStart = zoomStart;
+            this.zoomEnd = zoomEnd;
             this.alphaStart = alphaStart;
             this.alphaEnd = alphaEnd;
         }
@@ -54,6 +57,8 @@ public class BitmapTileLayer extends TileLayer {
         public FadeStep(double scaleStart, double scaleEnd, float alphaStart, float alphaEnd) {
             this.scaleStart = scaleStart;
             this.scaleEnd = scaleEnd;
+            this.zoomStart = Math.log(scaleStart) / Math.log(2);
+            this.zoomEnd = Math.log(scaleEnd) / Math.log(2);
             this.alphaStart = alphaStart;
             this.alphaEnd = alphaEnd;
         }
@@ -110,7 +115,7 @@ public class BitmapTileLayer extends TileLayer {
             return;
         }
 
-        float alpha = 0f;
+        float alpha = mBitmapAlpha;
         for (FadeStep f : fade) {
             if (pos.scale < f.scaleStart || pos.scale > f.scaleEnd)
                 continue;
@@ -119,11 +124,8 @@ public class BitmapTileLayer extends TileLayer {
                 alpha = f.alphaStart;
                 break;
             }
-            double range = f.scaleEnd - f.scaleStart;
-            float a = (float) ((pos.scale - f.scaleStart) / range);
-            a = FastMath.clamp(a, 0f, 1f);
             // interpolate alpha between start and end
-            alpha = (1 - a) * f.alphaStart + a * f.alphaEnd;
+            alpha = (float) (f.alphaStart + (pos.getZoom() - f.zoomStart) * (f.alphaEnd - f.alphaStart) / (f.zoomEnd - f.zoomStart));
             break;
         }
 
