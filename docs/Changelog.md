@@ -6,6 +6,7 @@
 - vtm-mvt module with MVT tile decoder [#481](https://github.com/mapsforge/vtm/pull/481)
 - OpenMapTiles MVT vector tiles [#482](https://github.com/mapsforge/vtm/issues/482)
 - Improved theme styles [#479](https://github.com/mapsforge/vtm/pull/479)
+- Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix libGDX flickering [#148](https://github.com/mapsforge/vtm/issues/148) [#149](https://github.com/mapsforge/vtm/issues/149)
 - JTS (LocationTech) [#484](https://github.com/mapsforge/vtm/issues/484)

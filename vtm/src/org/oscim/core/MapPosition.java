@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -107,6 +107,26 @@ public class MapPosition {
         return scale;
     }
 
+    public MapPosition setScale(double scale) {
+        this.zoomLevel = FastMath.log2((int) scale);
+        this.scale = scale;
+        return this;
+    }
+
+    /**
+     * @return the fractional zoom.
+     */
+    public double getZoom() {
+        return Math.log(scale) / Math.log(2);
+    }
+
+    /**
+     * Sets the fractional zoom.
+     */
+    public void setZoom(double zoom) {
+        setScale(Math.pow(2, zoom));
+    }
+
     public int getZoomLevel() {
         return zoomLevel;
     }
@@ -114,12 +134,6 @@ public class MapPosition {
     public MapPosition setZoomLevel(int zoomLevel) {
         this.zoomLevel = zoomLevel;
         this.scale = 1 << zoomLevel;
-        return this;
-    }
-
-    public MapPosition setScale(double scale) {
-        this.zoomLevel = FastMath.log2((int) scale);
-        this.scale = scale;
         return this;
     }
 
