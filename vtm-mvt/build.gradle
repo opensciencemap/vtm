@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     api project(':vtm')
-    api 'com.wdtinc:mapbox-vector-tile:2.0.0'
+    api 'com.github.wdtinc:mapbox-vector-tile-java:master-SNAPSHOT'
 }
 
 sourceSets {
