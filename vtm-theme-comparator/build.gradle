@@ -1,9 +1,5 @@
 apply plugin: 'application'
 
-repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
     implementation project(':vtm-desktop')
     file("${rootDir}/vtm-desktop/natives").eachDir() { dir ->

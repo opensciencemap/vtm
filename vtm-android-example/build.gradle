@@ -1,9 +1,5 @@
 apply plugin: 'com.android.application'
 
-repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
     implementation project(':vtm-android')
     implementation project(':vtm-http')
