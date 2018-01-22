@@ -24,9 +24,9 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
   - Raster tiles: any quadtree-scheme tiles as texture
 - Backends:
   - Android
-  - iOS (using libGDX/RoboVM, [instructions](docs/ios.md))
-  - Desktop (using libGDX/LWJGL, [instructions](docs/desktop.md))
-  - HTML5/WebGL (using libGDX/GWT, [instructions](docs/web.md))
+  - iOS (libGDX/RoboVM, [instructions](docs/ios.md))
+  - Desktop (libGDX/LWJGL, [instructions](docs/desktop.md))
+  - HTML5/WebGL (libGDX/GWT, [instructions](docs/web.md))
 
 ### Projects
 - **vtm** core library

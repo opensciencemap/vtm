@@ -26,7 +26,7 @@ implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
 implementation 'com.caverock:androidsvg:1.2.2-beta-1'
 ```
 
-### Android (with libGDX)
+### Android (libGDX)
 ```groovy
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'

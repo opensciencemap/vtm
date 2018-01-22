@@ -32,9 +32,7 @@ android {
     defaultConfig {
         versionCode versionCode()
         versionName versionName()
-        // FIXME Minimum API Level by mapbox-vector-tile
-        //minSdkVersion androidMinSdk()
-        minSdkVersion 26
+        minSdkVersion androidMinSdk()
         targetSdkVersion androidTargetSdk()
     }
 
