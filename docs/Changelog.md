@@ -6,6 +6,7 @@
 - vtm-mvt module with MVT tile decoder [#481](https://github.com/mapsforge/vtm/pull/481)
 - OpenMapTiles MVT vector tiles [#482](https://github.com/mapsforge/vtm/issues/482)
 - Improved theme styles [#479](https://github.com/mapsforge/vtm/pull/479)
+- Internal render themes improvements [#488](https://github.com/mapsforge/vtm/pull/488)
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)
