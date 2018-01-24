@@ -45,10 +45,6 @@
     <!--railway-->
     <style-area fade="10" fill="#f2eeef" id="railway|industrial" />
 
-    <!--wood-->
-    <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-    <style-area blend="11" blend-fill="#1b271e" fade="7" fill="#151806" id="forest|wood" />
-
     <!-- grass|meadow|garden|grassland|scrub -->
     <style-area fade="10" fill="#202f24" id="greens" />
 
@@ -61,6 +57,10 @@
 
     <!-- park|common|green|cemetery|golf_course|dog_park -->
     <style-area fade="11" fill="#274a44" id="park" />
+
+    <!--wood-->
+    <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
+    <style-area blend="11" blend-fill="#1b271e" fade="7" fill="#151806" id="forest|wood" />
 
     <!-- de:Kleingartengebiet -->
     <style-area fade="12" fill="#efeae0" id="allotments" />
