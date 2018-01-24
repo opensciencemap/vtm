@@ -48,14 +48,7 @@
     <!--railway-->
     <style-area fade="10" fill="#e6e3e5" id="railway|industrial" />
 
-    <!--wood-->
-    <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
-    <!-- src="assets:textures/wood.png" -->
-    <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
-    <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" stroke="#d1dbc7" stroke-width="1.0"/> -->
-    <style-area blend="11" blend-fill="#83aa5b" fade="8" fill="#b3d095" id="wood" use="park" />
-    <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
-
+    <!--Note: ordered according to their inheritance via the `use` attribute-->
     <style-area id="tex1" src="assets:textures/rough.png" />
 
     <!-- meadow|garden -->
@@ -79,6 +72,14 @@
     <!-- park|common|green|cemetery|golf_course|dog_park -->
     <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
     <!-- <style-area id="park" fill="#a3ca7b" fade="11" /> -->
+
+    <!--wood-->
+    <!-- fade out at z=7, blend over to 'blend-fill' in z=11 -->
+    <!-- src="assets:textures/wood.png" -->
+    <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
+    <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" stroke="#d1dbc7" stroke-width="1.0"/> -->
+    <style-area blend="11" blend-fill="#83aa5b" fade="8" fill="#b3d095" id="wood" use="park" />
+    <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
 
     <!-- de:Kleingartengebiet -->
     <style-area fade="12" fill="#efeae0" id="allotments" use="tex1" />

@@ -52,6 +52,7 @@
     <!-- src="assets:textures/wood.png" -->
     <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
 
+    <!--Note: ordered according to their inheritance via the `use` attribute-->
     <style-area id="tex1" src="assets:textures/rough.png" />
 
     <!-- meadow|garden -->
@@ -76,6 +77,7 @@
     <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
     <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" stroke="#d1dbc7" stroke-width="1.0"/> -->
 
+    <!--wood-->
     <style-area blend="11" blend-fill="#83aa5b" fade="8" fill="#b3d095" id="wood" use="park" />
     <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
 
