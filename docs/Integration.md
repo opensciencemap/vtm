@@ -87,15 +87,9 @@ implementation 'com.squareup.okio:okio:1.13.0'
 - Mapbox vector tiles
 
 ```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-```
-
-```groovy
 implementation 'org.mapsforge:vtm-mvt:[CURRENT-VERSION]'
-implementation 'com.github.wdtinc:mapbox-vector-tile-java:master-SNAPSHOT'
 implementation 'com.google.protobuf:protobuf-java:3.5.1'
+implementation 'com.wdtinc:mapbox-vector-tile:3.0.0'
 implementation 'org.locationtech.jts:jts-core:1.15.0'
 ```
 
