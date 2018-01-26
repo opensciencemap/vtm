@@ -252,15 +252,15 @@ public class ViewController extends Viewport {
     private void updateMatrices() {
         /* - view matrix:
          * 0. apply yaw
-         * 1. apply pitch
-         * 2. apply roll */
+         * 1. apply roll
+         * 2. apply pitch */
 
         mRotationMatrix.setRotation(mPos.bearing, 0, 0, 1);
 
-        mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
+        mTmpMatrix.setRotation(mPos.roll, 0, 1, 0);
         mRotationMatrix.multiplyLhs(mTmpMatrix);
 
-        mTmpMatrix.setRotation(mPos.roll, 0, 1, 0);
+        mTmpMatrix.setRotation(mPos.tilt, 1, 0, 0);
         mRotationMatrix.multiplyLhs(mTmpMatrix);
 
         mViewMatrix.copy(mRotationMatrix);
