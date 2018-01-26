@@ -58,8 +58,9 @@ public class MapPosition {
         this.scale = 1;
         this.x = 0.5;
         this.y = 0.5;
-        this.zoomLevel = 1;
+        this.zoomLevel = 0;
         this.bearing = 0;
+        this.tilt = 0;
     }
 
     public MapPosition(double latitude, double longitude, double scale) {
