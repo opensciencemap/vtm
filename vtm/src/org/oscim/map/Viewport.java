@@ -92,6 +92,7 @@ public class Viewport {
         mPos.scale = mMinScale;
         mPos.x = 0.5;
         mPos.y = 0.5;
+        mPos.zoomLevel = MIN_ZOOMLEVEL;
         mPos.bearing = 0;
         mPos.tilt = 0;
         mPos.roll = 0;
