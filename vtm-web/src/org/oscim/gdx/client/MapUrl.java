@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2018 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.gdx.client;
 
 import com.google.gwt.user.client.Timer;
@@ -90,19 +107,17 @@ public class MapUrl extends Timer {
     @Override
     public void run() {
         mMap.viewport().getMapPosition(pos);
-        int lat = (int) (MercatorProjection.toLatitude(pos.y) * 1000);
-        int lon = (int) (MercatorProjection.toLongitude(pos.x) * 1000);
+        int lat = (int) (pos.getLatitude() * 1000);
+        int lon = (int) (pos.getLongitude() * 1000);
+        int tilt = (int) (pos.tilt);
         int rot = (int) (pos.bearing);
-        rot = (int) (pos.bearing) % 360;
-        //rot = rot < 0 ? -rot : rot;
 
         if (curZoom != pos.zoomLevel || curLat != lat || curLon != lon
-                || curTilt != rot || curRot != (int) (pos.bearing)) {
-
+                || curTilt != tilt || curRot != rot) {
             curLat = lat;
             curLon = lon;
             curZoom = pos.zoomLevel;
-            curTilt = (int) pos.tilt;
+            curTilt = tilt;
             curRot = rot;
 
             String newURL = Window.Location
