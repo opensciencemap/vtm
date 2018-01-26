@@ -208,9 +208,9 @@ public class ViewController extends Viewport {
     public void setRoll(double degree) {
         ThreadUtils.assertMainThread();
 
-        while (degree > 360)
+        while (degree > 180)
             degree -= 360;
-        while (degree < 0)
+        while (degree < -180)
             degree += 360;
 
         mPos.roll = (float) degree;
