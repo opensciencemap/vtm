@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Andrey Novikov
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -126,6 +126,10 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                 // TODO
             } else if (element.type == POLY) {
                 PointF centroid = element.labelPosition;
+                if (!Parameters.POLY_SYMBOL) {
+                    if (centroid == null)
+                        return false;
+                }
                 // skip unnecessary calculations if centroid is outside of visible area
                 if (centroid != null && (centroid.x < 0 || centroid.x > Tile.SIZE || centroid.y < 0 || centroid.y > Tile.SIZE))
                     return false;

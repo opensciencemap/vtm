@@ -9,6 +9,7 @@
 - Internal render themes improvements [#488](https://github.com/mapsforge/vtm/pull/488)
 - Map view roll [#474](https://github.com/mapsforge/vtm/pull/474)
 - Fling animation improvements [#489](https://github.com/mapsforge/vtm/pull/489)
+- Polygon symbols default disabled [#405](https://github.com/mapsforge/vtm/issues/405)
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -32,9 +32,14 @@ public final class Parameters {
     public static int MAXIMUM_BUFFER_SIZE = 8000000;
 
     /**
-     * Optimal placement of text labels on polygons.
+     * Optimal placement of labels or symbols on polygons.
      */
     public static boolean POLY_LABEL = false;
+
+    /**
+     * Placement of symbols on polygons.
+     */
+    public static boolean POLY_SYMBOL = false;
 
     /**
      * POT textures in themes.
