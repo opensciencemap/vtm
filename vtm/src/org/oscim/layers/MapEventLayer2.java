@@ -3,6 +3,7 @@
  * Copyright 2016 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2016 Longri
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +20,7 @@
  */
 package org.oscim.layers;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
@@ -74,12 +76,22 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
     private long mStartMove;
 
     /**
+     * 1in = 25.4mm
+     */
+    private static final float INCH = 25.4f;
+
+    /**
      * 2mm as minimal distance to start move: dpi / 25.4
      */
-    private static final float MIN_SLOP = 25.4f / 2;
+    private static final float MIN_SLOP = INCH / 2;
 
-    private static final float PINCH_ZOOM_THRESHOLD = MIN_SLOP / 2;
-    private static final float PINCH_TILT_THRESHOLD = MIN_SLOP / 2;
+    /**
+     * 1cm distance in dips between the first touch and second touch to still be considered a double tap
+     */
+    private static final float DOUBLE_TAP_SLOP = INCH / 10;
+
+    private static final float PINCH_ZOOM_THRESHOLD = INCH / 4; // 4mm
+    private static final float PINCH_TILT_THRESHOLD = INCH / 4; // 4mm
     private static final float PINCH_TILT_SLOPE = 0.75f;
     private static final float PINCH_ROTATE_THRESHOLD = 0.2f;
     private static final float PINCH_ROTATE_THRESHOLD2 = 0.5f;
@@ -170,7 +182,7 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
             if (mTaps > 0) {
                 float mx = e.getX(0) - mLastTap.getX();
                 float my = e.getY(0) - mLastTap.getY();
-                if (isMinimalMove(mx, my)) {
+                if (!isDoubleTap(mx, my)) {
                     mTaps = 0;
                     mMap.handleGesture(Gesture.TAP, mLastTap);
                 }
@@ -270,6 +282,8 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
                             final float pivotX = mFixOnCenter ? 0 : mPrevX1 - mMap.getWidth() / 2;
                             final float pivotY = mFixOnCenter ? 0 : mPrevY1 - mMap.getHeight() / 2;
                             mMap.animator().animateZoom(300, 2, pivotX, pivotY);
+                            if (CanvasAdapter.platform.isDesktop())
+                                mMap.updateMap(true);
                         }
                         return Task.DONE;
                     }
@@ -538,6 +552,11 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
             mAngle = Math.atan2(dy, dx);
             mPrevPinchWidth = Math.sqrt(dx * dx + dy * dy);
         }
+    }
+
+    private boolean isDoubleTap(float mx, float my) {
+        float minSlop = (dpi / DOUBLE_TAP_SLOP);
+        return withinSquaredDist(mx, my, minSlop * minSlop);
     }
 
     private boolean isMinimalMove(float mx, float my) {

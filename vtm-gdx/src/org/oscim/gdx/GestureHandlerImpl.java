@@ -39,6 +39,7 @@ public class GestureHandlerImpl extends GestureDetector.GestureAdapter {
     @Override
     public boolean tap(float x, float y, int count, int button) {
         // Handle double tap zoom
+        // Not needed on desktop with MapEventLayer2
         if (button == Input.Buttons.LEFT) {
             if (count == 2) {
                 float pivotX = x - map.getWidth() / 2;
