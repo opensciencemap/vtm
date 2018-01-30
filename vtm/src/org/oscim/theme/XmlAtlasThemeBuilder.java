@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Longri
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -75,20 +75,21 @@ public class XmlAtlasThemeBuilder extends XmlThemeBuilder {
         return renderTheme;
     }
 
-    private static void replaceRuleSymbols(Rule rule, Map<Object, TextureRegion> regionMap, SymbolBuilder<?> symbolBuilder) {
+    private static void replaceRuleSymbols(Rule rule, Map<Object, TextureRegion> regionMap, SymbolBuilder<?> b) {
         for (int i = 0, n = rule.styles.length; i < n; i++) {
             RenderStyle style = rule.styles[i];
             if (style instanceof SymbolStyle) {
-                int hash = ((SymbolStyle) style).hash;
-                TextureRegion region = regionMap.get(hash);
-                if (region != null) {
-                    SymbolBuilder<?> b = symbolBuilder.reset();
-                    rule.styles[i] = b.texture(region).build();
-                }
+                SymbolStyle symbol = (SymbolStyle) style;
+                TextureRegion region = regionMap.get(symbol.hash);
+                if (region != null)
+                    rule.styles[i] = b.set(symbol)
+                            .bitmap(null)
+                            .texture(region)
+                            .build();
             }
         }
         for (Rule subRule : rule.subRules) {
-            replaceRuleSymbols(subRule, regionMap, symbolBuilder);
+            replaceRuleSymbols(subRule, regionMap, b);
         }
     }
 
