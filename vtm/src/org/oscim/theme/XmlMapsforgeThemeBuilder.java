@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
  *
@@ -1234,7 +1234,7 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
         b.colorLine(0xffd9d8d6);
         b.colorSide(0xeaecebe9);
         b.colorTop(0xeaf9f8f6);
-        RuleBuilder rule = new RuleBuilder(RuleBuilder.RuleType.POSITIVE, new String[]{"building"}, new String[]{});
+        RuleBuilder rule = new RuleBuilder(RuleBuilder.RuleType.POSITIVE, new String[]{"building", "building:part"}, new String[]{});
         rule.element(Rule.Element.WAY).zoom((byte) 17, Byte.MAX_VALUE).style(b);
         return rule;
     }
