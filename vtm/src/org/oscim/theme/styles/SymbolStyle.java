@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -27,6 +27,9 @@ import org.oscim.renderer.atlas.TextureRegion;
  */
 public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
+    public static final float REPEAT_START_DEFAULT = 30f;
+    public static final float REPEAT_GAP_DEFAULT = 200f;
+
     public final Bitmap bitmap;
     public final TextureRegion texture;
     public final int hash;
@@ -34,6 +37,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
     public final int symbolWidth;
     public final int symbolHeight;
     public final int symbolPercent;
+
+    public final boolean repeat;
+    public final float repeatStart;
+    public final float repeatGap;
 
     public SymbolStyle(Bitmap bitmap) {
         this(bitmap, null, 0);
@@ -55,6 +62,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         this.symbolWidth = 0;
         this.symbolHeight = 0;
         this.symbolPercent = 100;
+
+        this.repeat = false;
+        this.repeatStart = REPEAT_START_DEFAULT;
+        this.repeatGap = REPEAT_GAP_DEFAULT;
     }
 
     public SymbolStyle(SymbolBuilder<?> b) {
@@ -67,6 +78,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         this.symbolWidth = b.symbolWidth;
         this.symbolHeight = b.symbolHeight;
         this.symbolPercent = b.symbolPercent;
+
+        this.repeat = b.repeat;
+        this.repeatStart = b.repeatStart;
+        this.repeatGap = b.repeatGap;
     }
 
     @Override
@@ -100,6 +115,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         public int symbolHeight;
         public int symbolPercent;
 
+        public boolean repeat;
+        public float repeatStart;
+        public float repeatGap;
+
         public SymbolBuilder() {
         }
 
@@ -116,6 +135,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             this.symbolWidth = symbol.symbolWidth;
             this.symbolHeight = symbol.symbolHeight;
             this.symbolPercent = symbol.symbolPercent;
+
+            this.repeat = symbol.repeat;
+            this.repeatStart = symbol.repeatStart;
+            this.repeatGap = symbol.repeatGap;
 
             return self();
         }
@@ -150,6 +173,21 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             return self();
         }
 
+        public T repeat(boolean repeat) {
+            this.repeat = repeat;
+            return self();
+        }
+
+        public T repeatStart(float repeatStart) {
+            this.repeatStart = repeatStart;
+            return self();
+        }
+
+        public T repeatGap(float repeatGap) {
+            this.repeatGap = repeatGap;
+            return self();
+        }
+
         public T reset() {
             cat = null;
 
@@ -160,6 +198,10 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             symbolWidth = 0;
             symbolHeight = 0;
             symbolPercent = 100;
+
+            repeat = false;
+            repeatStart = REPEAT_START_DEFAULT;
+            repeatGap = REPEAT_GAP_DEFAULT;
 
             return self();
         }

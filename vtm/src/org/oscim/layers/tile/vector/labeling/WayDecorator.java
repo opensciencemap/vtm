@@ -1,6 +1,7 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -18,12 +19,93 @@
 package org.oscim.layers.tile.vector.labeling;
 
 import org.oscim.core.Tile;
+import org.oscim.renderer.bucket.SymbolItem;
 import org.oscim.renderer.bucket.TextItem;
+import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.geom.GeometryUtils;
 import org.oscim.utils.geom.LineClipper;
 
 public final class WayDecorator {
+
+    /**
+     * Mapsforge implementation.
+     */
+    public static void renderSymbol(LineClipper clipper, float[] coordinates, SymbolStyle symbol,
+                                    int pos, int len, LabelTileData ld) {
+        int skipPixels = (int) symbol.repeatStart;
+
+        // get the first way point coordinates
+        float previousX = coordinates[pos + 0];
+        float previousY = coordinates[pos + 1];
+
+        // draw the symbol on each way segment
+        float segmentLengthRemaining;
+        float segmentSkipPercentage;
+        float theta = 0;
+
+        for (int i = pos; i < pos + len - 2; i += 2) {
+            // get the current way point coordinates
+            float currentX = coordinates[i + 2];
+            float currentY = coordinates[i + 3];
+
+            // calculate the length of the current segment (Euclidean distance)
+            float diffX = currentX - previousX;
+            float diffY = currentY - previousY;
+            double segmentLengthInPixel = Math.sqrt(diffX * diffX + diffY * diffY);
+            segmentLengthRemaining = (float) segmentLengthInPixel;
+
+            while (segmentLengthRemaining - skipPixels > symbol.repeatStart) {
+                // calculate the percentage of the current segment to skip
+                segmentSkipPercentage = skipPixels / segmentLengthRemaining;
+
+                // move the previous point forward towards the current point
+                previousX += diffX * segmentSkipPercentage;
+                previousY += diffY * segmentSkipPercentage;
+
+                // TODO
+                /*if (rotate) {
+                    // if we do not rotate theta will be 0, which is correct
+                    theta = (float) Math.atan2(currentY - previousY, currentX - previousX);
+                }*/
+
+                float x = previousX;
+                float y = previousY;
+                if (x >= 0 && x <= Tile.SIZE && y >= 0 && y <= Tile.SIZE) {
+                    SymbolItem s = SymbolItem.pool.get();
+                    if (symbol.bitmap != null)
+                        s.set(x, y, symbol.bitmap, 0, true);
+                    else
+                        s.set(x, y, symbol.texture, 0, true);
+                    ld.symbols.push(s);
+                }
+
+                // check if the symbol should only be rendered once
+                if (!symbol.repeat) {
+                    return;
+                }
+
+                // recalculate the distances
+                diffX = currentX - previousX;
+                diffY = currentY - previousY;
+
+                // recalculate the remaining length of the current segment
+                segmentLengthRemaining -= skipPixels;
+
+                // set the amount of pixels to skip before repeating the symbol
+                skipPixels = (int) symbol.repeatGap;
+            }
+
+            skipPixels -= segmentLengthRemaining;
+            if (skipPixels < symbol.repeatStart) {
+                skipPixels = (int) symbol.repeatStart;
+            }
+
+            // set the previous way point coordinates for the next loop
+            previousX = currentX;
+            previousY = currentY;
+        }
+    }
 
     public static void renderText(LineClipper clipper, float[] coordinates, String label,
                                   TextStyle text, int pos, int len, LabelTileData ld) {
@@ -82,7 +164,7 @@ public final class WayDecorator {
 
             int last = i;
 
-            // calculate the length of the current segment (Euclidian distance)
+            // calculate the length of the current segment (Euclidean distance)
             float vx = prevX - curX;
             float vy = prevY - curY;
             if (vx == 0 && vy == 0)

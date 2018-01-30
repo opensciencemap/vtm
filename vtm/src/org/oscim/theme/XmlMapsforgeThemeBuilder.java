@@ -1123,6 +1123,15 @@ public class XmlMapsforgeThemeBuilder extends DefaultHandler {
             else if ("symbol-scaling".equals(name))
                 ; // no-op
 
+            else if ("repeat".equals(name))
+                b.repeat(Boolean.parseBoolean(value));
+
+            else if ("repeat-start".equals(name))
+                b.repeatStart = Float.parseFloat(value) * mScale;
+
+            else if ("repeat-gap".equals(name))
+                b.repeatGap = Float.parseFloat(value) * mScale;
+
             else
                 logUnknownAttribute(elementName, name, value, i);
         }

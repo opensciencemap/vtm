@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
  *
@@ -1099,6 +1099,15 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             else if ("symbol-scaling".equals(name))
                 ; // no-op
+
+            else if ("repeat".equals(name))
+                b.repeat(Boolean.parseBoolean(value));
+
+            else if ("repeat-start".equals(name))
+                b.repeatStart = Float.parseFloat(value) * mScale;
+
+            else if ("repeat-gap".equals(name))
+                b.repeatGap = Float.parseFloat(value) * mScale;
 
             else
                 logUnknownAttribute(elementName, name, value, i);

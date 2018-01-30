@@ -123,7 +123,16 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
 
             LabelTileData ld = get(tile);
             if (element.type == LINE) {
-                // TODO
+                int offset = 0;
+                for (int i = 0, n = element.index.length; i < n; i++) {
+                    int length = element.index[i];
+                    if (length < 4)
+                        break;
+
+                    WayDecorator.renderSymbol(null, element.points, symbol,
+                            offset, length, ld);
+                    offset += length;
+                }
             } else if (element.type == POLY) {
                 PointF centroid = element.labelPosition;
                 if (!Parameters.POLY_SYMBOL) {
