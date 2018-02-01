@@ -17,6 +17,11 @@ package org.oscim.utils;
 public final class Parameters {
 
     /**
+     * If true the <code>Animator2</code> will be used instead of default <code>Animator</code>.
+     */
+    public static boolean ANIMATOR2 = false;
+
+    /**
      * Allow custom tile size instead of the calculated one.
      */
     public static boolean CUSTOM_TILE_SIZE = false;

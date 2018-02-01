@@ -21,14 +21,17 @@
 package org.oscim.layers;
 
 import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.Platform;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
 import org.oscim.event.Gesture;
 import org.oscim.event.MotionEvent;
+import org.oscim.map.Animator2;
 import org.oscim.map.Map;
 import org.oscim.map.Map.InputListener;
 import org.oscim.map.ViewController;
+import org.oscim.utils.Parameters;
 import org.oscim.utils.async.Task;
 
 import static org.oscim.backend.CanvasAdapter.dpi;
@@ -569,8 +572,14 @@ public class MapEventLayer2 extends AbstractMapEventLayer implements InputListen
         int w = Tile.SIZE * 5;
         int h = Tile.SIZE * 5;
 
-        mMap.animator().animateFling(velocityX * 2, velocityY * 2,
-                -w, w, -h, h);
+        if (Parameters.ANIMATOR2) {
+            if (!CanvasAdapter.platform.isDesktop() && CanvasAdapter.platform != Platform.WEBGL) {
+                velocityX *= 2;
+                velocityY *= 2;
+            }
+            ((Animator2) mMap.animator()).animateFlingScroll(velocityX, velocityY, -w, w, -h, h);
+        } else
+            mMap.animator().animateFling(velocityX * 2, velocityY * 2, -w, w, -h, h);
         return true;
     }
 
