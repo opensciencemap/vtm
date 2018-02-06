@@ -33,7 +33,7 @@ public class MapzenTest extends GdxMapImpl {
         UrlTileSource tileSource = OSciMap4TileSource.builder()
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .url("https://vector.mapzen.com/osm/v0.8/all")
-                .apiKey("vector-tiles-xxxxxxx") // Put a proper API key
+                .apiKey("xxxxxxx") // Put a proper API key
                 .build();
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);

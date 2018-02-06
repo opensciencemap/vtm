@@ -46,7 +46,7 @@ public class MapzenGeojsonTest extends GdxMapApp {
         OkHttpEngine.OkHttpFactory factory = new OkHttpEngine.OkHttpFactory(builder);
 
         UrlTileSource tileSource = MapzenGeojsonTileSource.builder()
-                .apiKey("mapzen-xxxxxxx") // Put a proper API key
+                .apiKey("xxxxxxx") // Put a proper API key
                 .httpFactory(factory)
                 //.locale("en")
                 .build();

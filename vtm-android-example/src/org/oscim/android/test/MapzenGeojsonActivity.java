@@ -37,7 +37,7 @@ public class MapzenGeojsonActivity extends MapActivity {
         super.onCreate(savedInstanceState);
 
         UrlTileSource tileSource = MapzenGeojsonTileSource.builder()
-                .apiKey("mapzen-xxxxxxx") // Put a proper API key
+                .apiKey("xxxxxxx") // Put a proper API key
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 //.locale("en")
                 .build();
