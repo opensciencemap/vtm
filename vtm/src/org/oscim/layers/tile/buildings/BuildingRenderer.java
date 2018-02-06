@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -142,17 +143,14 @@ public class BuildingRenderer extends ExtrusionRenderer {
                     compiled = true;
                 }
             }
-        } else if (zoom == mZoomMax + 1) {
-            /* special case for s3db: render from parent tiles */
+        }
+        /*else if (zoom == mZoomMax + 1) {
+            // special case for s3db: render from parent tiles
             for (int i = 0; i < mTileSet.cnt; i++) {
                 MapTile t = tiles[i].node.parent();
 
                 if (t == null)
                     continue;
-
-                //    for (MapTile c : mTiles)
-                //        if (c == t)
-                //            continue O;
 
                 ExtrusionBuckets ebs = getBuckets(t);
                 if (ebs == null)
@@ -166,7 +164,8 @@ public class BuildingRenderer extends ExtrusionRenderer {
                     compiled = true;
                 }
             }
-        } else if (zoom == mZoomMin - 1) {
+        }*/
+        else if (zoom == mZoomMin - 1) {
             /* check if proxy children are ready */
             for (int i = 0; i < mTileSet.cnt; i++) {
                 MapTile t = tiles[i];
