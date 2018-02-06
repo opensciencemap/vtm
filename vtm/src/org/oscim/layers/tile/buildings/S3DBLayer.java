@@ -159,7 +159,7 @@ public class S3DBLayer extends BuildingLayer {
         List<BuildingElement> tileBuildings = mBuildings.get(tile.hashCode());
         Set<BuildingElement> rootBuildings = new HashSet<>();
         for (BuildingElement partBuilding : tileBuildings) {
-            if (!partBuilding.isPart)
+            if (!partBuilding.element.isBuildingPart())
                 continue;
 
             TagSet partTags = partBuilding.element.tags;
@@ -170,7 +170,7 @@ public class S3DBLayer extends BuildingLayer {
 
             // Search buildings which inherit parts
             for (BuildingElement rootBuilding : tileBuildings) {
-                if (rootBuilding.isPart
+                if (rootBuilding.element.isBuildingPart()
                         || !(refId.equals(rootBuilding.element.tags.getValue(Tag.KEY_ID))))
                     continue;
 
