@@ -2,6 +2,7 @@
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
  * Copyright 2017 Gustl22
+ * Copyright 2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -57,6 +58,16 @@ public class MapElement extends GeometryBuffer {
         this.tags.set(element.tags.asArray());
         this.labelPosition = element.labelPosition;
         this.setLayer(element.layer);
+    }
+
+    public boolean isBuilding() {
+        return tags.containsKey(Tag.KEY_BUILDING)
+                || "building".equals(tags.getValue("kind")); // Mapzen
+    }
+
+    public boolean isBuildingPart() {
+        return tags.containsKey(Tag.KEY_BUILDING_PART)
+                || "building_part".equals(tags.getValue("kind")); // Mapzen
     }
 
     public void setLabelPosition(float x, float y) {

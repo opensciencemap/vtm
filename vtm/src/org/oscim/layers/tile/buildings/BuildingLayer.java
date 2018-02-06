@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Robin Boldt
  * Copyright 2017 Gustl22
  *
@@ -103,17 +103,14 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook {
 
         // Filter all building elements
         // TODO #TagFromTheme: load from theme or decode tags to generalize mapsforge tags
-        boolean isBuildingPart = element.tags.containsKey(Tag.KEY_BUILDING_PART)
-                || (element.tags.containsKey("kind") && element.tags.getValue("kind").equals("building_part")); // Mapzen
-        if (element.tags.containsKey(Tag.KEY_BUILDING) || isBuildingPart
-                || (element.tags.containsKey("kind") && element.tags.getValue("kind").equals("building"))) { // Mapzen
+        if (element.isBuilding() || element.isBuildingPart()) {
             List<BuildingElement> buildingElements = mBuildings.get(tile.hashCode());
             if (buildingElements == null) {
                 buildingElements = new ArrayList<>();
                 mBuildings.put(tile.hashCode(), buildingElements);
             }
             element = new MapElement(element); // Deep copy, because element will be cleared
-            buildingElements.add(new BuildingElement(element, extrusion, isBuildingPart));
+            buildingElements.add(new BuildingElement(element, extrusion, element.isBuildingPart()));
             return true;
         }
 
