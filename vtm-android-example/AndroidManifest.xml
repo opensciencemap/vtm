@@ -85,6 +85,12 @@
             android:name=".NewGesturesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".NextzenGeojsonActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".NextzenMvtActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".OpenMapTilesMvtActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

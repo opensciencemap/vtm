@@ -4,6 +4,7 @@
 
 - S3DB layer [#475](https://github.com/mapsforge/vtm/pull/475)
 - vtm-mvt module with MVT tile decoder [#481](https://github.com/mapsforge/vtm/pull/481)
+- Nextzen MVT / GeoJSON vector tiles [#498](https://github.com/mapsforge/vtm/issues/498)
 - OpenMapTiles MVT vector tiles [#482](https://github.com/mapsforge/vtm/issues/482)
 - Render themes: symbols on lines [#495](https://github.com/mapsforge/vtm/issues/495)
 - Render themes: styles improvements [#479](https://github.com/mapsforge/vtm/pull/479)
