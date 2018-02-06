@@ -19,8 +19,8 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 - Support for multiple tile sources:
   - OpenScienceMap vector tiles
   - Mapsforge vector maps
-  - Mapbox vector tiles
-  - GeoJSON vector tiles
+  - Mapbox vector tiles (e.g. Mapzen, Nextzen, OpenMapTiles)
+  - GeoJSON vector tiles (e.g. Mapzen, Nextzen)
   - Raster tiles: any quadtree-scheme tiles as texture
 - Backends:
   - Android
