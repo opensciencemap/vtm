@@ -16,9 +16,9 @@ package org.oscim.android.test;
 
 import org.oscim.utils.Parameters;
 
-public class NewGesturesActivity extends MarkerOverlayActivity {
+public class MapEventLayer2Activity extends MarkerOverlayActivity {
 
-    public NewGesturesActivity() {
+    public MapEventLayer2Activity() {
         super();
         Parameters.MAP_EVENT_LAYER2 = true;
     }

@@ -17,12 +17,12 @@ package org.oscim.test;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.utils.Parameters;
 
-public class NewGesturesTest extends MarkerLayerTest {
+public class MapEventLayer2Test extends MarkerLayerTest {
 
     public static void main(String[] args) {
         Parameters.MAP_EVENT_LAYER2 = true;
 
         GdxMapApp.init();
-        GdxMapApp.run(new NewGesturesTest());
+        GdxMapApp.run(new MapEventLayer2Test());
     }
 }

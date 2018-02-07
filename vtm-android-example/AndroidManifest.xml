@@ -52,6 +52,9 @@
             android:name=".LocationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
+            android:name=".MapEventLayer2Activity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
             android:name=".MapsforgeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
@@ -80,9 +83,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MultiMapViewActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".NewGesturesActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".NextzenGeojsonActivity"
