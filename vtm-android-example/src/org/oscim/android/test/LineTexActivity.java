@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -36,7 +36,7 @@ import java.util.List;
  * This is a very INEFFICIENT and somewhat less useful example for how to use
  * PathLayers!
  */
-public class LineTexActivity extends SimpleMapActivity {
+public class LineTexActivity extends BitmapTileActivity {
 
     private static final boolean ANIMATION = false;
 

@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +17,7 @@
  */
 package org.oscim.android.test;
 
+import android.os.Bundle;
 import android.widget.Toast;
 
 import org.oscim.backend.canvas.Bitmap;
@@ -29,21 +30,18 @@ import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map;
-import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.oscim.android.canvas.AndroidGraphics.drawableToBitmap;
 
-public class MarkerOverlayActivity extends SimpleMapActivity
+public class MarkerOverlayActivity extends MapActivity
         implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
 
     static final boolean BILLBOARDS = true;
@@ -51,17 +49,20 @@ public class MarkerOverlayActivity extends SimpleMapActivity
     ItemizedLayer<MarkerItem> mMarkerLayer;
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        createLayers();
+    }
+
     void createLayers() {
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
-        TileSource tileSource = OSciMap4TileSource.builder()
+        TileSource tileSource = DefaultSources.OPENSTREETMAP
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
-        VectorTileLayer l = mMap.setBaseMap(tileSource);
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        mMap.layers().add(new LabelLayer(mMap, l));
-        mMap.setTheme(VtmThemes.DEFAULT);
+        mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
         Bitmap bitmapPoi = drawableToBitmap(getResources().getDrawable(R.drawable.marker_poi));
         MarkerSymbol symbol;

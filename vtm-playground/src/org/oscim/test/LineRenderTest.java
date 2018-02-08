@@ -48,12 +48,6 @@ public class LineRenderTest extends GdxMapImpl {
     public void createLayers() {
         MapRenderer.setBackgroundColor(0xff000000);
 
-        /*TileSource ts = OSciMap4TileSource.builder()
-                .httpFactory(new OkHttpEngine.OkHttpFactory())
-                .build();*/
-        // ts.setOption("url", "http://opensciencemap.org/tiles/vtm");
-        // initDefaultLayers(ts, false, false, false);
-
         mMap.setMapPosition(0, 0, 1 << 4);
 
         GeometryBuffer g = mLine;

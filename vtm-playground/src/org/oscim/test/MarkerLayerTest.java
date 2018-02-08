@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -25,14 +25,11 @@ import org.oscim.layers.Layer;
 import org.oscim.layers.marker.ItemizedLayer;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map;
-import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,13 +49,10 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
             // Map events receiver
             mMap.layers().add(new MapEventsReceiver(mMap));
 
-            TileSource tileSource = OSciMap4TileSource.builder()
+            TileSource tileSource = DefaultSources.OPENSTREETMAP
                     .httpFactory(new OkHttpEngine.OkHttpFactory())
                     .build();
-            VectorTileLayer l = mMap.setBaseMap(tileSource);
-            mMap.layers().add(new BuildingLayer(mMap, l));
-            mMap.layers().add(new LabelLayer(mMap, l));
-            mMap.setTheme(VtmThemes.DEFAULT);
+            mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
             mMap.setMapPosition(0, 0, 1 << 2);
 

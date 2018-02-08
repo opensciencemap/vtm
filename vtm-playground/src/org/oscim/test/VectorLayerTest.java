@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -18,29 +18,23 @@ package org.oscim.test;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.layers.vector.VectorLayer;
 import org.oscim.layers.vector.geometries.PointDrawable;
 import org.oscim.layers.vector.geometries.Style;
-import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
+import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.utils.ColorUtil;
 
 public class VectorLayerTest extends GdxMapApp {
 
     @Override
     public void createLayers() {
-        TileSource tileSource = OSciMap4TileSource.builder()
+        TileSource tileSource = DefaultSources.OPENSTREETMAP
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
-        VectorTileLayer l = mMap.setBaseMap(tileSource);
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        mMap.layers().add(new LabelLayer(mMap, l));
-        mMap.setTheme(VtmThemes.DEFAULT);
+        mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
         mMap.setMapPosition(0, 0, 1 << 2);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -22,9 +22,8 @@ import android.os.Bundle;
 
 import org.oscim.core.MapPosition;
 import org.oscim.layers.LocationLayer;
-import org.oscim.renderer.LocationRenderer;
 
-public class LocationActivity extends SimpleMapActivity implements LocationListener {
+public class LocationActivity extends BitmapTileActivity implements LocationListener {
     private LocationLayer locationLayer;
     private LocationManager locationManager;
     private final MapPosition mapPosition = new MapPosition();
