@@ -10,8 +10,10 @@
 - Render themes: styles improvements [#479](https://github.com/mapsforge/vtm/pull/479)
 - Internal render themes improvements [#488](https://github.com/mapsforge/vtm/pull/488)
 - Map view roll [#474](https://github.com/mapsforge/vtm/pull/474)
-- Physical fling implementation [#497](https://github.com/mapsforge/vtm/pull/497)
+- Physical fling and fling on rotation / scale [#497](https://github.com/mapsforge/vtm/pull/497) [#499](https://github.com/mapsforge/vtm/pull/499)
+  - `Parameters.ANIMATOR2 = true;`
 - Polygon symbols default disabled [#405](https://github.com/mapsforge/vtm/issues/405)
+  - `Parameters.POLY_SYMBOL = true;`
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)
@@ -52,6 +54,7 @@
   - BuildingLayer expects height tags in meters
 - Polygon symbol positioning [#405](https://github.com/mapsforge/vtm/issues/405)
 - PolyLabel default disabled [#402](https://github.com/mapsforge/vtm/issues/402)
+  - `Parameters.POLY_LABEL = true;`
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Feature parameters [#403](https://github.com/mapsforge/vtm/issues/403)
 - vtm-android-gdx module enhancements [#435](https://github.com/mapsforge/vtm/issues/435)
@@ -64,11 +67,13 @@
 ## Version 0.8.0 (2017-07-19)
 
 - Real time (SVG) texture atlas [#63](https://github.com/mapsforge/vtm/issues/63)
+  - `Parameters.TEXTURE_ATLAS = true;`
 - Marker clustering [#312](https://github.com/mapsforge/vtm/issues/312)
 - Osmagray theme [#300](https://github.com/mapsforge/vtm/issues/300)
 - Symbol rotation [#294](https://github.com/mapsforge/vtm/issues/294)
 - Location renderer improvements [#317](https://github.com/mapsforge/vtm/issues/317)
 - POT textures [#334](https://github.com/mapsforge/vtm/issues/334)
+  - `Parameters.POT_TEXTURES = true;`
 - OkHttp external cache [#135](https://github.com/mapsforge/vtm/issues/135)
 - Texture atlas improvements [#301](https://github.com/mapsforge/vtm/pull/301) [#304](https://github.com/mapsforge/vtm/pull/304)
 - vtm-json module [#367](https://github.com/mapsforge/vtm/issues/367)
@@ -89,6 +94,7 @@
 
 - Mapsforge multiple map files [#208](https://github.com/mapsforge/vtm/issues/208)
 - New gestures implementation [#253](https://github.com/mapsforge/vtm/issues/253)
+  - `Parameters.MAP_EVENT_LAYER2 = true;`
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
 - vtm-web modules update [#51](https://github.com/mapsforge/vtm/issues/51)
 - Mapzen MVT vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
@@ -124,6 +130,7 @@
 - Location renderer and layer [#171](https://github.com/mapsforge/vtm/issues/171)
 - Map scale bar [#84](https://github.com/mapsforge/vtm/issues/84)
 - Tile size based on scale factor [#183](https://github.com/mapsforge/vtm/issues/183)
+  - `Parameters.CUSTOM_TILE_SIZE = true;`
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Render theme resources optional location prefixes [#66](https://github.com/mapsforge/vtm/issues/66)
