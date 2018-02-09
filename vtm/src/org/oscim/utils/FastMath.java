@@ -74,6 +74,17 @@ public class FastMath {
         return (value < 0f ? 0f : (value > 1f ? 1f : value));
     }
 
+    /**
+     * Returns normalized radian in range of -PI to +PI
+     */
+    public static double clampRadian(double radian) {
+        while (radian > Math.PI)
+            radian -= 2 * Math.PI;
+        while (radian < -Math.PI)
+            radian += 2 * Math.PI;
+        return radian;
+    }
+
     public static byte clampToByte(int value) {
         return (byte) (value < 0 ? 0 : (value > 255 ? 255 : value));
     }

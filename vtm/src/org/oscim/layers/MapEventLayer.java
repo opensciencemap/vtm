@@ -32,6 +32,7 @@ import org.oscim.map.Animator2;
 import org.oscim.map.Map;
 import org.oscim.map.Map.InputListener;
 import org.oscim.map.ViewController;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.Parameters;
 
 import static org.oscim.backend.CanvasAdapter.dpi;
@@ -366,10 +367,11 @@ public class MapEventLayer extends AbstractMapEventLayer implements InputListene
                     deltaPinch = 0;
 
                     if (Parameters.ANIMATOR2) {
+                        double clampedRotation = FastMath.clampRadian(rotateBy);
                         if (mRotateTracker.mNumSamples < 0)
-                            mRotateTracker.start(mRotateTracker.mLastX + (float) da, 0, e.getTime());
+                            mRotateTracker.start(mRotateTracker.mLastX + (float) clampedRotation, 0, e.getTime());
                         else
-                            mRotateTracker.update(mRotateTracker.mLastX + (float) da, 0, e.getTime());
+                            mRotateTracker.update(mRotateTracker.mLastX + (float) clampedRotation, 0, e.getTime());
                     }
                 }
             } else {
