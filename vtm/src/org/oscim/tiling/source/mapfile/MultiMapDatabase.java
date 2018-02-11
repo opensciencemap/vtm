@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,6 +18,7 @@ import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.TileDataSink;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +26,8 @@ import java.util.List;
 public class MultiMapDatabase implements ITileDataSource {
 
     private final List<MapDatabase> mapDatabases = new ArrayList<>();
-    private final MultiMapFileTileSource tileSource;
 
-    public MultiMapDatabase(MultiMapFileTileSource tileSource) {
-        this.tileSource = tileSource;
+    public MultiMapDatabase() {
     }
 
     public boolean add(MapDatabase mapDatabase) {
@@ -39,13 +38,13 @@ public class MultiMapDatabase implements ITileDataSource {
     }
 
     @Override
-    public void query(MapTile tile, ITileDataSink mapDataSink) {
-        MultiMapDataSink multiMapDataSink = new MultiMapDataSink(mapDataSink);
+    public void query(MapTile tile, ITileDataSink sink) {
+        TileDataSink dataSink = new TileDataSink(sink);
         for (MapDatabase mapDatabase : mapDatabases) {
             if (mapDatabase.supportsTile(tile))
-                mapDatabase.query(tile, multiMapDataSink);
+                mapDatabase.query(tile, dataSink);
         }
-        mapDataSink.completed(multiMapDataSink.getResult());
+        sink.completed(dataSink.getResult());
     }
 
     @Override

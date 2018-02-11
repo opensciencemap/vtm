@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,6 +20,7 @@ package org.oscim.tiling.source.geojson;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.OverzoomTileDataSource;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
@@ -41,7 +42,7 @@ public abstract class GeojsonTileSource extends UrlTileSource {
 
     @Override
     public ITileDataSource getDataSource() {
-        return new UrlTileDataSource(this, new TileDecoder(this), getHttpEngine());
+        return new OverzoomTileDataSource(new UrlTileDataSource(this, new TileDecoder(this), getHttpEngine()), mOverZoom);
     }
 
     public Tag getFeatureTag() {

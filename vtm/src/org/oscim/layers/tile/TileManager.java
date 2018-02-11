@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
+ * Copyright 2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -14,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.oscim.layers.tile;
 
 import org.oscim.core.MapPosition;
@@ -153,12 +153,10 @@ public class TileManager {
         void onTileManagerEvent(Event event, MapTile tile);
     }
 
-    ;
-
     public TileManager(Map map, int cacheLimit) {
         mMap = map;
-        mMaxZoom = 20;
-        mMinZoom = 0;
+        mMaxZoom = map.viewport().getMaxZoomLevel();
+        mMinZoom = map.viewport().getMinZoomLevel();
         mCacheLimit = cacheLimit;
         mCacheReduce = 0;
 

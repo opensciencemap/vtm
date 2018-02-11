@@ -55,7 +55,6 @@ public class VectorTileLoader extends TileLoader implements RenderStyle.Callback
     protected static final byte LAYERS = 11;
 
     public static final byte STROKE_MIN_ZOOM = 12;
-    public static final byte STROKE_MAX_ZOOM = 17;
 
     protected IRenderTheme renderTheme;
 

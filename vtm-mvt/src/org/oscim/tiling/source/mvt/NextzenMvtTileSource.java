@@ -14,7 +14,10 @@
  */
 package org.oscim.tiling.source.mvt;
 
+import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSource;
+import org.oscim.tiling.OverzoomTileDataSource;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.UrlTileDataSource;
 import org.oscim.tiling.source.UrlTileSource;
 
@@ -27,8 +30,9 @@ public class NextzenMvtTileSource extends UrlTileSource {
         private String locale = "";
 
         public Builder() {
-            super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
+            super(DEFAULT_URL, DEFAULT_PATH, Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
             keyName("api_key");
+            overZoom(16);
         }
 
         public T locale(String locale) {
@@ -63,6 +67,6 @@ public class NextzenMvtTileSource extends UrlTileSource {
 
     @Override
     public ITileDataSource getDataSource() {
-        return new UrlTileDataSource(this, new MvtTileDecoder(locale), getHttpEngine());
+        return new OverzoomTileDataSource(new UrlTileDataSource(this, new MvtTileDecoder(locale), getHttpEngine()), mOverZoom);
     }
 }

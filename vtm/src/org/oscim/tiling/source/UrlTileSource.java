@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -19,6 +19,7 @@
 package org.oscim.tiling.source;
 
 import org.oscim.core.Tile;
+import org.oscim.map.Viewport;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.LwHttp.LwHttpFactory;
 
@@ -39,9 +40,13 @@ public abstract class UrlTileSource extends TileSource {
         protected Builder() {
         }
 
-        protected Builder(String url, String tilePath, int zoomMin, int zoomMax) {
+        protected Builder(String url, String tilePath) {
             this.url = url;
             this.tilePath = tilePath;
+        }
+
+        protected Builder(String url, String tilePath, int zoomMin, int zoomMax) {
+            this(url, tilePath);
             this.zoomMin = zoomMin;
             this.zoomMax = zoomMax;
         }
@@ -97,7 +102,7 @@ public abstract class UrlTileSource extends TileSource {
     }
 
     protected UrlTileSource(String urlString, String tilePath) {
-        this(urlString, tilePath, 0, 17);
+        this(urlString, tilePath, Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
     }
 
     protected UrlTileSource(String urlString, String tilePath, int zoomMin, int zoomMax) {
