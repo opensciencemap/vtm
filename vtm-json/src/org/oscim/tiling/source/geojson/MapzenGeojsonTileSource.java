@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  * Copyright 2017 Gustl22
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -17,6 +17,8 @@ package org.oscim.tiling.source.geojson;
 
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
+import org.oscim.map.Viewport;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.utils.FastMath;
 
@@ -32,8 +34,9 @@ public class MapzenGeojsonTileSource extends GeojsonTileSource {
         private String locale = "";
 
         public Builder() {
-            super(DEFAULT_URL, DEFAULT_PATH, 1, 17);
+            super(DEFAULT_URL, DEFAULT_PATH, Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
             keyName("api_key");
+            overZoom(16);
         }
 
         public T locale(String locale) {

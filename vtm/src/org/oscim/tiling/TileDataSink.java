@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -12,34 +12,32 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.mapfile;
+package org.oscim.tiling;
 
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.MapElement;
-import org.oscim.tiling.ITileDataSink;
-import org.oscim.tiling.QueryResult;
 
-class MultiMapDataSink implements ITileDataSink {
+public class TileDataSink implements ITileDataSink {
 
     private QueryResult result;
-    private final ITileDataSink tileDataSink;
+    private final ITileDataSink sink;
 
-    MultiMapDataSink(ITileDataSink tileDataSink) {
-        this.tileDataSink = tileDataSink;
+    public TileDataSink(ITileDataSink sink) {
+        this.sink = sink;
     }
 
-    QueryResult getResult() {
+    public QueryResult getResult() {
         return result;
     }
 
     @Override
     public void process(MapElement element) {
-        tileDataSink.process(element);
+        sink.process(element);
     }
 
     @Override
     public void setTileImage(Bitmap bitmap) {
-        tileDataSink.setTileImage(bitmap);
+        sink.setTileImage(bitmap);
     }
 
     @Override

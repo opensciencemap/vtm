@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2018 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.tiling.source.bitmap;
 
 import com.google.gwt.event.dom.client.ErrorEvent;
@@ -13,9 +30,11 @@ import org.oscim.gdx.client.GwtBitmap;
 import org.oscim.layers.tile.LoadDelayTask;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
+import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.QueryResult;
+import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
@@ -27,7 +46,7 @@ public class BitmapTileSource extends UrlTileSource {
     public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
 
         public Builder() {
-            super(null, "/{Z}/{X}/{Y}.png", 0, 17);
+            super(null, "/{Z}/{X}/{Y}.png", Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
         }
 
         public BitmapTileSource build() {
