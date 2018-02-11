@@ -90,6 +90,7 @@
             <xs:enumeration value="ele" />
             <xs:enumeration value="addr:housenumber" />
             <xs:enumeration value="addr_housenumber" /> <!-- Mapzen -->
+            <xs:enumeration value="housenumber" /> <!-- OpenMapTiles -->
             <xs:enumeration value="name" />
             <xs:enumeration value="ref" />
         </xs:restriction>

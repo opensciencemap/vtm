@@ -376,22 +376,39 @@
     </m>
 
     <!-- building -->
-    <m k="layer" v="building">
-        <m zoom-min="14">
-            <m closed="yes">
-                <area fade="14" use="building" />
+    <m k="layer" v="building|building:part">
+        <m v="building">
+            <m zoom-min="14">
+                <m closed="yes">
+                    <area fade="14" use="building" />
+                </m>
+                <m closed="no">
+                    <line fade="14" use="building" />
+                </m>
             </m>
+        </m>
+        <m v="building:part">
+            <m zoom-min="16">
+                <m closed="yes">
+                    <area fade="16" use="building" />
+                </m>
+                <m closed="no">
+                    <line fade="16" use="building" />
+                </m>
+            </m>
+        </m>
+        <m zoom-min="17">
+            <extrusion line-color="#ffd9d8d6" side-color="#eaecebe9" top-color="#eaf9f8f6" />
         </m>
     </m>
     <!-- housenumber -->
-    <!-- TODO it's weird that not all housenumbers are shown... also needed to put zoom-min to 14 -->
-    <!--<m k="layer" v="housenumber" zoom-min="14">
-        <caption style="bold" fill="#606060" k="housenumber" size="12" stroke="#ffffff"
-            stroke-width="2.0" />
-    </m>-->
-    <m k="layer" v="poi" zoom-min="14">
-        <m k="subclass">
+    <m k="layer" v="housenumber" zoom-min="17">
+        <caption style="bold" fill="#606060" font-family="condensed" k="housenumber" priority="10"
+            size="12" stroke="#ffffff" stroke-width="2.0" />
+    </m>
 
+    <m k="layer" v="poi">
+        <m k="subclass">
 
             <!-- Shop -->
             <m select="first" zoom-min="15">
@@ -401,7 +418,7 @@
                 <!--<m v="florist">
                     <symbol src="assets:symbols/shopping/florist.svg" />
                 </m>-->
-                <!--<m v="hairdresser" zoom-min="16">
+                <!--<m v="hairdresser">
                     <symbol src="assets:symbols/shopping/hairdresser.svg" />
                 </m>-->
                 <m v="supermarket|organic">
@@ -418,7 +435,7 @@
             </m>
 
             <!-- Tourism -->
-            <m select="first" zoom-min="14">
+            <m select="first" zoom-min="15">
                 <m v="alpine_hut">
                     <symbol src="assets:symbols/accommodation/alpinehut.svg" />
                 </m>
@@ -437,15 +454,17 @@
                 </m>
             </m>
 
-            <m v="viewpoint">
-                <symbol src="assets:symbols/custom/tourist/view_point.svg" />
-            </m>
-            <m v="museum">
-                <symbol src="assets:symbols/custom/tourist/museum.svg" />
-            </m>
+            <m select="first" zoom-min="15">
+                <m v="viewpoint">
+                    <symbol src="assets:symbols/custom/tourist/view_point.svg" />
+                </m>
+                <m v="museum">
+                    <symbol src="assets:symbols/custom/tourist/museum.svg" />
+                </m>
 
-            <m zoom-min="14">
-                <text use="caption-small-blue" />
+                <m select="when-matched">
+                    <text use="caption-small-blue" />
+                </m>
             </m>
         </m>
     </m>
