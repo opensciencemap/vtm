@@ -199,10 +199,7 @@ public class ViewController extends Viewport {
     public void setRotation(double degree) {
         ThreadUtils.assertMainThread();
 
-        while (degree > 180)
-            degree -= 360;
-        while (degree < -180)
-            degree += 360;
+        degree = FastMath.clampDegree(degree);
 
         mPos.bearing = (float) degree;
 
@@ -216,10 +213,7 @@ public class ViewController extends Viewport {
     public void setRoll(double degree) {
         ThreadUtils.assertMainThread();
 
-        while (degree > 180)
-            degree -= 360;
-        while (degree < -180)
-            degree += 360;
+        degree = FastMath.clampDegree(degree);
 
         mPos.roll = (float) degree;
 

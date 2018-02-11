@@ -24,7 +24,7 @@ import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.source.PbfDecoder;
-import org.oscim.utils.math.MathUtils;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.pool.Inlist;
 import org.oscim.utils.pool.Pool;
 import org.slf4j.Logger;
@@ -258,7 +258,7 @@ public class TileDecoder extends PbfDecoder {
                         && f.elem.tags.containsKey(Tag.KEY_AREA)) {
                     float volume = Float.parseFloat(f.elem.tags.getValue(Tag.KEY_VOLUME));
                     float area = Float.parseFloat(f.elem.tags.getValue(Tag.KEY_AREA));
-                    String heightStr = String.valueOf(MathUtils.round2(volume / area));
+                    String heightStr = String.valueOf(FastMath.round2(volume / area));
                     f.elem.tags.add(new Tag(Tag.KEY_HEIGHT, heightStr, false));
                 }
             }
