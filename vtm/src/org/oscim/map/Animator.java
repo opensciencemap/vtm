@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Izumi Kawashima
  * Copyright 2017 Wolfgang Schramm
  * Copyright 2018 Gustl22
@@ -167,7 +167,11 @@ public class Animator {
     }
 
     public void animateTo(GeoPoint p) {
-        animateTo(500, p, 1, true, Easing.Type.LINEAR);
+        animateTo(500, p);
+    }
+
+    public void animateTo(long duration, GeoPoint p) {
+        animateTo(duration, p, 1, true, Easing.Type.LINEAR);
     }
 
     public void animateTo(long duration, MapPosition pos) {
