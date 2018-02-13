@@ -75,6 +75,10 @@ public abstract class TileSource {
         }
 
         public abstract TileSource build();
+
+        public String getName() {
+            return name;
+        }
     }
 
     // FIXME Same as BuildingLayer.MAX_ZOOM
