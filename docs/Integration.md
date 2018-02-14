@@ -67,16 +67,14 @@ implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
 implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
 ```
 
-### Optional
-
-- JTS geometries
+### JTS geometries
 
 ```groovy
 implementation 'org.mapsforge:vtm-jts:[CURRENT-VERSION]'
 implementation 'org.locationtech.jts:jts-core:1.15.0'
 ```
 
-- Online tiles
+### Online tiles
 
 ```groovy
 implementation 'org.mapsforge:vtm-http:[CURRENT-VERSION]'
@@ -84,7 +82,7 @@ implementation 'com.squareup.okhttp3:okhttp:3.8.0'
 implementation 'com.squareup.okio:okio:1.13.0'
 ```
 
-- Mapbox vector tiles
+### Mapbox vector tiles
 
 ```groovy
 implementation 'org.mapsforge:vtm-mvt:[CURRENT-VERSION]'
@@ -93,7 +91,7 @@ implementation 'com.wdtinc:mapbox-vector-tile:3.0.0'
 implementation 'org.locationtech.jts:jts-core:1.15.0'
 ```
 
-- GeoJSON vector tiles
+### GeoJSON vector tiles
 
 ```groovy
 implementation 'org.mapsforge:vtm-json:[CURRENT-VERSION]'
@@ -102,7 +100,7 @@ implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
 implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
 ```
 
-- jeo (indoor maps)
+### jeo (indoor maps)
 
 Add _first_ the Boundless repository:
 ```groovy
