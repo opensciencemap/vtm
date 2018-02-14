@@ -102,6 +102,33 @@ implementation 'com.fasterxml.jackson.core:jackson-core:2.8.4'
 implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
 ```
 
+- jeo (indoor maps)
+
+Add _first_ the Boundless repository:
+```groovy
+repositories {
+    maven { url 'https://repo.boundlessgeo.com/main/' }
+    jcenter()
+    ...
+}
+```
+
+```groovy
+implementation 'org.mapsforge:vtm-jeo:[CURRENT-VERSION]'
+implementation('org.jeo:jeo:0-SNAPSHOT') {
+    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+implementation('org.jeo:jeo-carto:0-SNAPSHOT') {
+    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+implementation('org.jeo:jeo-render:0-SNAPSHOT') {
+    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+implementation 'org.osgeo:proj4j:0.1.0:jeo'
+implementation 'com.metaweb:lessen:1.0'
+implementation 'com.vividsolutions:jts:1.13'
+```
+
 ## Snapshots
 
 We publish SNAPSHOT builds to Sonatype OSS Repository Hosting.
