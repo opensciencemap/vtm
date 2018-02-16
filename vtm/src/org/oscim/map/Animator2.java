@@ -46,17 +46,17 @@ public class Animator2 extends Animator {
     private static final float DEFAULT_MIN_VISIBLE_CHANGE_SCALE = 1f;
 
     /**
-     * The friction scalar for fling movements (1 as default).
+     * The friction scalar for fling movements (1 as base).
      */
     public static float FLING_FRICTION_MOVE = 1.0f;
 
     /**
-     * The friction scalar for fling rotations (1.2 as default).
+     * The friction scalar for fling rotations (1 as base).
      */
     public static float FLING_FRICTION_ROTATE = 1.2f;
 
     /**
-     * The friction scalar for fling scales (1.2 as default).
+     * The friction scalar for fling scales (1 as base).
      */
     public static float FLING_FRICTION_SCALE = 1.2f;
 
