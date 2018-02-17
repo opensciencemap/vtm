@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -58,11 +58,11 @@ public class PoiSearchActivity extends MapsforgeActivity implements ItemizedLaye
 
     private static final Logger log = LoggerFactory.getLogger(PoiSearchActivity.class);
 
-    private static String POI_FILE;
     private static final String POI_CATEGORY = "Restaurants";
     private static final int SELECT_POI_FILE = MapsforgeActivity.SELECT_THEME_FILE + 1;
 
     private ItemizedLayer<MarkerItem> mMarkerLayer;
+    private PoiPersistenceManager mPersistenceManager;
 
     public static class PoiFilePicker extends FilePicker {
         public PoiFilePicker() {
@@ -76,6 +76,14 @@ public class PoiSearchActivity extends MapsforgeActivity implements ItemizedLaye
 
         // Map events receiver
         mMap.layers().add(new PoiSearchActivity.MapEventsReceiver(mMap));
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mPersistenceManager != null)
+            mPersistenceManager.close();
+
+        super.onDestroy();
     }
 
     @Override
@@ -99,7 +107,8 @@ public class PoiSearchActivity extends MapsforgeActivity implements ItemizedLaye
                 return;
             }
 
-            POI_FILE = intent.getStringExtra(FilePicker.SELECTED_FILE);
+            String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
+            mPersistenceManager = AndroidPoiPersistenceManagerFactory.getPoiPersistenceManager(file);
 
             Bitmap bitmap = drawableToBitmap(getResources().getDrawable(R.drawable.marker_green));
             MarkerSymbol symbol = new MarkerSymbol(bitmap, MarkerSymbol.HotspotPlace.BOTTOM_CENTER);
@@ -151,22 +160,16 @@ public class PoiSearchActivity extends MapsforgeActivity implements ItemizedLaye
         @Override
         protected Collection<PointOfInterest> doInBackground(BoundingBox... params) {
             // Search POI
-            PoiPersistenceManager persistenceManager = null;
             try {
-                persistenceManager = AndroidPoiPersistenceManagerFactory.getPoiPersistenceManager(POI_FILE);
-                PoiCategoryManager categoryManager = persistenceManager.getCategoryManager();
+                PoiCategoryManager categoryManager = mPersistenceManager.getCategoryManager();
                 PoiCategoryFilter categoryFilter = new ExactMatchPoiCategoryFilter();
                 categoryFilter.addCategory(categoryManager.getPoiCategoryByTitle(category));
                 org.mapsforge.core.model.BoundingBox bb = new org.mapsforge.core.model.BoundingBox(
                         params[0].getMinLatitude(), params[0].getMinLongitude(),
                         params[0].getMaxLatitude(), params[0].getMaxLongitude());
-                return persistenceManager.findInRect(bb, categoryFilter, null, Integer.MAX_VALUE);
+                return mPersistenceManager.findInRect(bb, categoryFilter, null, Integer.MAX_VALUE);
             } catch (Throwable t) {
                 log.error(t.getMessage(), t);
-            } finally {
-                if (persistenceManager != null) {
-                    persistenceManager.close();
-                }
             }
             return null;
         }
