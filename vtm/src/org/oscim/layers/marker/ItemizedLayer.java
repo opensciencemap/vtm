@@ -2,7 +2,7 @@
  * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
  * 
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Stephan Leuschner 
  * Copyright 2016 Pedinel
  *
@@ -81,53 +81,53 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
     }
 
     @Override
-    protected Item createItem(int index) {
+    protected synchronized Item createItem(int index) {
         return mItemList.get(index);
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return Math.min(mItemList.size(), mDrawnItemsLimit);
     }
 
-    public boolean addItem(Item item) {
+    public synchronized boolean addItem(Item item) {
         final boolean result = mItemList.add(item);
         populate();
         return result;
     }
 
-    public void addItem(int location, Item item) {
+    public synchronized void addItem(int location, Item item) {
         mItemList.add(location, item);
     }
 
-    public boolean addItems(Collection<Item> items) {
+    public synchronized boolean addItems(Collection<Item> items) {
         final boolean result = mItemList.addAll(items);
         populate();
         return result;
     }
 
-    public List<Item> getItemList() {
+    public synchronized List<Item> getItemList() {
         return mItemList;
     }
 
-    public void removeAllItems() {
+    public synchronized void removeAllItems() {
         removeAllItems(true);
     }
 
-    public void removeAllItems(boolean withPopulate) {
+    public synchronized void removeAllItems(boolean withPopulate) {
         mItemList.clear();
         if (withPopulate) {
             populate();
         }
     }
 
-    public boolean removeItem(Item item) {
+    public synchronized boolean removeItem(Item item) {
         final boolean result = mItemList.remove(item);
         populate();
         return result;
     }
 
-    public Item removeItem(int position) {
+    public synchronized Item removeItem(int position) {
         final Item result = mItemList.remove(position);
         populate();
         return result;

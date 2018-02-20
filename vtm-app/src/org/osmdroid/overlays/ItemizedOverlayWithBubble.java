@@ -179,7 +179,7 @@ public class ItemizedOverlayWithBubble<Item extends MarkerItem> extends
     }
 
     @Override
-    public boolean removeItem(final Item item) {
+    public synchronized boolean removeItem(final Item item) {
         boolean result = super.removeItem(item);
         if (mItemWithBubble == item) {
             hideBubble();
@@ -188,7 +188,7 @@ public class ItemizedOverlayWithBubble<Item extends MarkerItem> extends
     }
 
     @Override
-    public void removeAllItems() {
+    public synchronized void removeAllItems() {
         super.removeAllItems();
         hideBubble();
     }

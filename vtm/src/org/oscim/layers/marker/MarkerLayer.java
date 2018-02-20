@@ -6,7 +6,7 @@
  * 
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -71,7 +71,7 @@ public abstract class MarkerLayer<Item extends MarkerInterface> extends Layer {
      * should call this as soon as it has data, before anything else gets
      * called.
      */
-    public final void populate() {
+    public final synchronized void populate() {
         mMarkerRenderer.populate(size());
     }
 
@@ -85,7 +85,7 @@ public abstract class MarkerLayer<Item extends MarkerInterface> extends Layer {
      *
      * @param item
      */
-    public void setFocus(Item item) {
+    public synchronized void setFocus(Item item) {
         mFocusedItem = item;
     }
 
@@ -93,7 +93,7 @@ public abstract class MarkerLayer<Item extends MarkerInterface> extends Layer {
      * @return the currently-focused item, or null if no item is currently
      * focused.
      */
-    public Item getFocus() {
+    public synchronized Item getFocus() {
         return mFocusedItem;
     }
 
