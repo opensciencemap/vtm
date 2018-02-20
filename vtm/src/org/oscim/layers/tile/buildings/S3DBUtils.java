@@ -976,8 +976,11 @@ public final class S3DBUtils {
             boolean hasOutlines = calcOutlines(specialParts, minHeight, maxHeight);
 
             // Use 3 points that match the angle the best and use as plane
-            float[] min = null, max1 = null, max2 = null;
-            float minDif = Float.MAX_VALUE, maxDif1 = 0, maxDif2 = 0;
+            float[] min1 = null, min2 = null, max1 = null, max2 = null;
+            float minDif1, minDif2, maxDif1, maxDif2;
+            minDif1 = minDif2 = Float.MAX_VALUE;
+            maxDif1 = maxDif2 = 0;
+
             if (calcFlatMesh(element, maxHeight)) {
                 // To positive radian
                 roofDegree = ((MathUtils.degreesToRadians * roofDegree) + MathUtils.PI2) % MathUtils.PI2;
@@ -1002,20 +1005,36 @@ public final class S3DBUtils {
                         max2 = point;
                         maxDif2 = currentDiff;
                     }
-                    if (min == null || currentDiff < minDif) {
-                        min = point;
-                        minDif = currentDiff;
+                    if (min1 == null || currentDiff < minDif1) {
+                        if (min1 != null) {
+                            min2 = min1;
+                            minDif2 = minDif1;
+                        }
+                        min1 = point;
+                        minDif1 = currentDiff;
+                    } else if (min2 == null || currentDiff < minDif2) {
+                        min2 = point;
+                        minDif2 = currentDiff;
                     }
                 }
-                if (min == max1) return false;
+                if (min1 == max1) return false;
 
-                // Calc intersection points of ground points with plane of the three points
-                float[] zVector = new float[]{0, 0, 1}; // Calc only height intersection
-                min[2] = minHeight;
-                max1[2] = max2[2] = maxHeight;
-                float[] normal = GeometryUtils.normalOfPlane(min, max1, max2);
+                float[] normal, zVector = new float[]{0, 0, 1}; // height intersection
+                min1[2] = minHeight;
+                max1[2] = maxHeight;
+
+                // Use lower two points if they promise better results (e.g. at triangles)
+                if (Math.abs(minDif2 - minDif1) < Math.abs(maxDif2 - maxDif1)) {
+                    min2[2] = minHeight; // Note: min2 == max2 is possible
+                    normal = GeometryUtils.normalOfPlane(min1, max1, min2);
+                } else {
+                    max2[2] = maxHeight;
+                    normal = GeometryUtils.normalOfPlane(min1, max1, max2);
+                }
+
+                // Calc intersection points of ground points with plane
                 for (int k = 0; k < point3Fs.size(); k++) {
-                    float[] intersection = GeometryUtils.intersectionLinePlane(point3Fs.get(k), zVector, min, normal);
+                    float[] intersection = GeometryUtils.intersectionLinePlane(point3Fs.get(k), zVector, min1, normal);
                     if (intersection == null) return false;
                     intersection[2] = intersection[2] > (2 * maxHeight) ? maxHeight : (intersection[2] < minHeight ? minHeight : intersection[2]);
                     element.points[3 * k + 2] = intersection[2];
