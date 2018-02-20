@@ -2,7 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Izumi Kawashima
  * Copyright 2017 Longri
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  * Copyright 2017 nebular
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -42,11 +42,6 @@ public class MarkerRenderer extends BucketRenderer {
     protected final Point mMapPoint = new Point();
 
     /**
-     * increase view to show items that are partially visible
-     */
-    protected int mExtents = 100;
-
-    /**
      * flag to force update of markers
      */
     protected boolean mUpdate;
@@ -74,7 +69,8 @@ public class MarkerRenderer extends BucketRenderer {
         //int changedVisible = 0;
         int numVisible = 0;
 
-        mMarkerLayer.map().viewport().getMapExtents(mBox, mExtents);
+        // Increase view to show items that are partially visible
+        mMarkerLayer.map().viewport().getMapExtents(mBox, Tile.SIZE / 2);
 
         long flip = (long) (Tile.SIZE * v.pos.scale) >> 1;
 

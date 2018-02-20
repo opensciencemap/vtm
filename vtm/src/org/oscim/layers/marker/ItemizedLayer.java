@@ -24,6 +24,7 @@ package org.oscim.layers.marker;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.Box;
 import org.oscim.core.Point;
+import org.oscim.core.Tile;
 import org.oscim.event.Gesture;
 import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
@@ -190,7 +191,7 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
         int eventY = (int) event.getY() - mMap.getHeight() / 2;
         Viewport mapPosition = mMap.viewport();
 
-        Box box = mapPosition.getBBox(null, 128);
+        Box box = mapPosition.getBBox(null, Tile.SIZE / 2);
         box.map2mercator();
         box.scale(1E6);
 
