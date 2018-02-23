@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2018 devemux86
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +18,7 @@
  */
 package org.oscim.gdx;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.SharedLibraryLoader;
@@ -62,6 +64,13 @@ public class GdxMapApp extends GdxMap {
         LwjglApplicationConfiguration.disableAudio = true;
         LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
         cfg.title = title != null ? title : "vtm-gdx";
+
+        int[] sizes = new int[]{128, 64, 32, 16};
+        for (int size : sizes) {
+            String path = "res/ic_vtm_" + size + ".png";
+            cfg.addIcon(path, Files.FileType.Internal);
+        }
+
         cfg.width = 800;
         cfg.height = 600;
         cfg.stencil = 8;
