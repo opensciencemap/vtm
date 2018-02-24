@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Hannes Janetzek
- * Copyright 2016 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -17,6 +17,7 @@
  */
 package org.oscim.renderer;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.backend.canvas.Paint.Cap;
@@ -39,7 +40,7 @@ public class GridRenderer extends BucketRenderer {
     private int mCurX, mCurY, mCurZ;
 
     public GridRenderer() {
-        this(1);
+        this(CanvasAdapter.getScale());
     }
 
     public GridRenderer(float scale) {
