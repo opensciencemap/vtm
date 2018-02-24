@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -69,7 +69,7 @@ public class ReverseGeocodeActivity extends MapsforgeActivity {
 
         if (requestCode == SELECT_MAP_FILE) {
             // For debug
-            TileGridLayer gridLayer = new TileGridLayer(mMap, getResources().getDisplayMetrics().density);
+            TileGridLayer gridLayer = new TileGridLayer(mMap);
             mMap.layers().add(gridLayer);
         }
     }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 devemux86
+ * Copyright 2013 Hannes Janetzek
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -154,7 +155,7 @@ public class MapLayers {
 
         if (enable) {
             if (mGridOverlay == null)
-                mGridOverlay = new TileGridLayer(App.map, context.getResources().getDisplayMetrics().density);
+                mGridOverlay = new TileGridLayer(App.map);
 
             App.map.layers().add(mGridOverlay);
         } else {

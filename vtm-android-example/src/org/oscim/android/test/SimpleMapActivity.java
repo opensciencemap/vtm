@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +19,7 @@ package org.oscim.android.test;
 
 import android.os.Bundle;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
 import org.oscim.layers.GroupLayer;
@@ -60,7 +61,7 @@ public class SimpleMapActivity extends BaseMapActivity {
         MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
         BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
         renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
-        renderer.setOffset(5 * getResources().getDisplayMetrics().density, 0);
+        renderer.setOffset(5 * CanvasAdapter.getScale(), 0);
         mMap.layers().add(mapScaleBarLayer);
 
         mMap.setTheme(VtmThemes.DEFAULT);

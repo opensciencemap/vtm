@@ -59,12 +59,11 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
         java.util.Map<Object, TextureRegion> regionsMap = new LinkedHashMap<>();
         List<TextureAtlas> atlasList = new ArrayList<>();
 
-        float scale = getResources().getDisplayMetrics().density;
         Canvas canvas = CanvasAdapter.newCanvas();
         Paint paint = CanvasAdapter.newPaint();
         paint.setTypeface(Paint.FontFamily.DEFAULT, Paint.FontStyle.NORMAL);
-        paint.setTextSize(12 * scale);
-        paint.setStrokeWidth(2 * scale);
+        paint.setTextSize(12 * CanvasAdapter.getScale());
+        paint.setStrokeWidth(2 * CanvasAdapter.getScale());
         paint.setColor(Color.BLACK);
         List<MarkerItem> pts = new ArrayList<>();
         for (double lat = -90; lat <= 90; lat += 10) {
@@ -72,12 +71,12 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
                 String title = lat + "/" + lon;
                 pts.add(new MarkerItem(title, "", new GeoPoint(lat, lon)));
 
-                Bitmap bmp = CanvasAdapter.newBitmap((int) (40 * scale), (int) (40 * scale), 0);
+                Bitmap bmp = CanvasAdapter.newBitmap((int) (40 * CanvasAdapter.getScale()), (int) (40 * CanvasAdapter.getScale()), 0);
                 canvas.setBitmap(bmp);
                 canvas.fillColor(Color.GREEN);
 
-                canvas.drawText(Double.toString(lat), 3 * scale, 17 * scale, paint);
-                canvas.drawText(Double.toString(lon), 3 * scale, 35 * scale, paint);
+                canvas.drawText(Double.toString(lat), 3 * CanvasAdapter.getScale(), 17 * CanvasAdapter.getScale(), paint);
+                canvas.drawText(Double.toString(lon), 3 * CanvasAdapter.getScale(), 35 * CanvasAdapter.getScale(), paint);
                 inputMap.put(title, bmp);
             }
         }

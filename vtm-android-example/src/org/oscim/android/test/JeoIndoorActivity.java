@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -25,6 +25,7 @@ import android.widget.ToggleButton;
 
 import org.jeo.map.Style;
 import org.jeo.vector.VectorDataset;
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.layers.OSMIndoorLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
@@ -96,11 +97,10 @@ public class JeoIndoorActivity extends BaseMapActivity {
 
         VectorDataset data = JeoTest.readGeoJson(is);
         Style style = JeoTest.getStyle();
-        float scale = getResources().getDisplayMetrics().density;
         TextStyle textStyle = TextStyle.builder()
                 .isCaption(true)
-                .fontSize(16 * scale).color(Color.BLACK)
-                .strokeWidth(2.2f * scale).strokeColor(Color.WHITE)
+                .fontSize(16 * CanvasAdapter.getScale()).color(Color.BLACK)
+                .strokeWidth(2.2f * CanvasAdapter.getScale()).strokeColor(Color.WHITE)
                 .build();
         mIndoorLayer = new OSMIndoorLayer(mMap, data, style, textStyle);
         mMap.layers().add(mIndoorLayer);

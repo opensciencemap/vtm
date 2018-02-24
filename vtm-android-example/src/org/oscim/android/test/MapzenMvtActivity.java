@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Mathieu De Brito
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -56,7 +56,7 @@ public class MapzenMvtActivity extends MapActivity {
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
 
-        mMap.layers().add(new TileGridLayer(mMap, getResources().getDisplayMetrics().density));
+        mMap.layers().add(new TileGridLayer(mMap));
     }
 
     @Override

@@ -64,7 +64,7 @@ public class GdxActivity extends AndroidApplication {
             TileSource ts = OSciMap4TileSource.builder()
                     .httpFactory(new OkHttpEngine.OkHttpFactory())
                     .build();
-            initDefaultLayers(ts, false, true, true, getResources().getDisplayMetrics().density);
+            initDefaultLayers(ts, false, true, true);
         }
     }
 }
