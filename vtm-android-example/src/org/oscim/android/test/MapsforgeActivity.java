@@ -2,6 +2,7 @@
  * Copyright 2014 Hannes Janetzek
  * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -204,11 +205,12 @@ public class MapsforgeActivity extends MapActivity {
                 mMap.layers().add(mapScaleBarLayer);
 
                 MapInfo info = mTileSource.getMapInfo();
-                MapPosition pos = new MapPosition();
-                pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
-                mMap.setMapPosition(pos);
-
-                mPrefs.clear();
+                if (!info.boundingBox.contains(mMap.getMapPosition().getGeoPoint())) {
+                    MapPosition pos = new MapPosition();
+                    pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+                    mMap.setMapPosition(pos);
+                    mPrefs.clear();
+                }
             }
         } else if (requestCode == SELECT_THEME_FILE) {
             if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
