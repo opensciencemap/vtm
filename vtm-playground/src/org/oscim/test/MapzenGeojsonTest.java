@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -14,6 +14,7 @@
  */
 package org.oscim.test;
 
+import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -56,6 +57,16 @@ public class MapzenGeojsonTest extends GdxMapApp {
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
+
+        MapPosition pos = MapPreferences.getMapPosition();
+        if (pos != null)
+            mMap.setMapPosition(pos);
+    }
+
+    @Override
+    public void dispose() {
+        MapPreferences.saveMapPosition(mMap.getMapPosition());
+        super.dispose();
     }
 
     public static void main(String[] args) {

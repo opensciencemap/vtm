@@ -14,6 +14,7 @@
  */
 package org.oscim.test;
 
+import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -56,6 +57,16 @@ public class NextzenMvtTest extends GdxMapApp {
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
+
+        MapPosition pos = MapPreferences.getMapPosition();
+        if (pos != null)
+            mMap.setMapPosition(pos);
+    }
+
+    @Override
+    public void dispose() {
+        MapPreferences.saveMapPosition(mMap.getMapPosition());
+        super.dispose();
     }
 
     public static void main(String[] args) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -16,6 +16,7 @@
  */
 package org.oscim.test;
 
+import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GroupLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
@@ -63,7 +64,17 @@ public class SimpleMapTest extends GdxMapApp {
         map.layers().add(mapScaleBarLayer);
 
         map.setTheme(VtmThemes.DEFAULT);
-        map.setMapPosition(53.075, 8.808, 1 << 17);
+        MapPosition pos = MapPreferences.getMapPosition();
+        if (pos != null)
+            map.setMapPosition(pos);
+        else
+            map.setMapPosition(53.075, 8.808, 1 << 17);
+    }
+
+    @Override
+    public void dispose() {
+        MapPreferences.saveMapPosition(mMap.getMapPosition());
+        super.dispose();
     }
 
     public static void main(String[] args) {

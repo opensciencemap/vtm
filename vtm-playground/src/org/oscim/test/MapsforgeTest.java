@@ -77,10 +77,19 @@ public class MapsforgeTest extends GdxMapApp {
         renderer.setOffset(5, 0);
         mMap.layers().add(mapScaleBarLayer);
 
+        MapPosition pos = MapPreferences.getMapPosition();
         MapInfo info = tileSource.getMapInfo();
-        MapPosition pos = new MapPosition();
-        pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+        if (pos == null || !info.boundingBox.contains(pos.getGeoPoint())) {
+            pos = new MapPosition();
+            pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+        }
         mMap.setMapPosition(pos);
+    }
+
+    @Override
+    public void dispose() {
+        MapPreferences.saveMapPosition(mMap.getMapPosition());
+        super.dispose();
     }
 
     static File getMapFile(String[] args) {
