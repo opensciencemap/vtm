@@ -19,7 +19,6 @@ package org.oscim.test.renderer;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -36,10 +35,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-public class AtlasTest extends GdxMapImpl {
+public class AtlasTest extends GdxMapApp {
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         mMap.setMapPosition(0, 0, 1 << 4);
         mMap.layers().add(new GenericLayer(mMap, new AtlasRenderLayer()));
     }

@@ -18,7 +18,6 @@ import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -26,7 +25,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.bucket.CircleBucket;
 import org.oscim.theme.styles.CircleStyle;
 
-public class CircleTest extends GdxMapImpl {
+public class CircleTest extends GdxMapApp {
 
     private final GeometryBuffer geom = new GeometryBuffer(2, 1);
     private final Renderer renderer = new Renderer();
@@ -55,7 +54,7 @@ public class CircleTest extends GdxMapImpl {
     }
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         MapRenderer.setBackgroundColor(Color.BLACK);
 
         mMap.setMapPosition(0, 0, 1 << 4);

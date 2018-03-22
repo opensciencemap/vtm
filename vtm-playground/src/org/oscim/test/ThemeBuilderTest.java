@@ -19,7 +19,6 @@ package org.oscim.test;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.theme.RenderTheme;
@@ -27,7 +26,7 @@ import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class ThemeBuilderTest extends GdxMapImpl {
+public class ThemeBuilderTest extends GdxMapApp {
 
     static class MyTheme extends ThemeBuilder {
         public MyTheme() {

@@ -19,7 +19,6 @@ package org.oscim.test.renderer;
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.BufferObject;
@@ -35,10 +34,10 @@ import java.nio.FloatBuffer;
 import static org.oscim.backend.GLAdapter.gl;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
-public class HexagonRenderTest extends GdxMapImpl {
+public class HexagonRenderTest extends GdxMapApp {
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         mMap.setMapPosition(0, 0, 1 << 4);
         mMap.layers().add(new GenericLayer(mMap, new HexagonRenderer()));
     }

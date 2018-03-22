@@ -19,7 +19,6 @@ package org.oscim.test;
 import com.badlogic.gdx.Input;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.RenderTheme;
@@ -39,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.oscim.utils.ColorUtil.saturate;
 
-public class RuleVisitorTest extends GdxMapImpl {
+public class RuleVisitorTest extends GdxMapApp {
 
     final Logger log = LoggerFactory.getLogger(RuleVisitorTest.class);
     RenderTheme mTheme;

@@ -19,7 +19,6 @@ package org.oscim.test;
 import com.badlogic.gdx.Input;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.MapRenderer;
@@ -28,7 +27,7 @@ import org.oscim.theme.IRenderTheme.ThemeException;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
-public class ExternalRenderThemeTest extends GdxMapImpl {
+public class ExternalRenderThemeTest extends GdxMapApp {
 
     VectorTileLayer mapLayer;
 

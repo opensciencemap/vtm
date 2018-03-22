@@ -21,14 +21,13 @@ import com.badlogic.gdx.Input;
 
 import org.oscim.core.BoundingBox;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
-public class AnimatorTest extends GdxMapImpl {
+public class AnimatorTest extends GdxMapApp {
 
     @Override
     public void createLayers() {

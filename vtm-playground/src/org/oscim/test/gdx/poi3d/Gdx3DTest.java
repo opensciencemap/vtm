@@ -17,7 +17,6 @@
 package org.oscim.test.gdx.poi3d;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -27,7 +26,7 @@ import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
-public class Gdx3DTest extends GdxMapImpl {
+public class Gdx3DTest extends GdxMapApp {
 
     @Override
     public void createLayers() {

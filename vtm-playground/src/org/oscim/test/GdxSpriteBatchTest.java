@@ -28,7 +28,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import org.oscim.backend.GL;
 import org.oscim.core.Point;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
@@ -37,7 +36,7 @@ import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 import static org.oscim.backend.GLAdapter.gl;
 
-public class GdxSpriteBatchTest extends GdxMapImpl {
+public class GdxSpriteBatchTest extends GdxMapApp {
     private double latitude = 47.1970869;
     private double longitude = 18.4398422;
     private double scale = 1 << 17;
@@ -49,7 +48,7 @@ public class GdxSpriteBatchTest extends GdxMapImpl {
     private Texture texture;
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         TileSource tileSource = OSciMap4TileSource.builder()
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();

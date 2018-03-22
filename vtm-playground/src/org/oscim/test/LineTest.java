@@ -6,7 +6,6 @@ import com.badlogic.gdx.Input;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -14,7 +13,7 @@ import org.oscim.renderer.MapRenderer;
 import org.oscim.renderer.bucket.LineBucket;
 import org.oscim.theme.styles.LineStyle;
 
-public class LineTest extends GdxMapImpl {
+public class LineTest extends GdxMapApp {
 
     @Override
     protected boolean onKeyDown(int keycode) {
@@ -37,7 +36,7 @@ public class LineTest extends GdxMapImpl {
     float angle = 0;
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         mMap.layers().add(new GenericLayer(mMap, new BucketRenderer() {
             boolean init;
 

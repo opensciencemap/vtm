@@ -19,7 +19,6 @@ package org.oscim.test;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -37,7 +36,7 @@ import org.oscim.tiling.source.mapfile.MapInfo;
 
 import java.io.File;
 
-public class MapsforgeTest extends GdxMapImpl {
+public class MapsforgeTest extends GdxMapApp {
 
     private File mapFile;
     private boolean s3db;

@@ -19,12 +19,11 @@ package org.oscim.test;
 import com.badlogic.gdx.Input;
 
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
-public class BitmapTileTest extends GdxMapImpl {
+public class BitmapTileTest extends GdxMapApp {
 
     private BitmapTileLayer mLayer = null;
     private BitmapTileLayer mShaded = null;

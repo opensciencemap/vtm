@@ -20,7 +20,6 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Point;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.BucketRenderer;
 import org.oscim.renderer.GLViewport;
@@ -30,10 +29,10 @@ import org.oscim.utils.geom.BezierPath;
 
 import java.util.List;
 
-public class BezierTest extends GdxMapImpl {
+public class BezierTest extends GdxMapApp {
 
     @Override
-    protected void createLayers() {
+    public void createLayers() {
         mMap.layers().add(new GenericLayer(mMap, new BezierPathLayer()));
     }
 

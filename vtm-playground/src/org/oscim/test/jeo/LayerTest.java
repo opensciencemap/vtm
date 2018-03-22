@@ -21,7 +21,6 @@ import org.jeo.map.Style;
 import org.jeo.vector.VectorDataset;
 import org.oscim.backend.canvas.Color;
 import org.oscim.gdx.GdxMapApp;
-import org.oscim.gdx.GdxMapImpl;
 import org.oscim.layers.JeoVectorLayer;
 import org.oscim.layers.OSMIndoorLayer;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
@@ -35,7 +34,7 @@ import java.net.URLConnection;
 
 import static org.oscim.tiling.source.bitmap.DefaultSources.STAMEN_TONER;
 
-public class LayerTest extends GdxMapImpl {
+public class LayerTest extends GdxMapApp {
 
     // from http://overpass-turbo.eu/s/2vp
     String PATH = "https://gist.githubusercontent.com/anonymous/09062103a66844a96048f25626078c8d/raw/1d3af6a5a55e9ea4adc9551fa633a051a44a5a9c/overpass.geojson";
