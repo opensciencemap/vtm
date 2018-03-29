@@ -409,9 +409,7 @@ public class MapDatabase implements ITileDataSource {
     //    private long mCurrentRow;
     //    private long mCurrentCol;
 
-    private int xmin, ymin, xmax, ymax, xSmin, ySmin, xSmax, ySmax;
-
-    private synchronized void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
+    private void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
         long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
         long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
 
@@ -424,10 +422,15 @@ public class MapDatabase implements ITileDataSource {
         else
             buffer = (int) (16 * CanvasAdapter.getScale() + 0.5f);
 
-        xmin = ymin = -buffer;
-        xmax = ymax = Tile.SIZE + buffer;
-        xSmin = ySmin = 0;
-        xSmax = ySmax = Tile.SIZE;
+        int xmin = -buffer;
+        int ymin = -buffer;
+        int xmax = Tile.SIZE + buffer;
+        int ymax = Tile.SIZE + buffer;
+
+        int xSmin = 0;
+        int ySmin = 0;
+        int xSmax = Tile.SIZE;
+        int ySmax = Tile.SIZE;
 
         if (numRows > 0) {
             int w = (int) (Tile.SIZE / (numCols + 1));
