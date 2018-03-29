@@ -5,6 +5,7 @@
  * Copyright 2016-2018 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2017-2018 Gustl22
+ * Copyright 2018 Bezzu
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -759,7 +760,7 @@ public class MapDatabase implements ITileDataSource {
             lon += deltaLon;
 
             if (pos == length - 2) {
-                boolean line = isLine || (lon != firstLon && lat != firstLat);
+                boolean line = isLine || (lon != firstLon || lat != firstLat);
 
                 if (line) {
                     outBuffer[outPos++] = lon;
