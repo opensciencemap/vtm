@@ -15,7 +15,7 @@
 package org.oscim.theme.comparator.mapsforge;
 
 import org.mapsforge.map.awt.input.MouseEventListener;
-import org.mapsforge.map.view.MapView;
+import org.mapsforge.map.awt.view.MapView;
 import org.oscim.theme.comparator.BothMapPositionHandler;
 
 import java.awt.event.MouseEvent;
