@@ -73,7 +73,7 @@ public class PathLayer extends Layer implements GestureListener {
         mLineStyle = style;
 
         mPoints = new ArrayList<>();
-        mRenderer = new RenderPath();
+        mRenderer = new PathRenderer();
         mWorker = new Worker(map);
     }
 
@@ -219,7 +219,7 @@ public class PathLayer extends Layer implements GestureListener {
     /***
      * everything below runs on GL- and Worker-Thread
      ***/
-    final class RenderPath extends BucketRenderer {
+    final class PathRenderer extends BucketRenderer {
 
         private int mCurX = -1;
         private int mCurY = -1;
