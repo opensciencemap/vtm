@@ -217,8 +217,9 @@ public class TileManager {
         mTilesEnd = 0;
         mTilesCount = 0;
 
-        /* set up TileSet large enough to hold current tiles */
-        int num = Math.max(mMap.getWidth(), mMap.getHeight());
+        /* Set up TileSet large enough to hold current tiles.
+         * Use screen size as workaround for blank tiles in #520. */
+        int num = Math.max(mMap.getScreenWidth(), mMap.getScreenHeight());
         int size = Tile.SIZE >> 1;
         int numTiles = (num * num) / (size * size) * 4;
 

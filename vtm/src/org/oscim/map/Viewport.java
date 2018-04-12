@@ -42,6 +42,8 @@ public class Viewport {
     public final static int MAX_ZOOM_LEVEL = 20;
     public final static int MIN_ZOOM_LEVEL = 2;
     public final static float MIN_TILT = 0;
+
+    /* Note: limited by numTiles in TileManager to ~80° */
     public final static float MAX_TILT = 65;
 
     protected double mMaxScale = (1 << MAX_ZOOM_LEVEL);
