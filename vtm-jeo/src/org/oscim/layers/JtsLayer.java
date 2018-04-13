@@ -1,5 +1,7 @@
 /*
+ * Copyright 2014 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2018 xiaoyan-qq
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -44,7 +46,7 @@ public abstract class JtsLayer extends AbstractVectorLayer<Geometry> {
 
     @Override
     protected void processFeatures(Task t, Box bbox) {
-        processFeatures(t, new Envelope(bbox.xmin, bbox.ymin, bbox.xmax, bbox.ymax));
+        processFeatures(t, new Envelope(bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax));
 
     }
 
