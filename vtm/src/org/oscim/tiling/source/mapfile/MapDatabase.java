@@ -407,14 +407,12 @@ public class MapDatabase implements ITileDataSource {
         }
     }
 
-    //    private long mCurrentRow;
-    //    private long mCurrentCol;
-
-    private void setTileClipping(QueryParameters queryParameters, long mCurrentRow, long mCurrentCol) {
+    private void setTileClipping(QueryParameters queryParameters, SubFileParameter subFileParameter,
+                                 long currentRow, long currentCol) {
         long numRows = queryParameters.toBlockY - queryParameters.fromBlockY;
         long numCols = queryParameters.toBlockX - queryParameters.fromBlockX;
 
-        //log.debug(numCols + "/" + numRows + " " + mCurrentCol + " " + mCurrentRow);
+        //log.debug(numCols + "/" + numRows + " " + currentCol + " " + currentRow);
 
         // At large query zoom levels use enlarged buffer
         int buffer;
@@ -434,20 +432,30 @@ public class MapDatabase implements ITileDataSource {
         int ySmax = Tile.SIZE;
 
         if (numRows > 0) {
-            int w = (int) (Tile.SIZE / (numCols + 1));
-            int h = (int) (Tile.SIZE / (numRows + 1));
+            /* If blocks are at a border, sometimes too less blocks are requested,
+             * so the divisor for tile dimensions is increased to base tile subdivision.
+             */
+            boolean isTopBorder = queryParameters.fromBaseTileY < subFileParameter.boundaryTileTop;
+            boolean isLeftBorder = queryParameters.fromBaseTileX < subFileParameter.boundaryTileLeft;
+            long numSubX = queryParameters.toBaseTileX - queryParameters.fromBaseTileX;
+            long numSubY = queryParameters.toBaseTileY - queryParameters.fromBaseTileY;
+            long numDifX = numSubX - numCols; // 0 except at map borders
+            long numDifY = numSubY - numRows; // 0 except at map borders
 
-            if (mCurrentCol > 0)
-                xSmin = xmin = (int) (mCurrentCol * w);
+            int w = (int) (Tile.SIZE / (numSubX + 1));
+            int h = (int) (Tile.SIZE / (numSubY + 1));
 
-            if (mCurrentCol < numCols)
-                xSmax = xmax = (int) (mCurrentCol * w + w);
+            if (currentCol > 0)
+                xSmin = xmin = (int) ((currentCol + (isLeftBorder ? numDifX : 0)) * w);
 
-            if (mCurrentRow > 0)
-                ySmin = ymin = (int) (mCurrentRow * h);
+            if (currentCol < numCols)
+                xSmax = xmax = (int) ((currentCol + (isLeftBorder ? numDifX : 0)) * w + w);
 
-            if (mCurrentRow < numRows)
-                ySmax = ymax = (int) (mCurrentRow * h + h);
+            if (currentRow > 0)
+                ySmin = ymin = (int) ((currentRow + (isTopBorder ? numDifY : 0)) * h);
+
+            if (currentRow < numRows)
+                ySmax = ymax = (int) ((currentRow + (isTopBorder ? numDifY : 0)) * h + h);
         }
         mTileClipper.setRect(xmin, ymin, xmax, ymax);
         mTileSeparator.setRect(xSmin, ySmin, xSmax, ySmax);
@@ -479,10 +487,7 @@ public class MapDatabase implements ITileDataSource {
         /* read and process all blocks from top to bottom and from left to right */
         for (long row = queryParams.fromBlockY; row <= queryParams.toBlockY; row++) {
             for (long column = queryParams.fromBlockX; column <= queryParams.toBlockX; column++) {
-                //mCurrentCol = column - queryParameters.fromBlockX;
-                //mCurrentRow = row - queryParameters.fromBlockY;
-
-                setTileClipping(queryParams,
+                setTileClipping(queryParams, subFileParameter,
                         row - queryParams.fromBlockY,
                         column - queryParams.fromBlockX);
 
