@@ -20,6 +20,9 @@
 - Fix ItemizedLayer synchronization [#507](https://github.com/mapsforge/vtm/issues/507)
 - Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)
 - Fix libGDX flickering [#148](https://github.com/mapsforge/vtm/issues/148) [#149](https://github.com/mapsforge/vtm/issues/149)
+- ViewController refactor [#523](https://github.com/mapsforge/vtm/pull/523)
+  - `ViewController.setScreenSize` renamed to `setViewSize`
+  - `ViewController.setMapScreenCenter` renamed to `setMapViewCenter`
 - JTS (LocationTech) [#484](https://github.com/mapsforge/vtm/issues/484)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
@@ -49,7 +52,7 @@
 - POI Search example [#394](https://github.com/mapsforge/vtm/issues/394)
 - Mapsforge Reverse Geocoding [#383](https://github.com/mapsforge/vtm/issues/383)
 - Core utilities [#396](https://github.com/mapsforge/vtm/issues/396)
-  - MercatorProjection.groundResolution renamed to groundResolutionWithScale
+  - `MercatorProjection.groundResolution` renamed to `groundResolutionWithScale`
 - Map scaling improvements [#401](https://github.com/mapsforge/vtm/issues/401)
 - Mapsforge fix artifacts zoom >17 [#231](https://github.com/mapsforge/vtm/issues/231)
 - Mapzen building extrusions [#419](https://github.com/mapsforge/vtm/issues/419)
