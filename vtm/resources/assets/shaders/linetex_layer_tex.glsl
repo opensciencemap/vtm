@@ -48,9 +48,9 @@ main(){
     if (u_mode == 2.0) { // dashed texture
       step = 1.0;
     }
-    vec4 c=texture2D(tex,vec2(abs(mod(v_st.s+1.0,step)),(v_st.t+1.0)*0.5));
-    float fuzz=fwidth(c.a);
-    gl_FragColor=(c * u_color) * smoothstep(0.5-fuzz,0.5+fuzz,c.a);
+    vec4 c = texture2D(tex, vec2(abs(mod(v_st.s + 1.0, step)), (v_st.t + 1.0) * 0.5));
+    float fuzz = fwidth(c.a);
+    gl_FragColor = (c * u_color) * smoothstep(0.5 - fuzz, 0.5 + fuzz, c.a);
   }
   else {
     /* distance on perpendicular to the line */
