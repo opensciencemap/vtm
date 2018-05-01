@@ -19,6 +19,7 @@
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix ItemizedLayer synchronization [#507](https://github.com/mapsforge/vtm/issues/507)
 - Fix Mapsforge clipping on small zooms [#264](https://github.com/mapsforge/vtm/issues/264)
+- Fix PathLayer (vtm) reverse segments [#220](https://github.com/mapsforge/vtm/issues/220)
 - Fix FadeStep alpha interpolation [#486](https://github.com/mapsforge/vtm/issues/486)
 - Fix libGDX flickering [#148](https://github.com/mapsforge/vtm/issues/148) [#149](https://github.com/mapsforge/vtm/issues/149)
 - ViewController refactor [#523](https://github.com/mapsforge/vtm/pull/523)
