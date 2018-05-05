@@ -31,6 +31,7 @@ import org.oscim.core.Tile;
 import org.oscim.gdx.AndroidGL;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
@@ -48,6 +49,7 @@ public class GdxActivity extends AndroidApplication {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
         Tile.SIZE = Tile.calculateTileSize();
+        MapRenderer.COORD_SCALE = MapRenderer.calculateCoordScale();
 
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.stencil = 8;

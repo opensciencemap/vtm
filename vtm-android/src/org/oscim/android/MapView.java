@@ -39,6 +39,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GLAdapter;
 import org.oscim.core.Tile;
 import org.oscim.map.Map;
+import org.oscim.renderer.MapRenderer;
 import org.oscim.utils.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,8 @@ public class MapView extends GLSurfaceView {
         CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
         if (!Parameters.CUSTOM_TILE_SIZE)
             Tile.SIZE = Tile.calculateTileSize();
+        if (!Parameters.CUSTOM_COORD_SCALE)
+            MapRenderer.COORD_SCALE = MapRenderer.calculateCoordScale();
 
         /* Initialize the Map */
         mMap = new AndroidMap(this);

@@ -13,6 +13,8 @@
 - Map view roll [#474](https://github.com/mapsforge/vtm/pull/474)
 - Physical fling and fling on rotation / scale [#497](https://github.com/mapsforge/vtm/pull/497) [#499](https://github.com/mapsforge/vtm/pull/499)
   - `Parameters.ANIMATOR2 = true;`
+- Scale factor for short vertices calculation [#537](https://github.com/mapsforge/vtm/issues/537)
+  - `Parameters.CUSTOM_COORD_SCALE = false;`
 - Polygon symbols default disabled [#405](https://github.com/mapsforge/vtm/issues/405)
   - `Parameters.POLY_SYMBOL = true;`
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
@@ -137,7 +139,7 @@
 - Location renderer and layer [#171](https://github.com/mapsforge/vtm/issues/171)
 - Map scale bar [#84](https://github.com/mapsforge/vtm/issues/84)
 - Tile size based on scale factor [#183](https://github.com/mapsforge/vtm/issues/183)
-  - `Parameters.CUSTOM_TILE_SIZE = true;`
+  - `Parameters.CUSTOM_TILE_SIZE = false;`
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Render theme resources optional location prefixes [#66](https://github.com/mapsforge/vtm/issues/66)
