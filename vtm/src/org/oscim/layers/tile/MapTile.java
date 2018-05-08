@@ -240,11 +240,17 @@ public class MapTile extends Tile {
         if (--locked > 0)
             return;
 
-        if ((proxy & PROXY_PARENT) != 0)
-            node.parent.item.refs--;
+        if ((proxy & PROXY_PARENT) != 0) {
+            MapTile p = node.parent();
+            if (p != null)
+                p.refs--;
+        }
 
-        if ((proxy & PROXY_GRAMPA) != 0)
-            node.parent.parent.item.refs--;
+        if ((proxy & PROXY_GRAMPA) != 0) {
+            MapTile p = node.parent.parent();
+            if (p != null)
+                p.refs--;
+        }
 
         for (int i = 0; i < 4; i++) {
             if ((proxy & (1 << i)) != 0)
