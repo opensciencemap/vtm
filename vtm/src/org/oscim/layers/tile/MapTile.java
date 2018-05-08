@@ -1,6 +1,6 @@
 /*
  * Copyright 2012, 2013 Hannes Janetzek
- * Copyright 2017 devemux86
+ * Copyright 2017-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -240,14 +240,12 @@ public class MapTile extends Tile {
         if (--locked > 0)
             return;
 
-        TileNode parent = node.parent;
         if ((proxy & PROXY_PARENT) != 0)
-            parent.item.refs--;
+            node.parent.item.refs--;
 
-        if ((proxy & PROXY_GRAMPA) != 0) {
-            parent = parent.parent;
-            parent.item.refs--;
-        }
+        if ((proxy & PROXY_GRAMPA) != 0)
+            node.parent.parent.item.refs--;
+
         for (int i = 0; i < 4; i++) {
             if ((proxy & (1 << i)) != 0)
                 node.child(i).refs--;
