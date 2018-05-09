@@ -46,7 +46,8 @@ public class RenderBuckets extends TileData {
 
     static final Logger log = LoggerFactory.getLogger(RenderBuckets.class);
 
-    public final static int[] VERTEX_SHORT_CNT = {
+    /* Count of units needed for one vertex */
+    public final static int[] VERTEX_CNT = {
             4, // LINE_VERTEX
             6, // TEXLINE_VERTEX
             2, // POLY_VERTEX
@@ -58,7 +59,8 @@ public class RenderBuckets extends TileData {
             2, // CIRCLE
     };
 
-    private final static int SHORT_BYTES = 2;
+    public final static int SHORT_BYTES = 2;
+    // public final static int INT_BYTES = 4;
 
     private RenderBucket buckets;
 
@@ -277,12 +279,12 @@ public class RenderBuckets extends TileData {
     }
 
     private int countVboSize() {
-        int vboShorts = 0;
+        int vboSize = 0;
 
         for (RenderBucket l = buckets; l != null; l = l.next)
-            vboShorts += l.numVertices * VERTEX_SHORT_CNT[l.type];
+            vboSize += l.numVertices * VERTEX_CNT[l.type];
 
-        return vboShorts;
+        return vboSize;
     }
 
     private int countIboSize() {
@@ -363,7 +365,7 @@ public class RenderBuckets extends TileData {
         ShortBuffer vboData = MapRenderer.getShortBuffer(vboSize);
 
         if (addFill)
-            vboData.put(fillCoords, 0, 8);
+            vboData.put(fillShortCoords, 0, 8);
 
         ShortBuffer iboData = null;
 
@@ -420,23 +422,25 @@ public class RenderBuckets extends TileData {
         if (vbo == null)
             vbo = BufferObject.get(GL.ARRAY_BUFFER, vboSize);
 
-        vbo.loadBufferData(vboData.flip(), vboSize * 2);
+        // Set VBO data to READ mode
+        vbo.loadBufferData(vboData.flip(), vboSize * SHORT_BYTES);
 
         if (iboSize > 0) {
             if (ibo == null)
                 ibo = BufferObject.get(GL.ELEMENT_ARRAY_BUFFER, iboSize);
 
-            ibo.loadBufferData(iboData.flip(), iboSize * 2);
+            // Set IBO data to READ mode
+            ibo.loadBufferData(iboData.flip(), iboSize * SHORT_BYTES);
         }
 
         return true;
     }
 
-    private static short[] fillCoords;
+    private static short[] fillShortCoords;
 
     static {
         short s = (short) (Tile.SIZE * COORD_SCALE);
-        fillCoords = new short[]{0, s, s, s, 0, 0, s, 0};
+        fillShortCoords = new short[]{0, s, s, s, 0, 0, s, 0};
     }
 
     public static void initRenderer() {

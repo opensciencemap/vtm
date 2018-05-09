@@ -35,8 +35,8 @@ import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 /**
  * Note:
- * Coordinates must be in range +/- (Short.MAX_VALUE / COORD_SCALE) and the maximum
- * resolution for coordinates is 0.25 as points will be converted
+ * Coordinates must be in range +/- (Short.MAX_VALUE / COORD_SCALE) if using GL.SHORT.
+ * The maximum resolution for coordinates is 0.25 as points will be converted
  * to fixed point values.
  */
 public class LineBucket extends RenderBucket {
@@ -360,7 +360,7 @@ public class LineBucket extends RenderBucket {
             vNextX = nextX - curX;
             vNextY = nextY - curY;
             a = Math.sqrt(vNextX * vNextX + vNextY * vNextY);
-            /* skip too short segmets */
+            /* skip two vertex segments */
             if (a < mMinDist) {
                 numVertices -= 2;
                 continue;
