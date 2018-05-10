@@ -74,7 +74,7 @@ public final class SymbolBucket extends TextureBucket {
     @Override
     protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
         /* offset of layer data in vbo */
-        this.vertexOffset = vboData.position() * 2; //SHORT_BYTES;
+        this.vertexOffset = vboData.position() * RenderBuckets.SHORT_BYTES;
 
         int numIndices = 0;
 

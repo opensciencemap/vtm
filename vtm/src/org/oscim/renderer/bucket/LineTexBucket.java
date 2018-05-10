@@ -68,11 +68,11 @@ import static org.oscim.renderer.MapRenderer.bindQuadIndicesVBO;
  * flip        0  1  0  1  0  1  0  1
  * </pre>
  * <p/>
- * Vertex layout:
- * [2 short] position,
- * [2 short] extrusion,
- * [1 short] line length
- * [1 short] unused
+ * Vertex layout (here: 1 unit == 1 short):
+ * [2 unit] position,
+ * [2 unit] extrusion,
+ * [1 unit] line length
+ * [1 unit] unused
  * <p/>
  * indices, for two blocks:
  * 0, 1, 2,
@@ -341,8 +341,11 @@ public final class LineTexBucket extends LineBucket {
                     GL.REPEAT, GL.REPEAT);
         }
 
-        private final static int STRIDE = 12;
-        private final static int LEN_OFFSET = 8;
+        /* posX, posY, extrX, extrY, length, unused */
+        private final static int STRIDE = 6 * RenderBuckets.SHORT_BYTES;
+
+        /* offset for line length, unused; skip first 4 units */
+        private final static int LEN_OFFSET = 4 * RenderBuckets.SHORT_BYTES;
 
         public static RenderBucket draw(RenderBucket b, GLViewport v,
                                         float div, RenderBuckets buckets) {
@@ -420,8 +423,8 @@ public final class LineTexBucket extends LineBucket {
                     if (numIndices > MAX_INDICES)
                         numIndices = MAX_INDICES;
 
-                    /* i / 6 * (24 shorts per block * 2 short bytes) */
-                    int add = (b.vertexOffset + i * 8) + vOffset;
+                    /* i * (24 units per block / 6) * unit bytes) */
+                    int add = (b.vertexOffset + i * 4 * RenderBuckets.SHORT_BYTES) + vOffset;
 
                     gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,
                             add + STRIDE);
@@ -445,8 +448,8 @@ public final class LineTexBucket extends LineBucket {
                     int numIndices = allIndices - i;
                     if (numIndices > MAX_INDICES)
                         numIndices = MAX_INDICES;
-                    /* i / 6 * (24 shorts per block * 2 short bytes) */
-                    int add = (b.vertexOffset + i * 8) + vOffset;
+                    /* i * (24 units per block / 6) * unit bytes) */
+                    int add = (b.vertexOffset + i * 4 * RenderBuckets.SHORT_BYTES) + vOffset;
 
                     gl.vertexAttribPointer(aPos0, 4, GL.SHORT, false, STRIDE,
                             add + 2 * STRIDE);

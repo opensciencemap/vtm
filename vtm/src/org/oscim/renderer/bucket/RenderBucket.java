@@ -96,7 +96,7 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
     }
 
     /**
-     * Start position in ibo for this bucket
+     * Start position in ibo for this bucket (in bytes)
      */
     public int getIndiceOffset() {
         return indiceOffset;
@@ -110,9 +110,9 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
         this.vertexOffset = offset;
     }
 
-    protected int vertexOffset;
+    protected int vertexOffset; // in bytes
 
-    protected int indiceOffset;
+    protected int indiceOffset; // in bytes
 
     protected void compile(ShortBuffer vboData, ShortBuffer iboData) {
         compileVertexItems(vboData);
@@ -122,16 +122,16 @@ public abstract class RenderBucket extends Inlist<RenderBucket> {
 
     protected void compileVertexItems(ShortBuffer vboData) {
         /* keep offset of layer data in vbo */
-        vertexOffset = vboData.position() * 2; // FIXME 2? - should be vertex stride / num shorts
+        vertexOffset = vboData.position() * RenderBuckets.SHORT_BYTES;
         vertexItems.compile(vboData);
     }
 
     protected void compileIndicesItems(ShortBuffer iboData) {
-        /* keep offset of layer data in vbo */
+        /* keep offset of layer data in ibo */
         if (indiceItems == null || indiceItems.empty())
             return;
 
-        indiceOffset = iboData.position() * 2; // needs byte offset...
+        indiceOffset = iboData.position() * RenderBuckets.SHORT_BYTES;
         indiceItems.compile(iboData);
     }
 }

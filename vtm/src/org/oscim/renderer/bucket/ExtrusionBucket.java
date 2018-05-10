@@ -606,7 +606,7 @@ public class ExtrusionBucket extends RenderBucket {
                 iOffset += idx[i];
             }
         }
-        vertexOffset = vboData.position() * 2;
+        vertexOffset = vboData.position() * RenderBuckets.SHORT_BYTES;
         vertexItems.compile(vboData);
 
         clear();

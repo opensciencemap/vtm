@@ -122,7 +122,7 @@ public class BitmapBucket extends TextureBucket {
         buf[pos++] = texMax;
         buf[pos++] = texMax;
 
-        this.vertexOffset = vboData.position() * 2;
+        this.vertexOffset = vboData.position() * RenderBuckets.SHORT_BYTES;
         vboData.put(buf);
     }
 
