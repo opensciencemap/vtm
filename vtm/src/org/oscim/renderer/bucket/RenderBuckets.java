@@ -85,6 +85,9 @@ public class RenderBuckets extends TileData {
 
     private RenderBucket mCurBucket;
 
+    public RenderBuckets() {
+    }
+
     /**
      * add the LineBucket for a level with a given Line style. Levels are
      * ordered from bottom (0) to top
@@ -203,11 +206,7 @@ public class RenderBuckets extends TileData {
         if (mCurBucket != null && mCurBucket.level == level) {
             bucket = mCurBucket;
             if (bucket.type != type) {
-                log.error("BUG wrong bucket {} {} on level {}",
-                        Integer.valueOf(bucket.type),
-                        Integer.valueOf(type),
-                        Integer.valueOf(level));
-
+                log.error("BUG wrong bucket {} {} on level {}", bucket.type, type, level);
                 throw new IllegalArgumentException();
             }
             return bucket;
@@ -265,11 +264,7 @@ public class RenderBuckets extends TileData {
 
         /* check if found buckets matches requested type */
         if (bucket.type != type) {
-            log.error("BUG wrong bucket {} {} on level {}",
-                    Integer.valueOf(bucket.type),
-                    Integer.valueOf(type),
-                    Integer.valueOf(level));
-
+            log.error("BUG wrong bucket {} {} on level {}", bucket.type, type, level);
             throw new IllegalArgumentException();
         }
 

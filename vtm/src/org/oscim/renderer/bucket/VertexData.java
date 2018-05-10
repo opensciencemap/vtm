@@ -51,8 +51,6 @@ public class VertexData extends Inlist.List<Chunk> {
         public int used;
     }
 
-    ;
-
     private static class Pool extends SyncPool<Chunk> {
         public Pool() {
             super(MAX_POOL);
@@ -146,15 +144,15 @@ public class VertexData extends Inlist.List<Chunk> {
         used = 0;
     }
 
+    public void add(float a) {
+        add(toShort(a));
+    }
+
     public void add(short a) {
         if (used == SIZE)
             getNext();
 
         vertices[used++] = a;
-    }
-
-    static final short toShort(float v) {
-        return (short) FastMath.clamp(v, Short.MIN_VALUE, Short.MAX_VALUE);
     }
 
     public void add(float a, float b) {
@@ -216,6 +214,10 @@ public class VertexData extends Inlist.List<Chunk> {
         used += 6;
     }
 
+    public boolean empty() {
+        return cur == null;
+    }
+
     /**
      * Direct access to the current chunk of VertexData. Use with care!
      * <p/>
@@ -250,7 +252,7 @@ public class VertexData extends Inlist.List<Chunk> {
             throw new IllegalStateException("seeked too far: " + offset + "/" + used);
     }
 
-    public boolean empty() {
-        return cur == null;
+    static final short toShort(float v) {
+        return (short) FastMath.clamp(v, Short.MIN_VALUE, Short.MAX_VALUE);
     }
 }
