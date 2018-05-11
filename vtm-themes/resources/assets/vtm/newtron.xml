@@ -573,7 +573,7 @@
             </m>
 
             <!--Only add house numbers where no name exist-->
-            <m k="addr:housenumber" zoom-min="17">
+            <m k="addr:housenumber" zoom-min="18">
                 <m k="name" v="~">
                     <caption style="bold" fill="#ffffff" font-family="condensed"
                         k="addr:housenumber" priority="10" size="12" stroke="#606060"
@@ -1387,7 +1387,7 @@
 
     <m e="node" select="first">
         <!--Only add house numbers where no name exist-->
-        <m k="addr:housenumber" zoom-min="17">
+        <m k="addr:housenumber" zoom-min="18">
             <m k="name" v="~">
                 <caption style="bold" fill="#ffffff" font-family="condensed" k="addr:housenumber"
                     priority="10" size="12" stroke="#606060" stroke-width="2.0" />

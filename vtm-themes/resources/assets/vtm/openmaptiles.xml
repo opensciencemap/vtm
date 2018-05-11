@@ -402,7 +402,7 @@
         </m>
     </m>
     <!-- housenumber -->
-    <m k="layer" v="housenumber" zoom-min="17">
+    <m k="layer" v="housenumber" zoom-min="18">
         <caption style="bold" fill="#606060" font-family="condensed" k="housenumber" priority="10"
             size="12" stroke="#ffffff" stroke-width="2.0" />
     </m>

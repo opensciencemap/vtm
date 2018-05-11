@@ -640,7 +640,7 @@
                 <extrusion line-color="#ffd9d8d6" side-color="#eaecebe9" top-color="#eaf9f8f6" />
             </m>
             <!--Only add house numbers where no name exist-->
-            <m k="addr:housenumber" zoom-min="17">
+            <m k="addr:housenumber" zoom-min="18">
                 <m k="name" v="~">
                     <caption style="bold" fill="#606060" font-family="condensed"
                         k="addr:housenumber" priority="10" size="12" stroke="#ffffff"
@@ -1382,7 +1382,7 @@
 
     <m e="node" select="first">
         <!--Only add house numbers where no name exist-->
-        <m k="addr:housenumber" zoom-min="17">
+        <m k="addr:housenumber" zoom-min="18">
             <m k="name" v="~">
                 <caption style="bold" fill="#606060" font-family="condensed" k="addr:housenumber"
                     priority="10" size="12" stroke="#ffffff" stroke-width="2.0" />

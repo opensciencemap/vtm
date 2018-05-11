@@ -600,10 +600,10 @@
             </m>
             <m zoom-min="17">
                 <extrusion line-color="#ffd9d8d6" side-color="#eaecebe9" top-color="#eaf9f8f6" />
-            </m>
-            <m zoom-min="17">
                 <caption style="bold" fill="#2d51bc" k="name" priority="9" size="14"
                     stroke="#ffffff" stroke-width="2.0" />
+            </m>
+            <m zoom-min="18">
                 <caption style="bold" fill="#606060" font-family="condensed" k="addr_housenumber"
                     priority="10" size="12" stroke="#ffffff" stroke-width="2.0" />
             </m>
@@ -1383,7 +1383,7 @@
         </m>
 
         <!-- house numbers -->
-        <m k="addr_housenumber" zoom-min="17">
+        <m k="addr_housenumber" zoom-min="18">
             <caption style="bold" fill="#606060" font-family="condensed" k="addr:housenumber"
                 size="12" stroke="#ffffff" stroke-width="2.0" />
         </m>
