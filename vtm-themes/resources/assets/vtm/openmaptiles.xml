@@ -96,7 +96,7 @@
     <!--water-->
     <!--<style-area id="water" fill="#97b7e5" afc5e3 /> -->
     <!-- src="assets:textures/water.png" -->
-    <style-area fade="-1" fill="#99badf" id="water" use="tex1" />
+    <style-area fade="-1" fill="#99badf" id="water" mesh="true" />
 
 
     <!--###### LINE styles ######-->
@@ -344,11 +344,8 @@
 
     <m k="layer" v="water">
         <m k="class">
-            <m v="ocean|lake">
-                <area mesh="true" use="water" />
-            </m>
-            <m v="river">
-                <area mesh="true" use="water" />
+            <m v="ocean|lake|river">
+                <area use="water" />
             </m>
         </m>
     </m>

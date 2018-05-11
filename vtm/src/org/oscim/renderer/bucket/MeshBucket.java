@@ -101,7 +101,7 @@ public class MeshBucket extends RenderBucket {
         }
         if (!tess.tesselate()) {
             tess.dispose();
-            log.error("error in tessellation {}", numPoints);
+            log.debug("error in tessellation {}", numPoints);
             return;
         }
 

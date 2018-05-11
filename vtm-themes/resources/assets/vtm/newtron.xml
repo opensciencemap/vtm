@@ -73,7 +73,7 @@
     <style-area fade="15" fill="#ee202020" id="building" />
 
     <!--water-->
-    <style-area fill="#001223" id="water" />
+    <style-area fill="#001223" id="water" mesh="true" />
 
 
     <!--###### LINE styles ######-->
@@ -121,7 +121,7 @@
     <!--###### ASSIGNMENT ######-->
 
     <m e="way" k="natural" v="issea|sea">
-        <area mesh="true" use="water" />
+        <area use="water" />
     </m>
 
     <m e="way" k="natural" v="nosea">
