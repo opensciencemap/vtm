@@ -15,6 +15,7 @@
 package org.oscim.tiling.source.mapfile;
 
 import org.oscim.core.BoundingBox;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.OverzoomTileDataSource;
@@ -36,11 +37,11 @@ public class MultiMapFileTileSource extends TileSource implements IMapFileTileSo
     private final Map<MapFileTileSource, int[]> zoomsByTileSource = new HashMap<>();
 
     public MultiMapFileTileSource() {
-        this(Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
+        this(Viewport.MIN_ZOOM_LEVEL, Viewport.MAX_ZOOM_LEVEL);
     }
 
     public MultiMapFileTileSource(int zoomMin, int zoomMax) {
-        this(zoomMin, zoomMax, zoomMax);
+        this(zoomMin, zoomMax, BuildingLayer.MIN_ZOOM);
     }
 
     public MultiMapFileTileSource(int zoomMin, int zoomMax, int overZoom) {

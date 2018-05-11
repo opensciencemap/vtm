@@ -47,7 +47,7 @@ public class S3DBLayer extends BuildingLayer {
     private boolean mColored = true;
 
     public S3DBLayer(Map map, VectorTileLayer tileLayer) {
-        this(map, tileLayer, MIN_ZOOM, MAX_ZOOM);
+        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel());
     }
 
     public S3DBLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {

@@ -20,10 +20,8 @@ package org.oscim.tiling.source.bitmap;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.core.Tile;
-import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.ITileDecoder;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileDataSource;
@@ -40,7 +38,7 @@ public class BitmapTileSource extends UrlTileSource {
     public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
 
         public Builder() {
-            super(null, "/{Z}/{X}/{Y}.png", Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
+            super(null, "/{Z}/{X}/{Y}.png");
         }
 
         public BitmapTileSource build() {

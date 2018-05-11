@@ -29,8 +29,8 @@ public abstract class TileSource {
     public abstract static class Builder<T extends Builder<T>> {
         protected float alpha = 1;
         protected int zoomMin = Viewport.MIN_ZOOM_LEVEL;
-        protected int zoomMax = TileSource.MAX_ZOOM;
-        protected int overZoom = TileSource.MAX_ZOOM;
+        protected int zoomMax = Viewport.MAX_ZOOM_LEVEL;
+        protected int overZoom = BuildingLayer.MIN_ZOOM;
         protected FadeStep[] fadeSteps;
         protected String name;
         protected int tileSize = 256;
@@ -82,13 +82,10 @@ public abstract class TileSource {
         }
     }
 
-    // FIXME Sane default since buildings don't have overzoom
-    public static final int MAX_ZOOM = BuildingLayer.MAX_ZOOM;
-
     protected float mAlpha = 1;
     protected int mZoomMin = Viewport.MIN_ZOOM_LEVEL;
-    protected int mZoomMax = TileSource.MAX_ZOOM;
-    protected int mOverZoom = TileSource.MAX_ZOOM;
+    protected int mZoomMax = Viewport.MAX_ZOOM_LEVEL;
+    protected int mOverZoom = BuildingLayer.MIN_ZOOM;
     protected FadeStep[] mFadeSteps;
     protected String mName;
     protected int mTileSize = 256;

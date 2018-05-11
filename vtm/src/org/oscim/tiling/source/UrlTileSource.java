@@ -102,7 +102,7 @@ public abstract class UrlTileSource extends TileSource {
     }
 
     protected UrlTileSource(String urlString, String tilePath) {
-        this(urlString, tilePath, Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
+        this(urlString, tilePath, Viewport.MIN_ZOOM_LEVEL, Viewport.MAX_ZOOM_LEVEL);
     }
 
     protected UrlTileSource(String urlString, String tilePath, int zoomMin, int zoomMax) {

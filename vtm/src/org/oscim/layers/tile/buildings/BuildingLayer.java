@@ -45,7 +45,6 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     protected final static int BUILDING_LEVEL_HEIGHT = 280; // cm
 
     public final static int MIN_ZOOM = 17;
-    public final static int MAX_ZOOM = 17; // TODO use Viewport.MAX_ZOOM_LEVEL;
 
     public static boolean POST_AA = false;
     public static boolean TRANSLUCENT = true;
@@ -68,11 +67,11 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     }
 
     public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-        this(map, tileLayer, MIN_ZOOM, MAX_ZOOM, false);
+        this(map, tileLayer, false);
     }
 
     public BuildingLayer(Map map, VectorTileLayer tileLayer, boolean mesh) {
-        this(map, tileLayer, MIN_ZOOM, MAX_ZOOM, mesh);
+        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel(), mesh);
     }
 
     public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax, boolean mesh) {

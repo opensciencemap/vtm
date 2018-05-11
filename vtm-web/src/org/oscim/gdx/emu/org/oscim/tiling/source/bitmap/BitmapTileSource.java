@@ -30,11 +30,9 @@ import org.oscim.gdx.client.GwtBitmap;
 import org.oscim.layers.tile.LoadDelayTask;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.TileLoader;
-import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.QueryResult;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.LwHttp;
 import org.oscim.tiling.source.UrlTileSource;
 import org.slf4j.Logger;
@@ -46,7 +44,7 @@ public class BitmapTileSource extends UrlTileSource {
     public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
 
         public Builder() {
-            super(null, "/{Z}/{X}/{Y}.png", Viewport.MIN_ZOOM_LEVEL, TileSource.MAX_ZOOM);
+            super(null, "/{Z}/{X}/{Y}.png");
         }
 
         public BitmapTileSource build() {

@@ -34,7 +34,6 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.ITileDataSource;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.mapfile.header.SubFileParameter;
 import org.oscim.utils.Parameters;
 import org.oscim.utils.geom.TileClipper;
@@ -416,7 +415,7 @@ public class MapDatabase implements ITileDataSource {
 
         // At large query zoom levels use enlarged buffer
         int buffer;
-        if (queryParameters.queryZoomLevel > TileSource.MAX_ZOOM)
+        if (queryParameters.queryZoomLevel > BuildingLayer.MIN_ZOOM)
             buffer = Tile.SIZE / 2;
         else
             buffer = (int) (16 * CanvasAdapter.getScale() + 0.5f);
