@@ -68,6 +68,11 @@ public abstract class GdxMap implements ApplicationListener {
 
     @Override
     public void create() {
+        if (!Parameters.CUSTOM_COORD_SCALE) {
+            if (Math.min(Gdx.graphics.getDisplayMode().width, Gdx.graphics.getDisplayMode().height) > 1080)
+                MapRenderer.COORD_SCALE = 4.0f;
+        }
+
         mMap = new MapAdapter();
         mMapRenderer = new MapRenderer(mMap);
 

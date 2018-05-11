@@ -19,7 +19,6 @@
 package org.oscim.android;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
@@ -66,6 +65,8 @@ public class MapView extends GLSurfaceView {
     protected GestureDetector mGestureDetector;
     protected AndroidMotionEvent mMotionEvent;
 
+    private final Point mScreenSize = new Point();
+
     public MapView(Context context) {
         this(context, null);
     }
@@ -93,8 +94,20 @@ public class MapView extends GLSurfaceView {
         CanvasAdapter.dpi = (int) (metrics.scaledDensity * CanvasAdapter.DEFAULT_DPI);
         if (!Parameters.CUSTOM_TILE_SIZE)
             Tile.SIZE = Tile.calculateTileSize();
-        if (!Parameters.CUSTOM_COORD_SCALE)
-            MapRenderer.COORD_SCALE = MapRenderer.calculateCoordScale();
+
+        WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2)
+            display.getSize(mScreenSize);
+        else {
+            mScreenSize.x = display.getWidth();
+            mScreenSize.y = display.getHeight();
+        }
+
+        if (!Parameters.CUSTOM_COORD_SCALE) {
+            if (Math.min(mScreenSize.x, mScreenSize.y) > 1080)
+                MapRenderer.COORD_SCALE = 4.0f;
+        }
 
         /* Initialize the Map */
         mMap = new AndroidMap(this);
@@ -175,8 +188,6 @@ public class MapView extends GLSurfaceView {
         private boolean mRenderWait;
         private boolean mPausing;
 
-        private final Point mScreenSize = new Point();
-
         public AndroidMap(MapView mapView) {
             super();
             mMapView = mapView;
@@ -195,25 +206,12 @@ public class MapView extends GLSurfaceView {
 
         @Override
         public int getScreenWidth() {
-            return getScreenSize().x;
+            return mMapView.mScreenSize.x;
         }
 
         @Override
         public int getScreenHeight() {
-            return getScreenSize().y;
-        }
-
-        @SuppressWarnings("deprecation")
-        @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-        private Point getScreenSize() {
-            Display display = mWindowManager.getDefaultDisplay();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2)
-                display.getSize(mScreenSize);
-            else {
-                mScreenSize.x = display.getWidth();
-                mScreenSize.y = display.getHeight();
-            }
-            return mScreenSize;
+            return mMapView.mScreenSize.y;
         }
 
         private final Runnable mRedrawCb = new Runnable() {

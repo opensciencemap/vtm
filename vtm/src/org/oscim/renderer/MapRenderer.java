@@ -18,7 +18,6 @@
  */
 package org.oscim.renderer;
 
-import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
 import org.oscim.backend.GLAdapter;
 import org.oscim.backend.canvas.Color;
@@ -75,17 +74,6 @@ public class MapRenderer {
          * clear all previous vbo refs */
         BufferObject.clear();
         setBackgroundColor(Color.DKGRAY);
-    }
-
-    /**
-     * Calculate scale factor for short vertices.
-     * <p>
-     * CanvasAdapter.dpi must be set before!
-     */
-    public static float calculateCoordScale() {
-        if (CanvasAdapter.dpi > 420)
-            return 4.0f;
-        return 8.0f;
     }
 
     public static void setBackgroundColor(int color) {
