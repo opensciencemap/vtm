@@ -112,6 +112,26 @@ public class MapElement extends GeometryBuffer {
     }
 
     @Override
+    public MapElement scale(float scaleX, float scaleY) {
+        super.scale(scaleX, scaleY);
+        if (labelPosition != null) {
+            labelPosition.x *= scaleX;
+            labelPosition.y *= scaleY;
+        }
+        return this;
+    }
+
+    @Override
+    public MapElement translate(float dx, float dy) {
+        super.translate(dx, dy);
+        if (labelPosition != null) {
+            labelPosition.x += dx;
+            labelPosition.y += dy;
+        }
+        return this;
+    }
+
+    @Override
     public String toString() {
         return tags.toString() + '\n' + super.toString() + '\n';
     }
