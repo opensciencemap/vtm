@@ -29,6 +29,7 @@ import org.oscim.layers.LocationTextureLayer;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
 import org.oscim.renderer.bucket.TextureItem;
+import org.oscim.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,28 +43,31 @@ public class LocationTextureActivity extends BitmapTileActivity implements Locat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //initial Android locationManager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        //load a Bitmap/Svg from resources. (North/0° are on top
-        InputStream is = getResources().openRawResource(R.raw.arrow);
+        // load a Bitmap/SVG from resources
+        InputStream is = null;
         Bitmap bmp = null;
         try {
-            bmp = CanvasAdapter.decodeSvgBitmap(is, 200, 200, 100);
+            is = getResources().openRawResource(R.raw.arrow);
+            bmp = CanvasAdapter.decodeSvgBitmap(is, 128, 128, 100);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(is);
         }
-        //create TextureRegion from Bitmap
+
+        // create TextureRegion from Bitmap
         TextureRegion textureRegion = new TextureRegion(new TextureItem(bmp), new TextureAtlas.Rect(0, 0, bmp.getWidth(), bmp.getHeight()));
 
-        //create LocationTexturLayer with created/loaded TextureRegion
+        // create LocationTextureLayer with created/loaded TextureRegion
         locationLayer = new LocationTextureLayer(mMap, textureRegion);
 
-        // you can set the Color of Accuracy circle (Color.BLUE is default)
-        locationLayer.setAccuracyColor(Color.get(50, 50, 255));
+        // set color of accuracy circle (Color.BLUE is default)
+        locationLayer.locationRenderer.setAccuracyColor(Color.get(50, 50, 255));
 
-        // you can set the Color of Indicator circle (Color.RED is default)
-        locationLayer.setIndicatorColor(Color.MAGENTA);
+        // set color of indicator circle (Color.RED is default)
+        locationLayer.locationRenderer.setIndicatorColor(Color.MAGENTA);
 
         locationLayer.setEnabled(false);
         mMap.layers().add(locationLayer);
@@ -72,6 +76,7 @@ public class LocationTextureActivity extends BitmapTileActivity implements Locat
     @Override
     protected void onResume() {
         super.onResume();
+
         enableAvailableProviders();
     }
 
