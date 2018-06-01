@@ -50,7 +50,8 @@ public class LocationTextureActivity extends BitmapTileActivity implements Locat
         Bitmap bmp = null;
         try {
             is = getResources().openRawResource(R.raw.arrow);
-            bmp = CanvasAdapter.decodeSvgBitmap(is, 128, 128, 100);
+            float scale = CanvasAdapter.getScale();
+            bmp = CanvasAdapter.decodeSvgBitmap(is, (int) (60 * scale), (int) (60 * scale), 100);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
