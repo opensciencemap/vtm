@@ -104,6 +104,7 @@ public class LocationTextureRenderer extends BucketRenderer {
     private TextureRegion textureRegion;
     private int accuracyColor = Color.BLUE;
     private int viewShedColor = Color.RED;
+    private boolean billboard = false;
 
     public LocationTextureRenderer(Map map) {
         this.map = map;
@@ -112,6 +113,10 @@ public class LocationTextureRenderer extends BucketRenderer {
 
     public void setAccuracyColor(int color) {
         this.accuracyColor = color;
+    }
+
+    public void setBillboard(boolean billboard) {
+        this.billboard = billboard;
     }
 
     public void setIndicatorColor(int color) {
@@ -126,8 +131,13 @@ public class LocationTextureRenderer extends BucketRenderer {
         this.radius = radius;
     }
 
-    public void setTextureRegion(TextureRegion region) {
-        textureRegion = region;
+    public void setTextureRegion(TextureRegion textureRegion) {
+        this.textureRegion = textureRegion;
+    }
+
+    public void setTextureRegion(TextureRegion textureRegion, boolean billboard) {
+        this.textureRegion = textureRegion;
+        this.billboard = billboard;
     }
 
     private void animate(boolean enable) {
@@ -243,7 +253,7 @@ public class LocationTextureRenderer extends BucketRenderer {
         if (textureRegion == null)
             return;
         SymbolItem symbolItem = SymbolItem.pool.get();
-        symbolItem.set(symbolX, symbolY, textureRegion, this.bearing, false);
+        symbolItem.set(symbolX, symbolY, textureRegion, this.bearing, this.billboard);
         symbolItem.offset = CENTER_OFFSET;
         symbolBucket.pushSymbol(symbolItem);
 
