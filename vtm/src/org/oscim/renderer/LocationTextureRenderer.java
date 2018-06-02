@@ -243,7 +243,7 @@ public class LocationTextureRenderer extends BucketRenderer {
         if (textureRegion == null)
             return;
         SymbolItem symbolItem = SymbolItem.pool.get();
-        symbolItem.set(symbolX, symbolY, textureRegion, this.bearing, true);
+        symbolItem.set(symbolX, symbolY, textureRegion, this.bearing, false);
         symbolItem.offset = CENTER_OFFSET;
         symbolBucket.pushSymbol(symbolItem);
 
