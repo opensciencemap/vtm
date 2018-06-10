@@ -100,12 +100,8 @@ class GwtMap extends GdxMap {
                 ts = DefaultSources.STAMEN_TONER.build();
             else if ("osm".equals(mapName))
                 ts = DefaultSources.OPENSTREETMAP.build();
-            else if ("osm-transport".equals(mapName))
-                ts = DefaultSources.OSM_TRANSPORT.build();
             else if ("watercolor".equals(mapName))
                 ts = DefaultSources.STAMEN_WATERCOLOR.build();
-            else if ("imagico".equals(mapName))
-                ts = DefaultSources.IMAGICO_LANDCOVER.build();
             else if ("ne-landcover".equals(mapName))
                 ts = DefaultSources.NE_LANDCOVER.build();
             else if ("hikebike".equals(mapName))

@@ -15,6 +15,10 @@ implementation 'org.slf4j:slf4j-api:1.7.25'
 
 ### Android
 ```groovy
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
@@ -23,11 +27,15 @@ implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-mips64'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-x86_64'
-implementation 'com.caverock:androidsvg:1.2.2-beta-1'
+implementation 'com.caverock:androidsvg:1.3-SNAPSHOT'
 ```
 
 ### Android (libGDX)
 ```groovy
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-arm64-v8a'
 implementation 'org.mapsforge:vtm-android:[CURRENT-VERSION]:natives-armeabi'
@@ -43,7 +51,7 @@ implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86'
 implementation 'org.mapsforge:vtm-android-gdx:[CURRENT-VERSION]:natives-x86_64'
 implementation 'com.badlogicgames.gdx:gdx:1.9.8'
 implementation 'com.badlogicgames.gdx:gdx-backend-android:1.9.8'
-implementation 'com.caverock:androidsvg:1.2.2-beta-1'
+implementation 'com.caverock:androidsvg:1.3-SNAPSHOT'
 ```
 
 ### iOS

@@ -29,6 +29,7 @@
 - ViewController refactor [#523](https://github.com/mapsforge/vtm/pull/523)
   - `ViewController.setScreenSize` renamed to `setViewSize`
   - `ViewController.setMapScreenCenter` renamed to `setMapViewCenter`
+- Android 9 compatibility [#550](https://github.com/mapsforge/vtm/issues/550)
 - JTS (LocationTech) [#484](https://github.com/mapsforge/vtm/issues/484)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.10.0)
