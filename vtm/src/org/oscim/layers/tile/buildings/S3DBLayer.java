@@ -15,6 +15,7 @@
  */
 package org.oscim.layers.tile.buildings;
 
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.Box;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.MapElement;
@@ -45,6 +46,7 @@ public class S3DBLayer extends BuildingLayer {
     private final float TILE_SCALE = (ExtrusionUtils.REF_TILE_SIZE / (Tile.SIZE * COORD_SCALE));
 
     private boolean mColored = true;
+    private boolean mTransparent = true;
 
     public S3DBLayer(Map map, VectorTileLayer tileLayer) {
         this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel());
@@ -60,6 +62,17 @@ public class S3DBLayer extends BuildingLayer {
 
     public void setColored(boolean colored) {
         mColored = colored;
+    }
+
+    public boolean isTransparent() {
+        return mTransparent;
+    }
+
+    /**
+     * @param transparent if true it adopts transparency of extrusion styles
+     */
+    public void setTransparent(boolean transparent) {
+        mTransparent = transparent;
     }
 
     @Override
@@ -137,6 +150,9 @@ public class S3DBLayer extends BuildingLayer {
 
         if (bColor == null) {
             bColor = extrusion.colorTop;
+        } else if (mTransparent) {
+            // Multiply alpha channel of extrusion style
+            bColor = ExtrusionStyle.blendAlpha(bColor, Color.aToFloat(extrusion.colorTop));
         }
 
         // Scale x, y and z axis
@@ -238,9 +254,14 @@ public class S3DBLayer extends BuildingLayer {
 
         GeometryBuffer gElement = new GeometryBuffer(element);
         GeometryBuffer specialParts = null;
-        if (roofColor == null) roofColor = buildingColor;
-        boolean success = false;
+        if (roofColor == null)
+            roofColor = buildingColor;
+        else if (mTransparent) {
+            // For simplicity use transparency of building, which is identical in nearly all cases
+            roofColor = ExtrusionStyle.blendAlpha(roofColor, Color.aToFloat(buildingColor));
+        }
 
+        boolean success;
         switch (v) {
             case Tag.VALUE_DOME:
             case Tag.VALUE_ONION:
