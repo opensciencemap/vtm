@@ -94,8 +94,9 @@ public class S3DBLayer extends BuildingLayer {
                 }
             }
             if (bb != null) {
-                float maxSize = (int) Math.max(bb.getHeight(), bb.getWidth()) * TILE_SCALE;
-                roofHeight = (int) ((Float.parseFloat(v) / 45.f) * (maxSize * 15)); // Angle is simplified, 15 is some constant, may depend on lat
+                float minSize = (int) Math.min(bb.getHeight(), bb.getWidth()) * groundScale; // depends on lat
+                // Angle is simplified, 40 is an estimated constant
+                roofHeight = (int) ((Float.parseFloat(v) / 45.f) * (minSize * 40));
             }
         } else if ((v = element.tags.getValue(Tag.KEY_ROOF_SHAPE)) != null && !v.equals(Tag.VALUE_FLAT)) {
             roofHeight = (2 * BUILDING_LEVEL_HEIGHT);
