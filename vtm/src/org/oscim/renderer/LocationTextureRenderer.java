@@ -140,7 +140,7 @@ public class LocationTextureRenderer extends BucketRenderer {
         this.billboard = billboard;
     }
 
-    private void animate(boolean enable) {
+    public void animate(boolean enable) {
         if (runAnim == enable)
             return;
 

@@ -30,6 +30,17 @@ public class LocationTextureLayer extends Layer {
         locationRenderer.setTextureRegion(textureRegion);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == isEnabled())
+            return;
+
+        super.setEnabled(enabled);
+
+        if (!enabled)
+            locationRenderer.animate(false);
+    }
+
     public void setPosition(double latitude, double longitude, float bearing, float accuracy) {
         double x = MercatorProjection.longitudeToX(longitude);
         double y = MercatorProjection.latitudeToY(latitude);
@@ -38,5 +49,6 @@ public class LocationTextureLayer extends Layer {
             bearing += 360;
         double radius = accuracy / MercatorProjection.groundResolutionWithScale(latitude, 1);
         locationRenderer.setLocation(x, y, bearing, radius);
+        locationRenderer.animate(true);
     }
 }
