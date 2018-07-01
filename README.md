@@ -15,7 +15,7 @@ If you have any questions or problems, don't hesitate to ask our public [mailing
 ## Features
 - Java map library
 - OpenGL vector-tile rendering
-- Themeable vector layers
+- Themeable vector layers ([render themes](docs/Rendertheme.md))
 - Support for multiple tile sources:
   - OpenScienceMap vector tiles
   - Mapsforge vector maps
