@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Ahmad Saleem
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 ocsike
  * Copyright 2017 Mathieu De Brito
  *
@@ -133,8 +133,7 @@ public class LocationRenderer extends LayerRenderer {
 
                 long diff = System.currentTimeMillis() - lastRun;
                 mMap.postDelayed(this, Math.min(ANIM_RATE, diff));
-                if (!mLocationIsVisible)
-                    mMap.render();
+                mMap.render();
                 lastRun = System.currentTimeMillis();
             }
         };
@@ -222,17 +221,16 @@ public class LocationRenderer extends LayerRenderer {
 
         float radius = CIRCLE_SIZE * mScale;
 
-        animate(true);
         boolean viewShed = false;
         if (!mLocationIsVisible /* || pos.zoomLevel < SHOW_ACCURACY_ZOOM */) {
-            //animate(true);
+            animate(true);
         } else {
             if (v.pos.zoomLevel >= mShowAccuracyZoom)
                 radius = (float) (mRadius * v.pos.scale);
             radius = Math.max(CIRCLE_SIZE * mScale, radius);
 
             viewShed = true;
-            //animate(false);
+            animate(false);
         }
         gl.uniform1f(hScale, radius);
 
