@@ -2,6 +2,7 @@
 
 |**Name**|**Type**|**License/Cost**|**Platforms**|**Sources**|
 |--------|--------|----------------|-------------|-----------|
+| [AdvRider WD](https://play.google.com/store/apps/details?id=com.abware.watchdog_client) |  Tool-set for the adventure rider | Proprietary/Free | Android | Closed |
 | [Cachebox 3.0](https://github.com/Longri/cachebox3.0) | Geocaching application | Apache 2.0/Free | Android, Desktop, iOS | Open |
 | [Cruiser](http://wiki.openstreetmap.org/wiki/Cruiser) | Map and navigation application | Proprietary/Free | Android, Desktop | Closed |
 | [GCDroid](https://play.google.com/store/apps/details?id=com.gcdroid) | Geocaching App | Proprietary/Free and Commercial | Android | Closed |
