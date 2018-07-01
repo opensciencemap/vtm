@@ -64,6 +64,7 @@ public class LocationRenderer extends LayerRenderer {
     private boolean mLocationIsVisible;
 
     private boolean mRunAnim;
+    private boolean mAnimate = true;
     private long mAnimStart;
 
     private Callback mCallback;
@@ -86,6 +87,10 @@ public class LocationRenderer extends LayerRenderer {
         mColors[1] = a * Color.gToFloat(COLOR);
         mColors[2] = a * Color.bToFloat(COLOR);
         mColors[3] = a;
+    }
+
+    public void setAnimate(boolean animate) {
+        mAnimate = animate;
     }
 
     public void setCallback(Callback callback) {
@@ -122,6 +127,8 @@ public class LocationRenderer extends LayerRenderer {
         mRunAnim = enable;
         if (!enable)
             return;
+        if (!mAnimate)
+            return;
 
         final Runnable action = new Runnable() {
             private long lastRun;
@@ -129,6 +136,8 @@ public class LocationRenderer extends LayerRenderer {
             @Override
             public void run() {
                 if (!mRunAnim)
+                    return;
+                if (!mAnimate)
                     return;
 
                 long diff = System.currentTimeMillis() - lastRun;
@@ -242,7 +251,7 @@ public class LocationRenderer extends LayerRenderer {
         v.mvp.multiplyMM(v.viewproj, v.mvp);
         v.mvp.setAsUniform(hMatrixPosition);
 
-        if (!viewShed) {
+        if (!viewShed && mAnimate) {
             float phase = Math.abs(animPhase() - 0.5f) * 2;
             //phase = Interpolation.fade.apply(phase);
             phase = Interpolation.swing.apply(phase);

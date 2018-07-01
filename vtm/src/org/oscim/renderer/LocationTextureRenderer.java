@@ -96,6 +96,7 @@ public class LocationTextureRenderer extends BucketRenderer {
     private final Point screenPoint = new Point();
     private final Box boundingBox = new Box();
     private boolean runAnim;
+    private boolean animate = true;
     private long animStart;
     private boolean update;
     private float bearing;
@@ -113,6 +114,10 @@ public class LocationTextureRenderer extends BucketRenderer {
 
     public void setAccuracyColor(int color) {
         this.accuracyColor = color;
+    }
+
+    public void setAnimate(boolean animate) {
+        this.animate = animate;
     }
 
     public void setBillboard(boolean billboard) {
@@ -147,6 +152,8 @@ public class LocationTextureRenderer extends BucketRenderer {
         runAnim = enable;
         if (!enable)
             return;
+        if (!animate)
+            return;
 
         final Runnable action = new Runnable() {
             private long lastRun;
@@ -154,6 +161,8 @@ public class LocationTextureRenderer extends BucketRenderer {
             @Override
             public void run() {
                 if (!runAnim)
+                    return;
+                if (!animate)
                     return;
 
                 long diff = System.currentTimeMillis() - lastRun;
@@ -311,7 +320,7 @@ public class LocationTextureRenderer extends BucketRenderer {
         v.mvp.multiplyMM(v.viewproj, v.mvp);
         v.mvp.setAsUniform(hMatrixPosition);
 
-        if (!viewShed) {
+        if (!viewShed && animate) {
             float phase = Math.abs(animPhase() - 0.5f) * 2;
             //phase = Interpolation.fade.apply(phase);
             phase = Interpolation.swing.apply(phase);
