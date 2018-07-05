@@ -50,7 +50,7 @@
 
 ## Version 0.9.0 (2017-12-03)
 
-- Mapsforge maps **v5 beta** support [#429](https://github.com/mapsforge/vtm/issues/429)
+- Mapsforge maps **v5** support [#429](https://github.com/mapsforge/vtm/issues/429)
 - Mapsforge themes compatibility [#100](https://github.com/mapsforge/vtm/issues/100)
 - Render themes: line symbol [#124](https://github.com/mapsforge/vtm/issues/124)
 - Render themes: stroke dash array [#131](https://github.com/mapsforge/vtm/issues/131)
