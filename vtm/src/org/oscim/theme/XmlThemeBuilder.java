@@ -28,6 +28,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.backend.canvas.Paint.FontFamily;
 import org.oscim.backend.canvas.Paint.FontStyle;
+import org.oscim.core.Tag;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureAtlas.Rect;
 import org.oscim.renderer.atlas.TextureRegion;
@@ -50,6 +51,7 @@ import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.SymbolStyle.SymbolBuilder;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
+import org.oscim.utils.FastMath;
 import org.oscim.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +75,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 
     private static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
 
-    private static final int RENDER_THEME_VERSION = 1;
+    private static final int RENDER_THEME_VERSION_MAPSFORGE = 6;
+    private static final int RENDER_THEME_VERSION_VTM = 1;
 
     private enum Element {
         RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS, RENDERING_STYLE
@@ -81,12 +84,15 @@ public class XmlThemeBuilder extends DefaultHandler {
 
     private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
     private static final String ELEMENT_NAME_STYLE_MENU = "stylemenu";
-    private static final String ELEMENT_NAME_MATCH = "m";
+    private static final String ELEMENT_NAME_MATCH_MAPSFORGE = "rule";
+    private static final String ELEMENT_NAME_MATCH_VTM = "m";
     private static final String UNEXPECTED_ELEMENT = "unexpected element: ";
 
     private static final String LINE_STYLE = "L";
     private static final String OUTLINE_STYLE = "O";
     private static final String AREA_STYLE = "A";
+
+    private static final int DEFAULT_PRIORITY = Integer.MAX_VALUE / 2;
 
     /**
      * @param theme an input theme containing valid render theme XML data.
@@ -155,6 +161,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private final ThemeCallback mThemeCallback;
     RenderTheme mRenderTheme;
 
+    final boolean mMapsforgeTheme;
     private final float mScale, mScale2;
 
     private Set<String> mCategories;
@@ -168,15 +175,21 @@ public class XmlThemeBuilder extends DefaultHandler {
     public XmlThemeBuilder(ThemeFile theme, ThemeCallback themeCallback) {
         mTheme = theme;
         mThemeCallback = themeCallback;
+        mMapsforgeTheme = theme.isMapsforgeTheme();
         mScale = CanvasAdapter.getScale();
         mScale2 = CanvasAdapter.getScale() * 0.5f;
     }
 
     @Override
     public void endDocument() {
+        if (mMapsforgeTheme) {
+            // Building rule for Mapsforge themes
+            mRulesList.add(buildingRule());
+        }
+
         Rule[] rules = new Rule[mRulesList.size()];
         for (int i = 0, n = rules.length; i < n; i++)
-            rules[i] = mRulesList.get(i).onComplete(null);
+            rules[i] = mRulesList.get(i).onComplete(mMapsforgeTheme ? new int[1] : null);
 
         mRenderTheme = createTheme(rules);
 
@@ -189,14 +202,14 @@ public class XmlThemeBuilder extends DefaultHandler {
     }
 
     RenderTheme createTheme(Rule[] rules) {
-        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels);
+        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels, mMapsforgeTheme);
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) {
         mElementStack.pop();
 
-        if (ELEMENT_NAME_MATCH.equals(localName)) {
+        if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(localName) || ELEMENT_NAME_MATCH_VTM.equals(localName)) {
             mRuleStack.pop();
             if (mRuleStack.empty()) {
                 if (isVisible(mCurrentRule)) {
@@ -234,7 +247,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 checkState(localName, Element.RENDER_THEME);
                 createRenderTheme(localName, attributes);
 
-            } else if (ELEMENT_NAME_MATCH.equals(localName)) {
+            } else if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(localName) || ELEMENT_NAME_MATCH_VTM.equals(localName)) {
                 checkState(localName, Element.RULE);
                 RuleBuilder rule = createRule(localName, attributes);
                 if (!mRuleStack.empty() && isVisible(rule)) {
@@ -388,9 +401,17 @@ public class XmlThemeBuilder extends DefaultHandler {
                 else if ("NODE".equals(val))
                     element = Rule.Element.NODE;
             } else if ("k".equals(name)) {
-                keys = value;
+                if (mMapsforgeTheme) {
+                    if (!"*".equals(value))
+                        keys = value;
+                } else
+                    keys = value;
             } else if ("v".equals(name)) {
-                values = value;
+                if (mMapsforgeTheme) {
+                    if (!"*".equals(value))
+                        values = value;
+                } else
+                    values = value;
             } else if ("cat".equals(name)) {
                 cat = value;
             } else if ("closed".equals(name)) {
@@ -893,7 +914,8 @@ public class XmlThemeBuilder extends DefaultHandler {
 
         validateExists("version", version, elementName);
 
-        if (version > RENDER_THEME_VERSION)
+        int renderThemeVersion = mMapsforgeTheme ? RENDER_THEME_VERSION_MAPSFORGE : RENDER_THEME_VERSION_VTM;
+        if (version > renderThemeVersion)
             throw new ThemeException("invalid render theme version:" + version);
 
         validateNonNegative("base-stroke-width", baseStrokeWidth);
@@ -944,6 +966,11 @@ public class XmlThemeBuilder extends DefaultHandler {
         b.themeCallback(mThemeCallback);
         String symbol = null;
 
+        if (mMapsforgeTheme) {
+            // Reset default priority
+            b.priority = DEFAULT_PRIORITY;
+        }
+
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
@@ -978,10 +1005,16 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("caption".equals(name))
                 b.caption = Boolean.parseBoolean(value);
 
-            else if ("priority".equals(name))
+            else if ("priority".equals(name)) {
                 b.priority = Integer.parseInt(value);
 
-            else if ("area-size".equals(name))
+                if (mMapsforgeTheme) {
+                    // Mapsforge: higher priorities are drawn first (0 = default priority)
+                    // VTM: lower priorities are drawn first (0 = highest priority)
+                    b.priority = FastMath.clamp(DEFAULT_PRIORITY - b.priority, 0, Integer.MAX_VALUE);
+                }
+
+            } else if ("area-size".equals(name))
                 b.areaSize = Float.parseFloat(value);
 
             else if ("dy".equals(name))
@@ -1006,7 +1039,15 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("symbol-scaling".equals(name))
                 ; // no-op
 
-            else
+            else if ("position".equals(name)) {
+                // Until implement position..
+                if (b.dy == 0) {
+                    value = "above".equals(value) ? "20" : "-20";
+                    // NB: minus..
+                    b.dy = -Float.parseFloat(value) * mScale;
+                }
+
+            } else
                 logUnknownAttribute(elementName, name, value, i);
         }
 
@@ -1208,5 +1249,20 @@ public class XmlThemeBuilder extends DefaultHandler {
         if (obj == null)
             throw new ThemeException("missing attribute " + name
                     + " for element: " + elementName);
+    }
+
+    /**
+     * Building rule for Mapsforge themes.
+     */
+    private RuleBuilder buildingRule() {
+        ExtrusionBuilder<?> b = mExtrusionBuilder.reset();
+        b.level(mLevels++);
+        b.themeCallback(mThemeCallback);
+        b.colorLine(0xffd9d8d6);
+        b.colorSide(0xeaecebe9);
+        b.colorTop(0xeaf9f8f6);
+        RuleBuilder rule = new RuleBuilder(RuleBuilder.RuleType.POSITIVE, new String[]{Tag.KEY_BUILDING, Tag.KEY_BUILDING_PART}, new String[]{});
+        rule.element(Rule.Element.WAY).zoom((byte) 17, Byte.MAX_VALUE).style(b);
+        return rule;
     }
 }
