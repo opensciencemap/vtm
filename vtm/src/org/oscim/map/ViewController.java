@@ -29,7 +29,7 @@ import static org.oscim.utils.FastMath.clamp;
 
 public class ViewController extends Viewport {
 
-    protected float mPivotY = 0.0f;
+    private float mPivotY = 0.0f;
 
     private final float[] mat = new float[16];
 
@@ -69,6 +69,15 @@ public class ViewController extends Viewport {
         mProjMatrix.multiplyRhs(mTmpMatrix);
 
         updateMatrices();
+    }
+
+    /**
+     * Get pivot height relative to view center. E.g. 0.5 is usually preferred
+     * for navigation, moving the center to 25% of the view height.
+     * Range is [-1, 1].
+     */
+    public float getMapViewCenter() {
+        return mPivotY;
     }
 
     /**
