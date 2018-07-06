@@ -70,7 +70,7 @@
     <!--military-->
     <style-area fade="10" fill="#eeedea" id="military" />
     <!--building-->
-    <style-area fade="15" fill="#ee202020" id="building" />
+    <style-area fade="15" fill="#ee404040" id="building" />
 
     <!--water-->
     <style-area fill="#001223" id="water" mesh="true" />
@@ -111,7 +111,7 @@
     <style-line blur="0.7" cap="butt" id="aeroway:runway" stroke="#008888" width="1.8" />
 
     <!--building-->
-    <style-line cap="butt" fix="true" id="building" stroke="#303030" width="1.0" />
+    <style-line cap="butt" fix="true" id="building" stroke="#ee606060" width="1.0" />
 
     <!--water-->
     <style-line cap="butt" id="water:outline" stroke="#647b8c" width="1.0" />
@@ -569,7 +569,7 @@
                   <area fill="#e9e6e3" fade="15" /> -->
             </m>
             <m zoom-min="17">
-                <extrusion line-color="#10ffffff" side-color="#cc202020" top-color="#cc404040" />
+                <extrusion line-color="#50606060" side-color="#ea404040" top-color="#ea404040" />
             </m>
 
             <!--Only add house numbers where no name exist-->

@@ -560,7 +560,7 @@
             </m>
 
             <m zoom-min="17">
-                <extrusion line-color="#cc616161" side-color="#bbd9d9d9" top-color="#ccdddddd" />
+                <extrusion line-color="#50616161" side-color="#ead9d9d9" top-color="#eadddddd" />
             </m>
 
             <!--Only add house numbers where no name exist-->
