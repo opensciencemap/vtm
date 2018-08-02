@@ -45,7 +45,7 @@ public class LocationRenderer extends LayerRenderer {
     private final float mScale;
 
     private String mShaderFile;
-    private int mShaderProgram;
+    protected int mShaderProgram;
     private int hVertexPosition;
     private int hMatrixPosition;
     private int hScale;
@@ -281,7 +281,7 @@ public class LocationRenderer extends LayerRenderer {
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }
 
-    private boolean init() {
+    protected boolean init() {
         int program = GLShader.loadShader(mShaderFile != null ? mShaderFile : "location_1");
         if (program == 0)
             return false;
