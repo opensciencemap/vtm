@@ -60,6 +60,10 @@ Detailed iOS instructions can be found [here](ios.md).
 
 ### Desktop
 ```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 implementation 'org.mapsforge:vtm-gdx:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-linux'
@@ -72,7 +76,7 @@ implementation 'org.lwjgl.lwjgl:lwjgl:2.9.3'
 implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
 implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-osx'
 implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
-implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
+implementation 'com.github.blackears:svgSalamander:v1.1.1'
 ```
 
 ### JTS geometries
