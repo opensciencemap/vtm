@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2017 Longri
  * Copyright 2018 Gustl22
@@ -210,14 +210,14 @@ public final class Layers extends AbstractList<Layer> {
      *
      * @return the current LayerRenderer as array.
      */
-    public LayerRenderer[] getLayerRenderer() {
+    public synchronized LayerRenderer[] getLayerRenderer() {
         if (mDirtyLayers)
             updateLayers();
 
         return mLayerRenderer;
     }
 
-    void destroy() {
+    synchronized void destroy() {
         if (mDirtyLayers)
             updateLayers();
 
@@ -225,7 +225,7 @@ public final class Layers extends AbstractList<Layer> {
             o.onDetach();
     }
 
-    boolean handleGesture(Gesture g, MotionEvent e) {
+    synchronized boolean handleGesture(Gesture g, MotionEvent e) {
         if (mDirtyLayers)
             updateLayers();
 
