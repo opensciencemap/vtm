@@ -95,9 +95,9 @@ public class GdxRenderer3D2 extends LayerRenderer {
 
         // set state that is expected after modelBatch.end();
         // modelBatch keeps track of its own state
-        GLState.enableVertexArrays(-1, -1);
-        GLState.bindTex2D(-1);
-        GLState.useProgram(-1);
+        GLState.enableVertexArrays(GLState.DISABLED, GLState.DISABLED);
+        GLState.bindTex2D(GLState.DISABLED);
+        GLState.useProgram(GLState.DISABLED);
         GLState.test(false, false);
         GLState.blend(false);
 

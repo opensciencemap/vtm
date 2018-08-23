@@ -105,7 +105,7 @@ public class CustomRenderer extends LayerRenderer {
         //mVertices.position(2);
         //GL.vertexAttribPointer(hVertexPosition, 2, GL20.FLOAT, false, 4, mVertices);
 
-        GLState.enableVertexArrays(hVertexPosition, -1);
+        GLState.enableVertexArrays(hVertexPosition, GLState.DISABLED);
 
         /* apply view and projection matrices */
         // set mvp (tmp) matrix relative to mMapPosition

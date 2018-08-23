@@ -174,7 +174,7 @@ public class MeshBucket extends RenderBucket {
             Shader s = shader;
 
             s.useProgram();
-            GLState.enableVertexArrays(s.aPos, -1);
+            GLState.enableVertexArrays(s.aPos, GLState.DISABLED);
 
             v.mvp.setAsUniform(s.uMVP);
 

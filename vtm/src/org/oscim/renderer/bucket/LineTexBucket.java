@@ -353,7 +353,7 @@ public final class LineTexBucket extends LineBucket {
             GLState.blend(true);
             shader.useProgram();
 
-            GLState.enableVertexArrays(-1, -1);
+            GLState.enableVertexArrays(GLState.DISABLED, GLState.DISABLED);
 
             int aLen0 = shader.aLen0;
             int aLen1 = shader.aLen1;

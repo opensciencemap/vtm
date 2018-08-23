@@ -116,7 +116,7 @@ public class CircleBucket extends RenderBucket {
 
             public void set(GLViewport v) {
                 useProgram();
-                GLState.enableVertexArrays(aPos, -1);
+                GLState.enableVertexArrays(aPos, GLState.DISABLED);
 
                 v.mvp.setAsUniform(uMVP);
             }

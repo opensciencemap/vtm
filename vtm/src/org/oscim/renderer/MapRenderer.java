@@ -117,10 +117,10 @@ public class MapRenderer {
 
         GLState.test(false, false);
         GLState.blend(false);
-        GLState.bindTex2D(-1);
-        GLState.useProgram(-1);
-        GLState.bindElementBuffer(-1);
-        GLState.bindVertexBuffer(-1);
+        GLState.bindTex2D(GLState.DISABLED);
+        GLState.useProgram(GLState.DISABLED);
+        GLState.bindElementBuffer(GLState.DISABLED);
+        GLState.bindVertexBuffer(GLState.DISABLED);
 
         mViewport.setFrom(mMap);
 
@@ -269,7 +269,7 @@ public class MapRenderer {
 
         if (location >= 0) {
             GLState.bindVertexBuffer(mQuadVerticesID);
-            GLState.enableVertexArrays(location, -1);
+            GLState.enableVertexArrays(location, GLState.DISABLED);
             gl.vertexAttribPointer(location, 2, GL.FLOAT, false, 0, 0);
         }
     }

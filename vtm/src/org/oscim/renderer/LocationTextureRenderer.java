@@ -297,7 +297,7 @@ public class LocationTextureRenderer extends BucketRenderer {
         GLState.blend(true);
         GLState.test(false, false);
 
-        GLState.enableVertexArrays(hVertexPosition, -1);
+        GLState.enableVertexArrays(hVertexPosition, GLState.DISABLED);
         MapRenderer.bindQuadVertexVBO(hVertexPosition/*, true*/);
 
         float radius = 10;

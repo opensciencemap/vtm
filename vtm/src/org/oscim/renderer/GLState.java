@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -27,6 +28,8 @@ import static org.oscim.backend.GLAdapter.gl;
 public class GLState {
     static final Logger log = LoggerFactory.getLogger(GLState.class);
 
+    public final static int DISABLED = -1;
+
     private final static boolean[] vertexArray = {false, false};
     private static boolean blend = false;
     private static boolean depth = false;
@@ -44,10 +47,10 @@ public class GLState {
         blend = false;
         depth = false;
         stencil = false;
-        shader = -1;
-        currentTexId = -1;
-        glVertexBuffer = -1;
-        glIndexBuffer = -1;
+        shader = DISABLED;
+        currentTexId = DISABLED;
+        glVertexBuffer = DISABLED;
+        glIndexBuffer = DISABLED;
         clearColor = null;
 
         gl.disable(GL.STENCIL_TEST);
@@ -57,7 +60,7 @@ public class GLState {
 
     public static boolean useProgram(int shaderProgram) {
         if (shaderProgram < 0) {
-            shader = -1;
+            shader = DISABLED;
         } else if (shaderProgram != shader) {
             gl.useProgram(shaderProgram);
             shader = shaderProgram;
@@ -111,6 +114,13 @@ public class GLState {
         }
     }
 
+    /**
+     * Enable or disable vertex arrays.
+     * Valid values are
+     * -1: {@link #DISABLED},
+     * 0: enable first,
+     * 1: enable second.
+     */
     public static void enableVertexArrays(int va1, int va2) {
         if (va1 > 1 || va2 > 1)
             log.debug("FIXME: enableVertexArrays...");

@@ -112,7 +112,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
 
         Shader s = mShader;
         s.useProgram();
-        GLState.enableVertexArrays(s.aPos, -1);
+        GLState.enableVertexArrays(s.aPos, GLState.DISABLED);
 
         /* only use face-culling when it's unlikely
          * that one'moves through the building' */
