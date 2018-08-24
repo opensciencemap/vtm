@@ -523,7 +523,7 @@ public class LineBucket extends RenderBucket {
         @Override
         public boolean useProgram() {
             if (super.useProgram()) {
-                GLState.enableVertexArrays(aPos, -1);
+                GLState.enableVertexArrays(aPos, GLState.DISABLED);
                 return true;
             }
             return false;

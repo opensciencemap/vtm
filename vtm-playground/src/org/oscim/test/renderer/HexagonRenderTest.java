@@ -119,7 +119,7 @@ public class HexagonRenderTest extends GdxMapApp {
             // set VBO vertex layout
             gl.vertexAttribPointer(hVertexPosition, 2, GL.FLOAT, false, 0, 0);
 
-            GLState.enableVertexArrays(hVertexPosition, -1);
+            GLState.enableVertexArrays(hVertexPosition, GLState.DISABLED);
 
             /* apply view and projection matrices */
             // set mvp (tmp) matrix relative to mMapPosition

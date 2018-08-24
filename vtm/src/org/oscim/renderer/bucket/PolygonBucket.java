@@ -273,7 +273,7 @@ public final class PolygonBucket extends RenderBucket {
 
         private static Shader setShader(Shader shader, GLMatrix mvp, boolean first) {
             if (shader.useProgram() || first) {
-                GLState.enableVertexArrays(shader.aPos, -1);
+                GLState.enableVertexArrays(shader.aPos, GLState.DISABLED);
 
                 gl.vertexAttribPointer(shader.aPos, 2,
                         GL.SHORT, false, 0, 0);
