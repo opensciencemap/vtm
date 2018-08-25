@@ -222,7 +222,7 @@ public class Poi3DLayer extends Layer implements Map.UpdateListener {
             return;
 
         // scale aka tree height
-        float scale = (float) (1f / (1 << (17 - zoom))) * 8;
+        float scale = (float) (1f / Math.pow(2, (17 - zoom))) * 8;
 
         double tileX = (pos.x * (Tile.SIZE << zoom));
         double tileY = (pos.y * (Tile.SIZE << zoom));
