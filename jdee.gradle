@@ -1,29 +1,29 @@
 def prj = { project ->
 
-  "(jde-project-file-version" (["1.0"])
-  "(jde-set-variables" { 
-    "'(jde-compile-option-directory" ([project.sourceSets.main.output.classesDir])
-    "'(jde-junit-working-directory" ([project.projectDir])
+  "(jdee-project-file-version" (["1.0"])
+  "(jdee-set-variables" { 
+    "'(jdee-compile-option-directory" ([project.sourceSets.main.output.classesDir])
+    "'(jdee-junit-working-directory" ([project.projectDir])
     
-    "'(jde-compile-option-source" { 
+    "'(jdee-compile-option-source" { 
       "'(" (["default"])
     }
 
-    "'(jde-compile-option-target" { 
+    "'(jdee-compile-option-target" { 
       "'(" (["default"])
     }
 
-    "'(jde-compile-option-command-line-args" { 
-      "'(" (["-${project.sourceCompatibility}"])
+    "'(jdee-compile-option-command-line-args" { 
+      "'(" (["-source"] + ["${project.sourceCompatibility}"])
     }
     
-    "'(jde-sourcepath" { 
+    "'(jdee-sourcepath" { 
       "'(" (
         project.sourceSets.main.allSource.srcDirs 
         + project.sourceSets.test.allSource.srcDirs)
     }
     
-    "'(jde-global-classpath" { 
+    "'(jdee-global-classpath" { 
       "'(" (
         [] + project.sourceSets.main.output.classesDir
         + project.sourceSets.test.output.classesDir
