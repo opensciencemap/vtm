@@ -12,6 +12,7 @@ import org.oscim.core.PointF;
 import org.oscim.core.Tag;
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
+import org.oscim.gdx.GdxAssets;
 import org.oscim.layers.Layer;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.MapTile.TileData;
@@ -21,6 +22,7 @@ import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
 import org.oscim.map.Map;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.renderer.bucket.SymbolItem;
+import org.oscim.theme.VtmModels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,8 +94,10 @@ public class Poi3DLayer extends Layer implements Map.UpdateListener {
         // mModel = modelBuilder.createSphere(10f, 10f, 10f, 12, 12,
         // mat, attributes);
 
+        pathToTree = GdxAssets.getAssetPath(VtmModels.TREE.getPath());
+
         assets = new AssetManager();
-        assets.load("data/g3d/treeA.g3dj", Model.class);
+        assets.load(pathToTree, Model.class);
         loading = true;
     }
 
@@ -107,8 +111,10 @@ public class Poi3DLayer extends Layer implements Map.UpdateListener {
     Model mModel;
     AssetManager assets;
 
+    private final String pathToTree;
+
     private void doneLoading() {
-        Model model = assets.get("data/g3d/treeA.g3dj", Model.class);
+        Model model = assets.get(pathToTree, Model.class);
         for (int i = 0; i < model.nodes.size; i++) {
             Node node = model.nodes.get(i);
 

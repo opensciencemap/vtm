@@ -1,6 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 devemux86
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -48,6 +49,13 @@ public class GdxAssets extends AssetAdapter {
             log.debug(e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get file path in GDX assets.
+     */
+    public static String getAssetPath(String fileName) {
+        return Gdx.files.internal(pathPrefix + fileName).path();
     }
 
     public static void init(String path) {
