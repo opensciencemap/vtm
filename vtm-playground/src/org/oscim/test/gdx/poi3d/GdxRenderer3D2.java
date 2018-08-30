@@ -2,6 +2,7 @@ package org.oscim.test.gdx.poi3d;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Vector3;
@@ -31,7 +32,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
 
     public Environment lights;
 
-    public Array<SharedModel> instances = new Array<SharedModel>();
+    public Array<ModelInstance> instances = new Array<>();
 
     public GdxRenderer3D2(Map map) {
         mMap = map;
@@ -132,7 +133,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
             modelBatch.begin(cam);
             cnt = instances.size;
 
-            for (SharedModel instance : instances) {
+            for (ModelInstance instance : instances) {
                 instance.transform.getTranslation(tempVector);
                 tempVector.scl(0.9f, 0.9f, 1);
                 if (!GeometryUtils.pointInPoly(tempVector.x, tempVector.y, mBox, 8, 0))
