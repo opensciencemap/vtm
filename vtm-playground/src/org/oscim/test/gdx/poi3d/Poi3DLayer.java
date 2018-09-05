@@ -20,9 +20,9 @@ import org.oscim.layers.tile.TileSet;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderProcessHook;
 import org.oscim.map.Map;
+import org.oscim.model.VtmModels;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.renderer.bucket.SymbolItem;
-import org.oscim.theme.VtmModels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
