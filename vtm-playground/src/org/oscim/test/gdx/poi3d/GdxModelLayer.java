@@ -2,6 +2,7 @@ package org.oscim.test.gdx.poi3d;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 
 import org.oscim.core.MapPosition;
@@ -60,8 +61,8 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
     //    TileSet mTileSet = new TileSet();
     //    TileSet mPrevTiles = new TileSet();
     //
-    //    LinkedHashMap<Tile, Array<SharedModel>> mTileMap =
-    //            new LinkedHashMap<Tile, Array<SharedModel>>();
+    //    LinkedHashMap<Tile, Array<ModelInstance>> mTileMap =
+    //            new LinkedHashMap<Tile, Array<ModelInstance>>();
 
     boolean loading;
     Model mModel;
@@ -95,7 +96,7 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         //        if (ev == Map.CLEAR_EVENT) {
         //            mTileSet = new TileSet();
         //            mPrevTiles = new TileSet();
-        //            mTileMap = new LinkedHashMap<Tile, Array<SharedModel>>();
+        //            mTileMap = new LinkedHashMap<Tile, Array<ModelInstance>>();
         //            synchronized (g3d) {
         //                g3d.instances.clear();
         //            }
@@ -104,11 +105,11 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         if (loading && assets.update()) {
             doneLoading();
             // Renderable renderable = new Renderable();
-            // new SharedModel(mModel).getRenderable(renderable);
+            // new ModelInstance(mModel).getRenderable(renderable);
             // Shader shader = new DefaultShader(renderable, true, false,
             // false, false, 1, 0, 0, 0);
 
-            g3d.instances.add(new SharedModel(mModel));
+            g3d.instances.add(new ModelInstance(mModel));
 
         }
         if (loading)
@@ -133,15 +134,15 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         //
         //        boolean changed = false;
         //
-        //        Array<SharedModel> added = new Array<SharedModel>();
-        //        Array<SharedModel> removed = new Array<SharedModel>();
+        //        Array<ModelInstance> added = new Array<ModelInstance>();
+        //        Array<ModelInstance> removed = new Array<ModelInstance>();
 
         //        for (int i = 0; i < mTileSet.cnt; i++) {
         //            MapTile t = mTileSet.tiles[i];
         //            if (mPrevTiles.contains(t))
         //                continue;
         //
-        //            Array<SharedModel> instances = new Array<SharedModel>();
+        //            Array<ModelInstance> instances = new Array<ModelInstance>();
         //
         //            Poi3DTileData ld = (Poi3DTileData) t.getData(POI_DATA);
         //            if (ld == null)
@@ -149,7 +150,7 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         //
         //            for (SymbolItem it : ld.symbols) {
         //
-        //                SharedModel inst = new SharedModel(mModel);
+        //                ModelInstance inst = new ModelInstance(mModel);
         //                inst.userData = it;
         //                // float r = 0.5f + 0.5f * (float) Math.random();
         //                // float g = 0.5f + 0.5f * (float) Math.random();
@@ -178,7 +179,7 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         //            if (mTileSet.contains(t))
         //                continue;
         //
-        //            Array<SharedModel> instances = mTileMap.get(t);
+        //            Array<ModelInstance> instances = mTileMap.get(t);
         //            if (instances == null)
         //                continue;
         //
@@ -208,13 +209,13 @@ public class GdxModelLayer extends Layer implements Map.UpdateListener {
         //
         //        synchronized (g3d) {
         //
-        //            for (Entry<Tile, Array<SharedModel>> e : mTileMap.entrySet()) {
+        //            for (Entry<Tile, Array<ModelInstance>> e : mTileMap.entrySet()) {
         //                Tile t = e.getKey();
         //
         //                float dx = (float) (t.tileX * Tile.SIZE - tileX);
         //                float dy = (float) (t.tileY * Tile.SIZE - tileY);
         //
-        //                for (SharedModel inst : e.getValue()) {
+        //                for (ModelInstance inst : e.getValue()) {
         //                    SymbolItem it = (SymbolItem) inst.userData;
         //
         //                    // variable height
