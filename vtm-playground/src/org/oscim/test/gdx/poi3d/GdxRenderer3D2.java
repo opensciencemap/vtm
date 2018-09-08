@@ -1,8 +1,26 @@
+/*
+ * Copyright 2014 Hannes Janetzek
+ * Copyright 2018 Gustl22
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.oscim.test.gdx.poi3d;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Vector3;
@@ -21,6 +39,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.oscim.backend.GLAdapter.gl;
 
+/**
+ * Gdx renderer for more complex 3D models.
+ */
 public class GdxRenderer3D2 extends LayerRenderer {
     static final Logger log = LoggerFactory.getLogger(GdxRenderer3D2.class);
 
@@ -41,21 +62,12 @@ public class GdxRenderer3D2 extends LayerRenderer {
     @Override
     public boolean setup() {
 
-        // if (assets == null)
-        // assets = new AssetManager();
-
-        // assets.load("data/g3d/invaders.g3dj", Model.class);
-        // loading = true;
-
         modelBatch = new ModelBatch(new DefaultShaderProvider());
 
         lights = new Environment();
-        // lights.ambientLight.set(1.0f, 1.0f, 1.0f, 1f);
-        // lights.ambientLight.set(215 / 255f,
-        // 240 / 255f,
-        // 51 / 255f, 1f);
 
-        lights.add(new DirectionalLight().set(0.9f, 0.9f, 0.9f, 0, 1, -0.2f));
+        lights.add(new DirectionalLight().set(0.7f, 0.7f, 0.7f, 0, 1, -0.2f));
+        lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
 
         cam = new MapCamera(mMap);
 
@@ -115,12 +127,10 @@ public class GdxRenderer3D2 extends LayerRenderer {
         p.getMapExtents(mBox, 10);
         float scale = (float) (cam.mMapPosition.scale / v.pos.scale);
 
-        float dx =
-                (float) (cam.mMapPosition.x - v.pos.x)
-                        * (Tile.SIZE << cam.mMapPosition.zoomLevel);
-        float dy =
-                (float) (cam.mMapPosition.y - v.pos.y)
-                        * (Tile.SIZE << cam.mMapPosition.zoomLevel);
+        float dx = (float) (cam.mMapPosition.x - v.pos.x)
+                * (Tile.SIZE << cam.mMapPosition.zoomLevel);
+        float dy = (float) (cam.mMapPosition.y - v.pos.y)
+                * (Tile.SIZE << cam.mMapPosition.zoomLevel);
 
         for (int i = 0; i < 8; i += 2) {
             mBox[i] *= scale;
@@ -139,7 +149,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
                 if (!GeometryUtils.pointInPoly(tempVector.x, tempVector.y, mBox, 8, 0))
                     continue;
 
-                modelBatch.render(instance);
+                modelBatch.render(instance, lights);
                 rnd++;
             }
             modelBatch.end();
