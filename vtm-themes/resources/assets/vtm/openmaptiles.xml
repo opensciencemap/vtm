@@ -3,6 +3,11 @@
     version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
 
+    <tag-transform k="render_height" k-match="height" />
+    <tag-transform k="render_min_height" k-match="min_height" />
+    <!--<tag-transform k="layer" v="building" k-match="building" v-match="yes" />-->
+    <!--<tag-transform k="layer" v="building:part" k-match="building:part" v-match="yes" />-->
+
     <!--###### TEXT styles ######-->
 
     <!--default label-->

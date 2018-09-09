@@ -4,6 +4,7 @@
  * Copyright 2016-2018 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
+ * Copyright 2018 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -64,6 +65,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -168,6 +170,9 @@ public class XmlThemeBuilder extends DefaultHandler {
     private XmlRenderThemeStyleLayer mCurrentLayer;
     private XmlRenderThemeStyleMenu mRenderThemeStyleMenu;
 
+    private Map<String, String> mTransformKeyMap = new HashMap<>();
+    private Map<Tag, Tag> mTransformTagMap = new HashMap<>();
+
     public XmlThemeBuilder(ThemeFile theme) {
         this(theme, null);
     }
@@ -202,7 +207,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     }
 
     RenderTheme createTheme(Rule[] rules) {
-        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels, mMapsforgeTheme);
+        return new RenderTheme(mMapBackground, mTextScale, rules, mLevels, mTransformKeyMap, mTransformTagMap, mMapsforgeTheme);
     }
 
     @Override
@@ -368,6 +373,10 @@ public class XmlThemeBuilder extends DefaultHandler {
                 checkState(qName, Element.RENDERING_STYLE);
                 mRenderThemeStyleMenu = new XmlRenderThemeStyleMenu(getStringAttribute(attributes, "id"),
                         getStringAttribute(attributes, "defaultlang"), getStringAttribute(attributes, "defaultvalue"));
+
+            } else if ("tag-transform".equals(localName)) {
+                checkState(qName, Element.RENDERING_STYLE);
+                tagTransform(localName, attributes);
 
             } else {
                 log.error("unknown element: {}", localName);
@@ -1237,6 +1246,44 @@ public class XmlThemeBuilder extends DefaultHandler {
             dashIntervals[i] = Float.parseFloat(dashEntries[i]);
         }
         return dashIntervals;
+    }
+
+    private void tagTransform(String localName, Attributes attributes) {
+        String k, v, matchKey, matchValue;
+        k = v = matchKey = matchValue = null;
+
+        for (int i = 0; i < attributes.getLength(); i++) {
+            String name = attributes.getLocalName(i);
+            String value = attributes.getValue(i);
+
+            switch (name) {
+                case "k":
+                    k = value;
+                    break;
+                case "v":
+                    v = value;
+                    break;
+                case "k-match":
+                    matchKey = value;
+                    break;
+                case "v-match":
+                    matchValue = value;
+                    break;
+                default:
+                    logUnknownAttribute(localName, name, value, i);
+            }
+        }
+
+        if (k == null || k.isEmpty() || matchKey == null || matchKey.isEmpty()) {
+            log.debug("empty key in element " + localName);
+            return;
+        }
+
+        if (v == null && matchValue == null) {
+            mTransformKeyMap.put(matchKey, k);
+        } else {
+            mTransformTagMap.put(new Tag(matchKey, matchValue), new Tag(k, v));
+        }
     }
 
     private static void validateNonNegative(String name, float value) {

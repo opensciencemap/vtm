@@ -251,6 +251,20 @@ public class RenderTheme implements IRenderTheme {
     public void scaleTextSize(float scaleFactor) {
     }
 
+    @Override
+    public String transformKey(String key) {
+        return null;
+    }
+
+    @Override
+    public Tag transformTag(Tag tag) {
+        return null;
+    }
+
+    @Override
+    public void updateStyles() {
+    }
+
     public static void main(String[] args) {
         RenderTheme t = new RenderTheme();
 
@@ -261,11 +275,4 @@ public class RenderTheme implements IRenderTheme {
         t.matchElement(GeometryType.POLY, e.tags, 16);
         t.matchElement(GeometryType.POLY, e.tags, 15);
     }
-
-    @Override
-    public void updateStyles() {
-        // TODO Auto-generated method stub
-
-    }
-
 }

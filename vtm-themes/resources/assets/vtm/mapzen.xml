@@ -3,6 +3,17 @@
     version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
 
+    <!--<tag-transform k="kind" v="building" k-match="building" v-match="yes" />-->
+    <!--<tag-transform k="kind" v="building_part" k-match="building:part" v-match="yes" />-->
+    <tag-transform k="root_id" k-match="ref" />
+
+    <tag-transform k="roof_color" k-match="roof:colour" />
+    <tag-transform k="roof_direction" k-match="roof:direction" />
+    <tag-transform k="roof_height" k-match="roof:height" />
+    <tag-transform k="roof_material" k-match="roof:material" />
+    <tag-transform k="roof_orientation" k-match="roof:orientation" />
+    <tag-transform k="roof_shape" k-match="roof:shape" />
+
     <!-- base style for fixed width lines -->
     <style-line cap="butt" fix="true" id="fix" width="1.0" />
 
