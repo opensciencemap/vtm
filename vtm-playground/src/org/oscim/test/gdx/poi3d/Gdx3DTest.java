@@ -57,6 +57,13 @@ public class Gdx3DTest extends GdxMapApp {
 
         mMap.layers().add(new Poi3DLayer(mMap, mMapLayer));
 
+        /*
+        // Add car model to "Neue Elbbrücke" in Hamburg.
+        GdxModelLayer gdxModelLayer = new GdxModelLayer(mMap);
+        mMap.layers().add(gdxModelLayer);
+        gdxModelLayer.addModel(VtmModels.CAR, 53.53202, 10.02599, 300f);
+        */
+
         mMap.layers().add(new LabelLayer(mMap, mMapLayer));
 
         MapPosition pos = MapPreferences.getMapPosition();
