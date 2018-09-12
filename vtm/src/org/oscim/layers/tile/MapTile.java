@@ -253,8 +253,11 @@ public class MapTile extends Tile {
         }
 
         for (int i = 0; i < 4; i++) {
-            if ((proxy & (1 << i)) != 0)
-                node.child(i).refs--;
+            if ((proxy & (1 << i)) != 0) {
+                MapTile c = node.child(i);
+                if (c != null)
+                    c.refs--;
+            }
         }
 
         /* removed all proxy references for this tile */
