@@ -65,6 +65,8 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> implements Gestur
 
     public static final Logger log = LoggerFactory.getLogger(VectorLayer.class);
 
+    private static final int STROKE_MIN_ZOOM = 12;
+
     //private final SpatialIndex<Drawable> mDrawables = new RTree<Drawable>();
     protected final SpatialIndex<Drawable> mDrawables = new QuadTree<Drawable>(1 << 30, 18);
 
@@ -263,20 +265,24 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> implements Gestur
         if (ll.line == null) {
             ll.line = LineStyle.builder()
                     .reset()
+                    .blur(style.blur)
                     .cap(style.cap)
                     .color(style.strokeColor)
                     .fixed(style.fixed)
-                    .blur(style.blur)
                     .heightOffset(style.heightOffset)
                     .level(0)
                     .randomOffset(style.randomOffset)
                     .stipple(style.stipple)
                     .stippleColor(style.stippleColor)
                     .stippleWidth(style.stippleWidth)
+                    .strokeIncrease(style.strokeIncrease)
                     .strokeWidth(style.strokeWidth)
                     .texture(style.texture)
                     .build();
         }
+
+        if (!style.fixed && style.strokeIncrease > 1)
+            ll.scale = (float) Math.pow(style.strokeIncrease, Math.max(t.position.getZoom() - STROKE_MIN_ZOOM, 0));
 
         if (style.generalization != Style.GENERALIZATION_NONE) {
             line = DouglasPeuckerSimplifier.simplify(line, mMinX * style.generalization);

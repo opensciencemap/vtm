@@ -46,6 +46,7 @@ public class Style {
 
     public final Paint.Cap cap;
     public final boolean fixed;
+    public final double strokeIncrease;
     public final float blur;
     public final int stipple;
     public final int stippleColor;
@@ -69,6 +70,7 @@ public class Style {
 
         cap = builder.cap;
         fixed = builder.fixed;
+        strokeIncrease = builder.strokeIncrease;
         blur = builder.blur;
         stipple = builder.stipple;
         stippleColor = builder.stippleColor;
@@ -103,6 +105,7 @@ public class Style {
 
         public Paint.Cap cap = Paint.Cap.ROUND;
         public boolean fixed = false;
+        public double strokeIncrease = 1;
         public float blur = 0;
         public int stipple = 0;
         public int stippleColor = Color.GRAY;
@@ -207,6 +210,11 @@ public class Style {
 
         public Builder fixed(boolean b) {
             this.fixed = b;
+            return this;
+        }
+
+        public Builder strokeIncrease(double strokeIncrease) {
+            this.strokeIncrease = strokeIncrease;
             return this;
         }
 

@@ -1,7 +1,7 @@
 /*
  * Copyright 2012 osmdroid authors: Viesturs Zarins, Martin Pearman
  * Copyright 2012 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2016 Bezzu
  * Copyright 2016 Pedinel
  * Copyright 2017 Andrey Novikov
@@ -53,6 +53,8 @@ import java.util.List;
  * This class draws a path line in given color or texture.
  */
 public class PathLayer extends Layer implements GestureListener {
+
+    private static final int STROKE_MIN_ZOOM = 12;
 
     /**
      * Stores points, converted to the map projection.
@@ -338,7 +340,8 @@ public class PathLayer extends Layer implements GestureListener {
 
             ll.line = mLineStyle;
 
-            //ll.scale = ll.line.width;
+            if (!mLineStyle.fixed && mLineStyle.strokeIncrease > 1)
+                ll.scale = (float) Math.pow(mLineStyle.strokeIncrease, Math.max(task.position.getZoom() - STROKE_MIN_ZOOM, 0));
 
             mMap.getMapPosition(task.position);
 

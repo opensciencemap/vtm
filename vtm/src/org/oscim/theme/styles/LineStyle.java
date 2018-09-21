@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -37,6 +37,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
     public final Cap cap;
     public final boolean outline;
     public final boolean fixed;
+    public final double strokeIncrease;
     public final int fadeScale;
     public final float blur;
 
@@ -57,19 +58,19 @@ public final class LineStyle extends RenderStyle<LineStyle> {
     public final float repeatGap;
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(0, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(level, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(0, "", stroke, width, cap, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
     }
 
     public LineStyle(int level, String style, int color, float width,
-                     Cap cap, boolean fixed,
+                     Cap cap, boolean fixed, double strokeIncrease,
                      int stipple, int stippleColor, float stippleWidth,
                      int fadeScale, float blur, boolean isOutline, TextureItem texture,
                      boolean randomOffset, float[] dashArray, float repeatStart, float repeatGap) {
@@ -82,6 +83,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.color = color;
         this.width = width;
         this.fixed = fixed;
+        this.strokeIncrease = strokeIncrease;
 
         this.stipple = stipple;
         this.stippleColor = stippleColor;
@@ -112,6 +114,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.cap = b.cap;
         this.outline = b.outline;
         this.fixed = b.fixed;
+        this.strokeIncrease = b.strokeIncrease;
         this.fadeScale = b.fadeScale;
         this.blur = b.blur;
         this.stipple = b.stipple;
@@ -146,6 +149,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         public Cap cap;
         public boolean outline;
         public boolean fixed;
+        public double strokeIncrease;
         public int fadeScale;
         public float blur;
 
@@ -180,6 +184,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.cap = line.cap;
             this.outline = line.outline;
             this.fixed = line.fixed;
+            this.strokeIncrease = line.strokeIncrease;
             this.fadeScale = line.fadeScale;
             this.blur = line.blur;
             this.stipple = line.stipple;
@@ -246,6 +251,11 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             return self();
         }
 
+        public T strokeIncrease(double strokeIncrease) {
+            this.strokeIncrease = strokeIncrease;
+            return self();
+        }
+
         public T texture(TextureItem texture) {
             this.texture = texture;
             return self();
@@ -300,6 +310,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             outline = false;
             strokeWidth = 1;
             fixed = false;
+            strokeIncrease = 1;
 
             fadeScale = -1;
             blur = 0;
