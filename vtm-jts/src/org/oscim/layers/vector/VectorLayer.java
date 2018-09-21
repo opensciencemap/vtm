@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2018 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -266,6 +266,7 @@ public class VectorLayer extends AbstractVectorLayer<Drawable> implements Gestur
                     .cap(style.cap)
                     .color(style.strokeColor)
                     .fixed(style.fixed)
+                    .blur(style.blur)
                     .heightOffset(style.heightOffset)
                     .level(0)
                     .randomOffset(style.randomOffset)
