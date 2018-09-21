@@ -143,6 +143,8 @@ public class MapRenderer {
 
         for (int i = 0, n = layers.length; i < n; i++) {
             LayerRenderer renderer = layers[i];
+            if (renderer == null)
+                continue;
 
             if (!renderer.isInitialized) {
                 renderer.setup();
