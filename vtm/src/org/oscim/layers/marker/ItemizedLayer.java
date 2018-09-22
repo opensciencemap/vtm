@@ -1,9 +1,9 @@
 /*
  * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
- * 
+ *
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2018 devemux86
- * Copyright 2016 Stephan Leuschner 
+ * Copyright 2016 Stephan Leuschner
  * Copyright 2016 Pedinel
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -201,7 +201,7 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
 
         // squared dist: 50x50 px ~ 2mm on 400dpi
         // 20x20 px on baseline mdpi (160dpi)
-        double dist = 20 * 20 * CanvasAdapter.getScale();
+        double dist = (20 * CanvasAdapter.getScale()) * (20 * CanvasAdapter.getScale());
 
         for (int i = 0; i < size; i++) {
             Item item = mItemList.get(i);
