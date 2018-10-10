@@ -81,7 +81,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     private static final int RENDER_THEME_VERSION_VTM = 1;
 
     private enum Element {
-        RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS, RENDERING_STYLE
+        RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS, RENDERING_STYLE, TAG_TRANSFORM
     }
 
     private static final String ELEMENT_NAME_RENDER_THEME = "rendertheme";
@@ -375,7 +375,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                         getStringAttribute(attributes, "defaultlang"), getStringAttribute(attributes, "defaultvalue"));
 
             } else if ("tag-transform".equals(localName)) {
-                checkState(qName, Element.RENDERING_STYLE);
+                checkState(qName, Element.TAG_TRANSFORM);
                 tagTransform(localName, attributes);
 
             } else {
@@ -870,14 +870,23 @@ public class XmlThemeBuilder extends DefaultHandler {
 
             case ATLAS:
                 parentElement = mElementStack.peek();
-                // FIXME
-                if (parentElement != Element.RENDER_THEME
-                        && parentElement != Element.ATLAS) {
+                if (parentElement != Element.RENDER_THEME) {
                     throw new SAXException(UNEXPECTED_ELEMENT + elementName);
                 }
                 return;
 
             case RENDERING_STYLE:
+                parentElement = mElementStack.peek();
+                if (parentElement != Element.RENDER_THEME) {
+                    throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+                }
+                return;
+
+            case TAG_TRANSFORM:
+                parentElement = mElementStack.peek();
+                if (parentElement != Element.RENDER_THEME) {
+                    throw new SAXException(UNEXPECTED_ELEMENT + elementName);
+                }
                 return;
         }
 
