@@ -876,10 +876,6 @@ public class XmlThemeBuilder extends DefaultHandler {
                 return;
 
             case RENDERING_STYLE:
-                parentElement = mElementStack.peek();
-                if (parentElement != Element.RENDER_THEME) {
-                    throw new SAXException(UNEXPECTED_ELEMENT + elementName);
-                }
                 return;
 
             case TAG_TRANSFORM:
