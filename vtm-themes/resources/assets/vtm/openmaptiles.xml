@@ -28,9 +28,9 @@
     <!--health-->
     <style-text caption="true" dy="20" fill="#da0092" font-family="medium" id="health" k="name"
         size="14" stroke="#ffffff" stroke-width="2.0" />
-    <!--other POIs-->
-    <style-text caption="true" dy="20" fill="#404000" id="poi" k="name" size="16" stroke="#aaffffff"
-        stroke-width="2.0" />
+    <!--entertainment-->
+    <style-text caption="true" dy="20" fill="#b7650c" font-family="medium" id="entertainment"
+        k="name" size="14" stroke="#ffffff" stroke-width="2.0" />
     <!--roads-->
     <style-text fill="#101010" id="road" k="name" priority="2" size="16" stroke="#eeeeee"
         stroke-width="2.0" />
@@ -403,17 +403,33 @@
             <extrusion line-color="#ffd9d8d6" side-color="#eaecebe9" top-color="#eaf9f8f6" />
         </m>
     </m>
+
     <!-- housenumber -->
-    <m k="layer" v="housenumber" zoom-min="18">
+    <!--<m k="layer" v="housenumber" zoom-min="18">
         <caption style="bold" fill="#606060" font-family="condensed" k="housenumber" priority="10"
             size="12" stroke="#ffffff" stroke-width="2.0" />
-    </m>
+    </m>-->
 
     <m k="layer" v="poi">
         <m k="subclass">
 
-            <!-- Shop -->
+            <!-- railway -->
             <m select="first" zoom-min="15">
+                <m v="tram_stop">
+                    <symbol src="assets:symbols/transport/tram_stop.svg" />
+                </m>
+                <m v="railway">
+                    <symbol src="assets:symbols/transport/train_station2.svg" />
+                </m>
+
+                <m select="when-matched">
+                    <caption style="bold" dy="20" fill="#af3a3a" k="name" size="14" stroke="#ffffff"
+                        stroke-width="2.0" />
+                </m>
+            </m>
+
+            <!-- Shop -->
+            <m select="first" zoom-min="17">
                 <m v="bakery">
                     <symbol src="assets:symbols/shopping/bakery.svg" />
                 </m>
@@ -427,17 +443,17 @@
                     <symbol src="assets:symbols/shopping/supermarket.svg" />
                 </m>
 
-                <m zoom-min="17">
+                <m v="shop">
                     <symbol src="assets:symbols/dot_magenta.svg" />
                 </m>
 
-                <m select="when-matched" zoom-min="17">
-                    <text use="poi" />
+                <m select="when-matched">
+                    <text use="shop" />
                 </m>
             </m>
 
             <!-- Tourism -->
-            <m select="first" zoom-min="15">
+            <m select="first" zoom-min="17">
                 <m v="alpine_hut">
                     <symbol src="assets:symbols/accommodation/alpinehut.svg" />
                 </m>
@@ -452,20 +468,24 @@
                 </m>
 
                 <m select="when-matched">
-                    <text use="poi" />
+                    <text use="accommodation" />
                 </m>
             </m>
 
-            <m select="first" zoom-min="15">
-                <m v="viewpoint">
-                    <symbol src="assets:symbols/custom/tourist/view_point.svg" />
+            <!--Entertainment-->
+            <m select="first" zoom-min="16">
+                <m v="attraction">
+                    <symbol src="assets:symbols/custom/tourist/attraction.svg" />
                 </m>
                 <m v="museum">
                     <symbol src="assets:symbols/custom/tourist/museum.svg" />
                 </m>
+                <m v="viewpoint">
+                    <symbol src="assets:symbols/custom/tourist/view_point.svg" />
+                </m>
 
-                <m select="when-matched">
-                    <text use="caption-small-blue" />
+                <m select="when-matched" zoom-min="17">
+                    <text use="entertainment" />
                 </m>
             </m>
         </m>
