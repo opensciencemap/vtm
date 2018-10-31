@@ -59,6 +59,14 @@ This library contains code from several projects:
 - **osmdroid** (Apache 2.0): some overlay classes (https://github.com/osmdroid/osmdroid)
 - **tessellate** (SGI Free Software License B 2.0): (https://github.com/cscheid/tessellate)
 
+## License
+
+VTM library is under [LGPL v3 license](http://www.gnu.org/licenses/lgpl-3.0), with an important simplification: the constraints mentioned in sections LGPL v3 §4(d) and §4(e) are waived.
+
+This means that you are allowed to convey a Combined Work without providing the user any way to recombine or relink the application and without providing any shared library mechanism.
+
+In other words, you are allowed to include VTM library in your Android application, without making your application open source.
+
 ## Screenshots
 
 ### Android
