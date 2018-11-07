@@ -16,7 +16,7 @@
     <inherits name="com.badlogic.gdx.backends.Gdx" />
     <inherits name="com.google.gwt.user.theme.chrome.Chrome" />
 
-
+    <clear-configuration-property name="gdx.reflect.include" />
     <!--   <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.scenes.scene2d" />
       <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.math" />
       <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g2d.TextureRegion" />
@@ -30,10 +30,12 @@
       <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.ObjectMap" />
       <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.OrderedMap" />
       <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.utils.Disposable" />
-      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.VertexAttribute" />
-      <extend-configuration-property name="gdx.reflect.include" value="com.badlogic.gdx.graphics.g3d.model" />
      -->
-    <clear-configuration-property name="gdx.reflect.include" />
+
+    <extend-configuration-property name="gdx.reflect.include"
+        value="com.badlogic.gdx.graphics.VertexAttribute" />
+    <extend-configuration-property name="gdx.reflect.include"
+        value="com.badlogic.gdx.graphics.g3d.model" />
     <extend-configuration-property name="gdx.reflect.include" value="java.util.List" />
     <extend-configuration-property name="gdx.reflect.include" value="java.util.ArrayList" />
     <extend-configuration-property name="gdx.reflect.include" value="java.util.Map" />

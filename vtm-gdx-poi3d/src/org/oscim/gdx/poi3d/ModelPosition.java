@@ -12,27 +12,34 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.test.gdx.poi3d;
+package org.oscim.gdx.poi3d;
 
-import com.badlogic.gdx.graphics.g3d.Model;
+import org.oscim.core.MercatorProjection;
 
-class ModelHolder {
-    Model mModel;
-    String mPath;
+public class ModelPosition {
+    public double x;
+    public double y;
+    public float rotation;
 
-    ModelHolder(String path) {
-        mPath = path;
+    public ModelPosition(double lat, double lon, float rotation) {
+        setPosition(lat, lon, rotation);
     }
 
-    public Model getModel() {
-        return mModel;
+    public double getLat() {
+        return MercatorProjection.toLatitude(y);
     }
 
-    public String getPath() {
-        return mPath;
+    public double getLon() {
+        return MercatorProjection.toLongitude(x);
     }
 
-    public void setModel(Model model) {
-        mModel = model;
+    public float getRotation() {
+        return rotation;
+    }
+
+    public void setPosition(double lat, double lon, float rotation) {
+        this.y = MercatorProjection.latitudeToY(lat);
+        this.x = MercatorProjection.longitudeToX(lon);
+        this.rotation = rotation;
     }
 }

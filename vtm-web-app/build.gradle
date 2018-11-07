@@ -17,6 +17,7 @@ sourceSets {
 }
 
 dependencies {
+    providedCompile project(':vtm-gdx-poi3d')
     providedCompile project(':vtm-web')
     providedCompile 'ru.finam:slf4j-gwt:1.7.7.1'
 }
@@ -25,6 +26,8 @@ dependencies {
 evaluationDependsOn(':vtm')
 evaluationDependsOn(':vtm-themes')
 evaluationDependsOn(':vtm-gdx')
+evaluationDependsOn(':vtm-gdx-poi3d')
+evaluationDependsOn(':vtm-models')
 evaluationDependsOn(':vtm-web')
 
 gwt {
@@ -48,6 +51,9 @@ gwt {
     src += files(project(':vtm-themes').sourceSets.main.allJava.srcDirs)
     src += files(project(':vtm-themes').sourceSets.main.resources.srcDirs)
     src += files(project(':vtm-gdx').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-gdx-poi3d').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-models').sourceSets.main.allJava.srcDirs)
+    src += files(project(':vtm-models').sourceSets.main.resources.srcDirs)
     src += files(project(':vtm-web').sourceSets.main.allJava.srcDirs)
 }
 
@@ -61,6 +67,12 @@ project.afterEvaluate {
 
 task copyThemeAssets(type: Copy) {
     from "$rootDir/vtm-themes/resources/assets"
+    into "assets"
+    include '**/*'
+}
+
+task copyModelAssets(type: Copy) {
+    from "$rootDir/vtm-models/resources/assets"
     into "assets"
     include '**/*'
 }
@@ -85,6 +97,7 @@ task copyWarSources(type: Copy) {
 
 tasks.withType(JavaCompile) { compileTask ->
     compileTask.dependsOn copyThemeAssets
+    compileTask.dependsOn copyModelAssets
     compileTask.dependsOn copyThemeLocalAssets
     compileTask.dependsOn copyVtmAssets
     compileTask.dependsOn copyWarSources

@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+apply plugin: 'maven'
+
+dependencies {
+    api project(':vtm-gdx')
+    api project(':vtm-models')
+}
+
+sourceSets {
+    main.java.srcDirs = ['src']
+}
+
+if (project.hasProperty("SONATYPE_USERNAME")) {
+    afterEvaluate {
+        project.apply from: "${rootProject.projectDir}/deploy.gradle"
+    }
+}
