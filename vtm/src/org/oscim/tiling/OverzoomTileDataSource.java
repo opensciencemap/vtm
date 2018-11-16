@@ -26,6 +26,10 @@ public class OverzoomTileDataSource implements ITileDataSource {
         this.overZoom = overZoom;
     }
 
+    public ITileDataSource getDataSource() {
+        return tileDataSource;
+    }
+
     @Override
     public void query(MapTile tile, ITileDataSink sink) {
         MapTile mapTile = tile;
