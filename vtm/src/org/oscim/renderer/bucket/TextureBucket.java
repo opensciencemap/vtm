@@ -145,7 +145,7 @@ public class TextureBucket extends RenderBucket {
                 for (int i = 0; i < t.indices; i += MAX_INDICES) {
                     /* to.offset * (24(shorts) * 2(short-bytes)
                      * / 6(indices) == 8) */
-                    int off = (t.offset + i) * 8 + tb.vertexOffset;
+                    int off = (t.offset + i) * RenderBuckets.SHORT_BYTES * 4 + tb.vertexOffset;
 
                     int numIndices = t.indices - i;
                     if (numIndices > MAX_INDICES)
@@ -165,10 +165,10 @@ public class TextureBucket extends RenderBucket {
 
     public void render(int offset, int numIndices) {
         gl.vertexAttribPointer(shader.aPos, 4, GL.SHORT,
-                false, 12, offset);
+                false, RenderBuckets.SHORT_BYTES * 6, offset);
 
         gl.vertexAttribPointer(shader.aTexCoord, 2, GL.SHORT,
-                false, 12, offset + 8);
+                false, RenderBuckets.SHORT_BYTES * 6, offset + RenderBuckets.SHORT_BYTES * 4);
 
         gl.drawElements(GL.TRIANGLES, numIndices,
                 GL.UNSIGNED_SHORT, 0);
