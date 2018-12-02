@@ -29,6 +29,7 @@ public class GLState {
     static final Logger log = LoggerFactory.getLogger(GLState.class);
 
     public final static int DISABLED = -1;
+    public final static int UNBIND = 0;
 
     private final static boolean[] vertexArray = {false, false};
     private static boolean blend = false;

@@ -215,7 +215,7 @@ public class MapRenderer {
         gl.bufferData(GL.ELEMENT_ARRAY_BUFFER,
                 indices.length * 2, buf,
                 GL.STATIC_DRAW);
-        GLState.bindElementBuffer(0);
+        GLState.bindElementBuffer(GLState.UNBIND);
 
         /* initialize default quad */
         FloatBuffer floatBuffer = MapRenderer.getFloatBuffer(8);
@@ -228,7 +228,7 @@ public class MapRenderer {
         gl.bufferData(GL.ARRAY_BUFFER,
                 quad.length * 4, floatBuffer,
                 GL.STATIC_DRAW);
-        GLState.bindVertexBuffer(0);
+        GLState.bindVertexBuffer(GLState.UNBIND);
 
         GLState.init();
 
