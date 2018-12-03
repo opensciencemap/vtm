@@ -97,7 +97,7 @@ public class CustomRenderer extends LayerRenderer {
         GLState.test(false, false);
 
         // unbind previously bound VBOs
-        gl.bindBuffer(GL.ARRAY_BUFFER, 0);
+        GLState.bindBuffer(GL.ARRAY_BUFFER, GLState.UNBIND);
 
         // Load the vertex data
         //mVertices.position(0);

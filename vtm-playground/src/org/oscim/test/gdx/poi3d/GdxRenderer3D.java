@@ -102,7 +102,9 @@ public class GdxRenderer3D extends LayerRenderer {
         // if (position.zoomLevel < 17)
         // GL.clear(GL20.DEPTH_BUFFER_BIT);
 
-        gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, 0);
+        // Unbind via GLState to ensure no buffer is replaced by accident
+        GLState.bindElementBuffer(GLState.UNBIND);
+        GLState.bindBuffer(GL.ARRAY_BUFFER, GLState.UNBIND);
 
         // set state that is expected after modelBatch.end();
         // modelBatch keeps track of its own state
@@ -186,8 +188,8 @@ public class GdxRenderer3D extends LayerRenderer {
         log.debug(">>> " + (System.currentTimeMillis() - time) + " " + cnt + "/" + rnd);
 
         gl.depthMask(false);
-        gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, 0);
-        gl.bindBuffer(GL.ARRAY_BUFFER, 0);
+        GLState.bindElementBuffer(GLState.UNBIND);
+        GLState.bindBuffer(GL.ARRAY_BUFFER, GLState.UNBIND);
     }
 
     // @Override
