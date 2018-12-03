@@ -219,10 +219,10 @@ public class BitmapBucket extends TextureBucket {
                     int off = (t.offset + i) * 8 + tb.vertexOffset;
 
                     gl.vertexAttribPointer(s.aPos, 2,
-                            GL.SHORT, false, 12, off);
+                            GL.SHORT, false, RenderBuckets.SHORT_BYTES * 6, off);
 
                     gl.vertexAttribPointer(s.aTexCoord, 2,
-                            GL.SHORT, false, 12, off + 8);
+                            GL.SHORT, false, RenderBuckets.SHORT_BYTES * 6, off + RenderBuckets.SHORT_BYTES * 4);
 
                     int numIndices = t.indices - i;
                     if (numIndices > MAX_INDICES)

@@ -23,6 +23,7 @@ import org.oscim.backend.GL;
 import org.oscim.core.Tile;
 import org.oscim.renderer.bucket.ExtrusionBucket;
 import org.oscim.renderer.bucket.ExtrusionBuckets;
+import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.utils.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
         for (ExtrusionBucket eb = ebs.buckets(); eb != null; eb = eb.next()) {
 
             gl.vertexAttribPointer(vertexPointer, 3,
-                    GL.SHORT, false, 8,
+                    GL.SHORT, false, RenderBuckets.SHORT_BYTES * 4,
                     eb.getVertexOffset());
 
             int sumIndices = eb.idx[0] + eb.idx[1] + eb.idx[2];
@@ -188,10 +189,10 @@ public abstract class ExtrusionRenderer extends LayerRenderer {
                 }
 
                 gl.vertexAttribPointer(s.aPos, 3, GL.SHORT,
-                        false, 8, eb.getVertexOffset());
+                        false, RenderBuckets.SHORT_BYTES * 4, eb.getVertexOffset());
 
                 gl.vertexAttribPointer(s.aLight, 2, GL.UNSIGNED_BYTE,
-                        false, 8, eb.getVertexOffset() + 6);
+                        false, RenderBuckets.SHORT_BYTES * 4, eb.getVertexOffset() + RenderBuckets.SHORT_BYTES * 3);
 
                 /* draw extruded outlines (mMesh == false) */
                 if (eb.idx[0] > 0) {
