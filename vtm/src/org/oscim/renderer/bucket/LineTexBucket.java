@@ -297,7 +297,7 @@ public final class LineTexBucket extends LineBucket {
             GLState.bindVertexBuffer(mVertexFlipID);
             gl.bufferData(GL.ARRAY_BUFFER, flip.length, sbuf,
                     GL.STATIC_DRAW);
-            GLState.bindVertexBuffer(0);
+            GLState.bindVertexBuffer(GLState.UNBIND);
 
             //    mTexID = new int[10];
             //    byte[] stipple = new byte[40];

@@ -94,8 +94,8 @@ public class GdxSpriteBatchTest extends GdxMapApp {
         mMapRenderer.onDrawFrame();
 
         gl.flush();
-        GLState.bindVertexBuffer(0);
-        GLState.bindElementBuffer(0);
+        GLState.bindVertexBuffer(GLState.UNBIND);
+        GLState.bindElementBuffer(GLState.UNBIND);
         gl.frontFace(GL.CCW);
 
         spriteBatch.setProjectionMatrix(camera.combined);

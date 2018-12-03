@@ -85,7 +85,7 @@ public final class BufferObject extends Inlist<BufferObject> {
     }
 
     public void unbind() {
-        GLState.bindBuffer(target, 0);
+        GLState.bindBuffer(target, GLState.UNBIND);
     }
 
     // ---------------------------- pool ----------------------------
