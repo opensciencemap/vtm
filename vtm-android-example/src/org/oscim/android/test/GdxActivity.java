@@ -33,12 +33,30 @@ import org.oscim.core.Tile;
 import org.oscim.gdx.AndroidGL;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.gdx.GdxMap;
+import org.oscim.gdx.poi3d.Poi3DLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
+import org.oscim.layers.tile.buildings.S3DBLayer;
+import org.oscim.layers.tile.vector.VectorTileLayer;
+import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
 import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
 
 public class GdxActivity extends AndroidApplication {
     MapPreferences mPrefs;
+
+    private boolean mPoi3d;
+    private boolean mS3db;
+
+    public GdxActivity() {
+        this(false, false);
+    }
+
+    public GdxActivity(boolean s3db, boolean poi3d) {
+        mS3db = s3db;
+        mPoi3d = poi3d;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,11 +83,21 @@ public class GdxActivity extends AndroidApplication {
     class GdxMapAndroid extends GdxMap {
         @Override
         public void createLayers() {
-            TileSource ts = OSciMap4TileSource.builder()
+            TileSource tileSource = OSciMap4TileSource.builder()
                     .httpFactory(new OkHttpEngine.OkHttpFactory())
                     .build();
-            initDefaultLayers(ts, false, true, true);
+            VectorTileLayer l = mMap.setBaseMap(tileSource);
+            mMap.setTheme(VtmThemes.DEFAULT);
 
+            if (mS3db)
+                mMap.layers().add(new S3DBLayer(mMap, l));
+            else
+                mMap.layers().add(new BuildingLayer(mMap, l));
+
+            if (mPoi3d)
+                mMap.layers().add(new Poi3DLayer(mMap, l));
+
+            mMap.layers().add(new LabelLayer(mMap, l));
             mPrefs.load(getMap());
         }
 
