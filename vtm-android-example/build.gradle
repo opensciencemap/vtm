@@ -19,6 +19,7 @@ dependencies {
 
     implementation project(':vtm-android-gdx')
     implementation project(':vtm-gdx')
+    implementation project(':vtm-gdx-poi3d')
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
 
     implementation 'org.mapsforge:mapsforge-poi-android:master-SNAPSHOT'

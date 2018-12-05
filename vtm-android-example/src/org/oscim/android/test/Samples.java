@@ -134,5 +134,6 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(OSciMapS3DBActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(JeoIndoorActivity.class));
+        linearLayout.addView(createButton(GdxPoi3DActivity.class));
     }
 }
