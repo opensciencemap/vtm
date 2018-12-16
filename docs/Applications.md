@@ -9,6 +9,7 @@
 | [Hunt Cyprus](https://play.google.com/store/apps/developer?id=Talent+S.A.) | Map and navigation application for hunters | Proprietary/Free and Commercial | Android | Closed |
 | [Kurviger](https://kurviger.de/en) | Route planner specialized on motorcyclists | Proprietary/Free and Commercial | Android | Closed |
 | [MapTrek](http://maptrek.mobi) | Application for outdoor activities | GPL3/Free and Commercial | Android | Open |
+| [MyRunningApp](https://play.google.com/store/apps/details?id=it.nimarsolutions.rungpstracker) | Fitness app | Proprietary/Free | Android | Closed |
 | [MyTourbook](http://mytourbook.sourceforge.net/mytourbook/) | Visualize and analyze tours | GPL2/Free | Desktop | Open |
 | [Navi Cyprus](https://play.google.com/store/apps/developer?id=Talent+S.A.) | Map and navigation application | Proprietary/Free and Commercial | Android | Closed |
 | Tokyo Ogiqvo | Visualize App | Commercial | [Android](https://play.google.com/store/apps/details?id=com.ogiqvo.view.tokyo&hl=ja), [iOS](https://itunes.apple.com/us/app/tokyo-ogiqvo/id1097100677?mt=8) | Closed |
