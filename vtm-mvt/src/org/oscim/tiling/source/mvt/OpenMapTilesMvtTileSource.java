@@ -25,8 +25,8 @@ import org.oscim.tiling.source.UrlTileSource;
 
 public class OpenMapTilesMvtTileSource extends UrlTileSource {
 
-    private static final String DEFAULT_URL = "https://free.tilehosting.com/data/v3";
-    private static final String DEFAULT_PATH = "/{Z}/{X}/{Y}.pbf.pict";
+    private static final String DEFAULT_URL = "https://maps.tilehosting.com/data/v3";
+    private static final String DEFAULT_PATH = "/{Z}/{X}/{Y}.pbf";
 
     public static class Builder<T extends Builder<T>> extends UrlTileSource.Builder<T> {
         private String locale = "";
