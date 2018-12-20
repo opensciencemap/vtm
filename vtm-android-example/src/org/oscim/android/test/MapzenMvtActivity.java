@@ -18,7 +18,6 @@ package org.oscim.android.test;
 import android.os.Bundle;
 
 import org.oscim.android.cache.TileCache;
-import org.oscim.layers.TileGridLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -55,8 +54,6 @@ public class MapzenMvtActivity extends MapActivity {
 
         mMap.layers().add(new BuildingLayer(mMap, l));
         mMap.layers().add(new LabelLayer(mMap, l));
-
-        mMap.layers().add(new TileGridLayer(mMap));
     }
 
     @Override
