@@ -8,6 +8,8 @@
 - Mapilion MVT vector tiles & Hillshading [#614](https://github.com/mapsforge/vtm/issues/614)
 - vtm-gdx-poi3d module [#600](https://github.com/mapsforge/vtm/pull/600)
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
+- ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
+  - `getMapViewCenter` / `setMapViewCenter` use pivotX, pivotY
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.11.0)
 
