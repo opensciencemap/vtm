@@ -12,6 +12,7 @@
 | [MyRunningApp](https://play.google.com/store/apps/details?id=it.nimarsolutions.rungpstracker) | Fitness app | Proprietary/Free | Android | Closed |
 | [MyTourbook](http://mytourbook.sourceforge.net/mytourbook/) | Visualize and analyze tours | GPL2/Free | Desktop | Open |
 | [Navi Cyprus](https://play.google.com/store/apps/developer?id=Talent+S.A.) | Map and navigation application | Proprietary/Free and Commercial | Android | Closed |
+| [Pocket Maps](https://github.com/junjunguo/PocketMaps) | Offline maps, routing & tracking functions | MIT/Free | Android | Open |
 | Tokyo Ogiqvo | Visualize App | Commercial | [Android](https://play.google.com/store/apps/details?id=com.ogiqvo.view.tokyo&hl=ja), [iOS](https://itunes.apple.com/us/app/tokyo-ogiqvo/id1097100677?mt=8) | Closed |
 | [topoGuide](http://www.topoguide.gr/index-en.php) | Digital guides for the outdoor | Proprietary/Free and Commercial | Android | Closed |
 | [Ubitrek](https://play.google.com/store/apps/details?id=ubicarta.ubitrek) | Hiking with IGN maps | Proprietary/Free | Android | Closed |
