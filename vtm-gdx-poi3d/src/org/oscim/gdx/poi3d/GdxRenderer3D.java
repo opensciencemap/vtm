@@ -185,7 +185,7 @@ public class GdxRenderer3D extends LayerRenderer {
             shader.end();
             renderContext.end();
         }
-        log.debug(">>> " + (System.currentTimeMillis() - time) + " " + cnt + "/" + rnd);
+        //log.debug(">>> " + (System.currentTimeMillis() - time) + " " + cnt + "/" + rnd);
 
         gl.depthMask(false);
         GLState.bindElementBuffer(GLState.UNBIND);
