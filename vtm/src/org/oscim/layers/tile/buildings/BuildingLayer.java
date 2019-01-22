@@ -27,6 +27,7 @@ import org.oscim.layers.tile.ZoomLimiter;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer.TileLoaderThemeHook;
 import org.oscim.map.Map;
+import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.OffscreenRenderer;
 import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.bucket.ExtrusionBuckets;
@@ -64,6 +65,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
 
     // Can be replaced with Multimap in Java 8
     protected java.util.Map<Integer, List<BuildingElement>> mBuildings = new HashMap<>();
+
+    protected final ExtrusionRenderer mExtrusionRenderer;
 
     private final ZoomLimiter mZoomLimiter;
 
@@ -103,7 +106,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
         // Use zoomMin as zoomLimit to render buildings only once
         mZoomLimiter = new ZoomLimiter(tileLayer.getManager(), zoomMin, zoomMax, zoomMin);
 
-        mRenderer = new BuildingRenderer(tileLayer.tileRenderer(), mZoomLimiter, mesh, TRANSLUCENT);
+        mRenderer = mExtrusionRenderer = new BuildingRenderer(tileLayer.tileRenderer(), mZoomLimiter, mesh, TRANSLUCENT);
         if (POST_AA)
             mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
 
@@ -241,6 +244,13 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
             tile.addData(BUILDING_DATA, ebs);
         }
         return ebs;
+    }
+
+    /**
+     * Get the ExtrusionRenderer for customization.
+     */
+    public ExtrusionRenderer getExtrusionRenderer() {
+        return mExtrusionRenderer;
     }
 
     protected String getKeyOrDefault(String key) {

@@ -39,7 +39,6 @@ import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.buildings.S3DBTileLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.theme.StreamRenderTheme;
 import org.oscim.theme.VtmThemes;
@@ -151,7 +150,7 @@ class GwtMap extends GdxMap {
 
             if (!nobuildings && !s3db) {
                 mBuildingLayer = new BuildingLayer(mMap, l);
-                ((ExtrusionRenderer) mBuildingLayer.getRenderer()).setZLimit((float) 65536 / 10);
+                mBuildingLayer.getExtrusionRenderer().setZLimit((float) 65536 / 10);
                 mMap.layers().add(mBuildingLayer);
             }
 
@@ -174,7 +173,7 @@ class GwtMap extends GdxMap {
                     return;
                 }
 
-                ((ExtrusionRenderer) mBuildingLayer.getRenderer()).setZLimit((float) val / 10);
+                mBuildingLayer.getExtrusionRenderer().setZLimit((float) val / 10);
 
                 mMap.updateMap(true);
             }
