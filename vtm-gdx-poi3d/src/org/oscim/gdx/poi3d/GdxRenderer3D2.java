@@ -156,7 +156,7 @@ public class GdxRenderer3D2 extends LayerRenderer {
             }
             modelBatch.end();
         }
-        log.debug(">>> " + (System.currentTimeMillis() - time) + " " + cnt + "/" + rnd);
+        //log.debug(">>> " + (System.currentTimeMillis() - time) + " " + cnt + "/" + rnd);
 
         // GLUtils.checkGlError("<" + TAG);
 
