@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,6 +19,7 @@
 package org.oscim.tiling.source.bitmap;
 
 import org.oscim.layers.tile.bitmap.BitmapTileLayer.FadeStep;
+import org.oscim.map.Viewport;
 import org.oscim.tiling.source.bitmap.BitmapTileSource.Builder;
 
 /**
@@ -63,9 +64,18 @@ public class DefaultSources {
             .zoomMax(14);
 
     // Needs an API key
-    public static Builder<?> MAPILION_HILLSHADE = BitmapTileSource.builder()
-            .url("https://tiles.mapilion.com/hillshades")
+    public static Builder<?> MAPILION_HILLSHADE_1 = BitmapTileSource.builder()
+            .url("https://tiles.mapilion.com/hillshades/v1")
             .tilePath("/{Z}/{X}/{Y}.png")
             .zoomMin(1)
+            .zoomMax(12);
+
+    // Needs an API key
+    public static Builder<?> MAPILION_HILLSHADE_2 = BitmapTileSource.builder()
+            .url("https://tiles.mapilion.com/hillshades/v2")
+            .tilePath("/{Z}/{X}/{Y}.png")
+            .fadeSteps(new FadeStep[]{
+                    new FadeStep(0, Viewport.MAX_ZOOM_LEVEL, 1, 0.2f)
+            })
             .zoomMax(12);
 }

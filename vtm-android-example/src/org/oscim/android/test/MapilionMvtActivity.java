@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 devemux86
+ * Copyright 2018-2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -59,7 +59,7 @@ public class MapilionMvtActivity extends MapActivity {
         mMap.setTheme(VtmThemes.OPENMAPTILES);
 
         // Hillshading
-        UrlTileSource shadedTileSource = DefaultSources.MAPILION_HILLSHADE
+        UrlTileSource shadedTileSource = DefaultSources.MAPILION_HILLSHADE_2
                 .apiKey(API_KEY)
                 .httpFactory(factory)
                 .build();
