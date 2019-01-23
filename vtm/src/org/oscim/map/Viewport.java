@@ -80,6 +80,9 @@ public class Viewport {
     protected final float[] mu = new float[4];
     protected final float[] mViewCoords = new float[8];
 
+    /**
+     * Height and width in pixels
+     */
     protected float mHeight, mWidth;
 
     public static final float VIEW_DISTANCE = 3.0f;

@@ -128,10 +128,16 @@ public class GLViewport extends Viewport {
         getMapExtents(plane, 0);
     }
 
+    /**
+     * @return width in pixels
+     */
     public float getWidth() {
         return mWidth;
     }
 
+    /**
+     * @return height in pixels
+     */
     public float getHeight() {
         return mHeight;
     }
