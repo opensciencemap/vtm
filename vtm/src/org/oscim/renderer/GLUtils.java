@@ -160,6 +160,26 @@ public class GLUtils {
     }
 
     /**
+     * Check GL error.
+     * See: https://www.khronos.org/opengl/wiki/OpenGL_Error
+     *
+     * @param op the operation which should be debugged
+     * @param id the error to be found
+     * @return true if error was found
+     */
+    public static boolean checkGlError(String op, int id) {
+        boolean hasError = false;
+        int error; // GL.NO_ERROR
+        while ((error = gl.getError()) != GL.NO_ERROR) {
+            log.error(op + ": \tglError " + getGlErrorString(error) + " (" + error + ")");
+            // throw new RuntimeException(op + ": glError " + error);
+            if (error == id)
+                hasError = true;
+        }
+        return hasError;
+    }
+
+    /**
      * Check GL errors.
      * See: https://www.khronos.org/opengl/wiki/OpenGL_Error
      *
@@ -167,33 +187,14 @@ public class GLUtils {
      * @return the OpenGL error codes
      */
     public static List<Integer> checkGlErrors(String op) {
-        int error; // GL.NO_ERROR
         List<Integer> errors = new ArrayList<>();
+        int error; // GL.NO_ERROR
         while ((error = gl.getError()) != GL.NO_ERROR) {
             log.error(op + ": \tglError " + getGlErrorString(error) + " (" + error + ")");
-            errors.add(error);
             // throw new RuntimeException(op + ": glError " + error);
+            errors.add(error);
         }
         return errors;
-    }
-
-    /**
-     * Check GL out of memory.
-     * See: https://www.khronos.org/opengl/wiki/OpenGL_Error
-     *
-     * @param op the operation which should be debugged
-     * @return true if out of memory
-     */
-    public static boolean checkGlOutOfMemory(String op) {
-        int error; // GL.NO_ERROR
-        boolean oom = false;
-        while ((error = gl.getError()) != GL.NO_ERROR) {
-            log.error(op + ": \tglError " + getGlErrorString(error) + " (" + error + ")");
-            // throw new RuntimeException(op + ": glError " + error);
-            if (error == GL.OUT_OF_MEMORY)
-                oom = true;
-        }
-        return oom;
     }
 
     /**
