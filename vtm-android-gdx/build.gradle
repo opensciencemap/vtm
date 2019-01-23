@@ -40,11 +40,11 @@ android.libraryVariants.all { variant ->
         return
 
     def jar = project.tasks.create "jar${name.capitalize()}", Jar
-    jar.dependsOn variant.javaCompiler
+    jar.dependsOn variant.javaCompileProvider
     jar.exclude '**/BuildConfig.class'
     jar.exclude '**/R.class'
     jar.exclude '**/R$*.class'
-    jar.from variant.javaCompiler.destinationDir
+    jar.from variant.javaCompileProvider.get().destinationDir
     artifacts.add('archives', jar)
 
     file('natives').eachDir() { dir ->
