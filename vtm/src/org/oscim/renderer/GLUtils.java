@@ -178,6 +178,25 @@ public class GLUtils {
     }
 
     /**
+     * Check GL out of memory.
+     * See: https://www.khronos.org/opengl/wiki/OpenGL_Error
+     *
+     * @param op the operation which should be debugged
+     * @return true if out of memory
+     */
+    public static boolean checkGlOutOfMemory(String op) {
+        int error; // GL.NO_ERROR
+        boolean oom = false;
+        while ((error = gl.getError()) != GL.NO_ERROR) {
+            log.error(op + ": \tglError " + getGlErrorString(error) + " (" + error + ")");
+            // throw new RuntimeException(op + ": glError " + error);
+            if (error == GL.OUT_OF_MEMORY)
+                oom = true;
+        }
+        return oom;
+    }
+
+    /**
      * @param error the error code of OpenGL
      * @return the error code as string
      */
