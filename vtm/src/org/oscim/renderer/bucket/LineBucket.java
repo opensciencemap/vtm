@@ -618,7 +618,7 @@ public class LineBucket extends RenderBucket {
             gl.uniform1f(uLineFade, (float) pixel);
 
             int capMode = 0;
-            gl.uniform1f(uLineMode, capMode);
+            gl.uniform1i(uLineMode, capMode);
 
             boolean blur = false;
             double width;
@@ -682,16 +682,16 @@ public class LineBucket extends RenderBucket {
                     if (lb.scale < 1.5/* || lb.line.fixed*/) {
                         if (capMode != CAP_THIN) {
                             capMode = CAP_THIN;
-                            gl.uniform1f(uLineMode, capMode);
+                            gl.uniform1i(uLineMode, capMode);
                         }
                     } else if (lb.roundCap) {
                         if (capMode != CAP_ROUND) {
                             capMode = CAP_ROUND;
-                            gl.uniform1f(uLineMode, capMode);
+                            gl.uniform1i(uLineMode, capMode);
                         }
                     } else if (capMode != CAP_BUTT) {
                         capMode = CAP_BUTT;
-                        gl.uniform1f(uLineMode, capMode);
+                        gl.uniform1i(uLineMode, capMode);
                     }
 
                     gl.drawArrays(GL.TRIANGLE_STRIP,
@@ -733,11 +733,11 @@ public class LineBucket extends RenderBucket {
                     if (ref.roundCap) {
                         if (capMode != CAP_ROUND) {
                             capMode = CAP_ROUND;
-                            gl.uniform1f(uLineMode, capMode);
+                            gl.uniform1i(uLineMode, capMode);
                         }
                     } else if (capMode != CAP_BUTT) {
                         capMode = CAP_BUTT;
-                        gl.uniform1f(uLineMode, capMode);
+                        gl.uniform1i(uLineMode, capMode);
                     }
 
                     gl.drawArrays(GL.TRIANGLE_STRIP,
