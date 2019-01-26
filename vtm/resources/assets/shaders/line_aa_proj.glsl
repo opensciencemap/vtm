@@ -8,7 +8,7 @@ uniform mat4 u_mvp;
 uniform float u_width;
 // xy hold position, zw extrusion vector
 attribute vec4 a_pos;
-uniform float u_mode;
+uniform int u_mode;
 uniform float u_height;
 varying vec2 v_st;
 void
@@ -32,7 +32,7 @@ $$
 precision highp float;
 #endif
 uniform sampler2D tex;
-uniform float u_mode;
+uniform int u_mode;
 uniform vec4 u_color;
 uniform float u_fade;
 varying vec2 v_st;
@@ -40,7 +40,7 @@ void
 main(){
   float len;
   float fuzz;
-  if (u_mode == 2.0) {
+  if (u_mode == 2) {
     /* round cap line */
 #ifdef DESKTOP_QUIRKS
     len = length(v_st);
@@ -55,8 +55,8 @@ main(){
     len = abs(v_st.s);
     fuzz = fwidth(v_st.s);
   }
-  // u_mode == 0.0 -> thin line
-  //  len = len * clamp(u_mode, len, 1.0);
+  // u_mode == 0 -> thin line
+  // len = len * clamp(float(u_mode), len, 1.0);
   if (fuzz > 2.0)
     gl_FragColor = u_color * 0.5;
   else

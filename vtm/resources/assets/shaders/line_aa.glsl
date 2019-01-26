@@ -8,7 +8,7 @@ uniform mat4 u_mvp;
 uniform float u_width;
 // xy hold position, zw extrusion vector
 attribute vec4 a_pos;
-uniform float u_mode;
+uniform int u_mode;
 uniform float u_height;
 varying vec2 v_st;
 void
@@ -30,13 +30,13 @@ precision highp float;
 #endif
 uniform sampler2D tex;
 uniform float u_fade;
-uniform float u_mode;
+uniform int u_mode;
 uniform vec4 u_color;
 varying vec2 v_st;
 void
 main(){
   float len;
-  if (u_mode == 2.0) {
+  if (u_mode == 2) {
     // round cap line
 #ifdef DESKTOP_QUIRKS
     len = length(v_st);
