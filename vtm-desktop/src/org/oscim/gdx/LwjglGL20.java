@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 devemux86
+ *
+ * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
+ *
+ * This program is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 /*******************************************************************************
  * Copyright 2011 See AUTHORS file.
  * <p/>
@@ -38,6 +54,8 @@ import java.nio.ShortBuffer;
 /**
  * An implementation of the {@link GL20} interface based on LWJGL. Note that LWJGL shaders and OpenGL ES shaders will not be 100%
  * compatible. Some glGetXXX methods are not implemented.
+ * <p>
+ * See https://github.com/libgdx/libgdx/blob/master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglGL20.java
  *
  * @author mzechner
  */
@@ -241,6 +259,7 @@ public class LwjglGL20 implements GL {
         GL15.glDeleteBuffers(buffers);
     }
 
+    @Override
     public void deleteBuffer(int buffer) {
         GL15.glDeleteBuffers(buffer);
     }
@@ -250,6 +269,7 @@ public class LwjglGL20 implements GL {
         EXTFramebufferObject.glDeleteFramebuffersEXT(framebuffers);
     }
 
+    @Override
     public void deleteFramebuffer(int framebuffer) {
         EXTFramebufferObject.glDeleteFramebuffersEXT(framebuffer);
     }
@@ -264,6 +284,7 @@ public class LwjglGL20 implements GL {
         EXTFramebufferObject.glDeleteRenderbuffersEXT(renderbuffers);
     }
 
+    @Override
     public void deleteRenderbuffer(int renderbuffer) {
         EXTFramebufferObject.glDeleteRenderbuffersEXT(renderbuffer);
     }
@@ -278,6 +299,7 @@ public class LwjglGL20 implements GL {
         GL11.glDeleteTextures(textures);
     }
 
+    @Override
     public void deleteTexture(int texture) {
         GL11.glDeleteTextures(texture);
     }
@@ -370,6 +392,7 @@ public class LwjglGL20 implements GL {
         GL15.glGenBuffers(buffers);
     }
 
+    @Override
     public int genBuffer() {
         return GL15.glGenBuffers();
     }
@@ -379,6 +402,7 @@ public class LwjglGL20 implements GL {
         EXTFramebufferObject.glGenFramebuffersEXT(framebuffers);
     }
 
+    @Override
     public int genFramebuffer() {
         return EXTFramebufferObject.glGenFramebuffersEXT();
     }
@@ -388,6 +412,7 @@ public class LwjglGL20 implements GL {
         EXTFramebufferObject.glGenRenderbuffersEXT(renderbuffers);
     }
 
+    @Override
     public int genRenderbuffer() {
         return EXTFramebufferObject.glGenRenderbuffersEXT();
     }
@@ -397,6 +422,7 @@ public class LwjglGL20 implements GL {
         GL11.glGenTextures(textures);
     }
 
+    @Override
     public int genTexture() {
         return GL11.glGenTextures();
     }
@@ -764,6 +790,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform1(location, v);
     }
 
+    @Override
     public void uniform1fv(int location, int count, float[] v, int offset) {
         GL20.glUniform1(location, toFloatBuffer(v, offset, count));
     }
@@ -778,6 +805,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform1(location, v);
     }
 
+    @Override
     public void uniform1iv(int location, int count, int[] v, int offset) {
         GL20.glUniform1(location, toIntBuffer(v, offset, count));
     }
@@ -792,6 +820,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform2(location, v);
     }
 
+    @Override
     public void uniform2fv(int location, int count, float[] v, int offset) {
         GL20.glUniform2(location, toFloatBuffer(v, offset, count << 1));
     }
@@ -806,6 +835,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform2(location, v);
     }
 
+    @Override
     public void uniform2iv(int location, int count, int[] v, int offset) {
         GL20.glUniform2(location, toIntBuffer(v, offset, count << 1));
     }
@@ -820,6 +850,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform3(location, v);
     }
 
+    @Override
     public void uniform3fv(int location, int count, float[] v, int offset) {
         GL20.glUniform3(location, toFloatBuffer(v, offset, count * 3));
     }
@@ -834,6 +865,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform3(location, v);
     }
 
+    @Override
     public void uniform3iv(int location, int count, int[] v, int offset) {
         GL20.glUniform3(location, toIntBuffer(v, offset, count * 3));
     }
@@ -848,6 +880,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform4(location, v);
     }
 
+    @Override
     public void uniform4fv(int location, int count, float[] v, int offset) {
         GL20.glUniform4(location, toFloatBuffer(v, offset, count << 2));
     }
@@ -862,6 +895,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniform4(location, v);
     }
 
+    @Override
     public void uniform4iv(int location, int count, int[] v, int offset) {
         GL20.glUniform4(location, toIntBuffer(v, offset, count << 2));
     }
@@ -871,6 +905,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniformMatrix2(location, transpose, value);
     }
 
+    @Override
     public void uniformMatrix2fv(int location, int count, boolean transpose, float[] value, int offset) {
         GL20.glUniformMatrix2(location, transpose, toFloatBuffer(value, offset, count << 2));
     }
@@ -880,6 +915,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniformMatrix3(location, transpose, value);
     }
 
+    @Override
     public void uniformMatrix3fv(int location, int count, boolean transpose, float[] value, int offset) {
         GL20.glUniformMatrix3(location, transpose, toFloatBuffer(value, offset, count * 9));
     }
@@ -889,6 +925,7 @@ public class LwjglGL20 implements GL {
         GL20.glUniformMatrix4(location, transpose, value);
     }
 
+    @Override
     public void uniformMatrix4fv(int location, int count, boolean transpose, float[] value, int offset) {
         GL20.glUniformMatrix4(location, transpose, toFloatBuffer(value, offset, count << 4));
     }
@@ -987,9 +1024,5 @@ public class LwjglGL20 implements GL {
     @Override
     public void vertexAttribPointer(int indx, int size, int type, boolean normalized, int stride, int ptr) {
         GL20.glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
-    }
-
-    @Override
-    public void getShaderSource(int shader, int bufsize, Buffer length, String source) {
     }
 }
