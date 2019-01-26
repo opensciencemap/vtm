@@ -8,7 +8,6 @@ uniform mat4 u_mvp;
 uniform float u_width;
 // xy hold position, zw extrusion vector
 attribute vec4 a_pos;
-uniform int u_mode;
 uniform float u_height;
 varying vec2 v_st;
 
