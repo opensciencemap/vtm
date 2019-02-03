@@ -7,7 +7,6 @@ uniform float u_alpha;
 attribute vec4 a_pos;
 attribute vec2 a_light;
 varying vec4 color;
-const float alpha = 1.0;
 
 void main() {
   //   change height by u_alpha
@@ -37,7 +36,7 @@ void main() {
 
   // extreme fake-ssao by height
   l += (clamp(a_pos.z / 2048.0, 0.0, 0.1) - 0.05);
-  color = vec4(u_color.rgb * (clamp(l, 0.0, 1.0) * alpha), u_color.a * alpha);
+  color = vec4(u_color.rgb * (clamp(l, 0.0, 1.0)), u_color.a) * u_alpha;
 }
 
 $$
