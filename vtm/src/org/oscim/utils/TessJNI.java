@@ -239,7 +239,7 @@ public class TessJNI {
     } */
 
     /**
-     * Returns number of elements in the the tesselated output.
+     * Returns number of elements in the tesselated output.
      */
     static native int getElementCount(long inst);/*{
         return tessGetElementCount((TESStesselator*) inst);

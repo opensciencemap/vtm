@@ -139,7 +139,7 @@ final class RequiredFields {
     }
 
     static OpenResult readMagicByte(ReadBuffer readBuffer) throws IOException {
-        // read the the magic byte and the file header size into the buffer
+        // read the magic byte and the file header size into the buffer
         int magicByteLength = BINARY_OSM_MAGIC_BYTE.length();
         if (!readBuffer.readFromFile(magicByteLength + 4)) {
             return new OpenResult("reading magic byte has failed");
@@ -154,7 +154,7 @@ final class RequiredFields {
     }
 
     static OpenResult readMapDate(ReadBuffer readBuffer, MapFileInfoBuilder mapFileInfoBuilder) {
-        // get and check the the map date (8 bytes)
+        // get and check the map date (8 bytes)
         long mapDate = readBuffer.readLong();
         // is the map date before 2010-01-10 ?
         if (mapDate < 1200000000000L) {

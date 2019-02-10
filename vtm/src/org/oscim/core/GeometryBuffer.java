@@ -330,7 +330,7 @@ public class GeometryBuffer {
      * Ensure that 'points' array can hold the number of points.
      *
      * @param size the number of points to hold
-     * @param copy the the current data when array is reallocated
+     * @param copy the current data when array is reallocated
      * @return the float[] array holding current coordinates
      */
     public float[] ensurePointSize(int size, boolean copy) {

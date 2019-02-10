@@ -3,7 +3,7 @@
  * Copyright 2012 Nicolas Gramlich
  * Copyright 2012 Theodore Hong
  * Copyright 2012 Fred Eisele
- * 
+ *
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Stephan Leuschner
  * Copyright 2016-2018 devemux86
@@ -115,7 +115,7 @@ public abstract class MarkerLayer<Item extends MarkerInterface> extends Layer {
          *
          * @param x         The x in screen coordinates.
          * @param y         The y in screen coordinates.
-         * @param snapPoint To be filled with the the interesting point (in screen
+         * @param snapPoint To be filled with the interesting point (in screen
          *                  coordinates) that is closest to the given x and y. Can be
          *                  untouched if not snapping.
          * @return Whether or not to snap to the interesting point.
