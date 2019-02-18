@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2017 Andrey Novikov
  * Copyright 2017-2018 devemux86
+ * Copyright 2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -38,6 +39,10 @@ public class BitmapTileLayer extends TileLayer {
     private static final int CACHE_LIMIT = 40;
 
     protected final TileSource mTileSource;
+
+    /**
+     * Bitmap alpha in range 0 to 1.
+     */
     private float mBitmapAlpha = 1.0f;
 
     public static class FadeStep {
@@ -45,7 +50,15 @@ public class BitmapTileLayer extends TileLayer {
         public final double zoomStart, zoomEnd;
         public final float alphaStart, alphaEnd;
 
+        /**
+         * @param zoomStart  the zoom start in range {@value org.oscim.map.Viewport#MIN_ZOOM_LEVEL} to {@value org.oscim.map.Viewport#MAX_ZOOM_LEVEL}
+         * @param zoomEnd    the zoom end, must be greater than zoom start
+         * @param alphaStart the alpha start value in range 0 to 1
+         * @param alphaEnd   the alpha end value in range 0 to 1
+         */
         public FadeStep(int zoomStart, int zoomEnd, float alphaStart, float alphaEnd) {
+            if (zoomEnd < zoomStart)
+                throw new IllegalArgumentException("zoomEnd must be larger than zoomStart");
             this.scaleStart = 1 << zoomStart;
             this.scaleEnd = 1 << zoomEnd;
             this.zoomStart = zoomStart;
@@ -55,6 +68,8 @@ public class BitmapTileLayer extends TileLayer {
         }
 
         public FadeStep(double scaleStart, double scaleEnd, float alphaStart, float alphaEnd) {
+            if (scaleEnd < scaleStart)
+                throw new IllegalArgumentException("scaleEnd must be larger than scaleStart");
             this.scaleStart = scaleStart;
             this.scaleEnd = scaleEnd;
             this.zoomStart = Math.log(scaleStart) / Math.log(2);
@@ -85,16 +100,16 @@ public class BitmapTileLayer extends TileLayer {
                 tileSource.getZoomLevelMax());
 
         mTileSource = tileSource;
-        mBitmapAlpha = bitmapAlpha;
-        tileRenderer().setBitmapAlpha(mBitmapAlpha);
+        setBitmapAlpha(bitmapAlpha, false);
         initLoader(getNumLoaders());
         setFade(map.getMapPosition());
     }
 
-    public void setBitmapAlpha(float bitmapAlpha) {
-        mBitmapAlpha = bitmapAlpha;
+    public void setBitmapAlpha(float bitmapAlpha, boolean redraw) {
+        mBitmapAlpha = FastMath.clamp(bitmapAlpha, 0f, 1f);
         tileRenderer().setBitmapAlpha(mBitmapAlpha);
-        map().updateMap(true);
+        if (redraw)
+            map().updateMap(true);
     }
 
     @Override
@@ -129,7 +144,7 @@ public class BitmapTileLayer extends TileLayer {
             break;
         }
 
-        alpha = FastMath.clamp(alpha, 0f, mBitmapAlpha);
+        alpha = FastMath.clamp(alpha, 0f, 1f) * mBitmapAlpha;
         tileRenderer().setBitmapAlpha(alpha);
     }
 
