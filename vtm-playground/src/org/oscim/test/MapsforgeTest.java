@@ -1,6 +1,6 @@
 /*
- * Copyright 2016-2018 devemux86
- * Copyright 2018 Gustl22
+ * Copyright 2016-2019 devemux86
+ * Copyright 2018-2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -19,13 +19,16 @@ package org.oscim.test;
 
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.event.Event;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.gdx.poi3d.Poi3DLayer;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.buildings.S3DBLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Map;
 import org.oscim.renderer.BitmapRenderer;
+import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.scalebar.DefaultMapScaleBar;
 import org.oscim.scalebar.ImperialUnitAdapter;
@@ -39,6 +42,8 @@ import org.oscim.tiling.source.mapfile.MapInfo;
 import java.io.File;
 
 public class MapsforgeTest extends GdxMapApp {
+
+    private static final boolean SHADOWS = false;
 
     private File mapFile;
     private boolean poi3d;
@@ -63,10 +68,8 @@ public class MapsforgeTest extends GdxMapApp {
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         loadTheme(null);
 
-        if (s3db)
-            mMap.layers().add(new S3DBLayer(mMap, l));
-        else
-            mMap.layers().add(new BuildingLayer(mMap, l));
+        BuildingLayer buildingLayer = s3db ? new S3DBLayer(mMap, l) : new BuildingLayer(mMap, l);
+        mMap.layers().add(buildingLayer);
 
         if (poi3d)
             mMap.layers().add(new Poi3DLayer(mMap, l));
@@ -92,6 +95,23 @@ public class MapsforgeTest extends GdxMapApp {
             pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
         }
         mMap.setMapPosition(pos);
+
+        if (SHADOWS) {
+            final ExtrusionRenderer extrusionRenderer = buildingLayer.getExtrusionRenderer();
+            mMap.events.bind(new Map.UpdateListener() {
+                @Override
+                public void onMapEvent(Event e, MapPosition mapPosition) {
+                    long t = System.currentTimeMillis();
+                    float progress = (((t % 2000) / 1000f));
+
+                    extrusionRenderer.getSun().setProgress(progress);
+                    extrusionRenderer.getSun().updatePosition();
+                    extrusionRenderer.getSun().updateColor(); // only relevant for shadow implementation
+
+                    mMap.updateMap(true);
+                }
+            });
+        }
     }
 
     @Override
