@@ -9,7 +9,7 @@
 - vtm-gdx-poi3d module [#600](https://github.com/mapsforge/vtm/pull/600)
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
 - ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
-  - `getMapViewCenter` / `setMapViewCenter` use pivotX, pivotY
+  - `getMapViewCenter`, `setMapViewCenter` with pivotX, pivotY
 - Complete GL20 interface [#642](https://github.com/mapsforge/vtm/pull/642)
 - libGDX 1.9.9 [#635](https://github.com/mapsforge/vtm/issues/635)
 - Many other minor improvements and bug fixes
@@ -30,11 +30,11 @@
 - Internal render themes improvements [#488](https://github.com/mapsforge/vtm/pull/488)
 - Map view roll [#474](https://github.com/mapsforge/vtm/pull/474)
 - Physical fling and fling on rotation / scale [#497](https://github.com/mapsforge/vtm/pull/497) [#499](https://github.com/mapsforge/vtm/pull/499)
-  - `Parameters.ANIMATOR2 = true;`
+  - `Parameters.ANIMATOR2`
 - Scale factor for short vertices calculation [#537](https://github.com/mapsforge/vtm/issues/537)
-  - `Parameters.CUSTOM_COORD_SCALE = false;`
+  - `Parameters.CUSTOM_COORD_SCALE`
 - Polygon symbols default disabled [#405](https://github.com/mapsforge/vtm/issues/405)
-  - `Parameters.POLY_SYMBOL = true;`
+  - `Parameters.POLY_SYMBOL`
 - Map fractional zoom [#487](https://github.com/mapsforge/vtm/issues/487)
 - Render theme fallback internal resources [#477](https://github.com/mapsforge/vtm/issues/477)
 - Fix layers synchronization [#507](https://github.com/mapsforge/vtm/issues/507)
@@ -83,7 +83,7 @@
   - BuildingLayer expects height tags in meters
 - Polygon symbol positioning [#405](https://github.com/mapsforge/vtm/issues/405)
 - PolyLabel default disabled [#402](https://github.com/mapsforge/vtm/issues/402)
-  - `Parameters.POLY_LABEL = true;`
+  - `Parameters.POLY_LABEL`
 - vtm-theme-comparator module [#387](https://github.com/mapsforge/vtm/issues/387)
 - Feature parameters [#403](https://github.com/mapsforge/vtm/issues/403)
 - vtm-android-gdx module enhancements [#435](https://github.com/mapsforge/vtm/issues/435)
@@ -96,13 +96,13 @@
 ## Version 0.8.0 (2017-07-19)
 
 - Real time (SVG) texture atlas [#63](https://github.com/mapsforge/vtm/issues/63)
-  - `Parameters.TEXTURE_ATLAS = true;`
+  - `Parameters.TEXTURE_ATLAS`
 - Marker clustering [#312](https://github.com/mapsforge/vtm/issues/312)
 - Osmagray theme [#300](https://github.com/mapsforge/vtm/issues/300)
 - Symbol rotation [#294](https://github.com/mapsforge/vtm/issues/294)
 - Location renderer improvements [#317](https://github.com/mapsforge/vtm/issues/317)
 - POT textures [#334](https://github.com/mapsforge/vtm/issues/334)
-  - `Parameters.POT_TEXTURES = true;`
+  - `Parameters.POT_TEXTURES`
 - OkHttp external cache [#135](https://github.com/mapsforge/vtm/issues/135)
 - Texture atlas improvements [#301](https://github.com/mapsforge/vtm/pull/301) [#304](https://github.com/mapsforge/vtm/pull/304)
 - vtm-json module [#367](https://github.com/mapsforge/vtm/issues/367)
@@ -123,7 +123,7 @@
 
 - Mapsforge multiple map files [#208](https://github.com/mapsforge/vtm/issues/208)
 - New gestures implementation [#253](https://github.com/mapsforge/vtm/issues/253)
-  - `Parameters.MAP_EVENT_LAYER2 = true;`
+  - `Parameters.MAP_EVENT_LAYER2`
 - Polygon label position enhancements [#80](https://github.com/mapsforge/vtm/issues/80)
 - vtm-web modules update [#51](https://github.com/mapsforge/vtm/issues/51)
 - Mapzen MVT vector tiles [#57](https://github.com/mapsforge/vtm/issues/57)
@@ -159,7 +159,7 @@
 - Location renderer and layer [#171](https://github.com/mapsforge/vtm/issues/171)
 - Map scale bar [#84](https://github.com/mapsforge/vtm/issues/84)
 - Tile size based on scale factor [#183](https://github.com/mapsforge/vtm/issues/183)
-  - `Parameters.CUSTOM_TILE_SIZE = false;`
+  - `Parameters.CUSTOM_TILE_SIZE`
 - libGDX layer gestures [#151](https://github.com/mapsforge/vtm/issues/151)
 - Render theme area tessellation option [#37](https://github.com/mapsforge/vtm/issues/37)
 - Render theme resources optional location prefixes [#66](https://github.com/mapsforge/vtm/issues/66)
