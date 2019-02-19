@@ -322,9 +322,9 @@ public final class GeometryUtils {
     public static float isClockwise(float[] points, int n) {
         float area = 0f;
         for (int i = 0; i < n - 2; i += 2) {
-            area += (points[i] * points[i + 3]) - (points[i + 1] * points[i + 2]);
+            area += (points[i + 1] * points[i + 2]) - (points[i] * points[i + 3]);
         }
-        area += (points[n - 2] * points[1]) - (points[n - 1] * points[0]);
+        area += (points[n - 1] * points[0]) - (points[n - 2] * points[1]);
 
         return 0.5f * area;
     }
@@ -417,16 +417,5 @@ public final class GeometryUtils {
             scaled[i] = v[i] * scale;
         }
         return scaled;
-    }
-
-    public static void main(String[] args) {
-        float[] p = {-1, 0, 0, 0, 0, 0};
-
-        for (int i = 0; i < 9; i++) {
-            p[4] = (float) Math.cos(Math.toRadians(i * 45));
-            p[5] = (float) Math.sin(Math.toRadians(i * 45));
-            System.out.println("\n> " + (i * 45) + " " + p[3] + ":" + p[4] + "\n="
-                    + dotProduct(p, 0, 2, 4));
-        }
     }
 }
