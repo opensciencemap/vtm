@@ -10,7 +10,8 @@
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
 - ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
   - `getMapViewCenter`, `setMapViewCenter` with pivotX, pivotY
-- Complete GL20 interface [#642](https://github.com/mapsforge/vtm/pull/642)
+- OpenGL ES 3.0 support [#646](https://github.com/mapsforge/vtm/issues/646)
+- OpenGL ES 2.0 complete [#642](https://github.com/mapsforge/vtm/pull/642)
 - libGDX 1.9.9 [#635](https://github.com/mapsforge/vtm/issues/635)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.11.0)
