@@ -206,6 +206,11 @@ public class Sun {
                 progressEnd = progress;
         }
 
+        if (progressStart == progressEnd) {
+            mLightColor = mColorMap.get(progressStart);
+            return mLightColor;
+        }
+
         float fraction = ((mProgress + 2f - progressStart) % 2f) / ((progressEnd + 2f - progressStart) % 2f);
 
         int colorStart = mColorMap.get(progressStart);
