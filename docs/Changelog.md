@@ -6,6 +6,7 @@
 - Render themes: PNG scaling [#595](https://github.com/mapsforge/vtm/issues/595)
 - PathLayer(s) scaled width [#594](https://github.com/mapsforge/vtm/issues/594)
 - Mapilion MVT vector tiles & Hillshading [#614](https://github.com/mapsforge/vtm/issues/614)
+- Overpass tile source [#663](https://github.com/mapsforge/vtm/issues/663)
 - vtm-gdx-poi3d module [#600](https://github.com/mapsforge/vtm/pull/600)
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
 - ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
