@@ -68,6 +68,7 @@ public class MapsforgeTest extends GdxMapApp {
         VectorTileLayer l = mMap.setBaseMap(tileSource);
         loadTheme(null);
 
+        BuildingLayer.SHADOW = SHADOWS;
         BuildingLayer buildingLayer = s3db ? new S3DBLayer(mMap, l) : new BuildingLayer(mMap, l);
         mMap.layers().add(buildingLayer);
 
@@ -116,6 +117,9 @@ public class MapsforgeTest extends GdxMapApp {
 
     @Override
     public void dispose() {
+        if (SHADOWS)
+            BuildingLayer.SHADOW = false;
+
         MapPreferences.saveMapPosition(mMap.getMapPosition());
         super.dispose();
     }

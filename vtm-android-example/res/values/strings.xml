@@ -24,5 +24,6 @@
     <string name="search">Search</string>
     <string name="search_key">\'*\' or OSM key</string>
     <string name="search_value">void or value</string>
+    <string name="now">Now</string>
 
 </resources>
