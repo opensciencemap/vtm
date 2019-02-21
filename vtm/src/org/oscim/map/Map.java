@@ -2,7 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
  * Copyright 2016 Stephan Leuschner
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016 Longri
  * Copyright 2018 Gustl22
  *
@@ -171,9 +171,7 @@ public abstract class Map implements TaskQueue {
 
     /**
      * Create OsmTileLayer with given TileSource and
-     * set as base map (layer 1)
-     * <p>
-     * TODO deprecate
+     * set as base map (layer 1).
      */
     public VectorTileLayer setBaseMap(TileSource tileSource) {
         VectorTileLayer l = new OsmTileLayer(this);
@@ -235,6 +233,13 @@ public abstract class Map implements TaskQueue {
         mLayers.destroy();
         mAsyncExecutor.dispose();
     }
+
+    /**
+     * Request call to onUpdate for all layers. This function can
+     * be called from any thread. Request will be handled on main
+     * thread.
+     */
+    public abstract void updateMap();
 
     /**
      * Request call to onUpdate for all layers. This function can

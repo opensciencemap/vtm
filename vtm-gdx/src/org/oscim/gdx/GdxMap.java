@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2018-2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -183,6 +183,11 @@ public abstract class GdxMap implements ApplicationListener {
                 Gdx.graphics.requestRendering();
             }
         };
+
+        @Override
+        public void updateMap() {
+            updateMap(true);
+        }
 
         @Override
         public void updateMap(boolean forceRender) {
