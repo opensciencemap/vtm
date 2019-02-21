@@ -4,7 +4,9 @@
 
 # V™
 
-VTM was developed within the [OpenScienceMap](https://github.com/opensciencemap) project.
+<img src="docs/logo/VTM.svg" style="bottom:0;" width="200" align="right">
+
+VTM (Vector Tile Map) was developed within the [OpenScienceMap](https://github.com/opensciencemap) project.
 
 **This fork continues VTM development. And provides compatibility with latest [Mapsforge](https://github.com/mapsforge/mapsforge).**
 
@@ -69,14 +71,14 @@ In other words, you are allowed to include VTM library in your Android applicati
 
 ## Screenshots
 
-### Android
-![Android](docs/images/android.png)
+| Android       | iOS           |
+| ------------- | ------------- |
+|<img src="docs/images/android.png" width="1000">|<img src="docs/images/ios.png" width="1000">|
 
-### iOS
-![iOS](docs/images/ios.png)
+| Desktop       |
+| ------------- |
+|![Desktop](docs/images/desktop.png)|
 
-### Desktop
-![Desktop](docs/images/desktop.png)
-
-### Browser
-![Browser](docs/images/browser.png)
+| Browser       |
+| ------------- |
+|![Browser](docs/images/browser.png)|
