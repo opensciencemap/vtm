@@ -1,5 +1,6 @@
 /*
  * Copyright 2019 Gustl22
+ * Copyright 2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,32 +20,23 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.ToggleButton;
 
-import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.renderer.ExtrusionRenderer;
 import org.oscim.renderer.light.Sun;
 
 public class ShadowActivity extends SimpleMapActivity implements SeekBar.OnSeekBarChangeListener {
 
-    public ShadowActivity() {
-        super(R.layout.activity_shadow);
-    }
-
     private SeekBar mSeekBar;
+
+    public ShadowActivity() {
+        super(true, R.layout.activity_shadow);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        BuildingLayer.SHADOW = true;
-
         super.onCreate(savedInstanceState);
+
         mSeekBar = findViewById(R.id.seekBarShadow);
         mSeekBar.setOnSeekBarChangeListener(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        BuildingLayer.SHADOW = false;
     }
 
     @Override

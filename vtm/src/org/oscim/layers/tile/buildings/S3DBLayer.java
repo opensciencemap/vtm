@@ -1,6 +1,6 @@
 /*
  * Copyright 2018 Gustl22
- * Copyright 2018 devemux86
+ * Copyright 2018-2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -38,7 +38,7 @@ import java.util.Set;
 import static org.oscim.renderer.MapRenderer.COORD_SCALE;
 
 /**
- * An experimental layer to display S3DB elements.
+ * A layer to display S3DB elements.
  */
 public class S3DBLayer extends BuildingLayer {
 
@@ -50,7 +50,11 @@ public class S3DBLayer extends BuildingLayer {
     private boolean mTransparent = true;
 
     public S3DBLayer(Map map, VectorTileLayer tileLayer) {
-        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel());
+        this(map, tileLayer, false);
+    }
+
+    public S3DBLayer(Map map, VectorTileLayer tileLayer, boolean shadow) {
+        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel(), shadow);
     }
 
     /**
@@ -58,9 +62,10 @@ public class S3DBLayer extends BuildingLayer {
      * @param tileLayer The vector tile layer which contains the tiles and map elements
      * @param zoomMin   The minimum zoom at which the layer appears
      * @param zoomMax   The maximum zoom at which the layer appears
+     * @param shadow    Declare if using shadow renderer
      */
-    public S3DBLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax) {
-        super(map, tileLayer, zoomMin, zoomMax, true);
+    public S3DBLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax, boolean shadow) {
+        super(map, tileLayer, zoomMin, zoomMax, true, shadow);
     }
 
     public boolean isColored() {

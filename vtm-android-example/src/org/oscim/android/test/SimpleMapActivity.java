@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -41,14 +41,20 @@ public class SimpleMapActivity extends BaseMapActivity {
     private DefaultMapScaleBar mapScaleBar;
 
     BuildingLayer mBuildingLayer;
-    LabelLayer mLabelLayer;
-
-    public SimpleMapActivity(int contentView) {
-        super(contentView);
-    }
+    private boolean mShadow;
 
     public SimpleMapActivity() {
+        this(false);
+    }
+
+    public SimpleMapActivity(boolean shadow) {
         super();
+        mShadow = shadow;
+    }
+
+    public SimpleMapActivity(boolean shadow, int contentView) {
+        super(contentView);
+        mShadow = shadow;
     }
 
     @Override
@@ -60,10 +66,9 @@ public class SimpleMapActivity extends BaseMapActivity {
 
     void createLayers() {
         GroupLayer groupLayer = new GroupLayer(mMap);
-        mBuildingLayer = new BuildingLayer(mMap, mBaseLayer);
+        mBuildingLayer = new BuildingLayer(mMap, mBaseLayer, false, mShadow);
         groupLayer.layers.add(mBuildingLayer);
-        mLabelLayer = new LabelLayer(mMap, mBaseLayer);
-        groupLayer.layers.add(mLabelLayer);
+        groupLayer.layers.add(new LabelLayer(mMap, mBaseLayer));
         mMap.layers().add(groupLayer);
 
         mapScaleBar = new DefaultMapScaleBar(mMap);

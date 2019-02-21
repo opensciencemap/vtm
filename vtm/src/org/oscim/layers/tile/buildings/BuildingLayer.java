@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016 Robin Boldt
  * Copyright 2017-2019 Gustl22
  *
@@ -61,11 +61,6 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     public static boolean RAW_DATA = false;
 
     /**
-     * Use shadow rendering.
-     */
-    public static boolean SHADOW = false;
-
-    /**
      * Let vanish extrusions / meshes which are covered by others.
      * {@link org.oscim.renderer.bucket.RenderBucket#EXTRUSION}: roofs are always translucent.
      * <p>
@@ -95,11 +90,11 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     }
 
     public BuildingLayer(Map map, VectorTileLayer tileLayer) {
-        this(map, tileLayer, false);
+        this(map, tileLayer, false, false);
     }
 
-    public BuildingLayer(Map map, VectorTileLayer tileLayer, boolean mesh) {
-        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel(), mesh);
+    public BuildingLayer(Map map, VectorTileLayer tileLayer, boolean mesh, boolean shadow) {
+        this(map, tileLayer, MIN_ZOOM, map.viewport().getMaxZoomLevel(), mesh, shadow);
     }
 
     /**
@@ -108,9 +103,9 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
      * @param zoomMin   The minimum zoom at which the layer appears
      * @param zoomMax   The maximum zoom at which the layer appears
      * @param mesh      Declare if using mesh or polygon renderer
+     * @param shadow    Declare if using shadow renderer
      */
-    public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax, boolean mesh) {
-
+    public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax, boolean mesh, boolean shadow) {
         super(map);
 
         tileLayer.addHook(this);
@@ -119,8 +114,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
         mZoomLimiter = new ZoomLimiter(tileLayer.getManager(), zoomMin, zoomMax, zoomMin);
 
         mRenderer = mExtrusionRenderer = new BuildingRenderer(tileLayer.tileRenderer(), mZoomLimiter, mesh, TRANSLUCENT);
-        // TODO Allow SHADOW and POST_AA at same time
-        if (SHADOW)
+        // TODO Allow shadow and POST_AA at same time
+        if (shadow)
             mRenderer = new ShadowRenderer(mExtrusionRenderer);
         else if (POST_AA)
             mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
