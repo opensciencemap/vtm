@@ -33,7 +33,6 @@ import org.oscim.renderer.OffscreenRenderer.Mode;
 import org.oscim.renderer.bucket.ExtrusionBuckets;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.renderer.light.ShadowRenderer;
-import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.geom.GeometryUtils;
@@ -77,7 +76,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
 
     private final ZoomLimiter mZoomLimiter;
 
-    protected final IRenderTheme mRenderTheme;
+    protected final VectorTileLayer mTileLayer;
 
     class BuildingElement {
         MapElement element;
@@ -108,7 +107,8 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     public BuildingLayer(Map map, VectorTileLayer tileLayer, int zoomMin, int zoomMax, boolean mesh, boolean shadow) {
         super(map);
 
-        tileLayer.addHook(this);
+        mTileLayer = tileLayer;
+        mTileLayer.addHook(this);
 
         // Use zoomMin as zoomLimit to render buildings only once
         mZoomLimiter = new ZoomLimiter(tileLayer.getManager(), zoomMin, zoomMax, zoomMin);
@@ -119,8 +119,6 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
             mRenderer = new ShadowRenderer(mExtrusionRenderer);
         else if (POST_AA)
             mRenderer = new OffscreenRenderer(Mode.SSAO_FXAA, mRenderer);
-
-        mRenderTheme = tileLayer.getTheme();
     }
 
     @Override
@@ -182,7 +180,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
         int height = 0; // cm
         int minHeight = 0; // cm
 
-        Float f = element.getHeight(mRenderTheme);
+        Float f = element.getHeight(mTileLayer.getTheme());
         if (f != null)
             height = (int) (f * 100);
         else {
@@ -192,7 +190,7 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
                 height = (int) (Float.parseFloat(v) * BUILDING_LEVEL_HEIGHT);
         }
 
-        f = element.getMinHeight(mRenderTheme);
+        f = element.getMinHeight(mTileLayer.getTheme());
         if (f != null)
             minHeight = (int) (f * 100);
         else {
@@ -273,9 +271,9 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
     }
 
     protected String getKeyOrDefault(String key) {
-        if (mRenderTheme == null)
+        if (mTileLayer.getTheme() == null)
             return key;
-        String res = mRenderTheme.transformKey(key);
+        String res = mTileLayer.getTheme().transformKey(key);
         return res != null ? res : key;
     }
 
