@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
  * Copyright 2018 Gustl22
@@ -1268,40 +1268,40 @@ public class XmlThemeBuilder extends DefaultHandler {
     }
 
     private void tagTransform(String localName, Attributes attributes) {
-        String k, v, matchKey, matchValue;
-        k = v = matchKey = matchValue = null;
+        String matchKey, matchValue, outputKey, outputValue;
+        matchKey = matchValue = outputKey = outputValue = null;
 
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
 
             switch (name) {
-                case "k":
-                    k = value;
-                    break;
-                case "v":
-                    v = value;
-                    break;
-                case "k-match":
+                case "match-k":
                     matchKey = value;
                     break;
-                case "v-match":
+                case "match-v":
                     matchValue = value;
+                    break;
+                case "output-k":
+                    outputKey = value;
+                    break;
+                case "output-v":
+                    outputValue = value;
                     break;
                 default:
                     logUnknownAttribute(localName, name, value, i);
             }
         }
 
-        if (k == null || k.isEmpty() || matchKey == null || matchKey.isEmpty()) {
+        if (matchKey == null || matchKey.isEmpty() || outputKey == null || outputKey.isEmpty()) {
             log.debug("empty key in element " + localName);
             return;
         }
 
-        if (v == null && matchValue == null) {
-            mTransformKeyMap.put(matchKey, k);
+        if (matchValue == null && outputValue == null) {
+            mTransformKeyMap.put(matchKey, outputKey);
         } else {
-            mTransformTagMap.put(new Tag(matchKey, matchValue), new Tag(k, v));
+            mTransformTagMap.put(new Tag(matchKey, matchValue), new Tag(outputKey, outputValue));
         }
     }
 
