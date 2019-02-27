@@ -4,7 +4,7 @@
  * Copyright 2016-2019 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016 Andrey Novikov
- * Copyright 2018 Gustl22
+ * Copyright 2018-2019 Gustl22
  * Copyright 2018 Izumi Kawashima
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -1268,40 +1268,40 @@ public class XmlThemeBuilder extends DefaultHandler {
     }
 
     private void tagTransform(String localName, Attributes attributes) {
-        String matchKey, matchValue, outputKey, outputValue;
-        matchKey = matchValue = outputKey = outputValue = null;
+        String k, v, libK, libV;
+        k = v = libK = libV = null;
 
         for (int i = 0; i < attributes.getLength(); i++) {
             String name = attributes.getLocalName(i);
             String value = attributes.getValue(i);
 
             switch (name) {
-                case "match-k":
-                    matchKey = value;
+                case "k":
+                    k = value;
                     break;
-                case "match-v":
-                    matchValue = value;
+                case "v":
+                    v = value;
                     break;
-                case "output-k":
-                    outputKey = value;
+                case "k-lib":
+                    libK = value;
                     break;
-                case "output-v":
-                    outputValue = value;
+                case "v-lib":
+                    libV = value;
                     break;
                 default:
                     logUnknownAttribute(localName, name, value, i);
             }
         }
 
-        if (matchKey == null || matchKey.isEmpty() || outputKey == null || outputKey.isEmpty()) {
+        if (k == null || k.isEmpty() || libK == null || libK.isEmpty()) {
             log.debug("empty key in element " + localName);
             return;
         }
 
-        if (matchValue == null && outputValue == null) {
-            mTransformKeyMap.put(matchKey, outputKey);
+        if (v == null && libV == null) {
+            mTransformKeyMap.put(k, libK);
         } else {
-            mTransformTagMap.put(new Tag(matchKey, matchValue), new Tag(outputKey, outputValue));
+            mTransformTagMap.put(new Tag(k, v), new Tag(libK, libV));
         }
     }
 
