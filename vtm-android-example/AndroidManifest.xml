@@ -80,9 +80,6 @@
             android:name=".MapsforgeActivity$ThemeFilePicker"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapsforgePolyLabelActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".MapsforgeS3DBActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

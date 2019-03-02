@@ -12,6 +12,10 @@
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
 - ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
   - `getMapViewCenter`, `setMapViewCenter` with pivotX, pivotY
+- Enable optimal placement of labels or symbols on polygons
+  - `Parameters.POLY_LABEL`
+- Enable placement of symbols on polygons
+  - `Parameters.POLY_SYMBOL`
 - OpenGL ES 3.0 support [#646](https://github.com/mapsforge/vtm/issues/646)
 - OpenGL ES 2.0 complete [#642](https://github.com/mapsforge/vtm/pull/642)
 - libGDX 1.9.9 [#635](https://github.com/mapsforge/vtm/issues/635)
