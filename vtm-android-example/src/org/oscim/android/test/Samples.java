@@ -127,7 +127,6 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(VectorLayerActivity.class));
 
         linearLayout.addView(createLabel("User Interaction"));
-        linearLayout.addView(createButton(Animator2Activity.class));
         linearLayout.addView(createButton(MapEventLayer2Activity.class));
         linearLayout.addView(createButton(LayerGroupActivity.class));
 

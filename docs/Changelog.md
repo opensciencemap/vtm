@@ -12,6 +12,8 @@
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
 - ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
   - `getMapViewCenter`, `setMapViewCenter` with pivotX, pivotY
+- Enable physical fling and fling on rotation / scale
+  - `Parameters.ANIMATOR2`
 - Enable optimal placement of labels or symbols on polygons
   - `Parameters.POLY_LABEL`
 - Enable placement of symbols on polygons

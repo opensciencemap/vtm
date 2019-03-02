@@ -23,9 +23,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Animator2Activity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".AtlasMarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

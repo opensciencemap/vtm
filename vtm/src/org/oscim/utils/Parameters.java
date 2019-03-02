@@ -19,7 +19,7 @@ public final class Parameters {
     /**
      * If true the <code>Animator2</code> will be used instead of default <code>Animator</code>.
      */
-    public static boolean ANIMATOR2 = false;
+    public static boolean ANIMATOR2 = true;
 
     /**
      * Allow custom scale factor for short vertices instead of the calculated one.
