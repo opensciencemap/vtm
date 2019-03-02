@@ -14,17 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.layers.tile.example;
+package org.oscim.layers.tile;
 
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.core.GeometryBuffer;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.MapTile;
-import org.oscim.layers.tile.TileLayer;
-import org.oscim.layers.tile.TileLoader;
-import org.oscim.layers.tile.TileManager;
-import org.oscim.layers.tile.VectorTileRenderer;
 import org.oscim.map.Map;
 import org.oscim.renderer.bucket.LineBucket;
 import org.oscim.renderer.bucket.RenderBuckets;

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.oscim.tiling.source.test;
+package org.oscim.tiling.source;
 
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
