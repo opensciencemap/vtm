@@ -19,4 +19,4 @@
 | [VTM with Eclipse RCP](https://github.com/wolfgang-ch/vtm-with-rcp) | VTM with an Eclipse RCP application | GPL3/Free | Desktop | Open |
 | [XCTrack](http://xctrack.org/) | Flight computer for paraglider pilots | Proprietary/Free | Android | Closed |
 
-You know an application that is missing here? Please inform us by sending a message via our public [mailing list](https://groups.google.com/group/mapsforge-dev).
+You know an application that is missing here? Please inform us by sending a message via our public [forum](https://groups.google.com/group/mapsforge-dev).

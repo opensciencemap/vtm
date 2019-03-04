@@ -2,7 +2,7 @@
 
 **This article describes how to use XML-based render-themes to style maps.**
 
-If you have any questions or problems, don't hesitate to ask our public [mapsforge-dev](https://groups.google.com/group/mapsforge-dev) mailing list for help. You can also report bugs and improvement requests via our [issue tracker](https://github.com/mapsforge/vtm/issues).
+If you have any questions or problems, don't hesitate to ask our public [forum](https://groups.google.com/group/mapsforge-dev) for help. You can also report bugs and improvement requests via our [issue tracker](https://github.com/mapsforge/vtm/issues).
 
 ## Introduction
 
