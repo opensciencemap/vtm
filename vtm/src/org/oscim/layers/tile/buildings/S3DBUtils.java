@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2017, 2018 Gustl22
+ * Copyright 2017-2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -43,7 +43,7 @@ public final class S3DBUtils {
     private static final Logger log = LoggerFactory.getLogger(S3DBUtils.class);
 
     /* TODO get from theme */
-    private static final double HSV_S = 0.7;
+    private static final double HSV_S = 0.5;
     private static final double HSV_V = 1.2;
 
     // Toggle this to debug and improve ridge calculation, you can see the faults in map then.
@@ -1062,46 +1062,16 @@ public final class S3DBUtils {
 
     /**
      * @param color    the color as string (see http://wiki.openstreetmap.org/wiki/Key:colour)
-     * @param roof     declare if color is used for roofs
      * @param relative declare if colors are modified relative to their values
      * @return the color as integer (8 bit each a, r, g, b)
      */
-    public static int getColor(String color, boolean roof, boolean relative) {
+    public static int getColor(String color, boolean relative) {
 
         if (color.charAt(0) == '#') {
             int c = Color.parseColor(color, Color.CYAN);
             /* hardcoded colors are way too saturated for my taste */
-            return ColorUtil.modHsv(c, 1.0, 0.4, HSV_V, relative);
+            return ColorUtil.modHsv(c, 1.0, HSV_S, HSV_V, relative);
         }
-
-        if (roof) {
-            if ("brown".equals(color))
-                return Color.get(120, 110, 110);
-            if ("red".equals(color))
-                return Color.get(235, 140, 130);
-            if ("green".equals(color))
-                return Color.get(150, 200, 130);
-            if ("blue".equals(color))
-                return Color.get(100, 50, 200);
-        }
-        if ("white".equals(color))
-            return Color.get(240, 240, 240);
-        if ("black".equals(color))
-            return Color.get(86, 86, 86);
-        if ("grey".equals(color) || "gray".equals(color))
-            return Color.get(120, 120, 120);
-        if ("red".equals(color))
-            return Color.get(255, 190, 190);
-        if ("green".equals(color))
-            return Color.get(190, 255, 190);
-        if ("blue".equals(color))
-            return Color.get(190, 190, 255);
-        if ("yellow".equals(color))
-            return Color.get(255, 255, 175);
-        if ("darkgray".equals(color) || "darkgrey".equals(color))
-            return Color.DKGRAY;
-        if ("lightgray".equals(color) || "lightgrey".equals(color))
-            return Color.LTGRAY;
 
         if ("transparent".equals(color))
             return Color.get(0, 1, 1, 1);
