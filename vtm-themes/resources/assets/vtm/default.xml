@@ -3,6 +3,16 @@
     version="1" xmlns="http://opensciencemap.org/rendertheme"
     xsi:schemaLocation="http://opensciencemap.org/rendertheme https://raw.githubusercontent.com/mapsforge/vtm/master/resources/rendertheme.xsd">
 
+    <!--###### TRANSFORM tags ######-->
+    <tag-transform k="roof:colour" k-lib="roof:colour" v="blue" v-lib="#4e7ee0" />
+    <tag-transform k="roof:colour" k-lib="roof:colour" v="green" v-lib="#3ed889" />
+    <tag-transform k="roof:colour" k-lib="roof:colour" v="red" v-lib="#ad4340" />
+    <tag-transform k="roof:colour" k-lib="roof:colour" v="yellow" v-lib="#e5d522" />
+    <tag-transform k="building:colour" k-lib="building:colour" v="blue" v-lib="#416fcc" />
+    <tag-transform k="building:colour" k-lib="building:colour" v="green" v-lib="#38c459" />
+    <tag-transform k="building:colour" k-lib="building:colour" v="red" v-lib="#cc3733" />
+    <tag-transform k="building:colour" k-lib="building:colour" v="yellow" v-lib="#f4e216" />
+
     <!--###### TEXT styles ######-->
 
     <!--default label-->
