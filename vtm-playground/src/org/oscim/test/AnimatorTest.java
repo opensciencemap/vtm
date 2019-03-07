@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2017-2018 devemux86
+ * Copyright 2017-2019 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -46,6 +46,7 @@ public class AnimatorTest extends GdxMapApp {
     protected boolean onKeyDown(int keycode) {
         if (keycode == Input.Keys.NUM_1) {
             mMap.animator().animateTo(new BoundingBox(53.1, 8.8, 53.2, 8.9));
+            mMap.updateMap(true);
             return true;
         }
         return false;
