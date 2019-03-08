@@ -74,8 +74,8 @@ public class GdxMapApp extends GdxMap {
             cfg.addIcon(path, Files.FileType.Internal);
         }
 
-        cfg.width = 800;
-        cfg.height = 600;
+        cfg.width = 1024;
+        cfg.height = 768;
         cfg.stencil = 8;
         //cfg.samples = 2;
         cfg.foregroundFPS = 30;
