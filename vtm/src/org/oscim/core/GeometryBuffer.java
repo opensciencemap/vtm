@@ -479,12 +479,16 @@ public class GeometryBuffer {
      * Calculates geometry area, only polygon outer ring is taken into account.
      *
      * @return unsigned polygon area, 0 for other geometries
+     * @see GeometryUtils#area(float[], int)
      */
     public float area() {
         float area = isClockwise();
         return area < 0 ? -area : area;
     }
 
+    /**
+     * @see GeometryUtils#isClockwise(float[], int).
+     */
     public float isClockwise() {
         if (isPoint() || isLine() || getNumPoints() < 3)
             return 0f;
