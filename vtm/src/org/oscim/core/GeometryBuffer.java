@@ -469,6 +469,16 @@ public class GeometryBuffer {
     }
 
     /**
+     * Remove the last point.
+     */
+    public void removeLastPoint() {
+        if (!isTris()) {
+            pointNextPos -= 2;
+            index[indexCurrentPos] -= 2;
+        }
+    }
+
+    /**
      * Reverse the order of points for lines and polygons.
      */
     public void reverse() {
