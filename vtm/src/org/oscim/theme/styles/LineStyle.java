@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -110,7 +110,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.level = b.level;
         this.style = b.style;
         this.width = b.strokeWidth;
-        this.color = b.themeCallback != null ? b.themeCallback.getColor(b.fillColor) : b.fillColor;
+        this.color = b.themeCallback != null ? b.themeCallback.getColor(this, b.fillColor) : b.fillColor;
         this.cap = b.cap;
         this.outline = b.outline;
         this.fixed = b.fixed;
@@ -118,7 +118,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
         this.fadeScale = b.fadeScale;
         this.blur = b.blur;
         this.stipple = b.stipple;
-        this.stippleColor = b.themeCallback != null ? b.themeCallback.getColor(b.stippleColor) : b.stippleColor;
+        this.stippleColor = b.themeCallback != null ? b.themeCallback.getColor(this, b.stippleColor) : b.stippleColor;
         this.stippleWidth = b.stippleWidth;
         this.texture = b.texture;
 
@@ -180,7 +180,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.level = line.level;
             this.style = line.style;
             this.strokeWidth = line.width;
-            this.fillColor = themeCallback != null ? themeCallback.getColor(line.color) : line.color;
+            this.fillColor = themeCallback != null ? themeCallback.getColor(line, line.color) : line.color;
             this.cap = line.cap;
             this.outline = line.outline;
             this.fixed = line.fixed;
@@ -188,7 +188,7 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             this.fadeScale = line.fadeScale;
             this.blur = line.blur;
             this.stipple = line.stipple;
-            this.stippleColor = themeCallback != null ? themeCallback.getColor(line.stippleColor) : line.stippleColor;
+            this.stippleColor = themeCallback != null ? themeCallback.getColor(line, line.stippleColor) : line.stippleColor;
             this.stippleWidth = line.stippleWidth;
             this.texture = line.texture;
 

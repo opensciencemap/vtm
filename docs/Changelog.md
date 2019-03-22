@@ -11,8 +11,9 @@
 - Overpass tile source [#663](https://github.com/mapsforge/vtm/issues/663)
 - vtm-gdx-poi3d module [#600](https://github.com/mapsforge/vtm/pull/600)
 - vtm-models module [#580](https://github.com/mapsforge/vtm/issues/580)
-- ViewController refactor [#625](https://github.com/mapsforge/vtm/pull/625)
+- `ViewController` refactor [#625](https://github.com/mapsforge/vtm/pull/625)
   - `getMapViewCenter`, `setMapViewCenter` with pivotX, pivotY
+- `ThemeCallback.getColor` refactor [#274](https://github.com/mapsforge/vtm/issues/274)
 - Enable physical fling and fling on rotation / scale
   - `Parameters.ANIMATOR2`
 - Enable optimal placement of labels or symbols on polygons

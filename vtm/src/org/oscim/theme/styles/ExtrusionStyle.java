@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2018-2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -50,9 +50,9 @@ public class ExtrusionStyle extends RenderStyle<ExtrusionStyle> {
         this.cat = b.cat;
         this.level = b.level;
 
-        this.colorSide = b.themeCallback != null ? b.themeCallback.getColor(b.colorSide) : b.colorSide;
-        this.colorTop = b.themeCallback != null ? b.themeCallback.getColor(b.colorTop) : b.colorTop;
-        this.colorLine = b.themeCallback != null ? b.themeCallback.getColor(b.colorLine) : b.colorLine;
+        this.colorSide = b.themeCallback != null ? b.themeCallback.getColor(this, b.colorSide) : b.colorSide;
+        this.colorTop = b.themeCallback != null ? b.themeCallback.getColor(this, b.colorTop) : b.colorTop;
+        this.colorLine = b.themeCallback != null ? b.themeCallback.getColor(this, b.colorLine) : b.colorLine;
         this.colors = new float[16];
         fillColors(colorSide, colorTop, colorLine, colors);
 
@@ -129,9 +129,9 @@ public class ExtrusionStyle extends RenderStyle<ExtrusionStyle> {
 
             this.cat = extrusion.cat;
             this.level = extrusion.level;
-            this.colorSide = themeCallback != null ? themeCallback.getColor(extrusion.colorSide) : extrusion.colorSide;
-            this.colorTop = themeCallback != null ? themeCallback.getColor(extrusion.colorTop) : extrusion.colorTop;
-            this.colorLine = themeCallback != null ? themeCallback.getColor(extrusion.colorLine) : extrusion.colorLine;
+            this.colorSide = themeCallback != null ? themeCallback.getColor(extrusion, extrusion.colorSide) : extrusion.colorSide;
+            this.colorTop = themeCallback != null ? themeCallback.getColor(extrusion, extrusion.colorTop) : extrusion.colorTop;
+            this.colorLine = themeCallback != null ? themeCallback.getColor(extrusion, extrusion.colorLine) : extrusion.colorLine;
             this.hsvHue = extrusion.hsv.hue;
             this.hsvSaturation = extrusion.hsv.saturation;
             this.hsvValue = extrusion.hsv.value;
