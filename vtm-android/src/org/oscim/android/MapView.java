@@ -47,6 +47,9 @@ import org.oscim.utils.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -61,10 +64,12 @@ public class MapView extends GLSurfaceView {
 
     static final Logger log = LoggerFactory.getLogger(MapView.class);
 
+    private static final Pattern GL_PATTERN = Pattern.compile("OpenGL ES (\\d(\\.\\d){0,2})");
+
     /**
      * Target OpenGL ES version, if not available fall back to OpenGL ES 2.0
      */
-    public static int targetGLESVersion = 3;
+    public static double targetGLESVersion = 3.0;
 
     private static void init() {
         System.loadLibrary("vtm-jni");
@@ -122,8 +127,12 @@ public class MapView extends GLSurfaceView {
         mMap = new AndroidMap(this);
 
         /* Initialize Renderer */
-        //setEGLContextClientVersion(targetGLESVersion);
-        setEGLContextFactory(new GlContextFactory());
+        try {
+            setEGLContextFactory(new GlContextFactory());
+        } catch (Throwable t) {
+            log.error("Falling back to GLES 2", t);
+            setEGLContextClientVersion(2);
+        }
         setEGLConfigChooser(new GlConfigChooser());
 
         if (GLAdapter.debug)
@@ -301,16 +310,58 @@ public class MapView extends GLSurfaceView {
             super(map);
         }
 
+        /**
+         * @return GL version as [major, minor, release]
+         */
+        private int[] extractVersion(String versionString) {
+            int[] version = new int[3];
+            Matcher matcher = GL_PATTERN.matcher(versionString);
+            if (matcher.find()) {
+                String[] split = matcher.group(1).split("\\.");
+                version[0] = parseInt(split[0], 2);
+                version[1] = split.length < 2 ? 0 : parseInt(split[1], 0);
+                version[2] = split.length < 3 ? 0 : parseInt(split[2], 0);
+            } else {
+                log.error("Invalid version string: " + versionString);
+                version[0] = 2;
+                version[1] = 0;
+                version[2] = 0;
+            }
+            return version;
+        }
+
+        /**
+         * Forgiving parsing of GL major, minor and release versions as some manufacturers don't adhere to spec.
+         **/
+        private int parseInt(String value, int defaultValue) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                log.error("Error parsing number: " + value + ", assuming: " + defaultValue);
+                return defaultValue;
+            }
+        }
+
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            // Check OpenGL ES version
-            String versionStr = gl.glGetString(GL10.GL_VERSION);
-            int versionIndex = "OpenGL ES ".length();
-            float version = Float.parseFloat(versionStr.substring(versionIndex, versionIndex + 3));
-            if (version >= 3)
-                GLAdapter.init(new AndroidGL30());
-            else
+            try {
+                // Create a minimum supported OpenGL ES context, then check:
+                String versionString = gl.glGetString(GL10.GL_VERSION);
+                log.info("Version: " + versionString);
+                // The version format is displayed as: "OpenGL ES <major>.<minor>"
+                // followed by optional content provided by the implementation.
+
+                // OpenGL<space>ES<space><version number><space><vendor-specific information>.
+                int[] version = extractVersion(versionString);
+                int majorVersion = version[0];
+                if (majorVersion >= 3)
+                    GLAdapter.init(new AndroidGL30());
+                else
+                    GLAdapter.init(new AndroidGL());
+            } catch (Throwable t) {
+                log.error("Falling back to GLES 2", t);
                 GLAdapter.init(new AndroidGL());
+            }
 
             super.onSurfaceCreated();
         }

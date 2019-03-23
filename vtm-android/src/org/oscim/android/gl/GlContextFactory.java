@@ -1,5 +1,6 @@
 /*
  * Copyright 2019 Gustl22
+ * Copyright 2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -38,7 +39,9 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
 /**
- * See https://github.com/libgdx/libgdx/blob/master/backends/gdx-backend-android/src/com/badlogic/gdx/backends/android/surfaceview/GLSurfaceView20.java
+ * https://developer.android.com/guide/topics/graphics/opengl.html#version-check
+ * <p>
+ * https://github.com/libgdx/libgdx/blob/master/backends/gdx-backend-android/src/com/badlogic/gdx/backends/android/surfaceview/GLSurfaceView20.java
  */
 public class GlContextFactory implements GLSurfaceView.EGLContextFactory {
 
@@ -48,15 +51,15 @@ public class GlContextFactory implements GLSurfaceView.EGLContextFactory {
 
     @Override
     public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
-        log.info("creating OpenGL ES " + MapView.targetGLESVersion + ".0 context");
+        log.info("creating OpenGL ES " + MapView.targetGLESVersion + " context");
         checkEglError("Before eglCreateContext " + MapView.targetGLESVersion, egl);
-        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, MapView.targetGLESVersion, EGL10.EGL_NONE};
+        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, (int) MapView.targetGLESVersion, EGL10.EGL_NONE};
         EGLContext context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
         boolean success = checkEglError("After eglCreateContext " + MapView.targetGLESVersion, egl);
 
         if ((!success || context == null) && MapView.targetGLESVersion > 2) {
             log.warn("Falling back to GLES 2");
-            MapView.targetGLESVersion = 2;
+            MapView.targetGLESVersion = 2.0;
             return createContext(egl, display, eglConfig);
         }
         log.info("Returning a GLES " + MapView.targetGLESVersion + " context");
