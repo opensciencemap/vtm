@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.10.0
+## Version 0.11.0 (2019-03-25)
 
 - Render themes: tag transform [#420](https://github.com/mapsforge/vtm/issues/420)
 - Render themes: PNG scaling [#595](https://github.com/mapsforge/vtm/issues/595)
