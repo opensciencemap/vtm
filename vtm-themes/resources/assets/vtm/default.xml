@@ -647,8 +647,8 @@
                 </m>
             </m>
             <m zoom-min="17">
-                <extrusion line-color="#ffd9d8d6" side-color="#eaecebe9" top-color="#eaf9f8f6"
-                    hsv-s="0.5" hsv-v="1.2" />
+                <extrusion hsv-s="0.5" hsv-v="1.2" line-color="#ffd9d8d6" side-color="#eaecebe9"
+                    top-color="#eaf9f8f6" />
             </m>
             <!--Only add house numbers where no name exist-->
             <m k="addr:housenumber" zoom-min="18">
@@ -1044,11 +1044,11 @@
         <m k="admin_level">
             <m v="4">
                 <line fix="true" stipple="6" stipple-stroke="#888888" stipple-width="1.0"
-                    stroke="#dadada" width="2.0" />
+                    stroke="#dadada" width="1.8" />
             </m>
             <m v="2">
                 <line fix="true" stipple="8" stipple-stroke="#647b9c" stipple-width="1.0"
-                    stroke="#bbbbbb" width="2.5" />
+                    stroke="#bbbbbb" width="2.0" />
             </m>
         </m>
         <!-- </m> -->

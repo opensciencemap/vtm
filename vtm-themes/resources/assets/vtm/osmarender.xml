@@ -560,8 +560,8 @@
             </m>
 
             <m zoom-min="17">
-                <extrusion line-color="#506a5a8e" side-color="#eaf3d6b6" top-color="#eaf8d9b9"
-                    hsv-s="0.2" hsv-v="1.4" />
+                <extrusion hsv-s="0.2" hsv-v="1.4" line-color="#506a5a8e" side-color="#eaf3d6b6"
+                    top-color="#eaf8d9b9" />
             </m>
 
             <!--Only add house numbers where no name exist-->
@@ -1087,7 +1087,7 @@
                     </m>
                     <m v="4">
                         <line dasharray="15, 5, 5, 5" fix="true" stipple="4"
-                            stipple-stroke="#f9574b" stipple-width="0.9" stroke="#00000000"
+                            stipple-stroke="#f9574b" stipple-width="0.9" stroke="#80000000"
                             width="1.25" />
                     </m>
                     <m v="3">
