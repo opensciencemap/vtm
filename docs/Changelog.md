@@ -1,5 +1,10 @@
 # Changelog
 
+## New since 0.11.0
+
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.12.0)
+
 ## Version 0.11.0 (2019-03-25)
 
 - Render themes: tag transform [#420](https://github.com/mapsforge/vtm/issues/420)
