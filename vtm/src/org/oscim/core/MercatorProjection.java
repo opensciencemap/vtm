@@ -2,7 +2,8 @@
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2012 Hannes Janetzek
  * Copyright 2014 Ludwig M Brinckmann
- * Copyright 2016-2017 devemux86
+ * Copyright 2016-2019 devemux86
+ * Copyright 2019 Andrea Antonello
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -575,6 +576,17 @@ public final class MercatorProjection {
      */
     public static double tileYToLatitude(long tileY, byte zoomLevel) {
         return pixelYToLatitude(tileY * Tile.SIZE, getMapSize(zoomLevel));
+    }
+
+    /**
+     * Converts a tile Y number at a certain zoom level to TMS notation.
+     *
+     * @param tileY     the tile Y number that should be converted.
+     * @param zoomLevel the zoom level at which the number should be converted.
+     * @return the TMS value of the tile Y number.
+     */
+    public static long tileYToTMS(long tileY, byte zoomLevel) {
+        return (long) (zoomLevelToScale(zoomLevel) - tileY - 1);
     }
 
     public static double toLatitude(double y) {

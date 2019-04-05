@@ -8,6 +8,7 @@
  * Copyright 2017 nebular
  * Copyright 2018 boldtrn
  * Copyright 2018-2019 Gustl22
+ * Copyright 2019 Andrea Antonello
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -115,6 +116,7 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Raster Maps"));
         linearLayout.addView(createButton(BitmapTileActivity.class));
+        linearLayout.addView(createButton(MBTilesBitmapTileActivity.class));
 
         linearLayout.addView(createLabel("Overlays"));
         linearLayout.addView(createButton(MarkerOverlayActivity.class));
