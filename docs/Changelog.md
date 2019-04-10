@@ -2,6 +2,7 @@
 
 ## New since 0.11.0
 
+- MBTiles raster tile source (Android) [#708](https://github.com/mapsforge/vtm/pull/708)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.12.0)
 
