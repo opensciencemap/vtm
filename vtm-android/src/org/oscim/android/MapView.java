@@ -28,7 +28,6 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.WindowManager;
-
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.android.gl.AndroidGL;
 import org.oscim.android.gl.AndroidGL30;
@@ -47,11 +46,10 @@ import org.oscim.utils.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The MapView,
@@ -127,12 +125,16 @@ public class MapView extends GLSurfaceView {
         mMap = new AndroidMap(this);
 
         /* Initialize Renderer */
-        try {
-            setEGLContextFactory(new GlContextFactory());
-        } catch (Throwable t) {
-            log.error("Falling back to GLES 2", t);
+        // OpenGL ES 3.0 is supported with Android 4.3 (API level 18) and higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            try {
+                setEGLContextFactory(new GlContextFactory());
+            } catch (Throwable t) {
+                log.error("Falling back to GLES 2", t);
+                setEGLContextClientVersion(2);
+            }
+        } else
             setEGLContextClientVersion(2);
-        }
         setEGLConfigChooser(new GlConfigChooser());
 
         if (GLAdapter.debug)
