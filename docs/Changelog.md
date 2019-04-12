@@ -1,11 +1,11 @@
 # Changelog
 
-## New since 0.11.0
+## Version 0.11.1 (2019-04-12)
 
 - MBTiles raster tile source (Android) [#708](https://github.com/mapsforge/vtm/pull/708)
 - Fix Android 4.2 crash [#713](https://github.com/mapsforge/vtm/issues/713)
 - Many other minor improvements and bug fixes
-- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.12.0)
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.11.1)
 
 ## Version 0.11.0 (2019-03-25)
 
