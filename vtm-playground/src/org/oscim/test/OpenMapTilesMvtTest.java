@@ -14,8 +14,10 @@
  */
 package org.oscim.test;
 
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
 import org.oscim.core.MapPosition;
-import org.oscim.gdx.GdxMapApp;
+import org.oscim.gdx.lwjgl.GdxMapApp;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
@@ -26,9 +28,6 @@ import org.oscim.tiling.source.mvt.OpenMapTilesMvtTileSource;
 
 import java.io.File;
 import java.util.UUID;
-
-import okhttp3.Cache;
-import okhttp3.OkHttpClient;
 
 public class OpenMapTilesMvtTest extends GdxMapApp {
 
