@@ -19,6 +19,8 @@
  */
 package org.oscim.layers.tile.buildings;
 
+import org.oscim.backend.CanvasAdapter;
+import org.oscim.backend.Platform;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 import org.oscim.layers.Layer;
@@ -37,11 +39,7 @@ import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.utils.geom.GeometryUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLimiter.IZoomLimiter {
 
@@ -112,6 +110,10 @@ public class BuildingLayer extends Layer implements TileLoaderThemeHook, ZoomLim
 
         // Use zoomMin as zoomLimit to render buildings only once
         mZoomLimiter = new ZoomLimiter(tileLayer.getManager(), zoomMin, zoomMax, zoomMin);
+
+        // Buildings translucency does not work on macOS, see #61
+        if (CanvasAdapter.platform == Platform.MACOS)
+            TRANSLUCENT = false;
 
         mRenderer = mExtrusionRenderer = new BuildingRenderer(tileLayer.tileRenderer(), mZoomLimiter, mesh, TRANSLUCENT);
         // TODO Allow shadow and POST_AA at same time
