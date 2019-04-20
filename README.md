@@ -37,6 +37,7 @@ If you have any questions or problems, don't hesitate to ask our public [forum](
 - **vtm-gdx** common libGDX backend
 - **vtm-android-gdx** Android libGDX backend
 - **vtm-desktop** Desktop libGDX backend
+- **vtm-desktop-lwjgl** Desktop LWJGL backend
 - **vtm-playground** Desktop examples
 - **vtm-ios** iOS libGDX backend
 - **vtm-ios-example** iOS examples
