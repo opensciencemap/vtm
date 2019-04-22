@@ -19,7 +19,7 @@ import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Color;
 import org.oscim.core.GeoPoint;
-import org.oscim.gdx.lwjgl.GdxMapApp;
+import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.marker.*;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.tiling.TileSource;

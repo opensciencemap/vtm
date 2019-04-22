@@ -30,7 +30,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.oscim.gdx.lwjgl;
+package org.oscim.gdx;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.BufferUtils;

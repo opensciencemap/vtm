@@ -14,7 +14,7 @@
  */
 package org.oscim.test;
 
-import org.oscim.gdx.lwjgl.GdxMapApp;
+import org.oscim.gdx.GdxMapApp;
 
 import java.io.File;
 

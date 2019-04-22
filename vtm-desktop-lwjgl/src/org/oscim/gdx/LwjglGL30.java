@@ -14,18 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.oscim.gdx.lwjgl;
+package org.oscim.gdx;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.*;
-import org.oscim.backend.GL30;
 
 import java.nio.*;
 
 /**
  * See https://github.com/libgdx/libgdx/blob/master/backends/gdx-backend-lwjgl/src/com/badlogic/gdx/backends/lwjgl/LwjglGL30.java
  */
-public class LwjglGL30 extends LwjglGL20 implements GL30 {
+public class LwjglGL30 extends LwjglGL20 implements org.oscim.backend.GL30 {
     @Override
     public void readBuffer(int mode) {
         GL11.glReadBuffer(mode);
@@ -205,246 +204,246 @@ public class LwjglGL30 extends LwjglGL20 implements GL30 {
     @Override
     public void blitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1,
                                 int mask, int filter) {
-        org.lwjgl.opengl.GL30.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+        GL30.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
     }
 
     @Override
     public void bindFramebuffer(int target, int framebuffer) {
-        org.lwjgl.opengl.GL30.glBindFramebuffer(target, framebuffer);
+        GL30.glBindFramebuffer(target, framebuffer);
     }
 
     @Override
     public void bindRenderbuffer(int target, int renderbuffer) {
-        org.lwjgl.opengl.GL30.glBindRenderbuffer(target, renderbuffer);
+        GL30.glBindRenderbuffer(target, renderbuffer);
     }
 
     @Override
     public int checkFramebufferStatus(int target) {
-        return org.lwjgl.opengl.GL30.glCheckFramebufferStatus(target);
+        return GL30.glCheckFramebufferStatus(target);
     }
 
     @Override
     public void deleteFramebuffers(int n, IntBuffer framebuffers) {
-        org.lwjgl.opengl.GL30.glDeleteFramebuffers(framebuffers);
+        GL30.glDeleteFramebuffers(framebuffers);
     }
 
     @Override
     public void deleteFramebuffer(int framebuffer) {
-        org.lwjgl.opengl.GL30.glDeleteFramebuffers(framebuffer);
+        GL30.glDeleteFramebuffers(framebuffer);
     }
 
     @Override
     public void deleteRenderbuffers(int n, IntBuffer renderbuffers) {
-        org.lwjgl.opengl.GL30.glDeleteRenderbuffers(renderbuffers);
+        GL30.glDeleteRenderbuffers(renderbuffers);
     }
 
     @Override
     public void deleteRenderbuffer(int renderbuffer) {
-        org.lwjgl.opengl.GL30.glDeleteRenderbuffers(renderbuffer);
+        GL30.glDeleteRenderbuffers(renderbuffer);
     }
 
     @Override
     public void generateMipmap(int target) {
-        org.lwjgl.opengl.GL30.glGenerateMipmap(target);
+        GL30.glGenerateMipmap(target);
     }
 
     @Override
     public void genFramebuffers(int n, IntBuffer framebuffers) {
-        org.lwjgl.opengl.GL30.glGenFramebuffers(framebuffers);
+        GL30.glGenFramebuffers(framebuffers);
     }
 
     @Override
     public int genFramebuffer() {
-        return org.lwjgl.opengl.GL30.glGenFramebuffers();
+        return GL30.glGenFramebuffers();
     }
 
     @Override
     public void genRenderbuffers(int n, IntBuffer renderbuffers) {
-        org.lwjgl.opengl.GL30.glGenRenderbuffers(renderbuffers);
+        GL30.glGenRenderbuffers(renderbuffers);
     }
 
     @Override
     public int genRenderbuffer() {
-        return org.lwjgl.opengl.GL30.glGenRenderbuffers();
+        return GL30.glGenRenderbuffers();
     }
 
     @Override
     public void getRenderbufferParameteriv(int target, int pname, IntBuffer params) {
-        org.lwjgl.opengl.GL30.glGetRenderbufferParameter(target, pname, params);
+        GL30.glGetRenderbufferParameter(target, pname, params);
     }
 
     @Override
     public boolean isFramebuffer(int framebuffer) {
-        return org.lwjgl.opengl.GL30.glIsFramebuffer(framebuffer);
+        return GL30.glIsFramebuffer(framebuffer);
     }
 
     @Override
     public boolean isRenderbuffer(int renderbuffer) {
-        return org.lwjgl.opengl.GL30.glIsRenderbuffer(renderbuffer);
+        return GL30.glIsRenderbuffer(renderbuffer);
     }
 
     @Override
     public void renderbufferStorage(int target, int internalformat, int width, int height) {
-        org.lwjgl.opengl.GL30.glRenderbufferStorage(target, internalformat, width, height);
+        GL30.glRenderbufferStorage(target, internalformat, width, height);
     }
 
     @Override
     public void renderbufferStorageMultisample(int target, int samples, int internalformat, int width, int height) {
-        org.lwjgl.opengl.GL30.glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
+        GL30.glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
     }
 
     @Override
     public void framebufferTexture2D(int target, int attachment, int textarget, int texture, int level) {
-        org.lwjgl.opengl.GL30.glFramebufferTexture2D(target, attachment, textarget, texture, level);
+        GL30.glFramebufferTexture2D(target, attachment, textarget, texture, level);
     }
 
     @Override
     public void framebufferRenderbuffer(int target, int attachment, int renderbuffertarget, int renderbuffer) {
-        org.lwjgl.opengl.GL30.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+        GL30.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
     }
 
     @Override
     public void framebufferTextureLayer(int target, int attachment, int texture, int level, int layer) {
-        org.lwjgl.opengl.GL30.glFramebufferTextureLayer(target, attachment, texture, level, layer);
+        GL30.glFramebufferTextureLayer(target, attachment, texture, level, layer);
     }
 
     @Override
     public void flushMappedBufferRange(int target, int offset, int length) {
-        org.lwjgl.opengl.GL30.glFlushMappedBufferRange(target, offset, length);
+        GL30.glFlushMappedBufferRange(target, offset, length);
     }
 
     @Override
     public void bindVertexArray(int array) {
-        org.lwjgl.opengl.GL30.glBindVertexArray(array);
+        GL30.glBindVertexArray(array);
     }
 
     @Override
     public void deleteVertexArrays(int n, int[] arrays, int offset) {
         for (int i = offset; i < offset + n; i++) {
-            org.lwjgl.opengl.GL30.glDeleteVertexArrays(arrays[i]);
+            GL30.glDeleteVertexArrays(arrays[i]);
         }
     }
 
     @Override
     public void deleteVertexArrays(int n, IntBuffer arrays) {
-        org.lwjgl.opengl.GL30.glDeleteVertexArrays(arrays);
+        GL30.glDeleteVertexArrays(arrays);
     }
 
     @Override
     public void genVertexArrays(int n, int[] arrays, int offset) {
         for (int i = offset; i < offset + n; i++) {
-            arrays[i] = org.lwjgl.opengl.GL30.glGenVertexArrays();
+            arrays[i] = GL30.glGenVertexArrays();
         }
     }
 
     @Override
     public void genVertexArrays(int n, IntBuffer arrays) {
-        org.lwjgl.opengl.GL30.glGenVertexArrays(arrays);
+        GL30.glGenVertexArrays(arrays);
     }
 
     @Override
     public boolean isVertexArray(int array) {
-        return org.lwjgl.opengl.GL30.glIsVertexArray(array);
+        return GL30.glIsVertexArray(array);
     }
 
     @Override
     public void beginTransformFeedback(int primitiveMode) {
-        org.lwjgl.opengl.GL30.glBeginTransformFeedback(primitiveMode);
+        GL30.glBeginTransformFeedback(primitiveMode);
     }
 
     @Override
     public void endTransformFeedback() {
-        org.lwjgl.opengl.GL30.glEndTransformFeedback();
+        GL30.glEndTransformFeedback();
     }
 
     @Override
     public void bindBufferRange(int target, int index, int buffer, int offset, int size) {
-        org.lwjgl.opengl.GL30.glBindBufferRange(target, index, buffer, offset, size);
+        GL30.glBindBufferRange(target, index, buffer, offset, size);
     }
 
     @Override
     public void bindBufferBase(int target, int index, int buffer) {
-        org.lwjgl.opengl.GL30.glBindBufferBase(target, index, buffer);
+        GL30.glBindBufferBase(target, index, buffer);
     }
 
     @Override
     public void transformFeedbackVaryings(int program, String[] varyings, int bufferMode) {
-        org.lwjgl.opengl.GL30.glTransformFeedbackVaryings(program, varyings, bufferMode);
+        GL30.glTransformFeedbackVaryings(program, varyings, bufferMode);
     }
 
     @Override
     public void vertexAttribIPointer(int index, int size, int type, int stride, int offset) {
-        org.lwjgl.opengl.GL30.glVertexAttribIPointer(index, size, type, stride, offset);
+        GL30.glVertexAttribIPointer(index, size, type, stride, offset);
     }
 
     @Override
     public void getVertexAttribIiv(int index, int pname, IntBuffer params) {
-        org.lwjgl.opengl.GL30.glGetVertexAttribI(index, pname, params);
+        GL30.glGetVertexAttribI(index, pname, params);
     }
 
     @Override
     public void getVertexAttribIuiv(int index, int pname, IntBuffer params) {
-        org.lwjgl.opengl.GL30.glGetVertexAttribIu(index, pname, params);
+        GL30.glGetVertexAttribIu(index, pname, params);
     }
 
     @Override
     public void vertexAttribI4i(int index, int x, int y, int z, int w) {
-        org.lwjgl.opengl.GL30.glVertexAttribI4i(index, x, y, z, w);
+        GL30.glVertexAttribI4i(index, x, y, z, w);
     }
 
     @Override
     public void vertexAttribI4ui(int index, int x, int y, int z, int w) {
-        org.lwjgl.opengl.GL30.glVertexAttribI4ui(index, x, y, z, w);
+        GL30.glVertexAttribI4ui(index, x, y, z, w);
     }
 
     @Override
     public void getUniformuiv(int program, int location, IntBuffer params) {
-        org.lwjgl.opengl.GL30.glGetUniformu(program, location, params);
+        GL30.glGetUniformu(program, location, params);
     }
 
     @Override
     public int getFragDataLocation(int program, String name) {
-        return org.lwjgl.opengl.GL30.glGetFragDataLocation(program, name);
+        return GL30.glGetFragDataLocation(program, name);
     }
 
     @Override
     public void uniform1uiv(int location, int count, IntBuffer value) {
-        org.lwjgl.opengl.GL30.glUniform1u(location, value);
+        GL30.glUniform1u(location, value);
     }
 
     @Override
     public void uniform3uiv(int location, int count, IntBuffer value) {
-        org.lwjgl.opengl.GL30.glUniform3u(location, value);
+        GL30.glUniform3u(location, value);
     }
 
     @Override
     public void uniform4uiv(int location, int count, IntBuffer value) {
-        org.lwjgl.opengl.GL30.glUniform4u(location, value);
+        GL30.glUniform4u(location, value);
     }
 
     @Override
     public void clearBufferiv(int buffer, int drawbuffer, IntBuffer value) {
-        org.lwjgl.opengl.GL30.glClearBuffer(buffer, drawbuffer, value);
+        GL30.glClearBuffer(buffer, drawbuffer, value);
     }
 
     @Override
     public void clearBufferuiv(int buffer, int drawbuffer, IntBuffer value) {
-        org.lwjgl.opengl.GL30.glClearBufferu(buffer, drawbuffer, value);
+        GL30.glClearBufferu(buffer, drawbuffer, value);
     }
 
     @Override
     public void clearBufferfv(int buffer, int drawbuffer, FloatBuffer value) {
-        org.lwjgl.opengl.GL30.glClearBuffer(buffer, drawbuffer, value);
+        GL30.glClearBuffer(buffer, drawbuffer, value);
     }
 
     @Override
     public void clearBufferfi(int buffer, int drawbuffer, float depth, int stencil) {
-        org.lwjgl.opengl.GL30.glClearBufferfi(buffer, drawbuffer, depth, stencil);
+        GL30.glClearBufferfi(buffer, drawbuffer, depth, stencil);
     }
 
     @Override
     public String getStringi(int name, int index) {
-        return org.lwjgl.opengl.GL30.glGetStringi(name, index);
+        return GL30.glGetStringi(name, index);
     }
 
     @Override

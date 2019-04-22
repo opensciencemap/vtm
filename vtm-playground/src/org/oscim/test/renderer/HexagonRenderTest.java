@@ -18,7 +18,7 @@ package org.oscim.test.renderer;
 
 import org.oscim.backend.GL;
 import org.oscim.backend.canvas.Color;
-import org.oscim.gdx.lwjgl.GdxMapApp;
+import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.GenericLayer;
 import org.oscim.renderer.*;
 import org.oscim.utils.FastMath;
