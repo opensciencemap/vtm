@@ -4,6 +4,7 @@
  * Copyright 2016 Erik Duisters
  * Copyright 2017 Luca Osten
  * Copyright 2018 Izumi Kawashima
+ * Copyright 2019 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -20,13 +21,7 @@
  */
 package org.oscim.map;
 
-import org.oscim.core.BoundingBox;
-import org.oscim.core.Box;
-import org.oscim.core.GeoPoint;
-import org.oscim.core.MapPosition;
-import org.oscim.core.MercatorProjection;
-import org.oscim.core.Point;
-import org.oscim.core.Tile;
+import org.oscim.core.*;
 import org.oscim.renderer.GLMatrix;
 import org.oscim.utils.FastMath;
 
@@ -233,6 +228,7 @@ public class Viewport {
     }
 
     protected synchronized void unproject(float x, float y, float[] coords, int position) {
+        // Get point for near / opposite plane
         mv[0] = x;
         mv[1] = y;
         mv[2] = -1;
@@ -241,6 +237,7 @@ public class Viewport {
         double ny = mv[1];
         double nz = mv[2];
 
+        // Get point for far plane
         mv[0] = x;
         mv[1] = y;
         mv[2] = 1;
@@ -249,12 +246,34 @@ public class Viewport {
         double fy = mv[1];
         double fz = mv[2];
 
+        // Calc diffs
         double dx = fx - nx;
         double dy = fy - ny;
         double dz = fz - nz;
 
-        double dist = -nz / dz;
+        double dist;
+        if (y > 0 && nz < dz && fz > dz) {
+            /* Keep far distance (y > 0), while world flips between the screen coordinates.
+             * Screen coordinates can't be correctly converted to map coordinates
+             * as map plane doesn't intersect with top screen corners.
+             */
+            dist = 1; // Far plane
+        } else if (y < 0 && fz < dz && nz > dz) {
+            /* Keep near distance (y < 0), while world flips between the screen coordinates.
+             * Screen coordinates can't be correctly converted to map coordinates
+             * as map plane doesn't intersect with bottom screen corners.
+             */
+            dist = 0; // Near plane
+        } else {
+            // Calc factor to get map coordinates on current distance
+            dist = Math.abs(-nz / dz);
+            if (Double.isNaN(dist) || dist > 1) {
+                // Limit distance as it may exceeds to infinity
+                dist = 1; // Far plane
+            }
+        }
 
+        // near + dist * (far - near)
         coords[position + 0] = (float) (nx + dist * dx);
         coords[position + 1] = (float) (ny + dist * dy);
     }
