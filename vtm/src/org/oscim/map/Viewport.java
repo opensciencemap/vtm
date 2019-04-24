@@ -38,7 +38,13 @@ public class Viewport {
     public static final int MIN_ZOOM_LEVEL = 2;
     public static final float MIN_TILT = 0;
 
-    /* Note: limited by numTiles in TileManager to ~80° */
+    /**
+     * Limited by:
+     * <p>
+     * - numTiles in {@link org.oscim.layers.tile.TileManager#init() TileManager}
+     * <p>
+     * - tilt of map when cutting map on near and far plane.
+     */
     public static final float MAX_TILT = 65;
 
     protected double mMaxScale = (1 << MAX_ZOOM_LEVEL);
@@ -201,18 +207,25 @@ public class Viewport {
      * Get the inverse projection of the viewport, i.e. the
      * coordinates with z==0 that will be projected exactly
      * to screen corners by current view-projection-matrix.
+     * <p>
+     * Except when screen corners don't hit the map (e.g. on large tilt),
+     * then it will return the intersection with near and far plane.
      *
-     * @param box float[8] will be set.
+     * @param box float[8] will be set to
+     *            0,1 -> x,y bottom-right,
+     *            2,3 -> x,y bottom-left,
+     *            4,5 -> x,y top-left,
+     *            6,7 -> x,y top-right.
      * @param add increase extents of box
      */
     public void getMapExtents(float[] box, float add) {
-        /* top-right */
-        unproject(1, -1, box, 0);
-        /* top-left */
-        unproject(-1, -1, box, 2);
-        /* bottom-left */
-        unproject(-1, 1, box, 4);
         /* bottom-right */
+        unproject(1, -1, box, 0);
+        /* bottom-left */
+        unproject(-1, -1, box, 2);
+        /* top-left */
+        unproject(-1, 1, box, 4);
+        /* top-right */
         unproject(1, 1, box, 6);
 
         if (add == 0)
@@ -315,7 +328,7 @@ public class Viewport {
     }
 
     /**
-     * Get the GeoPoint for x,y in screen coordinates.
+     * Get the GeoPoint for x,y from screen coordinates.
      *
      * @param x screen coordinate
      * @param y screen coordinate
@@ -337,10 +350,11 @@ public class Viewport {
     }
 
     /**
-     * Get the map position for x,y in screen coordinates.
+     * Get the map position x,y from screen coordinates.
      *
-     * @param x screen coordinate
-     * @param y screen coordinate
+     * @param x   screen coordinate
+     * @param y   screen coordinate
+     * @param out map position as Point {@link MapPosition#getX() x} and {@link MapPosition#getY() y}
      */
     public synchronized void fromScreenPoint(double x, double y, Point out) {
         unprojectScreen(x, y, mu);
