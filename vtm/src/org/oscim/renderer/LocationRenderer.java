@@ -1,7 +1,7 @@
 /*
  * Copyright 2013 Ahmad Saleem
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016 ocsike
  * Copyright 2017 Mathieu De Brito
  *
@@ -36,13 +36,13 @@ public class LocationRenderer extends LayerRenderer {
     private static final long ANIM_RATE = 50;
     private static final long INTERVAL = 2000;
 
-    private static final float CIRCLE_SIZE = 30;
+    public static float CIRCLE_SIZE = 30;
     private static final int COLOR = 0xff3333cc;
     private static final int SHOW_ACCURACY_ZOOM = 16;
 
     private final Map mMap;
     private final Layer mLayer;
-    private final float mScale;
+    protected final float mScale;
 
     private String mShaderFile;
     protected int mShaderProgram;
