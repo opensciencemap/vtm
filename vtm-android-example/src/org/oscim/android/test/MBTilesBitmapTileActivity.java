@@ -18,7 +18,6 @@ package org.oscim.android.test;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Environment;
 import org.oscim.android.tiling.source.mbtiles.MBTilesBitmapTileSource;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
@@ -36,7 +35,7 @@ public class MBTilesBitmapTileActivity extends BitmapTileActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        File file = new File(Environment.getExternalStorageDirectory(), "test.mbtiles");
+        File file = new File(getExternalFilesDir(null), "test.mbtiles");
         if (!file.exists()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
                     .setTitle(R.string.warning)

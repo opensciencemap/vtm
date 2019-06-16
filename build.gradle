@@ -14,7 +14,7 @@ allprojects {
     version = 'master-SNAPSHOT'
     ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-    ext.androidBuildVersionTools = "28.0.3"
+    ext.androidBuildVersionTools = "29.0.0"
     ext.gdxVersion = "1.9.9"
     ext.gwtVersion = "2.8.0"
     ext.slf4jVersion = "1.7.25"
@@ -28,7 +28,7 @@ allprojects {
     }
 }
 
-static def androidCompileSdk() { return 28 }
+static def androidCompileSdk() { return 29 }
 
 // 14 for Support Library, 16 for sqlite-android
 static def androidMinSdk() { return 16 }

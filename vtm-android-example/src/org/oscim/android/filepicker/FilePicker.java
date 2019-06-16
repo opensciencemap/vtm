@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2016 devemux86
+ * Copyright 2016-2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -22,11 +22,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-
 import org.oscim.android.test.R;
 
 import java.io.File;
@@ -60,7 +58,6 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
 
     private static final String PREFERENCES_FILE = "FilePicker";
     private static final String CURRENT_DIRECTORY = "currentDirectory";
-    private static final String DEFAULT_DIRECTORY = Environment.getExternalStorageDirectory().getAbsolutePath();
     private static final int DIALOG_FILE_INVALID = 0;
 
     // private static final int DIALOG_FILE_SELECT = 1;
@@ -122,6 +119,7 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
         };
     }
 
+    private String mDefaultDirectory;
     private File mDirectory;
     private FilePickerIconAdapter mFilePickerIconAdapter;
     private File[] mFiles;
@@ -182,6 +180,7 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_picker);
 
+        mDefaultDirectory = getExternalFilesDir(null).getAbsolutePath();
         mFilePickerIconAdapter = new FilePickerIconAdapter(this);
         GridView gridView = (GridView) findViewById(R.id.filePickerView);
         gridView.setOnItemClickListener(this);
@@ -239,10 +238,9 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
         // restore the current directory
         SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE,
                 MODE_PRIVATE);
-        mDirectory = new File(preferences.getString(CURRENT_DIRECTORY,
-                DEFAULT_DIRECTORY));
+        mDirectory = new File(preferences.getString(CURRENT_DIRECTORY, mDefaultDirectory));
         if (!mDirectory.exists() || !mDirectory.canRead()) {
-            mDirectory = new File(DEFAULT_DIRECTORY);
+            mDirectory = new File(mDefaultDirectory);
         }
         browseToCurrentDirectory();
     }
