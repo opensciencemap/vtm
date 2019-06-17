@@ -162,7 +162,7 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
         }
 
         // if a parent directory exists, add it at the first position
-        if (mDirectory.getParentFile() != null) {
+        if (mDirectory.getParentFile() != null && mDirectory.getParentFile().canRead()) {
             mFilesWithParentFolder = new File[mFiles.length + 1];
             mFilesWithParentFolder[0] = mDirectory.getParentFile();
             System.arraycopy(mFiles, 0, mFilesWithParentFolder, 1,
@@ -180,7 +180,7 @@ public class FilePicker extends Activity implements AdapterView.OnItemClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_picker);
 
-        mDefaultDirectory = getExternalFilesDir(null).getAbsolutePath();
+        mDefaultDirectory = getExternalFilesDir(null) != null ? getExternalFilesDir(null).getAbsolutePath() : "/sdcard/";
         mFilePickerIconAdapter = new FilePickerIconAdapter(this);
         GridView gridView = (GridView) findViewById(R.id.filePickerView);
         gridView.setOnItemClickListener(this);
