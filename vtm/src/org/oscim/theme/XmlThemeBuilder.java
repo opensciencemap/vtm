@@ -6,6 +6,7 @@
  * Copyright 2016 Andrey Novikov
  * Copyright 2018-2019 Gustl22
  * Copyright 2018 Izumi Kawashima
+ * Copyright 2019 Murray Hughes
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -651,7 +652,8 @@ public class XmlThemeBuilder extends DefaultHandler {
             b.stippleWidth = 1;
             b.stippleColor = b.fillColor;
         } else {
-            b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
+            if (src != null)
+                b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
 
             if (hasSymbol) {
                 // Line symbol
@@ -764,7 +766,8 @@ public class XmlThemeBuilder extends DefaultHandler {
                 logUnknownAttribute(elementName, name, value, i);
         }
 
-        b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
+        if (src != null)
+            b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
 
         return b.build();
     }
