@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.8'
+        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.13'
         classpath 'org.akhikhl.gretty:gretty:2.0.0'
     }
 }
