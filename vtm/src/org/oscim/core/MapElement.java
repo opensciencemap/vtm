@@ -3,6 +3,7 @@
  * Copyright 2016 Andrey Novikov
  * Copyright 2017-2019 Gustl22
  * Copyright 2018-2019 devemux86
+ * Copyright 2019 marq24
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -30,7 +31,7 @@ import org.oscim.theme.IRenderTheme;
  */
 public class MapElement extends GeometryBuffer {
 
-    public PointF labelPosition;
+    public PointF centroidPosition, labelPosition;
 
     /**
      * layer of the element (0-10) overrides the theme drawing order.
@@ -57,6 +58,7 @@ public class MapElement extends GeometryBuffer {
     public MapElement(MapElement element) {
         super(element);
         this.tags.set(element.tags.asArray());
+        this.centroidPosition = element.centroidPosition;
         this.labelPosition = element.labelPosition;
         this.setLayer(element.layer);
     }
@@ -101,6 +103,10 @@ public class MapElement extends GeometryBuffer {
                 || "building:part".equals(tags.getValue("layer")); // OpenMapTiles
     }
 
+    public void setCentroidPosition(float x, float y) {
+        centroidPosition = new PointF(x, y);
+    }
+
     public void setLabelPosition(float x, float y) {
         labelPosition = new PointF(x, y);
     }
@@ -122,6 +128,10 @@ public class MapElement extends GeometryBuffer {
     @Override
     public MapElement scale(float scaleX, float scaleY) {
         super.scale(scaleX, scaleY);
+        if (centroidPosition != null) {
+            centroidPosition.x *= scaleX;
+            centroidPosition.y *= scaleY;
+        }
         if (labelPosition != null) {
             labelPosition.x *= scaleX;
             labelPosition.y *= scaleY;
@@ -132,6 +142,10 @@ public class MapElement extends GeometryBuffer {
     @Override
     public MapElement translate(float dx, float dy) {
         super.translate(dx, dy);
+        if (centroidPosition != null) {
+            centroidPosition.x += dx;
+            centroidPosition.y += dy;
+        }
         if (labelPosition != null) {
             labelPosition.x += dx;
             labelPosition.y += dy;

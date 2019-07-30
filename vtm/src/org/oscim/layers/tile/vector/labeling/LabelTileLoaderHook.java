@@ -2,6 +2,7 @@
  * Copyright 2013 Hannes Janetzek
  * Copyright 2016-2018 devemux86
  * Copyright 2016 Andrey Novikov
+ * Copyright 2019 marq24
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -32,9 +33,7 @@ import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.Parameters;
 import org.oscim.utils.geom.PolyLabel;
 
-import static org.oscim.core.GeometryBuffer.GeometryType.LINE;
-import static org.oscim.core.GeometryBuffer.GeometryType.POINT;
-import static org.oscim.core.GeometryBuffer.GeometryType.POLY;
+import static org.oscim.core.GeometryBuffer.GeometryType.*;
 import static org.oscim.layers.tile.vector.labeling.LabelLayer.LABEL_DATA;
 
 public class LabelTileLoaderHook implements TileLoaderThemeHook {
@@ -135,6 +134,8 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                 }
             } else if (element.type == POLY) {
                 PointF centroid = element.labelPosition;
+                if (centroid == null)
+                    centroid = element.centroidPosition;
                 if (!Parameters.POLY_SYMBOL) {
                     if (centroid == null)
                         return false;

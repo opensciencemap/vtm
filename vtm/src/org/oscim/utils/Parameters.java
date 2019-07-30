@@ -42,6 +42,12 @@ public final class Parameters {
     public static int MAXIMUM_BUFFER_SIZE = 8000000;
 
     /**
+     * Calculation of centroids for all polygons.
+     * (may affect performance)
+     */
+    public static boolean POLY_CENTROID = false;
+
+    /**
      * Optimal placement of labels or symbols on polygons.
      */
     public static boolean POLY_LABEL = false;
