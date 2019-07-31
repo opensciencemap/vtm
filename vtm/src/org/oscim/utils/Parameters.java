@@ -44,7 +44,7 @@ public final class Parameters {
     /**
      * Optimal placement of labels or symbols on polygons.
      */
-    public static boolean POLY_LABEL = true;
+    public static boolean POLY_LABEL = false;
 
     /**
      * Placement of symbols on polygons.

@@ -5,6 +5,8 @@
 - vtm-desktop-lwjgl module [#714](https://github.com/mapsforge/vtm/pull/714)
 - vtm-desktop-lwjgl3 module [#717](https://github.com/mapsforge/vtm/pull/717)
 - Fix marker touch events [#723](https://github.com/mapsforge/vtm/issues/723)
+- Disable optimal placement of labels or symbols on polygons
+  - `Parameters.POLY_LABEL`
 - Android 10 compatibility [#728](https://github.com/mapsforge/vtm/issues/728)
 - libGDX 1.9.10 [#731](https://github.com/mapsforge/vtm/issues/731)
 - Many other minor improvements and bug fixes
