@@ -41,18 +41,12 @@ import org.oscim.theme.rule.Rule;
 import org.oscim.theme.rule.Rule.Closed;
 import org.oscim.theme.rule.Rule.Selector;
 import org.oscim.theme.rule.RuleBuilder;
-import org.oscim.theme.styles.AreaStyle;
+import org.oscim.theme.styles.*;
 import org.oscim.theme.styles.AreaStyle.AreaBuilder;
-import org.oscim.theme.styles.CircleStyle;
 import org.oscim.theme.styles.CircleStyle.CircleBuilder;
-import org.oscim.theme.styles.ExtrusionStyle;
 import org.oscim.theme.styles.ExtrusionStyle.ExtrusionBuilder;
-import org.oscim.theme.styles.LineStyle;
 import org.oscim.theme.styles.LineStyle.LineBuilder;
-import org.oscim.theme.styles.RenderStyle;
-import org.oscim.theme.styles.SymbolStyle;
 import org.oscim.theme.styles.SymbolStyle.SymbolBuilder;
-import org.oscim.theme.styles.TextStyle;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.oscim.utils.FastMath;
 import org.oscim.utils.Utils;
@@ -64,12 +58,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Float.parseFloat;
@@ -655,7 +644,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             if (src != null)
                 b.texture = Utils.loadTexture(mTheme.getRelativePathPrefix(), src, b.symbolWidth, b.symbolHeight, b.symbolPercent);
 
-            if (hasSymbol) {
+            if (b.texture != null && hasSymbol) {
                 // Line symbol
                 int width = (int) (b.texture.width + b.repeatGap);
                 int height = b.texture.height;
