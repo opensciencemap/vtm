@@ -2,7 +2,7 @@
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013, 2014 Hannes Janetzek
  * Copyright 2014-2015 Ludwig M Brinckmann
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2017-2018 Gustl22
  * Copyright 2018 Bezzu
@@ -23,13 +23,8 @@
 package org.oscim.tiling.source.mapfile;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.core.BoundingBox;
-import org.oscim.core.GeoPoint;
+import org.oscim.core.*;
 import org.oscim.core.GeometryBuffer.GeometryType;
-import org.oscim.core.MapElement;
-import org.oscim.core.MercatorProjection;
-import org.oscim.core.Tag;
-import org.oscim.core.Tile;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.tiling.ITileDataSink;
@@ -968,6 +963,9 @@ public class MapDatabase implements ITileDataSource {
 
                 if (labelPosition != null && wayDataBlock == 0)
                     e.setLabelPosition(e.points[0] + labelPosition[0], e.points[1] + labelPosition[1]);
+                else
+                    e.labelPosition = null;
+
                 mTileProjection.project(e);
 
                 // Avoid clipping for buildings, which slows rendering.
