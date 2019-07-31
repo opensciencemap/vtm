@@ -963,8 +963,6 @@ public class MapDatabase implements ITileDataSource {
 
                 if (labelPosition != null && wayDataBlock == 0)
                     e.setLabelPosition(e.points[0] + labelPosition[0], e.points[1] + labelPosition[1]);
-                else
-                    e.labelPosition = null;
 
                 mTileProjection.project(e);
 

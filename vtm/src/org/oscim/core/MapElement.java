@@ -2,7 +2,7 @@
  * Copyright 2012 Hannes Janetzek
  * Copyright 2016 Andrey Novikov
  * Copyright 2017-2019 Gustl22
- * Copyright 2018 devemux86
+ * Copyright 2018-2019 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -114,6 +114,7 @@ public class MapElement extends GeometryBuffer {
 
     @Override
     public MapElement clear() {
+        labelPosition = null;
         layer = 5;
         super.clear();
         return this;
