@@ -90,10 +90,10 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(MapsforgeActivity.class));
         linearLayout.addView(createButton(MapilionMvtActivity.class));
         /*linearLayout.addView(createButton(MapzenMvtActivity.class));
-        linearLayout.addView(createButton(MapzenGeojsonActivity.class));*/
+        linearLayout.addView(createButton(MapzenGeojsonActivity.class));
         linearLayout.addView(createButton(NextzenMvtActivity.class));
         linearLayout.addView(createButton(NextzenGeojsonActivity.class));
-        linearLayout.addView(createButton(OpenMapTilesMvtActivity.class));
+        linearLayout.addView(createButton(OpenMapTilesMvtActivity.class));*/
         linearLayout.addView(createButton(GdxActivity.class));
 
         linearLayout.addView(createLabel("Features"));
@@ -110,8 +110,6 @@ public class Samples extends Activity {
         linearLayout.addView(createLabel("Vector Features"));
         linearLayout.addView(createButton(MapsforgeStyleActivity.class));
         linearLayout.addView(createButton(MapsforgeS3DBActivity.class));
-        linearLayout.addView(createButton(AtlasThemeActivity.class));
-        linearLayout.addView(createButton(POTTextureActivity.class));
         linearLayout.addView(createButton(ShadowActivity.class));
 
         linearLayout.addView(createLabel("Raster Maps"));
@@ -120,27 +118,17 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Overlays"));
         linearLayout.addView(createButton(MarkerOverlayActivity.class));
-        linearLayout.addView(createButton(RotateMarkerOverlayActivity.class));
-        linearLayout.addView(createButton(AtlasMarkerOverlayActivity.class));
-        linearLayout.addView(createButton(AtlasMultiTextureActivity.class));
-        linearLayout.addView(createButton(ClusterMarkerOverlayActivity.class));
         linearLayout.addView(createButton(PathOverlayActivity.class));
         linearLayout.addView(createButton(LineTexActivity.class));
         linearLayout.addView(createButton(VectorLayerActivity.class));
-
-        linearLayout.addView(createLabel("User Interaction"));
-        linearLayout.addView(createButton(MapEventLayer2Activity.class));
-        linearLayout.addView(createButton(LayerGroupActivity.class));
-
-        linearLayout.addView(createLabel("Dual Map Views"));
-        linearLayout.addView(createButton(MultiMapViewActivity.class));
+        linearLayout.addView(createButton(AtlasMultiTextureActivity.class));
 
         linearLayout.addView(createLabel("Experiments"));
         linearLayout.addView(createButton(ReverseGeocodeActivity.class));
-        linearLayout.addView(createButton(OSciMapS3DBActivity.class));
         linearLayout.addView(createButton(ThemeStylerActivity.class));
         linearLayout.addView(createButton(JeoIndoorActivity.class));
         linearLayout.addView(createButton(GdxPoi3DActivity.class));
         linearLayout.addView(createButton(OverpassActivity.class));
+        linearLayout.addView(createButton(ClusterMarkerOverlayActivity.class));
     }
 }

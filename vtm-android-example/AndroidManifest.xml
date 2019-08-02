@@ -22,13 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AtlasMarkerOverlayActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".AtlasMultiTextureActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".AtlasThemeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".BitmapTileActivity"
@@ -49,9 +43,6 @@
             android:name=".JeoIndoorActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".LayerGroupActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".LineTexActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
@@ -59,9 +50,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".LocationTextureActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".MapEventLayer2Activity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".MapilionMvtActivity"
@@ -94,9 +82,6 @@
             android:name=".MBTilesBitmapTileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MultiMapViewActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".NextzenGeojsonActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
@@ -104,9 +89,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".OpenMapTilesMvtActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".OSciMapS3DBActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".OverpassActivity"
@@ -121,13 +103,7 @@
             android:name=".PoiSearchActivity$PoiFilePicker"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".POTTextureActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".ReverseGeocodeActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".RotateMarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".ShadowActivity"
