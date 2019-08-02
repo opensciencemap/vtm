@@ -5,6 +5,8 @@
 - vtm-desktop-lwjgl module [#714](https://github.com/mapsforge/vtm/pull/714)
 - vtm-desktop-lwjgl3 module [#717](https://github.com/mapsforge/vtm/pull/717)
 - Fix marker touch events [#723](https://github.com/mapsforge/vtm/issues/723)
+- Calculation of centroids for all polygons [#734](https://github.com/mapsforge/vtm/pull/734)
+  - `Parameters.POLY_CENTROID`
 - Disable optimal placement of labels or symbols on polygons
   - `Parameters.POLY_LABEL`
 - Android 10 compatibility [#728](https://github.com/mapsforge/vtm/issues/728)
