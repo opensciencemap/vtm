@@ -1012,6 +1012,9 @@ public class XmlThemeBuilder extends DefaultHandler {
             else if ("size".equals(name) || "font-size".equals(name))
                 b.fontSize = Float.parseFloat(value);
 
+            else if ("bg-fill".equals(name))
+                b.bgFillColor = Color.parseColor(value);
+
             else if ("fill".equals(name))
                 b.fillColor = Color.parseColor(value);
 

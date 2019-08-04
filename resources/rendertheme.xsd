@@ -150,6 +150,7 @@
         <xs:attribute name="font-family" default="default" type="tns:fontFamily" use="optional" />
         <xs:attribute name="style" default="normal" type="tns:fontStyle" use="optional" />
         <xs:attribute name="size" default="0" type="tns:nonNegativeFloat" use="optional" />
+        <xs:attribute name="bg-fill" default="#00000000" type="tns:color" use="optional" />
         <xs:attribute name="fill" default="#000000" type="tns:color" use="optional" />
         <xs:attribute name="stroke" default="#000000" type="tns:color" use="optional" />
         <xs:attribute name="stroke-width" default="0" type="tns:nonNegativeFloat" use="optional" />
@@ -219,6 +220,7 @@
         <xs:attribute name="font-family" default="default" type="tns:fontFamily" use="optional" />
         <xs:attribute name="style" default="normal" type="tns:fontStyle" use="optional" />
         <xs:attribute name="size" default="0" type="tns:nonNegativeFloat" use="optional" />
+        <xs:attribute name="bg-fill" default="#00000000" type="tns:color" use="optional" />
         <xs:attribute name="fill" default="#000000" type="tns:color" use="optional" />
         <xs:attribute name="stroke" default="#000000" type="tns:color" use="optional" />
         <xs:attribute name="stroke-width" default="0" type="tns:nonNegativeFloat" use="optional" />
