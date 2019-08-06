@@ -2,6 +2,7 @@
 
 ## New since 0.11.1
 
+- Render themes: text background color [#737](https://github.com/mapsforge/vtm/pull/737)
 - vtm-desktop-lwjgl module [#714](https://github.com/mapsforge/vtm/pull/714)
 - vtm-desktop-lwjgl3 module [#717](https://github.com/mapsforge/vtm/pull/717)
 - Fix marker touch events [#723](https://github.com/mapsforge/vtm/issues/723)
