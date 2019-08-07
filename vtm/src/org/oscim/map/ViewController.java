@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2017 Luca Osten
  * Copyright 2018 Izumi Kawashima
  * Copyright 2018 Mathieu De Brito
@@ -306,7 +306,7 @@ public class ViewController extends Viewport {
         }
     }
 
-    void syncViewport() {
+    public void syncViewport() {
         synchronized (mNextFrame) {
             mNextFrame.copy(this);
         }
