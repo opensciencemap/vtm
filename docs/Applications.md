@@ -6,6 +6,7 @@
 | [Cachebox 3.0](https://github.com/Longri/cachebox3.0) | Geocaching application | Apache 2.0/Free | Android, Desktop, iOS | Open |
 | [Cruiser](http://wiki.openstreetmap.org/wiki/Cruiser) | Map and navigation application | Proprietary/Free | Android, Desktop | Closed |
 | [GCDroid](https://play.google.com/store/apps/details?id=com.gcdroid) | Geocaching App | Proprietary/Free and Commercial | Android | Closed |
+| [GPSLogger II](https://play.google.com/store/apps/details?id=com.emacberry.gpslogger) | Map and navigation, Fitness & Cycling application | Proprietary/Free | Android | Closed |
 | [Hunt Cyprus](https://play.google.com/store/apps/developer?id=Talent+S.A.) | Map and navigation application for hunters | Proprietary/Free and Commercial | Android | Closed |
 | [Kurviger](https://kurviger.de/en) | Route planner specialized on motorcyclists | Proprietary/Free and Commercial | Android | Closed |
 | [MapTrek](http://maptrek.mobi) | Application for outdoor activities | GPL3/Free and Commercial | Android | Open |
