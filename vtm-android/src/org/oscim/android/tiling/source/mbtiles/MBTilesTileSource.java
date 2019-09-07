@@ -16,28 +16,31 @@
  */
 package org.oscim.android.tiling.source.mbtiles;
 
-/**
- * A tile source for MBTiles raster databases.
- */
-public class MBTilesBitmapTileSource extends MBTilesTileSource {
+import org.oscim.tiling.TileSource;
 
-    /**
-     * Create a tile source for MBTiles raster databases.
-     *
-     * @param path the path to the MBTiles database.
-     */
-    public MBTilesBitmapTileSource(String path) {
-        this(path, null, null);
+/**
+ * A tile source for MBTiles databases.
+ */
+public abstract class MBTilesTileSource extends TileSource {
+
+    private final MBTilesTileDataSource mTileDataSource;
+
+    public MBTilesTileSource(MBTilesTileDataSource tileDataSource) {
+        mTileDataSource = tileDataSource;
     }
 
-    /**
-     * Create a tile source for MBTiles raster databases.
-     *
-     * @param path             the path to the MBTiles database.
-     * @param alpha            an optional alpha value [0-255] to make the tiles transparent.
-     * @param transparentColor an optional color that will be made transparent in the bitmap.
-     */
-    public MBTilesBitmapTileSource(String path, Integer alpha, Integer transparentColor) {
-        super(new MBTilesBitmapTileDataSource(path, alpha, transparentColor));
+    @Override
+    public void close() {
+        getDataSource().dispose();
+    }
+
+    @Override
+    public MBTilesTileDataSource getDataSource() {
+        return mTileDataSource;
+    }
+
+    @Override
+    public OpenResult open() {
+        return OpenResult.SUCCESS;
     }
 }

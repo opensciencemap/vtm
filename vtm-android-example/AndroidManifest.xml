@@ -79,7 +79,10 @@
             android:name=".MarkerOverlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MBTilesBitmapTileActivity"
+            android:name=".MBTilesBitmapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".MBTilesMvtActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".NextzenGeojsonActivity"

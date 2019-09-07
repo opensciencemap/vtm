@@ -1,6 +1,7 @@
 /*
  * Copyright 2019 Andrea Antonello
  * Copyright 2019 devemux86
+ * Copyright 2019 Kostas Tzounopoulos
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,144 +17,70 @@
 package org.oscim.android.tiling.source.mbtiles;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.core.BoundingBox;
 import org.oscim.core.MercatorProjection;
 import org.oscim.layers.tile.MapTile;
-import org.oscim.map.Viewport;
 import org.oscim.tiling.ITileDataSink;
-import org.oscim.tiling.ITileDataSource;
 import org.oscim.tiling.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A tile data source for MBTiles raster databases.
  */
-public class MBTilesBitmapTileDataSource implements ITileDataSource {
+public class MBTilesBitmapTileDataSource extends MBTilesTileDataSource {
 
     private static final Logger log = LoggerFactory.getLogger(MBTilesBitmapTileDataSource.class);
 
-    private static final String TABLE_TILES = "tiles";
-    private static final String COL_TILES_ZOOM_LEVEL = "zoom_level";
-    private static final String COL_TILES_TILE_COLUMN = "tile_column";
-    private static final String COL_TILES_TILE_ROW = "tile_row";
-    private static final String COL_TILES_TILE_DATA = "tile_data";
-    private static final String SELECT_TILES = "SELECT " + COL_TILES_TILE_DATA + " from " + TABLE_TILES + " where "
-            + COL_TILES_ZOOM_LEVEL + "=? AND " + COL_TILES_TILE_COLUMN + "=? AND " + COL_TILES_TILE_ROW + "=?";
-
-    private static final String TABLE_METADATA = "metadata";
-    private static final String COL_METADATA_NAME = "name";
-    private static final String COL_METADATA_VALUE = "value";
-    private static final String SELECT_METADATA = "select " + COL_METADATA_NAME + "," + COL_METADATA_VALUE + " from "
-            + TABLE_METADATA;
+    private static final List<String> SUPPORTED_FORMATS = Arrays.asList("png", "jpg", "jpeg");
 
     private final Integer mAlpha;
-    private final SQLiteDatabase mDatabase;
-    private Map<String, String> mMetadata;
     private final Integer mTransparentColor;
 
     /**
-     * Create a MBTiles tile data source.
+     * Create a tile data source for MBTiles raster databases.
      *
      * @param path             the path to the MBTiles database.
      * @param alpha            an optional alpha value [0-255] to make the tiles transparent.
      * @param transparentColor an optional color that will be made transparent in the bitmap.
      */
-    MBTilesBitmapTileDataSource(String path, Integer alpha, Integer transparentColor) {
-        mDatabase = SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READONLY);
+    public MBTilesBitmapTileDataSource(String path, Integer alpha, Integer transparentColor) {
+        super(path);
         mAlpha = alpha;
         mTransparentColor = transparentColor;
+
+        try {
+            assertDatabaseFormat();
+        } catch (MBTilesUnsupportedException e) {
+            log.error("Invalid MBTiles database", e);
+        }
     }
 
     @Override
     public void cancel() {
-        mDatabase.close();
+        if (mDatabase != null && mDatabase.isOpen())
+            mDatabase.close();
     }
 
     @Override
     public void dispose() {
-        mDatabase.close();
+        if (mDatabase != null && mDatabase.isOpen())
+            mDatabase.close();
     }
 
-    String getAttribution() {
-        return getMetadata().get("attribution");
-    }
-
-    BoundingBox getBounds() {
-        String bounds = getMetadata().get("bounds");
-        if (bounds != null) {
-            String[] split = bounds.split(",");
-            double w = Double.parseDouble(split[0]);
-            double s = Double.parseDouble(split[1]);
-            double e = Double.parseDouble(split[2]);
-            double n = Double.parseDouble(split[3]);
-            return new BoundingBox(s, w, n, e);
-        }
-        return null;
-    }
-
-    public String getDescription() {
-        return getMetadata().get("description");
-    }
-
-    /**
-     * @return the image format (jpg, png)
-     */
-    public String getFormat() {
-        return getMetadata().get("format");
-    }
-
-    int getMaxZoom() {
-        String maxZoom = getMetadata().get("maxzoom");
-        if (maxZoom != null)
-            return Integer.parseInt(maxZoom);
-        return Viewport.MAX_ZOOM_LEVEL;
-    }
-
-    private Map<String, String> getMetadata() {
-        if (mMetadata == null) {
-            mMetadata = new HashMap<>();
-            Cursor cursor = null;
-            try {
-                cursor = mDatabase.rawQuery(SELECT_METADATA, null);
-                while (cursor.moveToNext()) {
-                    String key = cursor.getString(0);
-                    String value = cursor.getString(1);
-                    mMetadata.put(key, value);
-                }
-            } finally {
-                if (cursor != null)
-                    cursor.close();
-            }
-        }
-        return mMetadata;
-    }
-
-    int getMinZoom() {
-        String minZoom = getMetadata().get("minzoom");
-        if (minZoom != null)
-            return Integer.parseInt(minZoom);
-        return Viewport.MIN_ZOOM_LEVEL;
-    }
-
-    String getName() {
-        return getMetadata().get("name");
-    }
-
-    public String getVersion() {
-        return getMetadata().get("version");
+    @Override
+    public List<String> getSupportedFormats() {
+        return SUPPORTED_FORMATS;
     }
 
     private static android.graphics.Bitmap processAlpha(android.graphics.Bitmap bitmap, int alpha) {
@@ -216,9 +143,9 @@ public class MBTilesBitmapTileDataSource implements ITileDataSource {
         Cursor cursor = null;
         try {
             long tmsTileY = MercatorProjection.tileYToTMS(tileY, zoomLevel);
-            cursor = mDatabase.rawQuery(SELECT_TILES, new String[]{String.valueOf(zoomLevel), String.valueOf(tileX), String.valueOf(tmsTileY)});
+            cursor = mDatabase.rawQuery(String.format(MBTilesTileDataSource.SELECT_TILES_FORMAT, MBTilesTileDataSource.WHERE_FORMAT), new String[]{String.valueOf(zoomLevel), String.valueOf(tileX), String.valueOf(tmsTileY)});
             if (cursor.moveToFirst())
-                return cursor.getBlob(0);
+                return cursor.getBlob(cursor.getColumnIndexOrThrow("tile_data"));
         } finally {
             if (cursor != null)
                 cursor.close();

@@ -9,6 +9,7 @@
  * Copyright 2018 boldtrn
  * Copyright 2018-2019 Gustl22
  * Copyright 2019 Andrea Antonello
+ * Copyright 2019 Kostas Tzounopoulos
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -88,6 +89,7 @@ public class Samples extends Activity {
         linearLayout.addView(createLabel(null));
         linearLayout.addView(createButton(SimpleMapActivity.class));
         linearLayout.addView(createButton(MapsforgeActivity.class));
+        linearLayout.addView(createButton(MBTilesMvtActivity.class));
         linearLayout.addView(createButton(MapilionMvtActivity.class));
         /*linearLayout.addView(createButton(MapzenMvtActivity.class));
         linearLayout.addView(createButton(MapzenGeojsonActivity.class));
@@ -114,7 +116,7 @@ public class Samples extends Activity {
 
         linearLayout.addView(createLabel("Raster Maps"));
         linearLayout.addView(createButton(BitmapTileActivity.class));
-        linearLayout.addView(createButton(MBTilesBitmapTileActivity.class));
+        linearLayout.addView(createButton(MBTilesBitmapActivity.class));
 
         linearLayout.addView(createLabel("Overlays"));
         linearLayout.addView(createButton(MarkerOverlayActivity.class));
