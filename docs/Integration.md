@@ -94,6 +94,16 @@ implementation 'com.squareup.okhttp3:okhttp:3.8.0'
 implementation 'com.squareup.okio:okio:1.13.0'
 ```
 
+### MBTiles (Android)
+
+```groovy
+implementation 'org.mapsforge:vtm-android-mvt:[CURRENT-VERSION]'
+implementation 'org.mapsforge:vtm-mvt:[CURRENT-VERSION]'
+implementation 'com.google.protobuf:protobuf-java:3.5.1'
+implementation 'com.wdtinc:mapbox-vector-tile:3.0.0'
+implementation 'org.locationtech.jts:jts-core:1.15.0'
+```
+
 ### Mapbox vector tiles
 
 ```groovy

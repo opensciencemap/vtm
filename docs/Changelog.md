@@ -2,6 +2,7 @@
 
 ## New since 0.11.1
 
+- MBTiles vector tile source (Android) [#740](https://github.com/mapsforge/vtm/pull/740)
 - Render themes: text background color [#737](https://github.com/mapsforge/vtm/pull/737)
 - vtm-desktop-lwjgl module [#714](https://github.com/mapsforge/vtm/pull/714)
 - vtm-desktop-lwjgl3 module [#717](https://github.com/mapsforge/vtm/pull/717)
