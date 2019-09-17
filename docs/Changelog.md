@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.11.1
+## Version 0.12.0 (2019-09-17)
 
 - MBTiles vector tile source (Android) [#740](https://github.com/mapsforge/vtm/pull/740)
   - vtm-android-mvt module
