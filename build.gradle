@@ -17,7 +17,7 @@ allprojects {
     ext.androidBuildVersionTools = "29.0.2"
     ext.gdxVersion = "1.9.10"
     ext.gwtVersion = "2.8.2"
-    ext.slf4jVersion = "1.7.25"
+    ext.slf4jVersion = "1.7.28"
 
     if (JavaVersion.current().isJava8Compatible()) {
         tasks.withType(Javadoc) {
