@@ -220,8 +220,7 @@
         <m k="landuse|natural|leisure|amenity|tourism">
             <!-- kind of more like landuse imho -->
             <m k="leisure|landuse" v="nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" stroke="#6fc18e"
-                    stroke-width="0.2" />
+                <area src="assets:patterns/nature-reserve.png" />
                 <m zoom-min="14">
                     <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
                 </m>
@@ -1031,16 +1030,9 @@
         </m>
 
         <!-- non-physical boundaries -->
-        <!-- <m k="boundary"> <m k="boundary" v="national_park">
-          <line stroke="#4ef94b" width="0.25" stroke-dasharray="15, 5, 5, 5"
-          /> -->
-
-        <!--
-          maybe use some alpha texture for this
-          <m k="boundary" v="national_park">
-          <area fill="#d7e6b0" />
-          </m>
-        -->
+        <m k="boundary" v="national_park">
+            <area src="assets:patterns/nature-reserve.png" />
+        </m>
 
         <!--<m k="boundary" v="administrative"> -->
         <m k="admin_level">

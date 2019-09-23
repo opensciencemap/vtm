@@ -241,8 +241,7 @@
     <m k="layer" v="park">
         <m k="class">
             <m v="national_park|nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" stroke="#6fc18e"
-                    stroke-width="0.2" />
+                <area src="assets:patterns/nature-reserve.png" />
             </m>
         </m>
     </m>

@@ -206,8 +206,7 @@
                     </m>
                 </m>
                 <m v="nature_reserve">
-                    <area src="assets:patterns/nature-reserve.png" stroke="#acacac"
-                        stroke-width="0.2" />
+                    <area src="assets:patterns/nature-reserve.png" />
                 </m>
 
                 <m v="stadium|sports_centre|water_park">
@@ -1061,7 +1060,7 @@
 
         <m k="boundary">
             <m k="boundary" v="national_park">
-                <line dasharray="15, 5, 5, 5" fix="true" stroke="#c8c8c8" width="1.25" />
+                <area src="assets:patterns/nature-reserve.png" />
             </m>
             <m k="boundary" v="administrative">
                 <m k="admin_level">
