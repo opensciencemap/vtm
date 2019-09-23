@@ -220,7 +220,8 @@
         <m k="landuse|natural|leisure|amenity|tourism">
             <!-- kind of more like landuse imho -->
             <m k="leisure|landuse" v="nature_reserve">
-                <area use="greens2" />
+                <area src="assets:patterns/nature-reserve.png" stroke="#6fc18e"
+                    stroke-width="0.2" />
                 <m zoom-min="14">
                     <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
                 </m>
