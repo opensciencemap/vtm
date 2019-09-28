@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -38,9 +38,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
     public final int symbolHeight;
     public final int symbolPercent;
 
+    public final boolean billboard;
     public final boolean repeat;
     public final float repeatStart;
     public final float repeatGap;
+    public final boolean rotate;
 
     public SymbolStyle(Bitmap bitmap) {
         this(bitmap, null, 0);
@@ -63,9 +65,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         this.symbolHeight = 0;
         this.symbolPercent = 100;
 
+        this.billboard = false;
         this.repeat = false;
         this.repeatStart = REPEAT_START_DEFAULT;
         this.repeatGap = REPEAT_GAP_DEFAULT;
+        this.rotate = true;
     }
 
     public SymbolStyle(SymbolBuilder<?> b) {
@@ -79,9 +83,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         this.symbolHeight = b.symbolHeight;
         this.symbolPercent = b.symbolPercent;
 
+        this.billboard = b.billboard;
         this.repeat = b.repeat;
         this.repeatStart = b.repeatStart;
         this.repeatGap = b.repeatGap;
+        this.rotate = b.rotate;
     }
 
     @Override
@@ -115,9 +121,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         public int symbolHeight;
         public int symbolPercent;
 
+        public boolean billboard;
         public boolean repeat;
         public float repeatStart;
         public float repeatGap;
+        public boolean rotate;
 
         public SymbolBuilder() {
         }
@@ -136,9 +144,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             this.symbolHeight = symbol.symbolHeight;
             this.symbolPercent = symbol.symbolPercent;
 
+            this.billboard = symbol.billboard;
             this.repeat = symbol.repeat;
             this.repeatStart = symbol.repeatStart;
             this.repeatGap = symbol.repeatGap;
+            this.rotate = symbol.rotate;
 
             return self();
         }
@@ -173,6 +183,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             return self();
         }
 
+        public T billboard(boolean billboard) {
+            this.billboard = billboard;
+            return self();
+        }
+
         public T repeat(boolean repeat) {
             this.repeat = repeat;
             return self();
@@ -188,6 +203,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             return self();
         }
 
+        public T rotate(boolean rotate) {
+            this.rotate = rotate;
+            return self();
+        }
+
         public T reset() {
             cat = null;
 
@@ -199,9 +219,11 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
             symbolHeight = 0;
             symbolPercent = 100;
 
+            billboard = false;
             repeat = false;
             repeatStart = REPEAT_START_DEFAULT;
             repeatGap = REPEAT_GAP_DEFAULT;
+            rotate = true;
 
             return self();
         }
