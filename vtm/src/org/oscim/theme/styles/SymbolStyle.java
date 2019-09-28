@@ -19,6 +19,7 @@
  */
 package org.oscim.theme.styles;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.renderer.atlas.TextureRegion;
 
@@ -67,8 +68,8 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
         this.billboard = false;
         this.repeat = false;
-        this.repeatStart = REPEAT_START_DEFAULT;
-        this.repeatGap = REPEAT_GAP_DEFAULT;
+        this.repeatStart = REPEAT_START_DEFAULT * CanvasAdapter.getScale();
+        this.repeatGap = REPEAT_GAP_DEFAULT * CanvasAdapter.getScale();
         this.rotate = true;
     }
 
@@ -221,8 +222,8 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
 
             billboard = false;
             repeat = false;
-            repeatStart = REPEAT_START_DEFAULT;
-            repeatGap = REPEAT_GAP_DEFAULT;
+            repeatStart = REPEAT_START_DEFAULT * CanvasAdapter.getScale();
+            repeatGap = REPEAT_GAP_DEFAULT * CanvasAdapter.getScale();
             rotate = true;
 
             return self();
