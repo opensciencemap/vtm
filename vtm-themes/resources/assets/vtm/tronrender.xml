@@ -1073,7 +1073,7 @@
             <m k="area" v="~|false|no">
                 <m k="highway">
                     <m k="oneway" v="yes|true" zoom-min="16">
-                        <lineSymbol src="assets:symbols/oneway.svg" />
+                        <symbol repeat="true" src="assets:symbols/oneway.svg" />
                     </m>
                 </m>
             </m>
