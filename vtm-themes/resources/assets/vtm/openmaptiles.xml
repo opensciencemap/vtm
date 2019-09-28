@@ -328,7 +328,12 @@
                 <line outline="motorway" use="highway:z11" />
             </m>
         </m>
-        <!--</m>-->
+
+        <m k="oneway" v="1" zoom-min="16">
+            <m k="class" v="motorway|trunk|primary|secondary|tertiary|minor">
+                <symbol repeat="true" src="assets:symbols/oneway.svg" />
+            </m>
+        </m>
     </m>
 
     <m k="layer" v="transportation_name">

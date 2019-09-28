@@ -19,6 +19,7 @@
  */
 package org.oscim.theme.styles;
 
+import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint.Cap;
 import org.oscim.renderer.bucket.TextureItem;
@@ -58,15 +59,15 @@ public final class LineStyle extends RenderStyle<LineStyle> {
     public final float repeatGap;
 
     public LineStyle(int stroke, float width) {
-        this(0, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(0, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT * CanvasAdapter.getScale(), REPEAT_GAP_DEFAULT * CanvasAdapter.getScale());
     }
 
     public LineStyle(int level, int stroke, float width) {
-        this(level, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(level, "", stroke, width, Cap.BUTT, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT * CanvasAdapter.getScale(), REPEAT_GAP_DEFAULT * CanvasAdapter.getScale());
     }
 
     public LineStyle(int stroke, float width, Cap cap) {
-        this(0, "", stroke, width, cap, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT, REPEAT_GAP_DEFAULT);
+        this(0, "", stroke, width, cap, true, 1, 0, 0, 0, -1, 0, false, null, true, null, REPEAT_START_DEFAULT * CanvasAdapter.getScale(), REPEAT_GAP_DEFAULT * CanvasAdapter.getScale());
     }
 
     public LineStyle(int level, String style, int color, float width,
@@ -328,8 +329,8 @@ public final class LineStyle extends RenderStyle<LineStyle> {
             symbolPercent = 100;
 
             dashArray = null;
-            repeatStart = REPEAT_START_DEFAULT;
-            repeatGap = REPEAT_GAP_DEFAULT;
+            repeatStart = REPEAT_START_DEFAULT * CanvasAdapter.getScale();
+            repeatGap = REPEAT_GAP_DEFAULT * CanvasAdapter.getScale();
 
             return self();
         }
