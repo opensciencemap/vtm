@@ -70,7 +70,15 @@ public class MapView extends GLSurfaceView {
     public static double targetGLESVersion = 3.0;
 
     private static void init() {
-        System.loadLibrary("vtm-jni");
+        if (Parameters.THREADED_INIT)
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.loadLibrary("vtm-jni");
+                }
+            }).start();
+        else
+            System.loadLibrary("vtm-jni");
     }
 
     protected AndroidMap mMap;

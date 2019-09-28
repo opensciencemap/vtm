@@ -67,6 +67,11 @@ public final class Parameters {
      */
     public static boolean TEXTURE_ATLAS = false;
 
+    /**
+     * Threaded system initialization.
+     */
+    public static boolean THREADED_INIT = false;
+
     private Parameters() {
         throw new IllegalStateException();
     }
