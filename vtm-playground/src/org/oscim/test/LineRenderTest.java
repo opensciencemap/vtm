@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -77,7 +77,7 @@ public class LineRenderTest extends GdxMapApp {
         TextureItem tex = null;
         try {
             tex = new TextureItem(CanvasAdapter.getBitmapAsset("", "patterns/dot.png"));
-            tex.mipmap = true;
+            //tex.mipmap = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
