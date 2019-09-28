@@ -2,6 +2,7 @@
 
 ## New since 0.12.0
 
+- Render themes: symbols on lines with billboard, rotate [#743](https://github.com/mapsforge/vtm/pull/743)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.13.0)
 
