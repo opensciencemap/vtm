@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class MvtTileDecoder implements ITileDecoder {
+public class TileDecoder implements ITileDecoder {
     private final String mLocale;
 
     private static final float REF_TILE_SIZE = 4096.0f;
@@ -52,11 +52,11 @@ public class MvtTileDecoder implements ITileDecoder {
     private final MapElement mMapElement;
     private ITileDataSink mTileDataSink;
 
-    public MvtTileDecoder() {
+    public TileDecoder() {
         this("");
     }
 
-    public MvtTileDecoder(String locale) {
+    public TileDecoder(String locale) {
         mLocale = locale;
         mGeomFactory = new GeometryFactory();
         mMapElement = new MapElement();

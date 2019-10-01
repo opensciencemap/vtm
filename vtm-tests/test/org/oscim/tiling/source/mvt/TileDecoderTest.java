@@ -24,11 +24,11 @@ import org.oscim.tiling.QueryResult;
 
 import static org.junit.Assert.assertEquals;
 
-public class MvtTileDecoderTest {
+public class TileDecoderTest {
 
     @Test
     public void tileDecodingTest() throws Exception {
-        MvtTileDecoder decoder = new MvtTileDecoder();
+        TileDecoder decoder = new TileDecoder();
         Tile tile = new Tile(0, 0, (byte) 0);
         ITileDataSink sink = new ITileDataSink() {
             @Override

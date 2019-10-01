@@ -22,7 +22,7 @@ import org.oscim.layers.tile.MapTile;
 import org.oscim.tiling.ITileDataSink;
 import org.oscim.tiling.OverzoomDataSink;
 import org.oscim.tiling.QueryResult;
-import org.oscim.tiling.source.mvt.MvtTileDecoder;
+import org.oscim.tiling.source.mvt.TileDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +45,10 @@ public class MBTilesMvtTileDataSource extends MBTilesTileDataSource {
 
     private final String mLanguage;
 
-    private final ThreadLocal<MvtTileDecoder> mThreadLocalDecoders = new ThreadLocal<MvtTileDecoder>() {
+    private final ThreadLocal<TileDecoder> mThreadLocalDecoders = new ThreadLocal<TileDecoder>() {
         @Override
-        protected MvtTileDecoder initialValue() {
-            return new MvtTileDecoder(mLanguage);
+        protected TileDecoder initialValue() {
+            return new TileDecoder(mLanguage);
         }
     };
 

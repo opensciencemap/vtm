@@ -39,14 +39,14 @@ import java.io.InputStream;
 import static org.oscim.core.MercatorProjection.latitudeToY;
 import static org.oscim.core.MercatorProjection.longitudeToX;
 
-public class OverpassTileDecoder implements ITileDecoder {
+public class TileDecoder implements ITileDecoder {
 
     private final MapElement mMapElement;
     private ITileDataSink mTileDataSink;
 
     private double mTileY, mTileX, mTileScale;
 
-    public OverpassTileDecoder() {
+    public TileDecoder() {
         mMapElement = new MapElement();
         mMapElement.layer = 5;
     }
