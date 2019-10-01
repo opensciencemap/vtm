@@ -39,6 +39,7 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
     public final int symbolHeight;
     public final int symbolPercent;
 
+    // Symbols on lines
     public final boolean billboard;
     public final boolean repeat;
     public final float repeatStart;
@@ -122,6 +123,7 @@ public final class SymbolStyle extends RenderStyle<SymbolStyle> {
         public int symbolHeight;
         public int symbolPercent;
 
+        // Symbols on lines
         public boolean billboard;
         public boolean repeat;
         public float repeatStart;
