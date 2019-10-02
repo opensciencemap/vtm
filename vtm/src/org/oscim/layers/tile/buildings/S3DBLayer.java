@@ -16,12 +16,7 @@
 package org.oscim.layers.tile.buildings;
 
 import org.oscim.backend.canvas.Color;
-import org.oscim.core.Box;
-import org.oscim.core.GeometryBuffer;
-import org.oscim.core.MapElement;
-import org.oscim.core.Tag;
-import org.oscim.core.TagSet;
-import org.oscim.core.Tile;
+import org.oscim.core.*;
 import org.oscim.layers.tile.MapTile;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.map.Map;
@@ -302,12 +297,12 @@ public class S3DBLayer extends BuildingLayer {
             case Tag.VALUE_GABLED:
             case Tag.VALUE_GAMBREL:
                 specialParts = new GeometryBuffer(0, 0); // No data in GeometryBuffer needed
-                success = S3DBUtils.calcRidgeMesh(gElement, minHeight, maxHeight, roofOrientationAcross, true, specialParts);
+                success = S3DBUtils.calcRidgeMesh(gElement, minHeight, maxHeight, roofOrientationAcross, v, specialParts);
                 break;
             case Tag.VALUE_MANSARD:
             case Tag.VALUE_HALF_HIPPED:
             case Tag.VALUE_HIPPED:
-                success = S3DBUtils.calcRidgeMesh(gElement, minHeight, maxHeight, roofOrientationAcross, false, null);
+                success = S3DBUtils.calcRidgeMesh(gElement, minHeight, maxHeight, roofOrientationAcross, v, null);
                 break;
             case Tag.VALUE_SKILLION:
                 // ROOF_SLOPE_DIRECTION is not supported yet
