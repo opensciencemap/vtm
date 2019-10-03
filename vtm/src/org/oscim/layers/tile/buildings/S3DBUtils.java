@@ -39,6 +39,32 @@ public final class S3DBUtils {
     private static final boolean IMPROVE_RIDGE_CALCULATION = false;
     private static final int SNAP_THRESHOLD = 70; // Threshold for ridge snap calculation (maybe should depend on map scale)
 
+    private static final float[][] PROFILE_DOME = new float[][]{
+            {1, 0},
+            {0.825f, 0.5f},
+            {0.5f, 0.825f},
+            {0, 1}};
+    private static final float[][] PROFILE_HIPPED = new float[][]{
+            {1, 0},
+            {0, 1}};
+    private static final float[][] PROFILE_MANSARD = new float[][]{
+            {1, 0},
+            {0.75f, 0.75f},
+            {0, 1}};
+    private static final float[][] PROFILE_ONION = new float[][]{
+            {1, 0},
+            {0.2f, 0.01f},
+            {0.875f, 0.1875f},
+            {1, 0.375f},
+            {0.875f, 0.5625f},
+            {0.5f, 0.75f},
+            {0.2f, 0.8125f},
+            {0, 1}};
+    private static final float[][] PROFILE_SALTBOX = new float[][]{
+            {1, 0},
+            {0.5f, 1},
+            {0, 1}};
+
     /**
      * Adds point to ridgePoints and snaps it to a point which is in radius of SNAP_THRESHOLD.
      */
@@ -707,7 +733,7 @@ public final class S3DBUtils {
                     // profile[m][0] is same length for x and y
                     meshPoints[offset + 0] = rp1[0] + (float) (r * profile[m][0] * Math.sin(phi));
                     meshPoints[offset + 1] = rp1[1] + (float) (r * profile[m][0] * Math.cos(phi));
-                    meshPoints[offset + 2] = p[2] + heightRange * profile[m][2];
+                    meshPoints[offset + 2] = p[2] + heightRange * profile[m][1];
                 }
             }
 
@@ -1329,54 +1355,29 @@ public final class S3DBUtils {
 
     /**
      * Get the profile (half cross section) of roof shape.
+     * profile[i][0]: x-coordinate
+     * profile[i][1]: z-coordinate
      *
      * @param roofShape the roof shape value
-     * @return the profile as 2D array
+     * @return the profile (read-only!)
      */
     public static float[][] getProfile(String roofShape) {
-        float[][] shape;
         switch (roofShape) {
             case Tag.VALUE_ONION:
-                shape = new float[][]{
-                        {1, 0, 0},
-                        {0.2f, 0, 0.01f},
-                        {0.875f, 0, 0.1875f},
-                        {1, 0, 0.375f},
-                        {0.875f, 0, 0.5625f},
-                        {0.5f, 0, 0.75f},
-                        {0.2f, 0, 0.8125f},
-                        {0, 0, 1}};
-                break;
+                return PROFILE_ONION;
             case Tag.VALUE_ROUND:
             case Tag.VALUE_DOME:
-                shape = new float[][]{
-                        {1, 0, 0},
-                        {0.825f, 0, 0.5f},
-                        {0.5f, 0, 0.825f},
-                        {0, 0, 1}};
-                break;
+                return PROFILE_DOME;
             case Tag.VALUE_SALTBOX:
-                shape = new float[][]{
-                        {1, 0, 0},
-                        {0.5f, 0, 1},
-                        {0, 0, 1}};
-                break;
+                return PROFILE_SALTBOX;
             case Tag.VALUE_MANSARD:
             case Tag.VALUE_GAMBREL:
-                shape = new float[][]{
-                        {1, 0, 0},
-                        {0.75f, 0, 0.75f},
-                        {0, 0, 1}};
-                break;
+                return PROFILE_MANSARD;
             case Tag.VALUE_GABLED:
             case Tag.VALUE_HIPPED:
             default:
-                shape = new float[][]{
-                        {1, 0, 0},
-                        {0, 0, 1}};
-                break;
+                return PROFILE_HIPPED;
         }
-        return shape;
     }
 
     /**
@@ -1440,8 +1441,8 @@ public final class S3DBUtils {
                 // Write point mesh
                 int pPos = 3 * (i * profile.length + j);
                 meshPoints[pPos + 0] = profile[j][0];
-                meshPoints[pPos + 1] = profile[j][1];
-                meshPoints[pPos + 2] = profile[j][2];
+                meshPoints[pPos + 1] = 0f;
+                meshPoints[pPos + 2] = profile[j][1];
 
                 // Write point indices
                 if (j != profile.length - 1) {
