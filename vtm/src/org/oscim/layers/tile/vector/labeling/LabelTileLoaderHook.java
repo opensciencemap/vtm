@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2019 devemux86
  * Copyright 2016 Andrey Novikov
  * Copyright 2019 marq24
  *
@@ -75,6 +75,8 @@ public class LabelTileLoaderHook implements TileLoaderThemeHook {
                 }
             } else if (element.type == POLY) {
                 PointF label = element.labelPosition;
+                if (label == null)
+                    label = element.centroidPosition;
                 // skip unnecessary calculations if label is outside of visible area
                 if (label != null && (label.x < 0 || label.x > Tile.SIZE || label.y < 0 || label.y > Tile.SIZE))
                     return false;
