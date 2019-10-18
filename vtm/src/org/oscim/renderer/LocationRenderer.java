@@ -66,6 +66,7 @@ public class LocationRenderer extends LayerRenderer {
     private boolean mRunAnim;
     private boolean mAnimate = true;
     private long mAnimStart;
+    private boolean mCenter;
 
     private Callback mCallback;
     private final float[] mColors = new float[4];
@@ -95,6 +96,10 @@ public class LocationRenderer extends LayerRenderer {
 
     public void setCallback(Callback callback) {
         mCallback = callback;
+    }
+
+    public void setCenter(boolean center) {
+        mCenter = center;
     }
 
     public void setColor(int color) {
@@ -168,32 +173,38 @@ public class LocationRenderer extends LayerRenderer {
             return;
         }
 
-            /*if (!v.changed() && isReady())
-                return;*/
+        /*if (!v.changed() && isReady())
+            return;*/
 
         setReady(true);
 
         int width = mMap.getWidth();
         int height = mMap.getHeight();
 
-        // clamp location to a position that can be
-        // savely translated to screen coordinates
-        v.getBBox(mBBox, 0);
+        double x, y;
+        if (mCenter) {
+            x = (width >> 1) + width * mMap.viewport().getMapViewCenterX();
+            y = (height >> 1) + height * mMap.viewport().getMapViewCenterY();
+        } else {
+            // clamp location to a position that can be
+            // safely translated to screen coordinates
+            v.getBBox(mBBox, 0);
 
-        double x = mLocation.x;
-        double y = mLocation.y;
+            x = mLocation.x;
+            y = mLocation.y;
 
-        if (!mBBox.contains(mLocation)) {
-            x = FastMath.clamp(x, mBBox.xmin, mBBox.xmax);
-            y = FastMath.clamp(y, mBBox.ymin, mBBox.ymax);
+            if (!mBBox.contains(mLocation)) {
+                x = FastMath.clamp(x, mBBox.xmin, mBBox.xmax);
+                y = FastMath.clamp(y, mBBox.ymin, mBBox.ymax);
+            }
+
+            // get position of Location in pixel relative to
+            // screen center
+            v.toScreenPoint(x, y, mScreenPoint);
+
+            x = mScreenPoint.x + (width >> 1);
+            y = mScreenPoint.y + (height >> 1);
         }
-
-        // get position of Location in pixel relative to
-        // screen center
-        v.toScreenPoint(x, y, mScreenPoint);
-
-        x = mScreenPoint.x + width / 2;
-        y = mScreenPoint.y + height / 2;
 
         // clip position to screen boundaries
         int visible = 0;

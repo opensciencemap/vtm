@@ -1,6 +1,6 @@
 /*
  * Copyright 2017-2018 Longri
- * Copyright 2018 devemux86
+ * Copyright 2018-2019 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -98,6 +98,7 @@ public class LocationTextureRenderer extends BucketRenderer {
     private boolean runAnim;
     private boolean animate = true;
     private long animStart;
+    private boolean center;
     private boolean update;
     private float bearing;
 
@@ -122,6 +123,10 @@ public class LocationTextureRenderer extends BucketRenderer {
 
     public void setBillboard(boolean billboard) {
         this.billboard = billboard;
+    }
+
+    public void setCenter(boolean center) {
+        this.center = center;
     }
 
     public void setIndicatorColor(int color) {
@@ -194,22 +199,29 @@ public class LocationTextureRenderer extends BucketRenderer {
 
         int width = map.getWidth();
         int height = map.getHeight();
-        v.getBBox(boundingBox, 0);
 
-        double x = mapPoint.x;
-        double y = mapPoint.y;
+        double x, y;
+        if (center) {
+            x = (width >> 1) + width * map.viewport().getMapViewCenterX();
+            y = (height >> 1) + height * map.viewport().getMapViewCenterY();
+        } else {
+            v.getBBox(boundingBox, 0);
 
-        if (!boundingBox.contains(mapPoint)) {
-            x = FastMath.clamp(x, boundingBox.xmin, boundingBox.xmax);
-            y = FastMath.clamp(y, boundingBox.ymin, boundingBox.ymax);
+            x = mapPoint.x;
+            y = mapPoint.y;
+
+            if (!boundingBox.contains(mapPoint)) {
+                x = FastMath.clamp(x, boundingBox.xmin, boundingBox.xmax);
+                y = FastMath.clamp(y, boundingBox.ymin, boundingBox.ymax);
+            }
+
+            // get position of Location in pixel relative to
+            // screen center
+            v.toScreenPoint(x, y, screenPoint);
+
+            x = screenPoint.x + width / 2;
+            y = screenPoint.y + height / 2;
         }
-
-        // get position of Location in pixel relative to
-        // screen center
-        v.toScreenPoint(x, y, screenPoint);
-
-        x = screenPoint.x + width / 2;
-        y = screenPoint.y + height / 2;
 
         // clip position to screen boundaries
         int visible = 0;
