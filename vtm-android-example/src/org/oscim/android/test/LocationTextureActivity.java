@@ -25,18 +25,16 @@ import android.os.Build;
 import android.os.Bundle;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.LocationTextureLayer;
-import org.oscim.renderer.atlas.TextureAtlas;
-import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.renderer.bucket.TextureItem;
+import org.oscim.renderer.LocationCallback;
 import org.oscim.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class LocationTextureActivity extends BitmapTileActivity implements LocationListener {
+    private Location location;
     private LocationTextureLayer locationLayer;
     private LocationManager locationManager;
     private final MapPosition mapPosition = new MapPosition();
@@ -47,34 +45,41 @@ public class LocationTextureActivity extends BitmapTileActivity implements Locat
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        // load a Bitmap/SVG from resources
         InputStream is = null;
-        Bitmap bmp = null;
+        Bitmap bitmapArrow = null;
         try {
             is = getResources().openRawResource(R.raw.arrow);
-            float scale = CanvasAdapter.getScale();
-            bmp = CanvasAdapter.decodeSvgBitmap(is, (int) (60 * scale), (int) (60 * scale), 100);
+            bitmapArrow = CanvasAdapter.decodeSvgBitmap(is, (int) (48 * CanvasAdapter.getScale()), (int) (48 * CanvasAdapter.getScale()), 100);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(is);
         }
 
-        // create TextureRegion from Bitmap
-        TextureRegion textureRegion = new TextureRegion(new TextureItem(bmp), new TextureAtlas.Rect(0, 0, bmp.getWidth(), bmp.getHeight()));
+        Bitmap bitmapMarker = null;
+        try {
+            is = getResources().openRawResource(R.raw.marker);
+            bitmapMarker = CanvasAdapter.decodeSvgBitmap(is, (int) (48 * CanvasAdapter.getScale()), (int) (48 * CanvasAdapter.getScale()), 100);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-        // create LocationTextureLayer with created/loaded TextureRegion
-        locationLayer = new LocationTextureLayer(mMap, textureRegion);
+        locationLayer = new LocationTextureLayer(mMap);
+        locationLayer.locationRenderer.setBitmapArrow(bitmapArrow);
+        locationLayer.locationRenderer.setBitmapMarker(bitmapMarker);
+        locationLayer.locationRenderer.setCallback(new LocationCallback() {
+            @Override
+            public boolean hasRotation() {
+                return location != null && location.hasBearing();
+            }
 
-        // set color of accuracy circle (Color.BLUE is default)
-        locationLayer.locationRenderer.setAccuracyColor(Color.get(50, 50, 255));
-
-        // set color of indicator circle (Color.RED is default)
-        locationLayer.locationRenderer.setIndicatorColor(Color.MAGENTA);
-
-        // set billboard rendering for TextureRegion (false is default)
-        locationLayer.locationRenderer.setBillboard(false);
-
+            @Override
+            public float getRotation() {
+                return location != null && location.hasBearing() ? location.getBearing() : 0;
+            }
+        });
         locationLayer.setEnabled(false);
         mMap.layers().add(locationLayer);
     }
@@ -103,8 +108,9 @@ public class LocationTextureActivity extends BitmapTileActivity implements Locat
 
     @Override
     public void onLocationChanged(Location location) {
+        this.location = location;
         locationLayer.setEnabled(true);
-        locationLayer.setPosition(location.getLatitude(), location.getLongitude(), location.getBearing(), location.getAccuracy());
+        locationLayer.setPosition(location.getLatitude(), location.getLongitude(), location.getAccuracy());
 
         // Follow location
         mMap.getMapPosition(mapPosition);
