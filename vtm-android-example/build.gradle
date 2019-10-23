@@ -1,12 +1,5 @@
 apply plugin: 'com.android.application'
 
-/*
-configurations.all {
-    // Check latest snapshot on every build
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-*/
-
 dependencies {
     implementation project(':vtm-android')
     implementation project(':vtm-android-mvt')
@@ -23,11 +16,11 @@ dependencies {
     implementation project(':vtm-gdx')
     implementation project(':vtm-gdx-poi3d')
 
-    implementation 'org.mapsforge:mapsforge-poi-android:master-SNAPSHOT'
-    implementation 'org.mapsforge:sqlite-android:master-SNAPSHOT:natives-armeabi-v7a'
-    implementation 'org.mapsforge:sqlite-android:master-SNAPSHOT:natives-arm64-v8a'
-    implementation 'org.mapsforge:sqlite-android:master-SNAPSHOT:natives-x86'
-    implementation 'org.mapsforge:sqlite-android:master-SNAPSHOT:natives-x86_64'
+    implementation 'org.mapsforge:mapsforge-poi-android:0.12.0'
+    implementation 'org.mapsforge:sqlite-android:0.12.0:natives-armeabi-v7a'
+    implementation 'org.mapsforge:sqlite-android:0.12.0:natives-arm64-v8a'
+    implementation 'org.mapsforge:sqlite-android:0.12.0:natives-x86'
+    implementation 'org.mapsforge:sqlite-android:0.12.0:natives-x86_64'
 }
 
 android {
