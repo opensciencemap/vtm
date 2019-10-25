@@ -2,8 +2,10 @@
 
 ## New since 0.12.0
 
-- Render themes: symbols on lines with billboard, rotate [#743](https://github.com/mapsforge/vtm/pull/743)
-- Threaded system initialization (Android)
+- Render themes: symbols on lines with billboard / rotation [#743](https://github.com/mapsforge/vtm/pull/743)
+- Android: OpenGL ES 2.0 default for performance / stability [#749](https://github.com/mapsforge/vtm/pull/749)
+  - `MapView.OPENGL_VERSION`
+- Android: threaded system initialization
   - `Parameters.THREADED_INIT`
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.13.0)
