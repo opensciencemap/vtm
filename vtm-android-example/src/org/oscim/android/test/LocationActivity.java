@@ -24,8 +24,10 @@ import android.os.Build;
 import android.os.Bundle;
 import org.oscim.core.MapPosition;
 import org.oscim.layers.LocationLayer;
+import org.oscim.renderer.LocationCallback;
 
 public class LocationActivity extends BitmapTileActivity implements LocationListener {
+    private Location location;
     private LocationLayer locationLayer;
     private LocationManager locationManager;
     private final MapPosition mapPosition = new MapPosition();
@@ -37,7 +39,17 @@ public class LocationActivity extends BitmapTileActivity implements LocationList
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         locationLayer = new LocationLayer(mMap);
-        locationLayer.locationRenderer.setShader("location_1_reverse");
+        locationLayer.locationRenderer.setCallback(new LocationCallback() {
+            @Override
+            public boolean hasRotation() {
+                return location != null && location.hasBearing();
+            }
+
+            @Override
+            public float getRotation() {
+                return location != null && location.hasBearing() ? location.getBearing() : 0;
+            }
+        });
         locationLayer.setEnabled(false);
         mMap.layers().add(locationLayer);
     }
@@ -66,6 +78,7 @@ public class LocationActivity extends BitmapTileActivity implements LocationList
 
     @Override
     public void onLocationChanged(Location location) {
+        this.location = location;
         locationLayer.setEnabled(true);
         locationLayer.setPosition(location.getLatitude(), location.getLongitude(), location.getAccuracy());
 

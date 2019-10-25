@@ -20,7 +20,6 @@ package org.oscim.renderer;
 
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.Box;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
@@ -68,8 +67,8 @@ public class LocationRenderer extends LayerRenderer {
     private long mAnimStart;
     private boolean mCenter;
 
-    private Callback mCallback;
-    private final float[] mColors = new float[4];
+    private LocationCallback mCallback;
+    private int mColor = COLOR;
     private final Point mLocation = new Point(Double.NaN, Double.NaN);
     private double mRadius;
     private int mShowAccuracyZoom = SHOW_ACCURACY_ZOOM;
@@ -82,19 +81,13 @@ public class LocationRenderer extends LayerRenderer {
         mMap = map;
         mLayer = layer;
         mScale = scale;
-
-        float a = Color.aToFloat(COLOR);
-        mColors[0] = a * Color.rToFloat(COLOR);
-        mColors[1] = a * Color.gToFloat(COLOR);
-        mColors[2] = a * Color.bToFloat(COLOR);
-        mColors[3] = a;
     }
 
     public void setAnimate(boolean animate) {
         mAnimate = animate;
     }
 
-    public void setCallback(Callback callback) {
+    public void setCallback(LocationCallback callback) {
         mCallback = callback;
     }
 
@@ -103,11 +96,7 @@ public class LocationRenderer extends LayerRenderer {
     }
 
     public void setColor(int color) {
-        float a = Color.aToFloat(color);
-        mColors[0] = a * Color.rToFloat(color);
-        mColors[1] = a * Color.gToFloat(color);
-        mColors[2] = a * Color.bToFloat(color);
-        mColors[3] = a;
+        mColor = color;
     }
 
     public void setLocation(double x, double y, double radius) {
@@ -287,7 +276,7 @@ public class LocationRenderer extends LayerRenderer {
         } else
             gl.uniform1i(uMode, -1); // Outside screen
 
-        GLUtils.glUniform4fv(uColor, 1, mColors);
+        GLUtils.setColor(uColor, mColor);
 
         gl.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
     }
@@ -307,14 +296,5 @@ public class LocationRenderer extends LayerRenderer {
         uMode = gl.getUniformLocation(program, "u_mode");
 
         return true;
-    }
-
-    public interface Callback {
-        /**
-         * Usually true, can be used with e.g. Android Location.hasBearing().
-         */
-        boolean hasRotation();
-
-        float getRotation();
     }
 }
