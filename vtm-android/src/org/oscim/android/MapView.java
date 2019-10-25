@@ -65,9 +65,10 @@ public class MapView extends GLSurfaceView {
     private static final Pattern GL_PATTERN = Pattern.compile("OpenGL ES (\\d(\\.\\d){0,2})");
 
     /**
-     * Target OpenGL ES version, if not available fall back to OpenGL ES 2.0
+     * OpenGL ES 2.0 default on Android for performance / stability.
+     * Any larger not available versions fall back to OpenGL ES 2.0.
      */
-    public static double targetGLESVersion = 3.0;
+    public static double OPENGL_VERSION = 2.0;
 
     private static void init() {
         if (Parameters.THREADED_INIT)
@@ -133,16 +134,20 @@ public class MapView extends GLSurfaceView {
         mMap = new AndroidMap(this);
 
         /* Initialize Renderer */
-        // OpenGL ES 3.0 is supported with Android 4.3 (API level 18) and higher
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            try {
-                setEGLContextFactory(new GlContextFactory());
-            } catch (Throwable t) {
-                log.error("Falling back to GLES 2", t);
-                setEGLContextClientVersion(2);
-            }
-        } else
+        if (OPENGL_VERSION == 2.0)
             setEGLContextClientVersion(2);
+        else {
+            // OpenGL ES 3.0 is supported with Android 4.3 (API level 18) and higher
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                try {
+                    setEGLContextFactory(new GlContextFactory());
+                } catch (Throwable t) {
+                    log.error("Falling back to GLES 2", t);
+                    setEGLContextClientVersion(2);
+                }
+            } else
+                setEGLContextClientVersion(2);
+        }
         setEGLConfigChooser(new GlConfigChooser());
 
         if (GLAdapter.debug)
@@ -354,23 +359,27 @@ public class MapView extends GLSurfaceView {
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            try {
-                // Create a minimum supported OpenGL ES context, then check:
-                String versionString = gl.glGetString(GL10.GL_VERSION);
-                log.info("Version: " + versionString);
-                // The version format is displayed as: "OpenGL ES <major>.<minor>"
-                // followed by optional content provided by the implementation.
-
-                // OpenGL<space>ES<space><version number><space><vendor-specific information>.
-                int[] version = extractVersion(versionString);
-                int majorVersion = version[0];
-                if (majorVersion >= 3)
-                    GLAdapter.init(new AndroidGL30());
-                else
-                    GLAdapter.init(new AndroidGL());
-            } catch (Throwable t) {
-                log.error("Falling back to GLES 2", t);
+            if (OPENGL_VERSION == 2.0)
                 GLAdapter.init(new AndroidGL());
+            else {
+                try {
+                    // Create a minimum supported OpenGL ES context, then check:
+                    String versionString = gl.glGetString(GL10.GL_VERSION);
+                    log.info("Version: " + versionString);
+                    // The version format is displayed as: "OpenGL ES <major>.<minor>"
+                    // followed by optional content provided by the implementation.
+
+                    // OpenGL<space>ES<space><version number><space><vendor-specific information>.
+                    int[] version = extractVersion(versionString);
+                    int majorVersion = Math.min(version[0], (int) OPENGL_VERSION);
+                    if (majorVersion >= 3)
+                        GLAdapter.init(new AndroidGL30());
+                    else
+                        GLAdapter.init(new AndroidGL());
+                } catch (Throwable t) {
+                    log.error("Falling back to GLES 2", t);
+                    GLAdapter.init(new AndroidGL());
+                }
             }
 
             super.onSurfaceCreated();

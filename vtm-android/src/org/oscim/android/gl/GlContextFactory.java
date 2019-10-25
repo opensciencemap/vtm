@@ -28,7 +28,6 @@
 package org.oscim.android.gl;
 
 import android.opengl.GLSurfaceView;
-
 import org.oscim.android.MapView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,18 +50,18 @@ public class GlContextFactory implements GLSurfaceView.EGLContextFactory {
 
     @Override
     public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
-        log.info("creating OpenGL ES " + MapView.targetGLESVersion + " context");
-        checkEglError("Before eglCreateContext " + MapView.targetGLESVersion, egl);
-        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, (int) MapView.targetGLESVersion, EGL10.EGL_NONE};
+        log.info("creating OpenGL ES " + MapView.OPENGL_VERSION + " context");
+        checkEglError("Before eglCreateContext " + MapView.OPENGL_VERSION, egl);
+        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, (int) MapView.OPENGL_VERSION, EGL10.EGL_NONE};
         EGLContext context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
-        boolean success = checkEglError("After eglCreateContext " + MapView.targetGLESVersion, egl);
+        boolean success = checkEglError("After eglCreateContext " + MapView.OPENGL_VERSION, egl);
 
-        if ((!success || context == null) && MapView.targetGLESVersion > 2) {
+        if ((!success || context == null) && MapView.OPENGL_VERSION > 2) {
             log.warn("Falling back to GLES 2");
-            MapView.targetGLESVersion = 2.0;
+            MapView.OPENGL_VERSION = 2.0;
             return createContext(egl, display, eglConfig);
         }
-        log.info("Returning a GLES " + MapView.targetGLESVersion + " context");
+        log.info("Returning a GLES " + MapView.OPENGL_VERSION + " context");
         return context;
     }
 
