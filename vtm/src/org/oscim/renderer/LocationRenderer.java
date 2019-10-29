@@ -21,6 +21,7 @@ package org.oscim.renderer;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.GL;
 import org.oscim.core.Box;
+import org.oscim.core.MapPosition;
 import org.oscim.core.Point;
 import org.oscim.core.Tile;
 import org.oscim.layers.Layer;
@@ -42,6 +43,13 @@ public class LocationRenderer extends LayerRenderer {
     private final Map mMap;
     private final Layer mLayer;
     protected final float mScale;
+
+    /**
+     * Use mMapPosition.copy(position) to keep the position for which
+     * the Overlay is *compiled*. NOTE: required by setMatrix utility
+     * functions to draw this layer fixed to the map
+     */
+    protected MapPosition mMapPosition;
 
     private String mShaderFile;
     protected int mShaderProgram;
@@ -81,6 +89,8 @@ public class LocationRenderer extends LayerRenderer {
         mMap = map;
         mLayer = layer;
         mScale = scale;
+
+        mMapPosition = new MapPosition();
     }
 
     public void setAnimate(boolean animate) {
@@ -216,6 +226,9 @@ public class LocationRenderer extends LayerRenderer {
 
         // set location indicator position
         v.fromScreenPoint(x, y, mIndicatorPosition);
+
+        mMapPosition.copy(v.pos);
+        mMapPosition.bearing = -mMapPosition.bearing;
     }
 
     @Override
