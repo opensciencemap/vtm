@@ -1,7 +1,7 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2014 Ludwig M Brinckmann
- * Copyright 2014-2016 devemux86
+ * Copyright 2014-2019 devemux86
  * Copyright 2014 Erik Duisters
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -44,7 +44,7 @@ public abstract class MapScaleBar {
     protected Canvas mapScaleCanvas;
     private int marginHorizontal;
     private int marginVertical;
-    private MapPosition prevMapPosition;
+    private final MapPosition prevMapPosition = new MapPosition();
     protected boolean redrawNeeded;
     protected ScaleBarPosition scaleBarPosition;
     private boolean visible;
@@ -194,7 +194,7 @@ public abstract class MapScaleBar {
      * @return a {@link ScaleBarLengthAndValue} object containing the required scaleBarLength and scaleBarValue
      */
     protected ScaleBarLengthAndValue calculateScaleBarLengthAndValue(DistanceUnitAdapter unitAdapter) {
-        this.prevMapPosition = this.map.getMapPosition();
+        this.map.getMapPosition(this.prevMapPosition);
         double groundResolution = MercatorProjection.groundResolution(this.prevMapPosition);
 
         groundResolution = groundResolution / unitAdapter.getMeterRatio();
