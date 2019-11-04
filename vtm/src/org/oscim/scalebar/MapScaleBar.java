@@ -266,7 +266,7 @@ public abstract class MapScaleBar {
      * @return true if redraw is necessary, false otherwise
      */
     protected boolean isRedrawNecessary() {
-        if (this.redrawNeeded || this.prevMapPosition == null) {
+        if (this.redrawNeeded) {
             return true;
         }
 
