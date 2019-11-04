@@ -638,8 +638,7 @@ public class LineBucket extends RenderBucket {
                 if (lb.heightOffset != heightOffset) {
                     heightOffset = lb.heightOffset;
 
-                    gl.uniform1f(uLineHeight, heightOffset /
-                            MercatorProjection.groundResolution(v.pos));
+                    gl.uniform1f(uLineHeight, (float) (heightOffset / MercatorProjection.groundResolution(v.pos)));
                 }
 
                 if (line.fadeScale < v.pos.zoomLevel) {

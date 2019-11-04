@@ -99,14 +99,14 @@ public final class MercatorProjection {
     }
 
     public static Point getPixelWithScale(GeoPoint geoPoint, double scale) {
-        double pixelX = MercatorProjection.longitudeToPixelXWithScale(geoPoint.getLongitude(), scale);
-        double pixelY = MercatorProjection.latitudeToPixelYWithScale(geoPoint.getLatitude(), scale);
+        double pixelX = longitudeToPixelXWithScale(geoPoint.getLongitude(), scale);
+        double pixelY = latitudeToPixelYWithScale(geoPoint.getLatitude(), scale);
         return new Point(pixelX, pixelY);
     }
 
     public static Point getPixel(GeoPoint geoPoint, long mapSize) {
-        double pixelX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mapSize);
-        double pixelY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mapSize);
+        double pixelX = longitudeToPixelX(geoPoint.getLongitude(), mapSize);
+        double pixelY = latitudeToPixelY(geoPoint.getLatitude(), mapSize);
         return new Point(pixelX, pixelY);
     }
 
@@ -130,8 +130,8 @@ public final class MercatorProjection {
      * @return the relative pixel position to the origin values (e.g. for a tile)
      */
     public static Point getPixelRelative(GeoPoint geoPoint, long mapSize, double x, double y) {
-        double pixelX = MercatorProjection.longitudeToPixelX(geoPoint.getLongitude(), mapSize) - x;
-        double pixelY = MercatorProjection.latitudeToPixelY(geoPoint.getLatitude(), mapSize) - y;
+        double pixelX = longitudeToPixelX(geoPoint.getLongitude(), mapSize) - x;
+        double pixelY = latitudeToPixelY(geoPoint.getLatitude(), mapSize) - y;
         return new Point(pixelX, pixelY);
     }
 
@@ -172,11 +172,8 @@ public final class MercatorProjection {
                 / (Tile.SIZE * scale);
     }
 
-    public static float groundResolution(MapPosition pos) {
-        double lat = MercatorProjection.toLatitude(pos.y);
-        return (float) (Math.cos(lat * (Math.PI / 180))
-                * MercatorProjection.EARTH_CIRCUMFERENCE
-                / (Tile.SIZE * pos.scale));
+    public static double groundResolution(MapPosition pos) {
+        return groundResolutionWithScale(toLatitude(pos.y), pos.scale);
     }
 
     /**
@@ -360,7 +357,7 @@ public final class MercatorProjection {
      * @return pixels that represent the meters at the given zoom-level and latitude.
      */
     public static double metersToPixelsWithScale(float meters, double latitude, double scale) {
-        return meters / MercatorProjection.groundResolutionWithScale(latitude, scale);
+        return meters / groundResolutionWithScale(latitude, scale);
     }
 
     /**
@@ -372,7 +369,7 @@ public final class MercatorProjection {
      * @return pixels that represent the meters at the given zoom-level and latitude.
      */
     public static double metersToPixels(float meters, double latitude, long mapSize) {
-        return meters / MercatorProjection.groundResolution(latitude, mapSize);
+        return meters / groundResolution(latitude, mapSize);
     }
 
     /**

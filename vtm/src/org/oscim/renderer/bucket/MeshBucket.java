@@ -191,8 +191,7 @@ public class MeshBucket extends RenderBucket {
                 if (ml.heightOffset != heightOffset) {
                     heightOffset = ml.heightOffset;
 
-                    gl.uniform1f(s.uHeight, heightOffset /
-                            MercatorProjection.groundResolution(v.pos));
+                    gl.uniform1f(s.uHeight, (float) (heightOffset / MercatorProjection.groundResolution(v.pos)));
                 }
 
                 if (ml.area == null)
