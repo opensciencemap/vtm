@@ -44,8 +44,9 @@ public abstract class MapScaleBar {
     protected Canvas mapScaleCanvas;
     private int marginHorizontal;
     private int marginVertical;
-    private final MapPosition prevMapPosition = new MapPosition();
+    protected final MapPosition prevMapPosition = new MapPosition();
     protected boolean redrawNeeded;
+    protected final float scale;
     protected ScaleBarPosition scaleBarPosition;
     private boolean visible;
 
@@ -62,9 +63,10 @@ public abstract class MapScaleBar {
         }
     }
 
-    public MapScaleBar(Map map, int width, int height) {
+    public MapScaleBar(Map map, int width, int height, float scale) {
         this.map = map;
         this.mapScaleBitmap = CanvasAdapter.newBitmap(width, height, 0);
+        this.scale = scale;
 
         this.scaleBarPosition = DEFAULT_SCALE_BAR_POSITION;
 
@@ -206,7 +208,7 @@ public abstract class MapScaleBar {
         for (int scaleBarValue : scaleBarValues) {
             mapScaleValue = scaleBarValue;
             scaleBarLength = (int) (mapScaleValue / groundResolution);
-            if (scaleBarLength < (this.mapScaleBitmap.getWidth() - 10)) {
+            if (scaleBarLength < (this.mapScaleBitmap.getWidth() - 10 * this.scale)) {
                 break;
             }
         }
