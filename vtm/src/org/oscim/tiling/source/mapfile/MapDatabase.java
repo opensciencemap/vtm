@@ -7,6 +7,7 @@
  * Copyright 2017-2018 Gustl22
  * Copyright 2018 Bezzu
  * Copyright 2019 marq24
+ * Copyright 2019 Justus Schmidt
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -692,7 +693,7 @@ public class MapDatabase implements ITileDataSource {
         return true;
     }
 
-    private boolean processWayDataBlock(MapElement e, boolean doubleDeltaEncoding, boolean isLine, List<GeoPoint[]> wayCoordinates) {
+    private boolean processWayDataBlock(MapElement e, boolean doubleDeltaEncoding, boolean isLine, List<GeoPoint[]> wayCoordinates, int[] labelPosition) {
         /* get and check the number of way coordinate blocks (VBE-U) */
         int numBlocks = mReadBuffer.readUnsignedInt();
         if (numBlocks < 1 || numBlocks > Short.MAX_VALUE) {
@@ -717,36 +718,49 @@ public class MapDatabase implements ITileDataSource {
             /* each way node consists of latitude and longitude */
             int len = numWayNodes * 2;
 
-            wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding,
-                    e, len, isLine);
+            // create the array which will store the current way segment
+            GeoPoint[] waySegment = null;
+            if (wayCoordinates != null)
+                waySegment = new GeoPoint[numWayNodes];
 
-            if (wayCoordinates != null) {
-                // create the array which will store the current way segment
-                GeoPoint[] waySegment = new GeoPoint[e.getNumPoints()];
-                for (int i = 0; i < e.getNumPoints(); i++)
-                    waySegment[i] = new GeoPoint(e.getPointY(i) / 1E6, e.getPointX(i) / 1E6);
+            // label position must be set on first coordinate block
+            wayLengths[coordinateBlock] = decodeWayNodes(doubleDeltaEncoding, e, len, isLine,
+                    coordinateBlock == 0 ? labelPosition : null, waySegment);
+
+            if (wayCoordinates != null)
                 wayCoordinates.add(waySegment);
-            }
         }
 
         return true;
     }
 
-    private int decodeWayNodes(boolean doubleDelta, MapElement e, int length, boolean isLine) {
+    private int decodeWayNodes(boolean doubleDelta, MapElement e, int length, boolean isLine, int[] labelPosition, GeoPoint[] waySegment) {
         int[] buffer = mIntBuffer;
         mReadBuffer.readSignedInt(buffer, length);
 
         float[] outBuffer = e.ensurePointSize(e.pointNextPos + length, true);
         int outPos = e.pointNextPos;
-        int lat, lon;
+        float pLat, pLon;
 
         /* first node latitude single-delta offset */
-        int firstLat = lat = mTileLatitude + buffer[0];
-        int firstLon = lon = mTileLongitude + buffer[1];
+        int rawLat = mTileLatitude + buffer[0];
+        int rawLon = mTileLongitude + buffer[1];
 
-        outBuffer[outPos++] = lon;
-        outBuffer[outPos++] = lat;
+        float firstLat = pLat = mTileProjection.projectLat(rawLat);
+        float firstLon = pLon = mTileProjection.projectLon(rawLon);
+
+        outBuffer[outPos++] = pLon;
+        outBuffer[outPos++] = pLat;
         int cnt = 2;
+
+        /* reset label position single-delta to first way node */
+        if (labelPosition != null) {
+            labelPosition[1] = rawLat + labelPosition[1];
+            labelPosition[0] = rawLon + labelPosition[0];
+        }
+
+        if (waySegment != null)
+            waySegment[0] = new GeoPoint(rawLat / 1E6, rawLon / 1E6);
 
         int deltaLat = 0;
         int deltaLon = 0;
@@ -759,8 +773,14 @@ public class MapDatabase implements ITileDataSource {
                 deltaLat = buffer[pos];
                 deltaLon = buffer[pos + 1];
             }
-            lat += deltaLat;
-            lon += deltaLon;
+            rawLat += deltaLat;
+            rawLon += deltaLon;
+
+            if (waySegment != null)
+                waySegment[pos / 2] = new GeoPoint(rawLat / 1E6, rawLon / 1E6);
+
+            float lat = mTileProjection.projectLat(rawLat);
+            float lon = mTileProjection.projectLon(rawLon);
 
             if (pos == length - 2) {
                 boolean line = isLine || (lon != firstLon || lat != firstLat);
@@ -774,13 +794,16 @@ public class MapDatabase implements ITileDataSource {
                 if (e.type == GeometryType.NONE)
                     e.type = line ? LINE : POLY;
 
+            } else if (lat == pLat && lon == pLon) {
+                /* drop small distance intermediate nodes */
+                //log.debug("drop zero delta ");
             } else /*if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
                     || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
                     || e.tags.contains("natural", "nosea"))*/ {
                 // Avoid additional simplification
                 // https://github.com/mapsforge/vtm/issues/39
-                outBuffer[outPos++] = lon;
-                outBuffer[outPos++] = lat;
+                outBuffer[outPos++] = pLon = lon;
+                outBuffer[outPos++] = pLat = lat;
                 cnt += 2;
             }
         }
@@ -954,7 +977,7 @@ public class MapDatabase implements ITileDataSource {
                 if (ways != null)
                     wayNodes = new ArrayList<>();
 
-                if (!processWayDataBlock(e, featureWayDoubleDeltaEncoding, linearFeature, wayNodes))
+                if (!processWayDataBlock(e, featureWayDoubleDeltaEncoding, linearFeature, wayNodes, labelPosition))
                     return false;
 
                 /* drop invalid outer ring */
@@ -963,11 +986,9 @@ public class MapDatabase implements ITileDataSource {
                 }
 
                 if (labelPosition != null && wayDataBlock == 0)
-                    e.setLabelPosition(e.points[0] + labelPosition[0], e.points[1] + labelPosition[1]);
+                    e.setLabelPosition(mTileProjection.projectLon(labelPosition[0]), mTileProjection.projectLat(labelPosition[1]));
                 else
                     e.labelPosition = null;
-
-                mTileProjection.project(e);
 
                 // When a way will be rendered then typically a label / symbol will be applied
                 // by the render theme. If the way does not come with a defined labelPosition
@@ -1011,7 +1032,7 @@ public class MapDatabase implements ITileDataSource {
                         for (int i = 0; i < e.tags.size(); i++)
                             tags.add(e.tags.get(i));
                         if (Selector.ALL == selector || hasName || hasHouseNr || hasRef || wayAsLabelTagFilter(tags)) {
-                            GeoPoint labelPos = e.labelPosition != null ? new GeoPoint(e.labelPosition.y / 1E6, e.labelPosition.x / 1E6) : null;
+                            GeoPoint labelPos = labelPosition != null ? new GeoPoint(labelPosition[1] / 1E6, labelPosition[0] / 1E6) : null;
                             ways.add(new Way(layer, tags, wayNodesArray, labelPos, e.type));
                         }
                     }
