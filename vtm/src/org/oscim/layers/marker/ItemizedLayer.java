@@ -5,6 +5,7 @@
  * Copyright 2016-2019 devemux86
  * Copyright 2016 Stephan Leuschner
  * Copyright 2016 Pedinel
+ * Copyright 2019 Carlos Alberto Martínez Gadea
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -264,6 +265,9 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
 
     @Override
     public boolean onGesture(Gesture g, MotionEvent e) {
+        if (!isEnabled())
+            return false;
+
         if (g instanceof Gesture.Tap)
             return activateSelectedItems(e, mActiveItemSingleTap);
 
