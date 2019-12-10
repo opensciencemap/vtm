@@ -17,6 +17,7 @@
  */
 package org.oscim.test;
 
+import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.event.Event;
@@ -33,33 +34,39 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.scalebar.*;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
-import org.oscim.tiling.source.mapfile.MapInfo;
+import org.oscim.tiling.source.mapfile.MultiMapFileTileSource;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class MapsforgeTest extends GdxMapApp {
 
     private static final boolean SHADOWS = false;
 
-    private File mapFile;
-    private boolean poi3d;
-    private boolean s3db;
+    private final List<File> mapFiles;
+    private final boolean poi3d;
+    private final boolean s3db;
 
-    MapsforgeTest(File mapFile) {
-        this(mapFile, false, false);
+    MapsforgeTest(List<File> mapFiles) {
+        this(mapFiles, false, false);
     }
 
-    MapsforgeTest(File mapFile, boolean s3db, boolean poi3d) {
-        this.mapFile = mapFile;
+    MapsforgeTest(List<File> mapFiles, boolean s3db, boolean poi3d) {
+        this.mapFiles = mapFiles;
         this.s3db = s3db;
         this.poi3d = poi3d;
     }
 
     @Override
     public void createLayers() {
-        MapFileTileSource tileSource = new MapFileTileSource();
-        tileSource.setMapFile(mapFile.getAbsolutePath());
+        MultiMapFileTileSource tileSource = new MultiMapFileTileSource();
+        for (File mapFile : mapFiles) {
+            MapFileTileSource mapFileTileSource = new MapFileTileSource();
+            mapFileTileSource.setMapFile(mapFile.getAbsolutePath());
+            tileSource.add(mapFileTileSource);
+        }
         //tileSource.setPreferredLanguage("en");
 
         VectorTileLayer l = mMap.setBaseMap(tileSource);
@@ -86,10 +93,10 @@ public class MapsforgeTest extends GdxMapApp {
         mMap.layers().add(mapScaleBarLayer);
 
         MapPosition pos = MapPreferences.getMapPosition();
-        MapInfo info = tileSource.getMapInfo();
-        if (pos == null || !info.boundingBox.contains(pos.getGeoPoint())) {
+        BoundingBox bbox = tileSource.getBoundingBox();
+        if (pos == null || !bbox.contains(pos.getGeoPoint())) {
             pos = new MapPosition();
-            pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+            pos.setByBoundingBox(bbox, Tile.SIZE * 4, Tile.SIZE * 4);
         }
         mMap.setMapPosition(pos);
 
@@ -123,28 +130,32 @@ public class MapsforgeTest extends GdxMapApp {
         super.dispose();
     }
 
-    static File getMapFile(String[] args) {
+    static List<File> getMapFiles(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException("missing argument: <mapFile>");
         }
 
-        File file = new File(args[0]);
-        if (!file.exists()) {
-            throw new IllegalArgumentException("file does not exist: " + file);
-        } else if (!file.isFile()) {
-            throw new IllegalArgumentException("not a file: " + file);
-        } else if (!file.canRead()) {
-            throw new IllegalArgumentException("cannot read file: " + file);
+        List<File> result = new ArrayList<>();
+        for (String arg : args) {
+            File mapFile = new File(arg);
+            if (!mapFile.exists()) {
+                throw new IllegalArgumentException("file does not exist: " + mapFile);
+            } else if (!mapFile.isFile()) {
+                throw new IllegalArgumentException("not a file: " + mapFile);
+            } else if (!mapFile.canRead()) {
+                throw new IllegalArgumentException("cannot read file: " + mapFile);
+            }
+            result.add(mapFile);
         }
-        return file;
+        return result;
     }
 
-    protected void loadTheme(final String styleId) {
+    void loadTheme(final String styleId) {
         mMap.setTheme(VtmThemes.DEFAULT);
     }
 
     public static void main(String[] args) {
         GdxMapApp.init();
-        GdxMapApp.run(new MapsforgeTest(getMapFile(args)));
+        GdxMapApp.run(new MapsforgeTest(getMapFiles(args)));
     }
 }
