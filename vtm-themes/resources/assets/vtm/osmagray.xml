@@ -41,7 +41,7 @@
     <!--###### AREA styles ######-->
 
     <!--water-->
-    <style-area fill="#d0d0d0" id="water" mesh="true" />
+    <style-area fill="#d0d0d0" id="water" />
 
 
     <!--###### LINE styles ######-->
@@ -56,7 +56,7 @@
     <!--###### ASSIGNMENT ######-->
 
     <m e="way" k="natural" v="issea|sea">
-        <area use="water" />
+        <area mesh="true" use="water" />
     </m>
 
     <m e="way" k="natural" v="nosea">
