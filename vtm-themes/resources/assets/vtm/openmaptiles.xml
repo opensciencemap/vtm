@@ -71,8 +71,7 @@
     <style-area fade="10" fill="#c2cba5" id="darkgreen" use="tex1" />
 
     <!--farmland-->
-    <style-area fade="12" fill="#e4dab5" id="farmland" stroke="#d1dbc7" stroke-width="1.0"
-        use="tex1" />
+    <style-area fade="12" fill="#e4dab5" id="farmland" use="tex1" />
 
     <!-- <style-area id="greens" fill="#d2e5ce" fade="10" /> -->
 
@@ -81,7 +80,7 @@
 
     <!-- park|common|green|cemetery|golf_course|dog_park -->
     <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
-    <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" stroke="#d1dbc7" stroke-width="1.0"/> -->
+    <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" /> -->
 
     <!--wood-->
     <style-area blend="11" blend-fill="#83aa5b" fade="8" fill="#b3d095" id="wood" use="park" />
@@ -96,7 +95,7 @@
     <!--military-->
     <style-area fade="10" fill="#eeedea" id="military" />
     <!--building-->
-    <style-area fade="15" fill="#f2f0eb" id="building" stroke="#b7b6b3" stroke-width="1.0" />
+    <style-area fade="15" fill="#f2f0eb" id="building" />
     <!--<style-area id="building" fill="#e9e6e3" fade="15"/>-->
 
     <!--water-->
@@ -389,6 +388,7 @@
             <m zoom-min="14">
                 <m closed="yes">
                     <area fade="14" use="building" />
+                    <line fade="14" use="building" />
                 </m>
                 <m closed="no">
                     <line fade="14" use="building" />
@@ -399,6 +399,7 @@
             <m zoom-min="16">
                 <m closed="yes">
                     <area fade="16" use="building" />
+                    <line fade="16" use="building" />
                 </m>
                 <m closed="no">
                     <line fade="16" use="building" />

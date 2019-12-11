@@ -229,17 +229,17 @@
             <!-- amenity -->
             <m k="amenity">
                 <m v="kindergarten|school|college|university" zoom-min="14">
-                    <area fill="#323439" stroke="#b094bf" stroke-width="2.0" />
+                    <area fill="#323439" />
                 </m>
                 <m v="hospital">
                     <area fill="#716553" />
                 </m>
                 <m v="parking" zoom-min="14">
-                    <area fill="#444434" stroke="#d4d4d4" stroke-width="0.2" />
+                    <area fill="#444434" />
                 </m>
 
                 <m closed="yes" v="fountain">
-                    <area fill="#b4cbdc" stroke="#000080" stroke-width="0.15" />
+                    <area fill="#b4cbdc" />
                 </m>
             </m>
 
@@ -292,7 +292,7 @@
                   </m>
                 -->
                 <m v="swimming_pool">
-                    <area fill="#b4cbdc" stroke="#6060ff" stroke-width="0.2" />
+                    <area fill="#b4cbdc" />
                 </m>
 
                 <!-- <m v="track"> <m k="area" v="yes|true">
@@ -932,7 +932,7 @@
           <line stroke="#e4e4e4" width="0.3" cap="butt" />
           </m>
           <m closed="yes">
-          <area fill="#e4e4e4" stroke="#d0d0d0" stroke-width="0.05" />
+          <area fill="#e4e4e4" />
           </m>
           </m> -->
 
