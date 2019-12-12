@@ -5,6 +5,8 @@
 - Render themes: symbols on lines with billboard / rotation [#743](https://github.com/mapsforge/vtm/pull/743)
 - Location texture renderer: rewrite and optimize [#750](https://github.com/mapsforge/vtm/pull/750)
 - Mapsforge: fix ways precision loss [#752](https://github.com/mapsforge/vtm/pull/752)
+- Mapsforge: additional simplification [#757](https://github.com/mapsforge/vtm/pull/757)
+  - `Parameters.SIMPLIFICATION`
 - Android: OpenGL ES 2.0 default for performance / stability [#749](https://github.com/mapsforge/vtm/pull/749)
   - `MapView.OPENGL_VERSION`
 - Android: threaded system initialization
