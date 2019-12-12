@@ -52,7 +52,7 @@ import static org.oscim.tiling.QueryResult.SUCCESS;
 /**
  * A class for reading binary map files.
  *
- * @see <a href="http://code.google.com/p/mapsforge/wiki/SpecificationBinaryMapFile">Specification</a>
+ * @see <a href="https://github.com/mapsforge/mapsforge/blob/master/docs/Specification-Binary-Map-File.md">Specification</a>
  */
 public class MapDatabase implements ITileDataSource {
     /**
@@ -187,6 +187,19 @@ public class MapDatabase implements ITileDataSource {
     public static boolean wayFilterEnabled = true;
     public static int wayFilterDistance = 20;
 
+    /**
+     * Reduce points on-the-fly while reading from map files.
+     */
+    public static int SIMPLIFICATION_MIN_ZOOM = 8;
+    public static int SIMPLIFICATION_MAX_ZOOM = 11;
+
+    /**
+     * Mapsforge artificial tags for land/sea areas.
+     */
+    private static final Tag TAG_ISSEA = new Tag("natural", "issea");
+    private static final Tag TAG_NOSEA = new Tag("natural", "nosea");
+    private static final Tag TAG_SEA = new Tag("natural", "sea");
+
     private long mFileSize;
     private boolean mDebugFile;
     private RandomAccessFile mInputFile;
@@ -250,20 +263,25 @@ public class MapDatabase implements ITileDataSource {
             mTileProjection.setTile(tile);
             //mTile = tile;
 
-            /* size of tile in map coordinates; */
-            double size = 1.0 / (1 << tile.zoomLevel);
+            if (tile.zoomLevel < SIMPLIFICATION_MIN_ZOOM || tile.zoomLevel > SIMPLIFICATION_MAX_ZOOM) {
+                minDeltaLat = 0;
+                minDeltaLon = 0;
+            } else {
+                /* size of tile in map coordinates; */
+                double size = 1.0 / (1 << tile.zoomLevel);
 
-            /* simplification tolerance */
-            int pixel = (tile.zoomLevel > 11) ? 1 : 2;
+                /* simplification tolerance */
+                int pixel = 2;
 
-            int simplify = Tile.SIZE / pixel;
+                int simplify = Tile.SIZE / pixel;
 
-            /* translate screen pixel for tile to latitude and longitude
-             * tolerance for point reduction before projection. */
-            minDeltaLat = (int) (Math.abs(MercatorProjection.toLatitude(tile.y + size)
-                    - MercatorProjection.toLatitude(tile.y)) * 1e6) / simplify;
-            minDeltaLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
-                    - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
+                /* translate screen pixel for tile to latitude and longitude
+                 * tolerance for point reduction before projection. */
+                minDeltaLat = (int) (Math.abs(MercatorProjection.toLatitude(tile.y + size)
+                        - MercatorProjection.toLatitude(tile.y)) * 1e6) / simplify;
+                minDeltaLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
+                        - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
+            }
 
             QueryParameters queryParameters = new QueryParameters();
             queryParameters.queryZoomLevel =
@@ -797,11 +815,12 @@ public class MapDatabase implements ITileDataSource {
             } else if (lat == pLat && lon == pLon) {
                 /* drop small distance intermediate nodes */
                 //log.debug("drop zero delta ");
-            } else /*if ((deltaLon > minDeltaLon || deltaLon < -minDeltaLon
-                    || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)
-                    || e.tags.contains("natural", "nosea"))*/ {
-                // Avoid additional simplification
-                // https://github.com/mapsforge/vtm/issues/39
+            } else if (!Parameters.SIMPLIFICATION
+                    || (e.tags.contains(TAG_ISSEA)
+                    || e.tags.contains(TAG_SEA)
+                    || e.tags.contains(TAG_NOSEA)
+                    || deltaLon > minDeltaLon || deltaLon < -minDeltaLon
+                    || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)) {
                 outBuffer[outPos++] = pLon = lon;
                 outBuffer[outPos++] = pLat = lat;
                 cnt += 2;

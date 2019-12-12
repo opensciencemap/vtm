@@ -63,6 +63,11 @@ public final class Parameters {
     public static boolean POT_TEXTURES = false;
 
     /**
+     * Reduce points on-the-fly while reading from map files.
+     */
+    public static boolean SIMPLIFICATION = false;
+
+    /**
      * Texture atlas in themes.
      */
     public static boolean TEXTURE_ATLAS = false;
