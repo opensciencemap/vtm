@@ -263,15 +263,13 @@ public class MapDatabase implements ITileDataSource {
             mTileProjection.setTile(tile);
             //mTile = tile;
 
-            if (tile.zoomLevel < SIMPLIFICATION_MIN_ZOOM || tile.zoomLevel > SIMPLIFICATION_MAX_ZOOM) {
-                minDeltaLat = 0;
-                minDeltaLon = 0;
-            } else {
+            if (Parameters.SIMPLIFICATION_TOLERANCE > 0
+                    && tile.zoomLevel >= SIMPLIFICATION_MIN_ZOOM && tile.zoomLevel <= SIMPLIFICATION_MAX_ZOOM) {
                 /* size of tile in map coordinates; */
                 double size = 1.0 / (1 << tile.zoomLevel);
 
                 /* simplification tolerance */
-                int pixel = 2;
+                int pixel = Parameters.SIMPLIFICATION_TOLERANCE;
 
                 int simplify = Tile.SIZE / pixel;
 
@@ -281,6 +279,9 @@ public class MapDatabase implements ITileDataSource {
                         - MercatorProjection.toLatitude(tile.y)) * 1e6) / simplify;
                 minDeltaLon = (int) (Math.abs(MercatorProjection.toLongitude(tile.x + size)
                         - MercatorProjection.toLongitude(tile.x)) * 1e6) / simplify;
+            } else {
+                minDeltaLat = 0;
+                minDeltaLon = 0;
             }
 
             QueryParameters queryParameters = new QueryParameters();
@@ -815,7 +816,7 @@ public class MapDatabase implements ITileDataSource {
             } else if (lat == pLat && lon == pLon) {
                 /* drop small distance intermediate nodes */
                 //log.debug("drop zero delta ");
-            } else if (!Parameters.SIMPLIFICATION
+            } else if (Parameters.SIMPLIFICATION_TOLERANCE == 0
                     || (e.tags.contains(TAG_ISSEA)
                     || e.tags.contains(TAG_SEA)
                     || e.tags.contains(TAG_NOSEA)

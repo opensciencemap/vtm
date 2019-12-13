@@ -64,8 +64,9 @@ public final class Parameters {
 
     /**
      * Reduce points on-the-fly while reading from map files.
+     * e.g. 0 (no simplification), 2, 4, ...
      */
-    public static boolean SIMPLIFICATION = false;
+    public static int SIMPLIFICATION_TOLERANCE = 0;
 
     /**
      * Texture atlas in themes.
