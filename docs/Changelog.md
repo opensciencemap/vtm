@@ -4,6 +4,7 @@
 
 - Render themes: symbols on lines with billboard / rotation [#743](https://github.com/mapsforge/vtm/pull/743)
 - Location texture renderer: rewrite and optimize [#750](https://github.com/mapsforge/vtm/pull/750)
+- Fix stroke cap line ending [#758](https://github.com/mapsforge/vtm/pull/758)
 - Mapsforge: fix ways precision loss [#752](https://github.com/mapsforge/vtm/pull/752)
 - Mapsforge: additional simplification [#757](https://github.com/mapsforge/vtm/pull/757)
   - `Parameters.SIMPLIFICATION_TOLERANCE`
