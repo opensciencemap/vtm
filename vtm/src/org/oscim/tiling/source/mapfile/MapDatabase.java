@@ -817,11 +817,13 @@ public class MapDatabase implements ITileDataSource {
                 /* drop small distance intermediate nodes */
                 //log.debug("drop zero delta ");
             } else if (Parameters.SIMPLIFICATION_TOLERANCE == 0
-                    || (e.tags.contains(TAG_ISSEA)
+                    || (isLine
+                    || e.tags.contains(TAG_ISSEA)
                     || e.tags.contains(TAG_SEA)
                     || e.tags.contains(TAG_NOSEA)
                     || deltaLon > minDeltaLon || deltaLon < -minDeltaLon
                     || deltaLat > minDeltaLat || deltaLat < -minDeltaLat)) {
+                // Point reduction except lines and land/sea polygons
                 outBuffer[outPos++] = pLon = lon;
                 outBuffer[outPos++] = pLat = lat;
                 cnt += 2;
