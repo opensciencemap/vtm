@@ -43,18 +43,19 @@
     <!-- src="assets:textures/wood.png" -->
     <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
 
-    <style-area id="tex1" src="assets:textures/rough.png" />
+    <!-- Avoid patterns and textures because of old GPU issues -->
+    <!--<style-area id="tex1" src="assets:textures/rough.png" />-->
 
     <!-- meadow|garden -->
-    <style-area fade="10" fill="#c9dc91" id="greens" use="tex1" />
+    <style-area fade="10" fill="#c9dc91" id="greens" />
 
     <!-- grass -->
-    <style-area fade="12" fill="#d3dcb9" id="lightgreen" use="tex1" />
+    <style-area fade="12" fill="#d3dcb9" id="lightgreen" />
 
     <!-- grassland|scrub -->
-    <style-area fade="10" fill="#c2cba5" id="darkgreen" use="tex1" />
+    <style-area fade="10" fill="#c2cba5" id="darkgreen" />
 
-    <style-area fade="12" fill="#e4dab5" id="farmland" use="tex1" />
+    <style-area fade="12" fill="#e4dab5" id="farmland" />
 
     <!-- <style-area id="greens" fill="#d2e5ce" fade="10" /> -->
 
@@ -62,7 +63,7 @@
     <style-area fade="12" fill="#deecb9" id="greens2" />
 
     <!-- park|common|green|cemetery|golf_course|dog_park -->
-    <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
+    <style-area fade="11" fill="#9ac56e" id="park" />
     <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" /> -->
 
     <style-area blend="11" blend-fill="#83aa5b" fade="8" fill="#b3d095" id="wood" use="park" />
@@ -72,7 +73,7 @@
     <style-line cap="butt" fade="14" fix="true" id="park" stroke="#9ac56e" width="1.0" />
 
     <!-- de:Kleingartengebiet -->
-    <style-area fade="12" fill="#efeae0" id="allotments" use="tex1" />
+    <style-area fade="12" fill="#efeae0" id="allotments" />
 
     <!-- de:Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
     <style-area fade="10" fill="#ddddcc" id="quarry" />
@@ -115,7 +116,7 @@
 
     <!--<style-area id="water" fill="#97b7e5" afc5e3 /> -->
     <!-- src="assets:textures/water.png" -->
-    <style-area fade="-1" fill="#99badf" id="water" use="tex1" />
+    <style-area fade="-1" fill="#99badf" id="water" />
 
     <!-- no-go area boundary -->
     <style-line cap="butt" fix="true" id="fence" stroke="#444444" width="1.2" />
@@ -181,7 +182,7 @@
         <m k="kind">
             <!-- kind of more like landuse imho -->
             <m v="nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" />
+                <area fill="#40abe29c" />
                 <m zoom-min="14">
                     <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
                 </m>
@@ -240,7 +241,7 @@
 
             <!-- Heideland, keep below forest -->
             <m v="heath|sand" zoom-min="10">
-                <area fade="10" fill="#fffad1" use="tex1" />
+                <area fade="10" fill="#fffad1" />
             </m>
 
             <m v="forest|wood">
@@ -314,7 +315,7 @@
                     <area fade="12" fill="#daefdb" />
                 </m>
                 <m v="playground|miniature_golf" zoom-min="15">
-                    <area fill="#f4f4de" use="tex1" />
+                    <area fill="#f4f4de" />
                     <line cap="butt" fix="true" stroke="#d9d9a3" width="1.0" />
                 </m>
                 <m v="playing_fields|pitch">
@@ -990,7 +991,7 @@
 
         <!-- non-physical boundaries -->
         <m k="boundary" v="national_park">
-            <area src="assets:patterns/nature-reserve.png" />
+            <area fill="#40abe29c" />
         </m>
 
         <!--<m k="boundary" v="administrative"> -->

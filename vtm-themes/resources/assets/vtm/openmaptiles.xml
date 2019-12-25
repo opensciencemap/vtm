@@ -59,19 +59,21 @@
     <!-- <style-area id="wood" fill="#d1dbc7" fade="8" blend="11" blend-fill="#9ac56e" /> -->
 
     <!--Note: ordered according to their inheritance via the `use` attribute-->
-    <style-area id="tex1" src="assets:textures/rough.png" />
+
+    <!-- Avoid patterns and textures because of old GPU issues -->
+    <!--<style-area id="tex1" src="assets:textures/rough.png" />-->
 
     <!-- meadow|garden -->
-    <style-area fade="10" fill="#c9dc91" id="greens" use="tex1" />
+    <style-area fade="10" fill="#c9dc91" id="greens" />
 
     <!-- grass -->
-    <style-area fade="12" fill="#d3dcb9" id="lightgreen" use="tex1" />
+    <style-area fade="12" fill="#d3dcb9" id="lightgreen" />
 
     <!-- grassland|scrub -->
-    <style-area fade="10" fill="#c2cba5" id="darkgreen" use="tex1" />
+    <style-area fade="10" fill="#c2cba5" id="darkgreen" />
 
     <!--farmland-->
-    <style-area fade="12" fill="#e4dab5" id="farmland" use="tex1" />
+    <style-area fade="12" fill="#e4dab5" id="farmland" />
 
     <!-- <style-area id="greens" fill="#d2e5ce" fade="10" /> -->
 
@@ -79,7 +81,7 @@
     <style-area fade="12" fill="#deecb9" id="greens2" />
 
     <!-- park|common|green|cemetery|golf_course|dog_park -->
-    <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
+    <style-area fade="11" fill="#9ac56e" id="park" />
     <!-- <style-area id="wood" use="park" fill="#9ac56e" fade="8" /> -->
 
     <!--wood-->
@@ -87,7 +89,7 @@
     <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
 
     <!-- de:Kleingartengebiet -->
-    <style-area fade="12" fill="#efeae0" id="allotments" use="tex1" />
+    <style-area fade="12" fill="#efeae0" id="allotments" />
 
     <!-- de:Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
     <style-area fade="10" fill="#ddddcc" id="quarry" />
@@ -240,7 +242,7 @@
     <m k="layer" v="park">
         <m k="class">
             <m v="national_park|nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" />
+                <area fill="#40abe29c" />
             </m>
         </m>
     </m>

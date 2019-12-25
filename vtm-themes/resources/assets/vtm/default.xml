@@ -60,27 +60,29 @@
     <style-area fade="10" fill="#e6e3e5" id="railway|industrial" />
 
     <!--Note: ordered according to their inheritance via the `use` attribute-->
-    <style-area id="tex1" src="assets:textures/rough.png" />
+
+    <!-- Avoid patterns and textures because of old GPU issues -->
+    <!--<style-area id="tex1" src="assets:textures/rough.png" />-->
 
     <!-- meadow|garden -->
-    <style-area fade="10" fill="#c9dc91" id="greens" use="tex1" />
+    <style-area fade="10" fill="#c9dc91" id="greens" />
 
     <!-- grass -->
-    <style-area fade="12" fill="#d3dcb9" id="lightgreen" use="tex1" />
+    <style-area fade="12" fill="#d3dcb9" id="lightgreen" />
 
     <!-- grassland|scrub -->
-    <style-area fade="10" fill="#c2cba5" id="darkgreen" use="tex1" />
+    <style-area fade="10" fill="#c2cba5" id="darkgreen" />
 
     <!-- <style-area id="greens" fill="#d2e5ce" fade="10" /> -->
 
     <!--farmland-->
-    <style-area fade="12" fill="#e4dab5" id="farmland" use="tex1" />
+    <style-area fade="12" fill="#e4dab5" id="farmland" />
 
     <!-- marsh|wetland|mud|nature_reserve -->
     <style-area fade="12" fill="#deecb9" id="greens2" />
 
     <!-- park|common|green|cemetery|golf_course|dog_park -->
-    <style-area fade="11" fill="#9ac56e" id="park" use="tex1" />
+    <style-area fade="11" fill="#9ac56e" id="park" />
     <!-- <style-area id="park" fill="#a3ca7b" fade="11" /> -->
 
     <!--wood-->
@@ -92,7 +94,7 @@
     <!-- <style-line id="wood" fix="true" cap="butt" width="1.0" stroke="#9ac56e" /> -->
 
     <!-- de:Kleingartengebiet -->
-    <style-area fade="12" fill="#efeae0" id="allotments" use="tex1" />
+    <style-area fade="12" fill="#efeae0" id="allotments" />
 
     <!-- de:Steinbruch, Schotter-, Kies-, Sand- und Tongrube -->
     <style-area fade="10" fill="#ddddcc" id="quarry" />
@@ -219,7 +221,7 @@
         <m k="landuse|natural|leisure|amenity|tourism">
             <!-- kind of more like landuse imho -->
             <m k="leisure|landuse" v="nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" />
+                <area fill="#40abe29c" />
                 <m zoom-min="14">
                     <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
                 </m>
@@ -280,7 +282,7 @@
 
             <!-- Heideland, keep below forest -->
             <m v="heath|sand" zoom-min="10">
-                <area fade="10" fill="#fffad1" use="tex1" />
+                <area fade="10" fill="#fffad1" />
             </m>
 
             <m k="landuse|natural" v="forest|wood">
@@ -353,7 +355,7 @@
                     <area fade="12" fill="#daefdb" />
                 </m>
                 <m v="playground|miniature_golf" zoom-min="15">
-                    <area fill="#f4f4de" use="tex1" />
+                    <area fill="#f4f4de" />
                     <line cap="butt" fix="true" stroke="#d9d9a3" width="1.0" />
                 </m>
                 <m v="playing_fields|pitch">
@@ -1030,7 +1032,7 @@
 
         <!-- non-physical boundaries -->
         <m k="boundary" v="national_park">
-            <area src="assets:patterns/nature-reserve.png" />
+            <area fill="#40abe29c" />
         </m>
 
         <!--<m k="boundary" v="administrative"> -->
