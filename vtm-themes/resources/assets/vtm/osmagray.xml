@@ -69,7 +69,7 @@
         <m k="landuse">
             <m select="first">
                 <m v="military">
-                    <area src="assets:patterns/military.png" />
+                    <area fill="#40ededed" />
                 </m>
                 <m v="residential|farmyard">
                     <area fill="#e4e4e4" />
@@ -94,7 +94,7 @@
                     <area fill="#d8d8d8" />
                 </m>
                 <m v="cemetery">
-                    <area src="assets:patterns/cemetery.png" />
+                    <area fill="#e2e2e2" />
                 </m>
                 <m v="field|farm|farmland|meadow|grass">
                     <area fill="#f9f9f9" />
@@ -117,20 +117,7 @@
         </m>
 
         <m k="natural|landuse" v="forest|wood">
-            <m k="wood">
-                <m k="wood" v="coniferous">
-                    <area src="assets:patterns/wood-coniferous.png" />
-                </m>
-                <m k="wood" v="deciduous">
-                    <area src="assets:patterns/wood-deciduous.png" />
-                </m>
-                <m k="wood" v="mixed">
-                    <area src="assets:patterns/wood-mixed.png" />
-                </m>
-            </m>
-            <m k="wood" v="~">
-                <area fill="#acacac" />
-            </m>
+            <area fill="#acacac" />
 
             <m zoom-min="16">
                 <text use="caption-small-blue" />
@@ -145,12 +132,12 @@
                     <area fill="#b5b5b5" />
                 </m>
                 <m v="grave_yard">
-                    <area src="assets:patterns/cemetery.png" />
+                    <area fill="#e2e2e2" />
                 </m>
                 <m v="parking">
                     <area fill="#fafafa" />
                     <m k="access" v="private" zoom-min="15">
-                        <area src="assets:patterns/access-private.png" />
+                        <area fill="#40363636" />
                     </m>
                 </m>
                 <m closed="yes" v="fountain">
@@ -184,7 +171,7 @@
                     <area fill="#fafafa" />
                 </m>
                 <m v="marsh|wetland">
-                    <area src="assets:patterns/marsh.png" />
+                    <area fill="#e5e5e5" />
                 </m>
             </m>
             <m k="name" zoom-min="16">
@@ -206,7 +193,7 @@
                     </m>
                 </m>
                 <m v="nature_reserve">
-                    <area src="assets:patterns/nature-reserve.png" />
+                    <area fill="#40d1d1d1" />
                 </m>
 
                 <m v="stadium|sports_centre|water_park">
@@ -280,7 +267,7 @@
 
         <!-- military -->
         <m k="military">
-            <area src="assets:patterns/military.png" />
+            <area fill="#40ededed" />
         </m>
 
 
@@ -782,18 +769,6 @@
                                 </m>
                             </m>
 
-                            <!-- <m zoom-min="16">
-
-                              <line width="1.0" stroke="#ff0000" />
-
-                              <m k="access" v="destination">
-                              <line src="assets:patterns/access-destination.png" width="1.5" />
-                              </m>
-                              <m k="access" v="private">
-                              <line src="assets:patterns/access-private.png" width="1.5" />
-                              </m>
-                              </m> -->
-
                             <!-- add outline for all matches -->
                             <m select="when-matched">
                                 <outline use="casing" />
@@ -1062,7 +1037,7 @@
 
         <m k="boundary">
             <m k="boundary" v="national_park">
-                <area src="assets:patterns/nature-reserve.png" />
+                <area fill="#40d1d1d1" />
             </m>
             <m k="boundary" v="administrative">
                 <m k="admin_level">

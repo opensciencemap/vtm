@@ -168,7 +168,7 @@
         <m k="landuse|natural|leisure||amenity">
             <!-- kind of more like landuse imho -->
             <m k="leisure|landuse" v="nature_reserve">
-                <area src="assets:patterns/nature-reserve.png" />
+                <area fill="#40abe29c" />
                 <m zoom-min="14">
                     <line cap="butt" fix="true" stroke="#abe29c" width="1.0" />
                 </m>
@@ -1022,7 +1022,7 @@
 
         <!-- non-physical boundaries -->
         <m k="boundary" v="national_park">
-            <area src="assets:patterns/nature-reserve.png" />
+            <area fill="#40abe29c" />
         </m>
 
         <!--<m k="boundary" v="administrative"> -->
