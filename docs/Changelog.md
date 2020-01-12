@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.12.0
+## Version 0.13.0 (2020-01-12)
 
 - Render themes: symbols on lines with billboard / rotation [#743](https://github.com/mapsforge/vtm/pull/743)
 - Location texture renderer: rewrite and optimize [#750](https://github.com/mapsforge/vtm/pull/750)
