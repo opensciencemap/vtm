@@ -65,7 +65,6 @@ public class MapsforgeActivity extends MapActivity {
     private static final Tag SEA_TAG = new Tag("natural", "sea");
 
     private TileGridLayer mGridLayer;
-    private DefaultMapScaleBar mMapScaleBar;
     private Menu mMenu;
     private boolean mS3db;
     private VectorTileLayer mTileLayer;
@@ -91,14 +90,6 @@ public class MapsforgeActivity extends MapActivity {
 
         startActivityForResult(new Intent(this, MapFilePicker.class),
                 SELECT_MAP_FILE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mMapScaleBar != null)
-            mMapScaleBar.destroy();
-
-        super.onDestroy();
     }
 
     public static class MapFilePicker extends FilePicker {
@@ -197,7 +188,7 @@ public class MapsforgeActivity extends MapActivity {
                     mMap.layers().add(new BuildingLayer(mMap, mTileLayer));
                 mMap.layers().add(new LabelLayer(mMap, mTileLayer));
 
-                mMapScaleBar = new DefaultMapScaleBar(mMap);
+                DefaultMapScaleBar mMapScaleBar = new DefaultMapScaleBar(mMap);
                 mMapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
                 mMapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
                 mMapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
