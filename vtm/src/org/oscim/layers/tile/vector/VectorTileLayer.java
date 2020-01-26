@@ -104,6 +104,10 @@ public class VectorTileLayer extends TileLayer {
         return true;
     }
 
+    public TileSource getTileSource() {
+        return mTileSource;
+    }
+
     /**
      * Set {@link IRenderTheme} used by {@link TileLoader}
      */
