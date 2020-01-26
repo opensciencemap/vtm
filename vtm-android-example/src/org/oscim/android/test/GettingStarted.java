@@ -42,7 +42,6 @@ public class GettingStarted extends Activity {
     private static final String MAP_FILE = "berlin.map";
 
     private MapView mapView;
-    private MapScaleBar mapScaleBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +68,7 @@ public class GettingStarted extends Activity {
             mapView.map().setTheme(VtmThemes.DEFAULT);
 
             // Scale bar
-            mapScaleBar = new DefaultMapScaleBar(mapView.map());
+            MapScaleBar mapScaleBar = new DefaultMapScaleBar(mapView.map());
             MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mapView.map(), mapScaleBar);
             mapScaleBarLayer.getRenderer().setPosition(GLViewport.Position.BOTTOM_LEFT);
             mapScaleBarLayer.getRenderer().setOffset(5 * CanvasAdapter.getScale(), 0);
@@ -94,8 +93,6 @@ public class GettingStarted extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (mapScaleBar != null)
-            mapScaleBar.destroy();
         mapView.onDestroy();
         super.onDestroy();
     }
