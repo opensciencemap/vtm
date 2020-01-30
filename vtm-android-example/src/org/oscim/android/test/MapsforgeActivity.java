@@ -67,8 +67,7 @@ public class MapsforgeActivity extends MapActivity {
     private TileGridLayer mGridLayer;
     private Menu mMenu;
     private boolean mS3db;
-    private VectorTileLayer mTileLayer;
-    MapFileTileSource mTileSource;
+    VectorTileLayer mTileLayer;
 
     public MapsforgeActivity() {
         this(false);
@@ -174,7 +173,7 @@ public class MapsforgeActivity extends MapActivity {
                 return;
             }
 
-            mTileSource = new MapFileTileSource();
+            MapFileTileSource mTileSource = new MapFileTileSource();
             //mTileSource.setPreferredLanguage("en");
             String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
             if (mTileSource.setMapFile(file)) {
