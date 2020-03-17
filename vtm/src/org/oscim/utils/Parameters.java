@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 devemux86
+ * Copyright 2017-2020 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -35,6 +35,11 @@ public final class Parameters {
      * If true the <code>MapEventLayer2</code> will be used instead of default <code>MapEventLayer</code>.
      */
     public static boolean MAP_EVENT_LAYER2 = false;
+
+    /**
+     * If true the markers are sorted in y-axis.
+     */
+    public static boolean MARKER_SORT = true;
 
     /**
      * Maximum buffer size for map files.

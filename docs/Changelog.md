@@ -2,6 +2,8 @@
 
 ## New since 0.13.0
 
+- Marker renderer sort option
+  - `Parameters.MARKER_SORT`
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.14.0)
 
