@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2019 devemux86
+ * Copyright 2016-2020 devemux86
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
  *
@@ -33,11 +33,12 @@ import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
+import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MarkerOverlayActivity extends MapActivity
@@ -58,9 +59,10 @@ public class MarkerOverlayActivity extends MapActivity
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
-        TileSource tileSource = DefaultSources.OPENSTREETMAP
+        UrlTileSource tileSource = DefaultSources.OPENSTREETMAP
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
+        tileSource.setHttpRequestHeaders(Collections.singletonMap("User-Agent", "vtm-android-example"));
         mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
         Bitmap bitmapPoi = new AndroidBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker_poi));

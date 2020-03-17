@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2020 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -27,12 +27,13 @@ import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.map.Map;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
+import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
@@ -49,9 +50,10 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
             // Map events receiver
             mMap.layers().add(new MapEventsReceiver(mMap));
 
-            TileSource tileSource = DefaultSources.OPENSTREETMAP
+            UrlTileSource tileSource = DefaultSources.OPENSTREETMAP
                     .httpFactory(new OkHttpEngine.OkHttpFactory())
                     .build();
+            tileSource.setHttpRequestHeaders(Collections.singletonMap("User-Agent", "vtm-playground"));
             mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
             mMap.setMapPosition(0, 0, 1 << 2);

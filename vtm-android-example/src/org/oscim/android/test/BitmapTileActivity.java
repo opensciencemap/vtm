@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2017-2018 devemux86
+ * Copyright 2017-2020 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -16,7 +16,6 @@
 package org.oscim.android.test;
 
 import android.os.Bundle;
-
 import org.oscim.android.cache.TileCache;
 import org.oscim.core.MapPosition;
 import org.oscim.core.MercatorProjection;
@@ -26,6 +25,8 @@ import org.oscim.tiling.source.bitmap.BitmapTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
 
 public class BitmapTileActivity extends MapActivity {
 
@@ -42,6 +43,7 @@ public class BitmapTileActivity extends MapActivity {
 
     public BitmapTileActivity(BitmapTileSource tileSource) {
         super(R.layout.activity_map);
+        tileSource.setHttpRequestHeaders(Collections.singletonMap("User-Agent", "vtm-android-example"));
         mTileSource = tileSource;
     }
 

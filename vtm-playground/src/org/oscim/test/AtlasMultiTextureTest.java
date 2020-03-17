@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2020 devemux86
  * Copyright 2017 Longri
  *
  * This program is free software: you can redistribute it and/or modify it under the
@@ -28,12 +28,13 @@ import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
+import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.utils.TextureAtlasUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -46,9 +47,10 @@ public class AtlasMultiTextureTest extends MarkerLayerTest {
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
-        TileSource tileSource = DefaultSources.OPENSTREETMAP
+        UrlTileSource tileSource = DefaultSources.OPENSTREETMAP
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
+        tileSource.setHttpRequestHeaders(Collections.singletonMap("User-Agent", "vtm-playground"));
         mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
         mMap.setMapPosition(0, 0, 1 << 2);

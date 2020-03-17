@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2020 devemux86
  * Copyright 2017 Longri
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -19,7 +19,6 @@
 package org.oscim.android.test;
 
 import android.widget.Toast;
-
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
@@ -33,12 +32,13 @@ import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
 import org.oscim.renderer.atlas.TextureAtlas;
 import org.oscim.renderer.atlas.TextureRegion;
-import org.oscim.tiling.TileSource;
 import org.oscim.tiling.source.OkHttpEngine;
+import org.oscim.tiling.source.UrlTileSource;
 import org.oscim.tiling.source.bitmap.DefaultSources;
 import org.oscim.utils.TextureAtlasUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -49,9 +49,10 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
         // Map events receiver
         mMap.layers().add(new MapEventsReceiver(mMap));
 
-        TileSource tileSource = DefaultSources.OPENSTREETMAP
+        UrlTileSource tileSource = DefaultSources.OPENSTREETMAP
                 .httpFactory(new OkHttpEngine.OkHttpFactory())
                 .build();
+        tileSource.setHttpRequestHeaders(Collections.singletonMap("User-Agent", "vtm-android-example"));
         mMap.layers().add(new BitmapTileLayer(mMap, tileSource));
 
         // Create Atlas from Bitmaps
