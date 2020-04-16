@@ -2,6 +2,7 @@
 
 ## New since 0.13.0
 
+- Render themes: symbol styles [#769](https://github.com/mapsforge/vtm/pull/769)
 - Marker renderer sort option
   - `Parameters.MARKER_SORT`
 - Disable vtm-jeo module [#768](https://github.com/mapsforge/vtm/issues/768)
