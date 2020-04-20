@@ -5,7 +5,7 @@
 - Render themes: symbol styles [#769](https://github.com/mapsforge/vtm/pull/769)
 - Marker renderer sort option
   - `Parameters.MARKER_SORT`
-- Disable vtm-jeo module [#768](https://github.com/mapsforge/vtm/issues/768)
+- Update vtm-jeo module [#770](https://github.com/mapsforge/vtm/pull/770)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.14.0)
 
