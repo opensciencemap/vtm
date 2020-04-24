@@ -109,11 +109,12 @@ There are different possibilities to simplify and accelerate map styling or chan
 
 ### Style patterns
 
-If you want to use a specific style multiple times you not have to rewrite it for each text, area, or line rule.
+If you want to use a specific style multiple times you not have to rewrite it for each text, line, area or symbol rule.
 If you define a style set an `id` and use it with `use` in your rendering instructions:
  - `style-text`
  - `style-line`
  - `style-area`
+ - `style-symbol`
  
 This example styles all areas with the_residential_ style, which haven't the `highway` or `building` key.
  
