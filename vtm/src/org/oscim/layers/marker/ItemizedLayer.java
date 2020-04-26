@@ -2,7 +2,7 @@
  * Copyright 2012 osmdroid authors: Nicolas Gramlich, Theodore Hong, Fred Eisele
  *
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2019 devemux86
+ * Copyright 2016-2020 devemux86
  * Copyright 2016 Stephan Leuschner
  * Copyright 2016 Pedinel
  * Copyright 2019 Carlos Alberto Martínez Gadea
@@ -100,6 +100,7 @@ public class ItemizedLayer<Item extends MarkerInterface> extends MarkerLayer<Ite
 
     public synchronized void addItem(int location, Item item) {
         mItemList.add(location, item);
+        populate();
     }
 
     public synchronized boolean addItems(Collection<Item> items) {
