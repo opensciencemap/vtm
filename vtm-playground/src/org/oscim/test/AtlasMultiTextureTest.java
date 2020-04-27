@@ -23,6 +23,7 @@ import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.marker.ItemizedLayer;
+import org.oscim.layers.marker.MarkerInterface;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
@@ -66,7 +67,7 @@ public class AtlasMultiTextureTest extends MarkerLayerTest {
         paint.setTextSize(12);
         paint.setStrokeWidth(2);
         paint.setColor(Color.BLACK);
-        List<MarkerItem> pts = new ArrayList<>();
+        List<MarkerInterface> pts = new ArrayList<>();
         for (double lat = -90; lat <= 90; lat += 5) {
             for (double lon = -180; lon <= 180; lon += 5) {
                 String title = lat + "/" + lon;
@@ -86,29 +87,32 @@ public class AtlasMultiTextureTest extends MarkerLayerTest {
         // With iOS we must flip the Y-Axis
         TextureAtlasUtils.createTextureRegions(inputMap, regionsMap, atlasList, true, false);
 
-        mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), (MarkerSymbol) null, this);
+        mMarkerLayer = new ItemizedLayer(mMap, new ArrayList<MarkerInterface>(), (MarkerSymbol) null, this);
         mMap.layers().add(mMarkerLayer);
 
         mMarkerLayer.addItems(pts);
 
         // set all markers
-        for (MarkerItem item : pts) {
-            MarkerSymbol markerSymbol = new MarkerSymbol(regionsMap.get(item.getTitle()), HotspotPlace.BOTTOM_CENTER);
-            item.setMarker(markerSymbol);
+        for (MarkerInterface item : pts) {
+            MarkerItem markerItem = (MarkerItem) item;
+            MarkerSymbol markerSymbol = new MarkerSymbol(regionsMap.get(markerItem.getTitle()), HotspotPlace.BOTTOM_CENTER);
+            markerItem.setMarker(markerSymbol);
         }
 
         System.out.println("Atlas count: " + atlasList.size());
     }
 
     @Override
-    public boolean onItemSingleTapUp(int index, MarkerItem item) {
-        System.out.println("Marker tap " + item.getTitle());
+    public boolean onItemSingleTapUp(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        System.out.println("Marker tap " + markerItem.getTitle());
         return true;
     }
 
     @Override
-    public boolean onItemLongPress(int index, MarkerItem item) {
-        System.out.println("Marker long press " + item.getTitle());
+    public boolean onItemLongPress(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        System.out.println("Marker long press " + markerItem.getTitle());
         return true;
     }
 
