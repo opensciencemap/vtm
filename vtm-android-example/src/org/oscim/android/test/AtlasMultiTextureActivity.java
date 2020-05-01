@@ -26,6 +26,7 @@ import org.oscim.backend.canvas.Color;
 import org.oscim.backend.canvas.Paint;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.marker.ItemizedLayer;
+import org.oscim.layers.marker.MarkerInterface;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
@@ -66,7 +67,7 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
         paint.setTextSize(12 * CanvasAdapter.getScale());
         paint.setStrokeWidth(2 * CanvasAdapter.getScale());
         paint.setColor(Color.BLACK);
-        List<MarkerItem> pts = new ArrayList<>();
+        List<MarkerInterface> pts = new ArrayList<>();
         for (double lat = -90; lat <= 90; lat += 10) {
             for (double lon = -180; lon <= 180; lon += 10) {
                 String title = lat + "/" + lon;
@@ -86,29 +87,32 @@ public class AtlasMultiTextureActivity extends MarkerOverlayActivity {
         // With iOS we must flip the Y-Axis
         TextureAtlasUtils.createTextureRegions(inputMap, regionsMap, atlasList, true, false);
 
-        mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), (MarkerSymbol) null, this);
+        mMarkerLayer = new ItemizedLayer(mMap, new ArrayList<MarkerInterface>(), (MarkerSymbol) null, this);
         mMap.layers().add(mMarkerLayer);
 
         mMarkerLayer.addItems(pts);
 
         // set all markers
-        for (MarkerItem item : pts) {
-            MarkerSymbol markerSymbol = new MarkerSymbol(regionsMap.get(item.getTitle()), HotspotPlace.BOTTOM_CENTER);
-            item.setMarker(markerSymbol);
+        for (MarkerInterface item : pts) {
+            MarkerItem markerItem = (MarkerItem) item;
+            MarkerSymbol markerSymbol = new MarkerSymbol(regionsMap.get(markerItem.getTitle()), HotspotPlace.BOTTOM_CENTER);
+            markerItem.setMarker(markerSymbol);
         }
 
         Toast.makeText(this, "Atlas count: " + atlasList.size(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public boolean onItemSingleTapUp(int index, MarkerItem item) {
-        Toast.makeText(this, "Marker tap\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+    public boolean onItemSingleTapUp(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        Toast.makeText(this, "Marker tap\n" + markerItem.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
     @Override
-    public boolean onItemLongPress(int index, MarkerItem item) {
-        Toast.makeText(this, "Marker long press\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+    public boolean onItemLongPress(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        Toast.makeText(this, "Marker long press\n" + markerItem.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 }

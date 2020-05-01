@@ -69,15 +69,15 @@ public class ClusterMarkerLayerTest extends MarkerLayerTest {
                     };
                 }
             };
-            mMarkerLayer = new ItemizedLayer<>(
+            mMarkerLayer = new ItemizedLayer(
                     mMap,
-                    new ArrayList<MarkerItem>(),
+                    new ArrayList<MarkerInterface>(),
                     markerRendererFactory,
                     this);
             mMap.layers().add(mMarkerLayer);
 
             // Create some markers spaced STEP degrees
-            List<MarkerItem> pts = new ArrayList<>();
+            List<MarkerInterface> pts = new ArrayList<>();
             GeoPoint center = mMap.getMapPosition().getGeoPoint();
             for (int x = -COUNT; x < COUNT; x++) {
                 for (int y = -COUNT; y < COUNT; y++) {

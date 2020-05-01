@@ -65,15 +65,15 @@ public class ClusterMarkerOverlayActivity extends MarkerOverlayActivity {
                 };
             }
         };
-        mMarkerLayer = new ItemizedLayer<>(
+        mMarkerLayer = new ItemizedLayer(
                 mMap,
-                new ArrayList<MarkerItem>(),
+                new ArrayList<MarkerInterface>(),
                 markerRendererFactory,
                 this);
         mMap.layers().add(mMarkerLayer);
 
         // Create some markers spaced STEP degrees
-        List<MarkerItem> pts = new ArrayList<>();
+        List<MarkerInterface> pts = new ArrayList<>();
         mMap.setMapPosition(53.08, 8.83, 1 << 15);
         GeoPoint center = mMap.getMapPosition().getGeoPoint();
         for (int x = -COUNT; x < COUNT; x++) {

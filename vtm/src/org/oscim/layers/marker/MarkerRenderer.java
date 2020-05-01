@@ -39,7 +39,7 @@ public class MarkerRenderer extends BucketRenderer {
 
     protected final SymbolBucket mSymbolLayer;
     protected final float[] mBox = new float[8];
-    protected final MarkerLayer<MarkerInterface> mMarkerLayer;
+    protected final MarkerLayer mMarkerLayer;
     protected final Point mMapPoint = new Point();
 
     /**
@@ -49,7 +49,7 @@ public class MarkerRenderer extends BucketRenderer {
 
     protected InternalItem[] mItems;
 
-    public MarkerRenderer(MarkerLayer<MarkerInterface> markerLayer, MarkerSymbol defaultSymbol) {
+    public MarkerRenderer(MarkerLayer markerLayer, MarkerSymbol defaultSymbol) {
         mSymbolLayer = new SymbolBucket();
         mMarkerLayer = markerLayer;
         mDefaultMarker = defaultSymbol;

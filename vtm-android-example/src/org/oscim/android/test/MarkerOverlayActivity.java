@@ -28,6 +28,7 @@ import org.oscim.event.GestureListener;
 import org.oscim.event.MotionEvent;
 import org.oscim.layers.Layer;
 import org.oscim.layers.marker.ItemizedLayer;
+import org.oscim.layers.marker.MarkerInterface;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
@@ -41,12 +42,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MarkerOverlayActivity extends MapActivity
-        implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
+public class MarkerOverlayActivity extends MapActivity implements ItemizedLayer.OnItemGestureListener<MarkerInterface> {
 
     static final boolean BILLBOARDS = true;
     MarkerSymbol mFocusMarker;
-    ItemizedLayer<MarkerItem> mMarkerLayer;
+    ItemizedLayer mMarkerLayer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,10 +78,10 @@ public class MarkerOverlayActivity extends MapActivity
         else
             mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.CENTER, false);
 
-        mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
+        mMarkerLayer = new ItemizedLayer(mMap, new ArrayList<MarkerInterface>(), symbol, this);
         mMap.layers().add(mMarkerLayer);
 
-        List<MarkerItem> pts = new ArrayList<>();
+        List<MarkerInterface> pts = new ArrayList<>();
 
         for (double lat = -90; lat <= 90; lat += 5) {
             for (double lon = -180; lon <= 180; lon += 5)
@@ -100,24 +100,26 @@ public class MarkerOverlayActivity extends MapActivity
     }
 
     @Override
-    public boolean onItemSingleTapUp(int index, MarkerItem item) {
-        if (item.getMarker() == null)
-            item.setMarker(mFocusMarker);
+    public boolean onItemSingleTapUp(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        if (markerItem.getMarker() == null)
+            markerItem.setMarker(mFocusMarker);
         else
-            item.setMarker(null);
+            markerItem.setMarker(null);
 
-        Toast.makeText(this, "Marker tap\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Marker tap\n" + markerItem.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
     @Override
-    public boolean onItemLongPress(int index, MarkerItem item) {
-        if (item.getMarker() == null)
-            item.setMarker(mFocusMarker);
+    public boolean onItemLongPress(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        if (markerItem.getMarker() == null)
+            markerItem.setMarker(mFocusMarker);
         else
-            item.setMarker(null);
+            markerItem.setMarker(null);
 
-        Toast.makeText(this, "Marker long press\n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Marker long press\n" + markerItem.getTitle(), Toast.LENGTH_SHORT).show();
         return true;
     }
 

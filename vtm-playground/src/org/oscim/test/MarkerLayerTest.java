@@ -23,6 +23,7 @@ import org.oscim.event.MotionEvent;
 import org.oscim.gdx.GdxMapApp;
 import org.oscim.layers.Layer;
 import org.oscim.layers.marker.ItemizedLayer;
+import org.oscim.layers.marker.MarkerInterface;
 import org.oscim.layers.marker.MarkerItem;
 import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.layers.tile.bitmap.BitmapTileLayer;
@@ -38,11 +39,11 @@ import java.util.List;
 
 import static org.oscim.layers.marker.MarkerSymbol.HotspotPlace;
 
-public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGestureListener<MarkerItem> {
+public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGestureListener<MarkerInterface> {
 
     static final boolean BILLBOARDS = true;
     MarkerSymbol mFocusMarker;
-    ItemizedLayer<MarkerItem> mMarkerLayer;
+    ItemizedLayer mMarkerLayer;
 
     @Override
     public void createLayers() {
@@ -71,10 +72,10 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
             else
                 mFocusMarker = new MarkerSymbol(bitmapFocus, HotspotPlace.CENTER, false);
 
-            mMarkerLayer = new ItemizedLayer<>(mMap, new ArrayList<MarkerItem>(), symbol, this);
+            mMarkerLayer = new ItemizedLayer(mMap, new ArrayList<MarkerInterface>(), symbol, this);
             mMap.layers().add(mMarkerLayer);
 
-            List<MarkerItem> pts = new ArrayList<>();
+            List<MarkerInterface> pts = new ArrayList<>();
             for (double lat = -90; lat <= 90; lat += 5) {
                 for (double lon = -180; lon <= 180; lon += 5)
                     pts.add(new MarkerItem(lat + "/" + lon, "", new GeoPoint(lat, lon)));
@@ -86,24 +87,26 @@ public class MarkerLayerTest extends GdxMapApp implements ItemizedLayer.OnItemGe
     }
 
     @Override
-    public boolean onItemSingleTapUp(int index, MarkerItem item) {
-        if (item.getMarker() == null)
-            item.setMarker(mFocusMarker);
+    public boolean onItemSingleTapUp(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        if (markerItem.getMarker() == null)
+            markerItem.setMarker(mFocusMarker);
         else
-            item.setMarker(null);
+            markerItem.setMarker(null);
 
-        System.out.println("Marker tap " + item.getTitle());
+        System.out.println("Marker tap " + markerItem.getTitle());
         return true;
     }
 
     @Override
-    public boolean onItemLongPress(int index, MarkerItem item) {
-        if (item.getMarker() == null)
-            item.setMarker(mFocusMarker);
+    public boolean onItemLongPress(int index, MarkerInterface item) {
+        MarkerItem markerItem = (MarkerItem) item;
+        if (markerItem.getMarker() == null)
+            markerItem.setMarker(mFocusMarker);
         else
-            item.setMarker(null);
+            markerItem.setMarker(null);
 
-        System.out.println("Marker long press " + item.getTitle());
+        System.out.println("Marker long press " + markerItem.getTitle());
         return true;
     }
 
