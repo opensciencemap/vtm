@@ -3,6 +3,7 @@
 ## New since 0.13.0
 
 - Render themes: symbol styles [#769](https://github.com/mapsforge/vtm/pull/769)
+- More mutable itemized layer [#771](https://github.com/mapsforge/vtm/pull/771)
 - Marker renderer sort option
   - `Parameters.MARKER_SORT`
 - Update vtm-jeo module [#770](https://github.com/mapsforge/vtm/pull/770)
