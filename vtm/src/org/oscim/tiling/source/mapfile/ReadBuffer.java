@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011, 2012 mapsforge.org
- * Copyright 2017-2018 devemux86
+ * Copyright 2017-2020 devemux86
  * Copyright 2017 Gustl22
  *
  * This file is part of the OpenScienceMap project (http://www.opensciencemap.org).
@@ -27,6 +27,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -84,7 +85,12 @@ public class ReadBuffer {
                 LOG.warning("invalid read length: " + length);
                 return false;
             }
-            mBufferData = new byte[length];
+            try {
+                mBufferData = new byte[length];
+            } catch (Throwable t) {
+                LOG.log(Level.SEVERE, t.getMessage(), t);
+                return false;
+            }
         }
 
         mBufferPosition = 0;
