@@ -1,6 +1,6 @@
 # Changelog
 
-## New since 0.13.0
+## Version 0.14.0 (2020-08-25)
 
 - Render themes: symbol styles [#769](https://github.com/mapsforge/vtm/pull/769)
 - More mutable itemized layer [#771](https://github.com/mapsforge/vtm/pull/771)
