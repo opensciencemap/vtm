@@ -1,5 +1,10 @@
 # Changelog
 
+## New since 0.14.0
+
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.15.0)
+
 ## Version 0.14.0 (2020-08-25)
 
 - Render themes: symbol styles [#769](https://github.com/mapsforge/vtm/pull/769)
