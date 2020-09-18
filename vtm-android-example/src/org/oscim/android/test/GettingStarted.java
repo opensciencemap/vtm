@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 devemux86
+ * Copyright 2018-2020 devemux86
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -15,6 +15,9 @@
 package org.oscim.android.test;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import org.oscim.android.MapView;
 import org.oscim.backend.CanvasAdapter;
@@ -29,6 +32,7 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * A very basic Android app example.
@@ -41,6 +45,9 @@ public class GettingStarted extends Activity {
     // Name of the map file in device storage
     private static final String MAP_FILE = "berlin.map";
 
+    // Request code for selecting a map file
+    private static final int PICK_MAP_FILE = 0;
+
     private MapView mapView;
 
     @Override
@@ -51,10 +58,39 @@ public class GettingStarted extends Activity {
         mapView = new MapView(this);
         setContentView(mapView);
 
-        // Tile source
-        MapFileTileSource tileSource = new MapFileTileSource();
-        String mapPath = new File(getExternalFilesDir(null), MAP_FILE).getAbsolutePath();
-        if (tileSource.setMapFile(mapPath)) {
+        // Open map
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, PICK_MAP_FILE);
+        } else
+            openMap(null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_MAP_FILE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                Uri uri = data.getData();
+                openMap(uri);
+            }
+        }
+    }
+
+    private void openMap(Uri uri) {
+        try {
+            // Tile source
+            MapFileTileSource tileSource = new MapFileTileSource();
+            if (uri != null) {
+                FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
+                tileSource.setMapFileInputStream(fis);
+            } else {
+                String mapPath = new File(getExternalFilesDir(null), MAP_FILE).getAbsolutePath();
+                if (!tileSource.setMapFile(mapPath))
+                    return;
+            }
+
             // Vector layer
             VectorTileLayer tileLayer = mapView.map().setBaseMap(tileSource);
 
@@ -76,6 +112,11 @@ public class GettingStarted extends Activity {
 
             // Note: this map position is specific to Berlin area
             mapView.map().setMapPosition(52.517037, 13.38886, 1 << 12);
+        } catch (Exception e) {
+            /*
+             * In case of map file errors avoid crash, but developers should handle these cases!
+             */
+            e.printStackTrace();
         }
     }
 

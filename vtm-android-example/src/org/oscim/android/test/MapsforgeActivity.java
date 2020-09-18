@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Hannes Janetzek
- * Copyright 2016-2018 devemux86
+ * Copyright 2016-2020 devemux86
  * Copyright 2017 Longri
  * Copyright 2018 Gustl22
  *
@@ -19,15 +19,18 @@
  */
 package org.oscim.android.test;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import org.oscim.android.filepicker.FilePicker;
 import org.oscim.android.filepicker.FilterByFileExtension;
 import org.oscim.android.filepicker.ValidMapFile;
 import org.oscim.android.filepicker.ValidRenderTheme;
+import org.oscim.android.theme.ContentRenderTheme;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapElement;
 import org.oscim.core.MapPosition;
@@ -42,23 +45,29 @@ import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.bucket.RenderBuckets;
-import org.oscim.scalebar.DefaultMapScaleBar;
-import org.oscim.scalebar.ImperialUnitAdapter;
-import org.oscim.scalebar.MapScaleBar;
-import org.oscim.scalebar.MapScaleBarLayer;
-import org.oscim.scalebar.MetricUnitAdapter;
+import org.oscim.scalebar.*;
 import org.oscim.theme.ExternalRenderTheme;
-import org.oscim.theme.ThemeUtils;
+import org.oscim.theme.ThemeFile;
 import org.oscim.theme.VtmThemes;
 import org.oscim.theme.styles.AreaStyle;
 import org.oscim.theme.styles.RenderStyle;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import org.oscim.tiling.source.mapfile.MapInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class MapsforgeActivity extends MapActivity {
 
-    static final int SELECT_MAP_FILE = 0;
-    static final int SELECT_THEME_FILE = SELECT_MAP_FILE + 1;
+    private static final Logger log = LoggerFactory.getLogger(MapsforgeActivity.class);
+
+    static final int PICK_MAP_FILE = 0;
+    static final int PICK_THEME_FILE = 1;
+
+    static final int SELECT_MAP_FILE = 2;
+    static final int SELECT_THEME_FILE = 3;
 
     private static final Tag ISSEA_TAG = new Tag("natural", "issea");
     private static final Tag NOSEA_TAG = new Tag("natural", "nosea");
@@ -66,7 +75,7 @@ public class MapsforgeActivity extends MapActivity {
 
     private TileGridLayer mGridLayer;
     private Menu mMenu;
-    private boolean mS3db;
+    private final boolean mS3db;
     VectorTileLayer mTileLayer;
 
     public MapsforgeActivity() {
@@ -87,8 +96,14 @@ public class MapsforgeActivity extends MapActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        startActivityForResult(new Intent(this, MapFilePicker.class),
-                SELECT_MAP_FILE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, PICK_MAP_FILE);
+        } else
+            startActivityForResult(new Intent(this, MapFilePicker.class),
+                    SELECT_MAP_FILE);
     }
 
     public static class MapFilePicker extends FilePicker {
@@ -142,8 +157,14 @@ public class MapsforgeActivity extends MapActivity {
                 return true;
 
             case R.id.theme_external:
-                startActivityForResult(new Intent(this, ThemeFilePicker.class),
-                        SELECT_THEME_FILE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    startActivityForResult(intent, PICK_THEME_FILE);
+                } else
+                    startActivityForResult(new Intent(this, ThemeFilePicker.class),
+                            SELECT_THEME_FILE);
                 return true;
 
             case R.id.gridlayer:
@@ -165,58 +186,86 @@ public class MapsforgeActivity extends MapActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == SELECT_MAP_FILE) {
-            if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
+        if (requestCode == PICK_MAP_FILE || requestCode == SELECT_MAP_FILE) {
+            if (resultCode != Activity.RESULT_OK || data == null) {
                 finish();
                 return;
             }
 
-            MapFileTileSource mTileSource = new MapFileTileSource();
-            //mTileSource.setPreferredLanguage("en");
-            String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
-            if (mTileSource.setMapFile(file)) {
+            MapFileTileSource tileSource = new MapFileTileSource();
+            //tileSource.setPreferredLanguage("en");
 
-                mTileLayer = mMap.setBaseMap(mTileSource);
-                loadTheme(null);
+            if (requestCode == PICK_MAP_FILE) {
+                try {
+                    Uri uri = data.getData();
+                    FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
+                    tileSource.setMapFileInputStream(fis);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    finish();
+                    return;
+                }
+            } else {
+                if (data.getStringExtra(FilePicker.SELECTED_FILE) == null) {
+                    finish();
+                    return;
+                }
 
-                if (mS3db)
-                    mMap.layers().add(new S3DBLayer(mMap, mTileLayer));
-                else
-                    mMap.layers().add(new BuildingLayer(mMap, mTileLayer));
-                mMap.layers().add(new LabelLayer(mMap, mTileLayer));
-
-                DefaultMapScaleBar mMapScaleBar = new DefaultMapScaleBar(mMap);
-                mMapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
-                mMapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
-                mMapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
-                mMapScaleBar.setScaleBarPosition(MapScaleBar.ScaleBarPosition.BOTTOM_LEFT);
-
-                MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mMapScaleBar);
-                BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
-                renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
-                renderer.setOffset(5 * CanvasAdapter.getScale(), 0);
-                mMap.layers().add(mapScaleBarLayer);
-
-                MapInfo info = mTileSource.getMapInfo();
-                if (!info.boundingBox.contains(mMap.getMapPosition().getGeoPoint())) {
-                    MapPosition pos = new MapPosition();
-                    pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
-                    mMap.setMapPosition(pos);
-                    mPrefs.clear();
+                String file = data.getStringExtra(FilePicker.SELECTED_FILE);
+                if (!tileSource.setMapFile(file)) {
+                    finish();
+                    return;
                 }
             }
-        } else if (requestCode == SELECT_THEME_FILE) {
-            if (resultCode != RESULT_OK || intent == null || intent.getStringExtra(FilePicker.SELECTED_FILE) == null) {
+
+            mTileLayer = mMap.setBaseMap(tileSource);
+            loadTheme(null);
+
+            if (mS3db)
+                mMap.layers().add(new S3DBLayer(mMap, mTileLayer));
+            else
+                mMap.layers().add(new BuildingLayer(mMap, mTileLayer));
+            mMap.layers().add(new LabelLayer(mMap, mTileLayer));
+
+            DefaultMapScaleBar mapScaleBar = new DefaultMapScaleBar(mMap);
+            mapScaleBar.setScaleBarMode(DefaultMapScaleBar.ScaleBarMode.BOTH);
+            mapScaleBar.setDistanceUnitAdapter(MetricUnitAdapter.INSTANCE);
+            mapScaleBar.setSecondaryDistanceUnitAdapter(ImperialUnitAdapter.INSTANCE);
+            mapScaleBar.setScaleBarPosition(MapScaleBar.ScaleBarPosition.BOTTOM_LEFT);
+
+            MapScaleBarLayer mapScaleBarLayer = new MapScaleBarLayer(mMap, mapScaleBar);
+            BitmapRenderer renderer = mapScaleBarLayer.getRenderer();
+            renderer.setPosition(GLViewport.Position.BOTTOM_LEFT);
+            renderer.setOffset(5 * CanvasAdapter.getScale(), 0);
+            mMap.layers().add(mapScaleBarLayer);
+
+            MapInfo info = tileSource.getMapInfo();
+            if (!info.boundingBox.contains(mMap.getMapPosition().getGeoPoint())) {
+                MapPosition pos = new MapPosition();
+                pos.setByBoundingBox(info.boundingBox, Tile.SIZE * 4, Tile.SIZE * 4);
+                mMap.setMapPosition(pos);
+                mPrefs.clear();
+            }
+        } else if (requestCode == PICK_THEME_FILE || requestCode == SELECT_THEME_FILE) {
+            if (resultCode != Activity.RESULT_OK || data == null)
                 return;
+
+            ThemeFile theme;
+            if (requestCode == PICK_THEME_FILE) {
+                Uri uri = data.getData();
+                theme = new ContentRenderTheme(getContentResolver(), "", uri);
+            } else {
+                if (data.getStringExtra(FilePicker.SELECTED_FILE) == null)
+                    return;
+
+                String file = data.getStringExtra(FilePicker.SELECTED_FILE);
+                theme = new ExternalRenderTheme(file);
             }
 
-            String file = intent.getStringExtra(FilePicker.SELECTED_FILE);
-            ExternalRenderTheme externalRenderTheme = new ExternalRenderTheme(file);
-
             // Use tessellation with sea and land for Mapsforge themes
-            if (ThemeUtils.isMapsforgeTheme(externalRenderTheme)) {
+            if (theme.isMapsforgeTheme()) {
                 mTileLayer.addHook(new VectorTileLayer.TileLoaderThemeHook() {
                     @Override
                     public boolean process(MapTile tile, RenderBuckets buckets, MapElement element, RenderStyle style, int level) {
@@ -233,7 +282,7 @@ public class MapsforgeActivity extends MapActivity {
                 });
             }
 
-            mMap.setTheme(externalRenderTheme);
+            mMap.setTheme(theme);
             mMenu.findItem(R.id.theme_external).setChecked(true);
         }
     }
