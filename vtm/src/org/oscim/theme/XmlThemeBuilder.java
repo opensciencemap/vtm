@@ -1,7 +1,8 @@
 /*
- * Copyright 2010, 2011, 2012 mapsforge.org
+ * Copyright 2010, 2011, 2012, 2013 mapsforge.org
  * Copyright 2013 Hannes Janetzek
- * Copyright 2016-2019 devemux86
+ * Copyright 2014 Ludwig M Brinckmann
+ * Copyright 2016-2020 devemux86
  * Copyright 2016-2017 Longri
  * Copyright 2016-2020 Andrey Novikov
  * Copyright 2018-2019 Gustl22
@@ -24,7 +25,6 @@
 package org.oscim.theme;
 
 import org.oscim.backend.CanvasAdapter;
-import org.oscim.backend.XMLReaderAdapter;
 import org.oscim.backend.canvas.Bitmap;
 import org.oscim.backend.canvas.Canvas;
 import org.oscim.backend.canvas.Color;
@@ -49,27 +49,29 @@ import org.oscim.theme.styles.LineStyle.LineBuilder;
 import org.oscim.theme.styles.SymbolStyle.SymbolBuilder;
 import org.oscim.theme.styles.TextStyle.TextBuilder;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.IOUtils;
 import org.oscim.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
 
-public class XmlThemeBuilder extends DefaultHandler {
+public class XmlThemeBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(XmlThemeBuilder.class);
 
     private static final int RENDER_THEME_VERSION_MAPSFORGE = 6;
     private static final int RENDER_THEME_VERSION_VTM = 1;
+    private static XmlPullParserFactory xmlPullParserFactory = null;
 
     private enum Element {
         RENDER_THEME, RENDERING_INSTRUCTION, RULE, STYLE, ATLAS, RECT, RENDERING_STYLE, TAG_TRANSFORM
@@ -109,15 +111,30 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @throws ThemeException if an error occurs while parsing the render theme XML.
      */
     public static IRenderTheme read(ThemeFile theme, ThemeCallback themeCallback) throws ThemeException {
-        XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(theme, themeCallback);
-
+        InputStream inputStream = null;
         try {
-            new XMLReaderAdapter().parse(renderThemeHandler, theme.getRenderThemeAsStream());
+            XmlPullParser pullParser = getXmlPullParserFactory().newPullParser();
+            XmlThemeBuilder renderThemeHandler = new XmlThemeBuilder(theme, pullParser, themeCallback);
+            inputStream = theme.getRenderThemeAsStream();
+            pullParser.setInput(inputStream, null);
+            renderThemeHandler.processRenderTheme();
+            return renderThemeHandler.mRenderTheme;
         } catch (Exception e) {
             throw new ThemeException(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
+    }
 
-        return renderThemeHandler.mRenderTheme;
+    public static XmlPullParserFactory getXmlPullParserFactory() throws XmlPullParserException {
+        if (xmlPullParserFactory == null) {
+            xmlPullParserFactory = XmlPullParserFactory.newInstance();
+        }
+        return xmlPullParserFactory;
+    }
+
+    public static void setXmlPullParserFactory(XmlPullParserFactory xmlPullParserFactory) {
+        XmlThemeBuilder.xmlPullParserFactory = xmlPullParserFactory;
     }
 
     /**
@@ -128,19 +145,17 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param value          the XML attribute value.
      * @param attributeIndex the XML attribute index position.
      */
-    private static void logUnknownAttribute(String element, String name,
-                                            String value, int attributeIndex) {
-        log.debug("unknown attribute in element {} () : {} = {}",
-                element, attributeIndex, name, value);
+    private static void logUnknownAttribute(String element, String name, String value, int attributeIndex) {
+        log.debug("unknown attribute in element {} {} : {} = {}", element, attributeIndex, name, value);
     }
 
     private final ArrayList<RuleBuilder> mRulesList = new ArrayList<>();
     private final Stack<Element> mElementStack = new Stack<>();
     private final Stack<RuleBuilder> mRuleStack = new Stack<>();
-    private final HashMap<String, RenderStyle> mStyles = new HashMap<>(10);
+    private final Map<String, RenderStyle<?>> mStyles = new HashMap<>(10);
 
-    private final HashMap<String, TextStyle.TextBuilder<?>> mTextStyles = new HashMap<>(10);
-    private final HashMap<String, SymbolStyle.SymbolBuilder<?>> mSymbolStyles = new HashMap<>(10);
+    private final Map<String, TextStyle.TextBuilder<?>> mTextStyles = new HashMap<>(10);
+    private final Map<String, SymbolStyle.SymbolBuilder<?>> mSymbolStyles = new HashMap<>(10);
 
     private final AreaBuilder<?> mAreaBuilder = AreaStyle.builder();
     private final CircleBuilder<?> mCircleBuilder = CircleStyle.builder();
@@ -157,6 +172,8 @@ public class XmlThemeBuilder extends DefaultHandler {
     private float mStrokeScale = 1;
     float mTextScale = 1;
 
+    private final XmlPullParser mPullParser;
+    private String qName;
     final ThemeFile mTheme;
     private final ThemeCallback mThemeCallback;
     RenderTheme mRenderTheme;
@@ -168,21 +185,38 @@ public class XmlThemeBuilder extends DefaultHandler {
     private XmlRenderThemeStyleLayer mCurrentLayer;
     private XmlRenderThemeStyleMenu mRenderThemeStyleMenu;
 
-    private Map<String, String> mTransformKeyMap = new HashMap<>();
-    private Map<Tag, Tag> mTransformTagMap = new HashMap<>();
+    private final Map<String, String> mTransformKeyMap = new HashMap<>();
+    private final Map<Tag, Tag> mTransformTagMap = new HashMap<>();
 
-    public XmlThemeBuilder(ThemeFile theme) {
-        this(theme, null);
+    public XmlThemeBuilder(ThemeFile theme, XmlPullParser pullParser) {
+        this(theme, pullParser, null);
     }
 
-    public XmlThemeBuilder(ThemeFile theme, ThemeCallback themeCallback) {
+    public XmlThemeBuilder(ThemeFile theme, XmlPullParser pullParser, ThemeCallback themeCallback) {
         mTheme = theme;
+        mPullParser = pullParser;
         mThemeCallback = themeCallback;
         mMapsforgeTheme = theme.isMapsforgeTheme();
         mScale = CanvasAdapter.getScale();
     }
 
-    @Override
+    public void processRenderTheme() throws XmlPullParserException, IOException {
+        int eventType = mPullParser.getEventType();
+        do {
+            if (eventType == XmlPullParser.START_DOCUMENT) {
+                // no-op
+            } else if (eventType == XmlPullParser.START_TAG) {
+                startElement();
+            } else if (eventType == XmlPullParser.END_TAG) {
+                endElement();
+            } else if (eventType == XmlPullParser.TEXT) {
+                // not implemented
+            }
+            eventType = mPullParser.next();
+        } while (eventType != XmlPullParser.END_DOCUMENT);
+        endDocument();
+    }
+
     public void endDocument() {
         if (mMapsforgeTheme) {
             // Building rule for Mapsforge themes
@@ -209,11 +243,12 @@ public class XmlThemeBuilder extends DefaultHandler {
         return new RenderTheme(mMapBackground, mTextScale, rules, mLevels, mTransformKeyMap, mTransformTagMap, mMapsforgeTheme);
     }
 
-    @Override
-    public void endElement(String uri, String localName, String qName) {
+    public void endElement() {
+        qName = mPullParser.getName();
+
         mElementStack.pop();
 
-        if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(localName) || ELEMENT_NAME_MATCH_VTM.equals(localName)) {
+        if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(qName) || ELEMENT_NAME_MATCH_VTM.equals(qName)) {
             mRuleStack.pop();
             if (mRuleStack.empty()) {
                 if (isVisible(mCurrentRule)) {
@@ -222,7 +257,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             } else {
                 mCurrentRule = mRuleStack.peek();
             }
-        } else if (ELEMENT_NAME_STYLE_MENU.equals(localName)) {
+        } else if (ELEMENT_NAME_STYLE_MENU.equals(qName)) {
             // when we are finished parsing the menu part of the file, we can get the
             // categories to render from the initiator. This allows the creating action
             // to select which of the menu options to choose
@@ -233,118 +268,108 @@ public class XmlThemeBuilder extends DefaultHandler {
         }
     }
 
-    @Override
-    public void error(SAXParseException exception) {
-        log.debug(exception.getMessage());
-    }
+    public void startElement() throws ThemeException {
+        qName = mPullParser.getName();
 
-    @Override
-    public void warning(SAXParseException exception) {
-        log.debug(exception.getMessage());
-    }
-
-    @Override
-    public void startElement(String uri, String localName, String qName,
-                             Attributes attributes) throws ThemeException {
         try {
-            if (ELEMENT_NAME_RENDER_THEME.equals(localName)) {
-                checkState(localName, Element.RENDER_THEME);
-                createRenderTheme(localName, attributes);
+            if (ELEMENT_NAME_RENDER_THEME.equals(qName)) {
+                checkState(qName, Element.RENDER_THEME);
+                createRenderTheme(qName);
 
-            } else if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(localName) || ELEMENT_NAME_MATCH_VTM.equals(localName)) {
-                checkState(localName, Element.RULE);
-                RuleBuilder rule = createRule(localName, attributes);
+            } else if (ELEMENT_NAME_MATCH_MAPSFORGE.equals(qName) || ELEMENT_NAME_MATCH_VTM.equals(qName)) {
+                checkState(qName, Element.RULE);
+                RuleBuilder rule = createRule(qName);
                 if (!mRuleStack.empty() && isVisible(rule)) {
                     mCurrentRule.addSubRule(rule);
                 }
                 mCurrentRule = rule;
                 mRuleStack.push(mCurrentRule);
 
-            } else if ("style-text".equals(localName)) {
-                checkState(localName, Element.STYLE);
-                handleTextElement(localName, attributes, true, false);
+            } else if ("style-text".equals(qName)) {
+                checkState(qName, Element.STYLE);
+                handleTextElement(qName, true, false);
 
-            } else if ("style-symbol".equals(localName)) {
-                checkState(localName, Element.STYLE);
-                handleSymbolElement(localName, attributes, true);
+            } else if ("style-symbol".equals(qName)) {
+                checkState(qName, Element.STYLE);
+                handleSymbolElement(qName, true);
 
-            } else if ("style-area".equals(localName)) {
-                checkState(localName, Element.STYLE);
-                handleAreaElement(localName, attributes, true);
+            } else if ("style-area".equals(qName)) {
+                checkState(qName, Element.STYLE);
+                handleAreaElement(qName, true);
 
-            } else if ("style-line".equals(localName)) {
-                checkState(localName, Element.STYLE);
-                handleLineElement(localName, attributes, true, false);
+            } else if ("style-line".equals(qName)) {
+                checkState(qName, Element.STYLE);
+                handleLineElement(qName, true, false);
 
-            } else if ("outline-layer".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                LineStyle line = createLine(null, localName, attributes, mLevels++, true, false);
+            } else if ("outline-layer".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                LineStyle line = createLine(null, qName, mLevels++, true, false);
                 mStyles.put(OUTLINE_STYLE + line.style, line);
 
-            } else if ("area".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleAreaElement(localName, attributes, false);
+            } else if ("area".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleAreaElement(qName, false);
 
-            } else if ("caption".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleTextElement(localName, attributes, false, true);
+            } else if ("caption".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleTextElement(qName, false, true);
 
-            } else if ("circle".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                CircleStyle circle = createCircle(localName, attributes, mLevels++);
+            } else if ("circle".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                CircleStyle circle = createCircle(qName, mLevels++);
                 if (isVisible(circle))
                     mCurrentRule.addStyle(circle);
 
-            } else if ("line".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleLineElement(localName, attributes, false, false);
+            } else if ("line".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleLineElement(qName, false, false);
 
-            } else if ("text".equals(localName) || "pathText".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleTextElement(localName, attributes, false, false);
+            } else if ("text".equals(qName) || "pathText".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleTextElement(qName, false, false);
 
-            } else if ("symbol".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleSymbolElement(localName, attributes, false);
+            } else if ("symbol".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleSymbolElement(qName, false);
 
-            } else if ("outline".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                LineStyle outline = createOutline(attributes.getValue("use"), attributes);
+            } else if ("outline".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                LineStyle outline = createOutline(getStringAttribute("use"));
                 if (outline != null && isVisible(outline))
                     mCurrentRule.addStyle(outline);
 
-            } else if ("extrusion".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                ExtrusionStyle extrusion = createExtrusion(localName, attributes, mLevels++);
+            } else if ("extrusion".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                ExtrusionStyle extrusion = createExtrusion(qName, mLevels++);
                 if (isVisible(extrusion))
                     mCurrentRule.addStyle(extrusion);
 
-            } else if ("lineSymbol".equals(localName)) {
-                checkState(localName, Element.RENDERING_INSTRUCTION);
-                handleLineElement(localName, attributes, false, true);
+            } else if ("lineSymbol".equals(qName)) {
+                checkState(qName, Element.RENDERING_INSTRUCTION);
+                handleLineElement(qName, false, true);
 
-            } else if ("atlas".equals(localName)) {
-                checkState(localName, Element.ATLAS);
-                createAtlas(localName, attributes);
+            } else if ("atlas".equals(qName)) {
+                checkState(qName, Element.ATLAS);
+                createAtlas(qName);
 
-            } else if ("rect".equals(localName)) {
-                checkState(localName, Element.RECT);
-                createTextureRegion(localName, attributes);
+            } else if ("rect".equals(qName)) {
+                checkState(qName, Element.RECT);
+                createTextureRegion(qName);
 
-            } else if ("cat".equals(localName)) {
+            } else if ("cat".equals(qName)) {
                 checkState(qName, Element.RENDERING_STYLE);
-                mCurrentLayer.addCategory(getStringAttribute(attributes, "id"));
+                mCurrentLayer.addCategory(getStringAttribute("id"));
 
-            } else if ("layer".equals(localName)) {
+            } else if ("layer".equals(qName)) {
                 // render theme menu layer
                 checkState(qName, Element.RENDERING_STYLE);
                 boolean enabled = false;
-                if (getStringAttribute(attributes, "enabled") != null) {
-                    enabled = Boolean.valueOf(getStringAttribute(attributes, "enabled"));
+                if (getStringAttribute("enabled") != null) {
+                    enabled = Boolean.parseBoolean(getStringAttribute("enabled"));
                 }
-                boolean visible = Boolean.valueOf(getStringAttribute(attributes, "visible"));
-                mCurrentLayer = mRenderThemeStyleMenu.createLayer(getStringAttribute(attributes, "id"), visible, enabled);
-                String parent = getStringAttribute(attributes, "parent");
+                boolean visible = Boolean.parseBoolean(getStringAttribute("visible"));
+                mCurrentLayer = mRenderThemeStyleMenu.createLayer(getStringAttribute("id"), visible, enabled);
+                String parent = getStringAttribute("parent");
                 if (null != parent) {
                     XmlRenderThemeStyleLayer parentEntry = mRenderThemeStyleMenu.getLayer(parent);
                     if (null != parentEntry) {
@@ -357,40 +382,38 @@ public class XmlThemeBuilder extends DefaultHandler {
                     }
                 }
 
-            } else if ("name".equals(localName)) {
+            } else if ("name".equals(qName)) {
                 // render theme menu name
                 checkState(qName, Element.RENDERING_STYLE);
-                mCurrentLayer.addTranslation(getStringAttribute(attributes, "lang"), getStringAttribute(attributes, "value"));
+                mCurrentLayer.addTranslation(getStringAttribute("lang"), getStringAttribute("value"));
 
-            } else if ("overlay".equals(localName)) {
+            } else if ("overlay".equals(qName)) {
                 // render theme menu overlay
                 checkState(qName, Element.RENDERING_STYLE);
-                XmlRenderThemeStyleLayer overlay = mRenderThemeStyleMenu.getLayer(getStringAttribute(attributes, "id"));
+                XmlRenderThemeStyleLayer overlay = mRenderThemeStyleMenu.getLayer(getStringAttribute("id"));
                 if (overlay != null) {
                     mCurrentLayer.addOverlay(overlay);
                 }
 
-            } else if ("stylemenu".equals(localName)) {
+            } else if ("stylemenu".equals(qName)) {
                 checkState(qName, Element.RENDERING_STYLE);
-                mRenderThemeStyleMenu = new XmlRenderThemeStyleMenu(getStringAttribute(attributes, "id"),
-                        getStringAttribute(attributes, "defaultlang"), getStringAttribute(attributes, "defaultvalue"));
+                mRenderThemeStyleMenu = new XmlRenderThemeStyleMenu(getStringAttribute("id"),
+                        getStringAttribute("defaultlang"), getStringAttribute("defaultvalue"));
 
-            } else if ("tag-transform".equals(localName)) {
+            } else if ("tag-transform".equals(qName)) {
                 checkState(qName, Element.TAG_TRANSFORM);
-                tagTransform(localName, attributes);
+                tagTransform(qName);
 
             } else {
-                log.error("unknown element: {}", localName);
-                throw new SAXException("unknown element: " + localName);
+                log.error("unknown element: {}", qName);
+                throw new XmlPullParserException("unknown element: " + qName);
             }
-        } catch (SAXException e) {
-            throw new ThemeException(e.getMessage());
-        } catch (IOException e) {
+        } catch (XmlPullParserException | IOException e) {
             throw new ThemeException(e.getMessage());
         }
     }
 
-    private RuleBuilder createRule(String localName, Attributes attributes) {
+    private RuleBuilder createRule(String qName) {
         String cat = null;
         int element = Rule.Element.ANY;
         int closed = Closed.ANY;
@@ -400,9 +423,9 @@ public class XmlThemeBuilder extends DefaultHandler {
         byte zoomMax = Byte.MAX_VALUE;
         int selector = 0;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("e".equals(name)) {
                 String val = value.toUpperCase(Locale.ENGLISH);
@@ -440,7 +463,7 @@ public class XmlThemeBuilder extends DefaultHandler {
                 if ("when-matched".equals(value))
                     selector |= Selector.WHEN_MATCHED;
             } else {
-                logUnknownAttribute(localName, name, value, i);
+                logUnknownAttribute(qName, name, value, i);
             }
         }
 
@@ -474,10 +497,9 @@ public class XmlThemeBuilder extends DefaultHandler {
         return texture;
     }
 
-    private void handleLineElement(String localName, Attributes attributes, boolean isStyle, boolean hasSymbol)
-            throws SAXException {
+    private void handleLineElement(String qName, boolean isStyle, boolean hasSymbol) {
 
-        String use = attributes.getValue("use");
+        String use = getStringAttribute("use");
         LineStyle style = null;
 
         if (use != null) {
@@ -488,7 +510,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             }
         }
 
-        LineStyle line = createLine(style, localName, attributes, mLevels++, false, hasSymbol);
+        LineStyle line = createLine(style, qName, mLevels++, false, hasSymbol);
 
         if (isStyle) {
             mStyles.put(LINE_STYLE + line.style, line);
@@ -497,9 +519,9 @@ public class XmlThemeBuilder extends DefaultHandler {
                 mCurrentRule.addStyle(line);
                 /* Note 'outline' will not be inherited, it's just a
                  * shortcut to add the outline RenderInstruction. */
-                String outlineValue = attributes.getValue("outline");
+                String outlineValue = getStringAttribute("outline");
                 if (outlineValue != null) {
-                    LineStyle outline = createOutline(outlineValue, attributes);
+                    LineStyle outline = createOutline(outlineValue);
                     if (outline != null)
                         mCurrentRule.addStyle(outline);
                 }
@@ -513,17 +535,16 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param isOutline is outline layer
      * @return a new Line with the given rendering attributes.
      */
-    private LineStyle createLine(LineStyle line, String elementName, Attributes attributes,
-                                 int level, boolean isOutline, boolean hasSymbol) {
+    private LineStyle createLine(LineStyle line, String elementName, int level, boolean isOutline, boolean hasSymbol) {
         LineBuilder<?> b = mLineBuilder.set(line);
         b.isOutline(isOutline);
         b.level(level);
         b.themeCallback(mThemeCallback);
         String src = null;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("id".equals(name))
                 b.style = value;
@@ -671,10 +692,9 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b.build();
     }
 
-    private void handleAreaElement(String localName, Attributes attributes, boolean isStyle)
-            throws SAXException {
+    private void handleAreaElement(String qName, boolean isStyle) {
 
-        String use = attributes.getValue("use");
+        String use = getStringAttribute("use");
         AreaStyle style = null;
 
         if (use != null) {
@@ -685,7 +705,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             }
         }
 
-        AreaStyle area = createArea(style, localName, attributes, mLevels++);
+        AreaStyle area = createArea(style, qName, mLevels++);
 
         if (isStyle) {
             mStyles.put(AREA_STYLE + area.style, area);
@@ -698,16 +718,15 @@ public class XmlThemeBuilder extends DefaultHandler {
     /**
      * @return a new Area with the given rendering attributes.
      */
-    private AreaStyle createArea(AreaStyle area, String elementName, Attributes attributes,
-                                 int level) {
+    private AreaStyle createArea(AreaStyle area, String elementName, int level) {
         AreaBuilder<?> b = mAreaBuilder.set(area);
         b.level(level);
         b.themeCallback(mThemeCallback);
         String src = null;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("id".equals(name))
                 b.style = value;
@@ -766,15 +785,15 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b.build();
     }
 
-    private LineStyle createOutline(String style, Attributes attributes) {
+    private LineStyle createOutline(String style) {
         if (style != null) {
             LineStyle line = (LineStyle) mStyles.get(OUTLINE_STYLE + style);
             if (line != null && line.outline) {
                 String cat = null;
 
-                for (int i = 0; i < attributes.getLength(); i++) {
-                    String name = attributes.getLocalName(i);
-                    String value = attributes.getValue(i);
+                for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+                    String name = mPullParser.getAttributeName(i);
+                    String value = mPullParser.getAttributeValue(i);
 
                     if ("cat".equals(name)) {
                         cat = value;
@@ -790,12 +809,12 @@ public class XmlThemeBuilder extends DefaultHandler {
         return null;
     }
 
-    private void createAtlas(String elementName, Attributes attributes) throws IOException {
+    private void createAtlas(String elementName) throws IOException {
         String img = null;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("img".equals(name)) {
                 img = value;
@@ -810,16 +829,16 @@ public class XmlThemeBuilder extends DefaultHandler {
             mTextureAtlas = new TextureAtlas(bitmap);
     }
 
-    private void createTextureRegion(String elementName, Attributes attributes) {
+    private void createTextureRegion(String elementName) {
         if (mTextureAtlas == null)
             return;
 
         String regionName = null;
         Rect r = null;
 
-        for (int i = 0, n = attributes.getLength(); i < n; i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("id".equals(name)) {
                 regionName = value;
@@ -841,12 +860,12 @@ public class XmlThemeBuilder extends DefaultHandler {
         mTextureAtlas.addTextureRegion(regionName.intern(), r);
     }
 
-    private void checkElement(String elementName, Element element) throws SAXException {
+    private void checkElement(String elementName, Element element) throws XmlPullParserException {
         Element parentElement;
         switch (element) {
             case RENDER_THEME:
                 if (!mElementStack.empty()) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_STACK_NOT_EMPTY + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_STACK_NOT_EMPTY + elementName);
                 }
                 return;
 
@@ -854,34 +873,34 @@ public class XmlThemeBuilder extends DefaultHandler {
                 parentElement = mElementStack.peek();
                 if (parentElement != Element.RENDER_THEME
                         && parentElement != Element.RULE) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_RULE_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_RULE_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
 
             case STYLE:
                 parentElement = mElementStack.peek();
                 if (parentElement != Element.RENDER_THEME) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_STYLE_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_STYLE_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
 
             case RENDERING_INSTRUCTION:
                 if (mElementStack.peek() != Element.RULE) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_RENDERING_INSTRUCTION_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_RENDERING_INSTRUCTION_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
 
             case ATLAS:
                 parentElement = mElementStack.peek();
                 if (parentElement != Element.RENDER_THEME) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_ATLAS_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_ATLAS_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
 
             case RECT:
                 parentElement = mElementStack.peek();
                 if (parentElement != Element.ATLAS) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_RECT_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_RECT_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
 
@@ -891,28 +910,28 @@ public class XmlThemeBuilder extends DefaultHandler {
             case TAG_TRANSFORM:
                 parentElement = mElementStack.peek();
                 if (parentElement != Element.RENDER_THEME) {
-                    throw new SAXException(UNEXPECTED_ELEMENT_TAG_TRANSFORM_PARENT_ELEMENT_MISMATCH + elementName);
+                    throw new XmlPullParserException(UNEXPECTED_ELEMENT_TAG_TRANSFORM_PARENT_ELEMENT_MISMATCH + elementName);
                 }
                 return;
         }
 
-        throw new SAXException("unknown enum value: " + element);
+        throw new XmlPullParserException("unknown enum value: " + element);
     }
 
-    private void checkState(String elementName, Element element) throws SAXException {
+    private void checkState(String elementName, Element element) throws XmlPullParserException {
         checkElement(elementName, element);
         mElementStack.push(element);
     }
 
-    private void createRenderTheme(String elementName, Attributes attributes) {
+    private void createRenderTheme(String elementName) {
         Integer version = null;
         int mapBackground = Color.WHITE;
         float baseStrokeWidth = 1;
         float baseTextScale = 1;
 
-        for (int i = 0; i < attributes.getLength(); ++i) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("schemaLocation".equals(name))
                 continue;
@@ -950,10 +969,9 @@ public class XmlThemeBuilder extends DefaultHandler {
         mTextScale = baseTextScale;
     }
 
-    private void handleTextElement(String localName, Attributes attributes, boolean isStyle,
-                                   boolean isCaption) throws SAXException {
+    private void handleTextElement(String qName, boolean isStyle, boolean isCaption) {
 
-        String style = attributes.getValue("use");
+        String style = getStringAttribute("use");
         TextBuilder<?> pt = null;
 
         if (style != null) {
@@ -964,7 +982,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             }
         }
 
-        TextBuilder<?> b = createText(localName, attributes, isCaption, pt);
+        TextBuilder<?> b = createText(qName, isCaption, pt);
         if (isStyle) {
             log.debug("put style {}", b.style);
             mTextStyles.put(b.style, TextStyle.builder().from(b));
@@ -979,8 +997,7 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param caption ...
      * @return a new Text with the given rendering attributes.
      */
-    private TextBuilder<?> createText(String elementName, Attributes attributes,
-                                      boolean caption, TextBuilder<?> style) {
+    private TextBuilder<?> createText(String elementName, boolean caption, TextBuilder<?> style) {
         TextBuilder<?> b;
         if (style == null) {
             b = mTextBuilder.reset();
@@ -995,9 +1012,9 @@ public class XmlThemeBuilder extends DefaultHandler {
             b.priority = DEFAULT_PRIORITY;
         }
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("id".equals(name))
                 b.style = value;
@@ -1101,14 +1118,14 @@ public class XmlThemeBuilder extends DefaultHandler {
      * @param level the drawing level of this instruction.
      * @return a new Circle with the given rendering attributes.
      */
-    private CircleStyle createCircle(String elementName, Attributes attributes, int level) {
+    private CircleStyle createCircle(String elementName, int level) {
         CircleBuilder<?> b = mCircleBuilder.reset();
         b.level(level);
         b.themeCallback(mThemeCallback);
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("r".equals(name) || "radius".equals(name))
                 b.radius(Float.parseFloat(value) * mScale * mStrokeScale);
@@ -1139,10 +1156,9 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b.build();
     }
 
-    private void handleSymbolElement(String localName, Attributes attributes, boolean isStyle)
-            throws SAXException {
+    private void handleSymbolElement(String qName, boolean isStyle) {
 
-        String style = attributes.getValue("use");
+        String style = getStringAttribute("use");
         SymbolBuilder<?> ps = null;
 
         if (style != null) {
@@ -1153,7 +1169,7 @@ public class XmlThemeBuilder extends DefaultHandler {
             }
         }
 
-        SymbolBuilder<?> b = createSymbol(localName, attributes, ps);
+        SymbolBuilder<?> b = createSymbol(qName, ps);
         if (isStyle) {
             log.debug("put style {}", b.style);
             mSymbolStyles.put(b.style, SymbolStyle.builder().from(b));
@@ -1167,8 +1183,7 @@ public class XmlThemeBuilder extends DefaultHandler {
     /**
      * @return a new Symbol with the given rendering attributes.
      */
-    private SymbolBuilder<?> createSymbol(String elementName, Attributes attributes,
-                                          SymbolBuilder<?> style) {
+    private SymbolBuilder<?> createSymbol(String elementName, SymbolBuilder<?> style) {
         SymbolBuilder<?> b;
         if (style == null)
             b = mSymbolBuilder.reset();
@@ -1176,9 +1191,9 @@ public class XmlThemeBuilder extends DefaultHandler {
             b = mSymbolBuilder.from(style);
         b.themeCallback(mThemeCallback);
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("id".equals(name))
                 b.style = value;
@@ -1247,14 +1262,14 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b.bitmap(bitmap).build();
     }
 
-    private ExtrusionStyle createExtrusion(String elementName, Attributes attributes, int level) {
+    private ExtrusionStyle createExtrusion(String elementName, int level) {
         ExtrusionBuilder<?> b = mExtrusionBuilder.reset();
         b.level(level);
         b.themeCallback(mThemeCallback);
 
-        for (int i = 0; i < attributes.getLength(); ++i) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             if ("cat".equals(name))
                 b.cat(value);
@@ -1287,10 +1302,11 @@ public class XmlThemeBuilder extends DefaultHandler {
         return b.build();
     }
 
-    private String getStringAttribute(Attributes attributes, String name) {
-        for (int i = 0; i < attributes.getLength(); ++i) {
-            if (attributes.getLocalName(i).equals(name)) {
-                return attributes.getValue(i);
+    private String getStringAttribute(String name) {
+        int n = mPullParser.getAttributeCount();
+        for (int i = 0; i < n; i++) {
+            if (mPullParser.getAttributeName(i).equals(name)) {
+                return mPullParser.getAttributeValue(i);
             }
         }
         return null;
@@ -1300,7 +1316,7 @@ public class XmlThemeBuilder extends DefaultHandler {
      * A style is visible if categories is not set or the style has no category
      * or the categories contain the style's category.
      */
-    private boolean isVisible(RenderStyle renderStyle) {
+    private boolean isVisible(RenderStyle<?> renderStyle) {
         return mCategories == null || renderStyle.cat == null || mCategories.contains(renderStyle.cat);
     }
 
@@ -1321,13 +1337,13 @@ public class XmlThemeBuilder extends DefaultHandler {
         return dashIntervals;
     }
 
-    private void tagTransform(String localName, Attributes attributes) {
+    private void tagTransform(String qName) {
         String k, v, libK, libV;
         k = v = libK = libV = null;
 
-        for (int i = 0; i < attributes.getLength(); i++) {
-            String name = attributes.getLocalName(i);
-            String value = attributes.getValue(i);
+        for (int i = 0, n = mPullParser.getAttributeCount(); i < n; ++i) {
+            String name = mPullParser.getAttributeName(i);
+            String value = mPullParser.getAttributeValue(i);
 
             switch (name) {
                 case "k":
@@ -1343,12 +1359,12 @@ public class XmlThemeBuilder extends DefaultHandler {
                     libV = value;
                     break;
                 default:
-                    logUnknownAttribute(localName, name, value, i);
+                    logUnknownAttribute(qName, name, value, i);
             }
         }
 
         if (k == null || k.isEmpty() || libK == null || libK.isEmpty()) {
-            log.debug("empty key in element " + localName);
+            log.debug("empty key in element " + qName);
             return;
         }
 

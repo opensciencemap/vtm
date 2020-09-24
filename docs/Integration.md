@@ -10,6 +10,7 @@ Current version is [![Maven Central](https://img.shields.io/maven-central/v/org.
 ```groovy
 implementation 'org.mapsforge:vtm:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-themes:[CURRENT-VERSION]'
+implementation 'net.sf.kxml:kxml2:2.3.0'
 implementation 'org.slf4j:slf4j-api:1.7.28'
 ```
 
