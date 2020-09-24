@@ -2,6 +2,7 @@
 
 ## New since 0.14.0
 
+- Mapsforge: map stream support [#784](https://github.com/mapsforge/vtm/pull/784)
 - Render theme from Android content providers [#783](https://github.com/mapsforge/vtm/pull/783)
 - Many other minor improvements and bug fixes
 - [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.15.0)
