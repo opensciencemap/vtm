@@ -31,22 +31,17 @@ import org.oscim.scalebar.MapScaleBarLayer;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
-import java.io.File;
 import java.io.FileInputStream;
 
 /**
  * A very basic Android app example.
  * <p>
- * You'll need a map with filename berlin.map from download.mapsforge.org in device storage:
- * /sdcard/Android/data/org.oscim.android.test/files/
+ * You'll need a map with filename berlin.map from download.mapsforge.org in device storage.
  */
 public class GettingStarted extends Activity {
 
-    // Name of the map file in device storage
-    private static final String MAP_FILE = "berlin.map";
-
     // Request code for selecting a map file
-    private static final int PICK_MAP_FILE = 0;
+    private static final int SELECT_MAP_FILE = 0;
 
     private MapView mapView;
 
@@ -59,18 +54,15 @@ public class GettingStarted extends Activity {
         setContentView(mapView);
 
         // Open map
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            startActivityForResult(intent, PICK_MAP_FILE);
-        } else
-            openMap(null);
+        Intent intent = new Intent(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? Intent.ACTION_OPEN_DOCUMENT : Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, SELECT_MAP_FILE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_MAP_FILE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == SELECT_MAP_FILE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 Uri uri = data.getData();
                 openMap(uri);
@@ -82,14 +74,8 @@ public class GettingStarted extends Activity {
         try {
             // Tile source
             MapFileTileSource tileSource = new MapFileTileSource();
-            if (uri != null) {
-                FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
-                tileSource.setMapFileInputStream(fis);
-            } else {
-                String mapPath = new File(getExternalFilesDir(null), MAP_FILE).getAbsolutePath();
-                if (!tileSource.setMapFile(mapPath))
-                    return;
-            }
+            FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
+            tileSource.setMapFileInputStream(fis);
 
             // Vector layer
             VectorTileLayer tileLayer = mapView.map().setBaseMap(tileSource);

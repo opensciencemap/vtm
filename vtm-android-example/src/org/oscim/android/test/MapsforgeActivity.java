@@ -46,7 +46,6 @@ import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.scalebar.*;
-import org.oscim.theme.ExternalRenderTheme;
 import org.oscim.theme.ThemeFile;
 import org.oscim.theme.VtmThemes;
 import org.oscim.theme.styles.AreaStyle;
@@ -63,11 +62,8 @@ public class MapsforgeActivity extends MapActivity {
 
     private static final Logger log = LoggerFactory.getLogger(MapsforgeActivity.class);
 
-    static final int PICK_MAP_FILE = 0;
-    static final int PICK_THEME_FILE = 1;
-
-    static final int SELECT_MAP_FILE = 2;
-    static final int SELECT_THEME_FILE = 3;
+    static final int SELECT_MAP_FILE = 0;
+    static final int SELECT_THEME_FILE = 1;
 
     private static final Tag ISSEA_TAG = new Tag("natural", "issea");
     private static final Tag NOSEA_TAG = new Tag("natural", "nosea");
@@ -96,14 +92,10 @@ public class MapsforgeActivity extends MapActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            startActivityForResult(intent, PICK_MAP_FILE);
-        } else
-            startActivityForResult(new Intent(this, MapFilePicker.class),
-                    SELECT_MAP_FILE);
+        Intent intent = new Intent(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? Intent.ACTION_OPEN_DOCUMENT : Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, SELECT_MAP_FILE);
     }
 
     public static class MapFilePicker extends FilePicker {
@@ -157,14 +149,10 @@ public class MapsforgeActivity extends MapActivity {
                 return true;
 
             case R.id.theme_external:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    startActivityForResult(intent, PICK_THEME_FILE);
-                } else
-                    startActivityForResult(new Intent(this, ThemeFilePicker.class),
-                            SELECT_THEME_FILE);
+                Intent intent = new Intent(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? Intent.ACTION_OPEN_DOCUMENT : Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                startActivityForResult(intent, SELECT_THEME_FILE);
                 return true;
 
             case R.id.gridlayer:
@@ -188,7 +176,7 @@ public class MapsforgeActivity extends MapActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == PICK_MAP_FILE || requestCode == SELECT_MAP_FILE) {
+        if (requestCode == SELECT_MAP_FILE) {
             if (resultCode != Activity.RESULT_OK || data == null) {
                 finish();
                 return;
@@ -197,27 +185,14 @@ public class MapsforgeActivity extends MapActivity {
             MapFileTileSource tileSource = new MapFileTileSource();
             //tileSource.setPreferredLanguage("en");
 
-            if (requestCode == PICK_MAP_FILE) {
-                try {
-                    Uri uri = data.getData();
-                    FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
-                    tileSource.setMapFileInputStream(fis);
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                    finish();
-                    return;
-                }
-            } else {
-                if (data.getStringExtra(FilePicker.SELECTED_FILE) == null) {
-                    finish();
-                    return;
-                }
-
-                String file = data.getStringExtra(FilePicker.SELECTED_FILE);
-                if (!tileSource.setMapFile(file)) {
-                    finish();
-                    return;
-                }
+            try {
+                Uri uri = data.getData();
+                FileInputStream fis = (FileInputStream) getContentResolver().openInputStream(uri);
+                tileSource.setMapFileInputStream(fis);
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                finish();
+                return;
             }
 
             mTileLayer = mMap.setBaseMap(tileSource);
@@ -248,21 +223,12 @@ public class MapsforgeActivity extends MapActivity {
                 mMap.setMapPosition(pos);
                 mPrefs.clear();
             }
-        } else if (requestCode == PICK_THEME_FILE || requestCode == SELECT_THEME_FILE) {
+        } else if (requestCode == SELECT_THEME_FILE) {
             if (resultCode != Activity.RESULT_OK || data == null)
                 return;
 
-            ThemeFile theme;
-            if (requestCode == PICK_THEME_FILE) {
-                Uri uri = data.getData();
-                theme = new ContentRenderTheme(getContentResolver(), "", uri);
-            } else {
-                if (data.getStringExtra(FilePicker.SELECTED_FILE) == null)
-                    return;
-
-                String file = data.getStringExtra(FilePicker.SELECTED_FILE);
-                theme = new ExternalRenderTheme(file);
-            }
+            Uri uri = data.getData();
+            ThemeFile theme = new ContentRenderTheme(getContentResolver(), "", uri);
 
             // Use tessellation with sea and land for Mapsforge themes
             if (theme.isMapsforgeTheme()) {
