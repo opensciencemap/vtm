@@ -57,7 +57,6 @@ implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]'
 implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-linux'
 implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-osx'
 implementation 'org.mapsforge:vtm-desktop:[CURRENT-VERSION]:natives-windows'
-implementation 'org.mapsforge:vtm-desktop-lwjgl:[CURRENT-VERSION]'
 implementation 'com.badlogicgames.gdx:gdx:1.9.10'
 implementation 'com.badlogicgames.gdx:gdx-platform:1.9.10:natives-desktop'
 implementation 'com.github.blackears:svgSalamander:v1.1.1'
@@ -65,6 +64,7 @@ implementation 'com.github.blackears:svgSalamander:v1.1.1'
 
 ### Desktop (LWJGL)
 ```groovy
+implementation 'org.mapsforge:vtm-desktop-lwjgl:[CURRENT-VERSION]'
 implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.9.10'
 implementation 'org.lwjgl.lwjgl:lwjgl:2.9.3'
 implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
@@ -74,6 +74,7 @@ implementation 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
 
 ### Desktop (LWJGL 3)
 ```groovy
+implementation 'org.mapsforge:vtm-desktop-lwjgl3:[CURRENT-VERSION]'
 implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.10'
 implementation 'org.lwjgl:lwjgl:3.2.3'
 implementation 'org.lwjgl:lwjgl:3.2.3:natives-linux'
