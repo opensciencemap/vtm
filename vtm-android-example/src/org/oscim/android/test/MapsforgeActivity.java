@@ -26,10 +26,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import org.oscim.android.filepicker.FilePicker;
-import org.oscim.android.filepicker.FilterByFileExtension;
-import org.oscim.android.filepicker.ValidMapFile;
-import org.oscim.android.filepicker.ValidRenderTheme;
 import org.oscim.android.theme.ContentRenderTheme;
 import org.oscim.backend.CanvasAdapter;
 import org.oscim.core.MapElement;
@@ -96,20 +92,6 @@ public class MapsforgeActivity extends MapActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
         startActivityForResult(intent, SELECT_MAP_FILE);
-    }
-
-    public static class MapFilePicker extends FilePicker {
-        public MapFilePicker() {
-            setFileDisplayFilter(new FilterByFileExtension(".map"));
-            setFileSelectFilter(new ValidMapFile());
-        }
-    }
-
-    public static class ThemeFilePicker extends FilePicker {
-        public ThemeFilePicker() {
-            setFileDisplayFilter(new FilterByFileExtension(".xml"));
-            setFileSelectFilter(new ValidRenderTheme());
-        }
     }
 
     @Override

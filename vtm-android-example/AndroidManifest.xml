@@ -62,12 +62,6 @@
             android:name=".MapsforgeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".MapsforgeActivity$MapFilePicker"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".MapsforgeActivity$ThemeFilePicker"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".MapsforgeS3DBActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
