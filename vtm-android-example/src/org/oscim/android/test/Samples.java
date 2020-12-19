@@ -28,7 +28,6 @@ package org.oscim.android.test;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -126,5 +125,6 @@ public class Samples extends Activity {
         linearLayout.addView(createButton(GdxPoi3DActivity.class));
         linearLayout.addView(createButton(OverpassActivity.class));
         linearLayout.addView(createButton(ClusterMarkerOverlayActivity.class));
+        linearLayout.addView(createButton(FragmentActivity.class));
     }
 }
