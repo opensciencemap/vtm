@@ -1,7 +1,8 @@
 /*
  * Copyright 2010, 2011, 2012, 2013 mapsforge.org
- * Copyright 2015-2016 devemux86
+ * Copyright 2015-2020 devemux86
  * Copyright 2015-2016 lincomatic
+ * Copyright 2020 Meibes
  *
  * This program is free software: you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,9 +20,26 @@ package org.oscim.tiling.source.mapfile;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public final class OSMUtils {
+
+    private static final Set<String> areaKeys = new HashSet<>();
+
+    static {
+        areaKeys.add("building");
+        areaKeys.add("highway");
+        areaKeys.add("natural");
+        areaKeys.add("landuse");
+        areaKeys.add("amenity");
+        areaKeys.add("barrier");
+        areaKeys.add("leisure");
+        areaKeys.add("railway");
+        areaKeys.add("area");
+        areaKeys.add("aeroway");
+    }
 
     /**
      * Heuristic to determine from attributes if a map element is likely to be an area.
@@ -41,8 +59,11 @@ public final class OSMUtils {
         for (int i = 0; i < mapElement.tags.size(); i++) {
             Tag tag = mapElement.tags.get(i);
             String key = tag.key.toLowerCase(Locale.ENGLISH);
-            String value = tag.value.toLowerCase(Locale.ENGLISH);
+            if (!areaKeys.contains(key)) {
+                continue;
+            }
             if ("area".equals(key)) {
+                String value = tag.value.toLowerCase(Locale.ENGLISH);
                 // obvious result
                 if (("yes").equals(value) || ("y").equals(value) || ("true").equals(value)) {
                     return true;
@@ -60,6 +81,7 @@ public final class OSMUtils {
                 result = false;
             }
             if ("railway".equals(key)) {
+                String value = tag.value.toLowerCase(Locale.ENGLISH);
                 // there is more to the railway tag then just rails, this excludes the
                 // most common railway lines from being detected as areas if they are closed.
                 // Since this method is only called if the first and last node are the same
