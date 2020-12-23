@@ -28,10 +28,10 @@ import java.util.Set;
 public final class OSMUtils {
 
     private static final Set<String> areaKeys = new HashSet<>(Arrays.asList(
-            "area",
-            "aeroway", "building", "landuse", "leisure", "natural", "amenity",
+            "building", "natural", "landuse", "amenity", "leisure", "aeroway",
             "highway", "barrier",
-            "railway"
+            "railway",
+            "area"
     ));
 
     /**
@@ -39,10 +39,12 @@ public final class OSMUtils {
      * Precondition for this call is that the first and last node of a map element are the
      * same, so that this method should only return false if it is known that the
      * feature should not be an area even if the geometry is a polygon.
-     * <p/>
+     * <p>
      * Determining what is an area is neigh impossible in OSM, this method inspects tag elements
      * to give a likely answer. See http://wiki.openstreetmap.org/wiki/The_Future_of_Areas and
      * http://wiki.openstreetmap.org/wiki/Way
+     * <p>
+     * The order in which the if-clauses are checked is determined with the help from https://taginfo.openstreetmap.org
      *
      * @param mapElement the map element (which is assumed to be closed and have enough nodes to be an area)
      * @return true if tags indicate this is an area, otherwise false.
@@ -55,34 +57,31 @@ public final class OSMUtils {
             if (!areaKeys.contains(key)) {
                 continue;
             }
-            if ("area".equals(key)) {
-                String value = tag.value.toLowerCase(Locale.ENGLISH);
-                // obvious result
-                if (("yes").equals(value) || ("y").equals(value) || ("true").equals(value)) {
-                    return true;
-                }
-                if (("no").equals(value) || ("n").equals(value) || ("false").equals(value)) {
-                    return false;
-                }
-            }
-            // as specified by http://wiki.openstreetmap.org/wiki/Key:area
-            if ("aeroway".equals(key) || "building".equals(key) || "landuse".equals(key) || "leisure".equals(key) || "natural".equals(key) || "amenity".equals(key)) {
+            if ("building".equals(key) || "natural".equals(key) || "landuse".equals(key) || "amenity".equals(key) || "leisure".equals(key) || "aeroway".equals(key)) {
+                // as specified by http://wiki.openstreetmap.org/wiki/Key:area
                 return true;
-            }
-            if ("highway".equals(key) || "barrier".equals(key)) {
+            } else if ("highway".equals(key) || "barrier".equals(key)) {
                 // false unless something else overrides this.
                 result = false;
-            }
-            if ("railway".equals(key)) {
+            } else if ("railway".equals(key)) {
                 String value = tag.value.toLowerCase(Locale.ENGLISH);
                 // there is more to the railway tag then just rails, this excludes the
                 // most common railway lines from being detected as areas if they are closed.
                 // Since this method is only called if the first and last node are the same
                 // this should be safe
                 if ("rail".equals(value) || "tram".equals(value) || "subway".equals(value)
-                        || "monorail".equals(value) || "narrow_gauge".equals(value) || "preserved".equals(value)
-                        || "light_rail".equals(value) || "construction".equals(value)) {
+                        || "narrow_gauge".equals(value) || "light_rail".equals(value)
+                        || "construction".equals(value) || "preserved".equals(value)
+                        || "monorail".equals(value)) {
                     result = false;
+                }
+            } else if ("area".equals(key)) {
+                String value = tag.value.toLowerCase(Locale.ENGLISH);
+                if (("yes").equals(value) || ("y").equals(value) || ("true").equals(value)) {
+                    return true;
+                }
+                if (("no").equals(value) || ("n").equals(value) || ("false").equals(value)) {
+                    return false;
                 }
             }
         }
