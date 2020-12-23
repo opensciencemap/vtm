@@ -20,26 +20,19 @@ package org.oscim.tiling.source.mapfile;
 import org.oscim.core.MapElement;
 import org.oscim.core.Tag;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
 public final class OSMUtils {
 
-    private static final Set<String> areaKeys = new HashSet<>();
-
-    static {
-        areaKeys.add("building");
-        areaKeys.add("highway");
-        areaKeys.add("natural");
-        areaKeys.add("landuse");
-        areaKeys.add("amenity");
-        areaKeys.add("barrier");
-        areaKeys.add("leisure");
-        areaKeys.add("railway");
-        areaKeys.add("area");
-        areaKeys.add("aeroway");
-    }
+    private static final Set<String> areaKeys = new HashSet<>(Arrays.asList(
+            "area",
+            "aeroway", "building", "landuse", "leisure", "natural", "amenity",
+            "highway", "barrier",
+            "railway"
+    ));
 
     /**
      * Heuristic to determine from attributes if a map element is likely to be an area.
