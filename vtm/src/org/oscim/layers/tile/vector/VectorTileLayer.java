@@ -39,6 +39,12 @@ import org.slf4j.LoggerFactory;
 public class VectorTileLayer extends TileLayer {
     static final Logger log = LoggerFactory.getLogger(VectorTileLayer.class);
 
+    private final List<LList<TileLoaderProcessHook>> mLoaderProcessHooks = new List<>();
+
+    private final List<LList<TileLoaderThemeHook>> mLoaderThemeHooks = new List<>();
+
+    private IRenderTheme mTheme;
+
     public VectorTileLayer(Map map, TileSource tileSource) {
         this(map, new TileManager(map,
                         100),
@@ -102,7 +108,15 @@ public class VectorTileLayer extends TileLayer {
     /**
      * Set {@link IRenderTheme} used by {@link TileLoader}
      */
+    @Deprecated
     public void setRenderTheme(IRenderTheme theme) {
+        setTheme(theme);
+    }
+
+    /**
+     * Set {@link IRenderTheme} used by {@link TileLoader}
+     */
+    public void setTheme(IRenderTheme theme) {
         /* wait for loaders to finish all current jobs to
          * not change theme instance hold by loader instance
          * while running */
@@ -117,8 +131,6 @@ public class VectorTileLayer extends TileLayer {
 
         resumeLoaders();
     }
-
-    private IRenderTheme mTheme;
 
     public IRenderTheme getTheme() {
         return mTheme;
@@ -154,12 +166,6 @@ public class VectorTileLayer extends TileLayer {
          */
         public void complete(MapTile tile, boolean success);
     }
-
-    private List<LList<TileLoaderProcessHook>> mLoaderProcessHooks =
-            new List<LList<TileLoaderProcessHook>>();
-
-    private List<LList<TileLoaderThemeHook>> mLoaderThemeHooks =
-            new List<LList<TileLoaderThemeHook>>();
 
     public void addHook(TileLoaderProcessHook h) {
         mLoaderProcessHooks.append(new LList<TileLoaderProcessHook>(h));

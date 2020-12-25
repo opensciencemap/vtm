@@ -213,7 +213,7 @@ public abstract class Map implements TaskQueue {
         boolean themeSet = false;
         for (Layer layer : mLayers) {
             if (layer instanceof VectorTileLayer) {
-                ((VectorTileLayer) layer).setRenderTheme(theme);
+                ((VectorTileLayer) layer).setTheme(theme);
                 themeSet = true;
                 if (!allLayers)
                     break;
