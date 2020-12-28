@@ -28,6 +28,8 @@ import org.oscim.renderer.GLViewport;
 import org.oscim.scalebar.DefaultMapScaleBar;
 import org.oscim.scalebar.MapScaleBar;
 import org.oscim.scalebar.MapScaleBarLayer;
+import org.oscim.theme.IRenderTheme;
+import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
@@ -44,6 +46,7 @@ public class GettingStarted extends Activity {
     private static final int SELECT_MAP_FILE = 0;
 
     private MapView mapView;
+    private IRenderTheme theme;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,7 +90,8 @@ public class GettingStarted extends Activity {
             mapView.map().layers().add(new LabelLayer(mapView.map(), tileLayer));
 
             // Render theme
-            mapView.map().setTheme(VtmThemes.DEFAULT);
+            theme = ThemeLoader.load(VtmThemes.DEFAULT);
+            mapView.map().setTheme(theme);
 
             // Scale bar
             MapScaleBar mapScaleBar = new DefaultMapScaleBar(mapView.map());
@@ -120,6 +124,7 @@ public class GettingStarted extends Activity {
 
     @Override
     protected void onDestroy() {
+        theme.dispose();
         mapView.onDestroy();
         super.onDestroy();
     }
