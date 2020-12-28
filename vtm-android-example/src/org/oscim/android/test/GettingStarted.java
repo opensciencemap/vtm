@@ -29,7 +29,6 @@ import org.oscim.scalebar.DefaultMapScaleBar;
 import org.oscim.scalebar.MapScaleBar;
 import org.oscim.scalebar.MapScaleBarLayer;
 import org.oscim.theme.IRenderTheme;
-import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
@@ -90,8 +89,7 @@ public class GettingStarted extends Activity {
             mapView.map().layers().add(new LabelLayer(mapView.map(), tileLayer));
 
             // Render theme
-            theme = ThemeLoader.load(VtmThemes.DEFAULT);
-            mapView.map().setTheme(theme);
+            theme = mapView.map().setTheme(VtmThemes.DEFAULT);
 
             // Scale bar
             MapScaleBar mapScaleBar = new DefaultMapScaleBar(mapView.map());

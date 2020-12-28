@@ -42,6 +42,7 @@ import org.oscim.renderer.BitmapRenderer;
 import org.oscim.renderer.GLViewport;
 import org.oscim.renderer.bucket.RenderBuckets;
 import org.oscim.scalebar.*;
+import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeFile;
 import org.oscim.theme.VtmThemes;
 import org.oscim.theme.styles.AreaStyle;
@@ -68,6 +69,7 @@ public class MapsforgeActivity extends MapActivity {
     private TileGridLayer mGridLayer;
     private Menu mMenu;
     private final boolean mS3db;
+    IRenderTheme mTheme;
     VectorTileLayer mTileLayer;
 
     public MapsforgeActivity() {
@@ -106,27 +108,37 @@ public class MapsforgeActivity extends MapActivity {
 
         switch (item.getItemId()) {
             case R.id.theme_default:
-                mMap.setTheme(VtmThemes.DEFAULT);
+                if (mTheme != null)
+                    mTheme.dispose();
+                mTheme = mMap.setTheme(VtmThemes.DEFAULT);
                 item.setChecked(true);
                 return true;
 
             case R.id.theme_osmarender:
-                mMap.setTheme(VtmThemes.OSMARENDER);
+                if (mTheme != null)
+                    mTheme.dispose();
+                mTheme = mMap.setTheme(VtmThemes.OSMARENDER);
                 item.setChecked(true);
                 return true;
 
             case R.id.theme_osmagray:
-                mMap.setTheme(VtmThemes.OSMAGRAY);
+                if (mTheme != null)
+                    mTheme.dispose();
+                mTheme = mMap.setTheme(VtmThemes.OSMAGRAY);
                 item.setChecked(true);
                 return true;
 
             case R.id.theme_tubes:
-                mMap.setTheme(VtmThemes.TRONRENDER);
+                if (mTheme != null)
+                    mTheme.dispose();
+                mTheme = mMap.setTheme(VtmThemes.TRONRENDER);
                 item.setChecked(true);
                 return true;
 
             case R.id.theme_newtron:
-                mMap.setTheme(VtmThemes.NEWTRON);
+                if (mTheme != null)
+                    mTheme.dispose();
+                mTheme = mMap.setTheme(VtmThemes.NEWTRON);
                 item.setChecked(true);
                 return true;
 
@@ -230,12 +242,16 @@ public class MapsforgeActivity extends MapActivity {
                 });
             }
 
-            mMap.setTheme(theme);
+            if (mTheme != null)
+                mTheme.dispose();
+            mTheme = mMap.setTheme(theme);
             mMenu.findItem(R.id.theme_external).setChecked(true);
         }
     }
 
     protected void loadTheme(final String styleId) {
-        mMap.setTheme(VtmThemes.DEFAULT);
+        if (mTheme != null)
+            mTheme.dispose();
+        mTheme = mMap.setTheme(VtmThemes.DEFAULT);
     }
 }
