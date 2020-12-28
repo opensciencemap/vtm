@@ -122,8 +122,8 @@ public class GettingStarted extends Activity {
 
     @Override
     protected void onDestroy() {
-        theme.dispose();
         mapView.onDestroy();
+        theme.dispose();
         super.onDestroy();
     }
 }

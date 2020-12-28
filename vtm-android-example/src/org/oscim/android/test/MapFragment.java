@@ -112,13 +112,13 @@ public class MapFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        if (theme != null) {
-            theme.dispose();
-            theme = null;
-        }
         if (mapView != null) {
             mapView.onDestroy();
             mapView = null;
+        }
+        if (theme != null) {
+            theme.dispose();
+            theme = null;
         }
         super.onDestroyView();
     }
