@@ -1,6 +1,11 @@
 # Changelog
 
-## New since 0.14.0
+## New since 0.15.0
+
+- Many other minor improvements and bug fixes
+- [Solved issues](https://github.com/mapsforge/vtm/issues?q=is%3Aclosed+milestone%3A0.16.0)
+
+## Version 0.15.0 (2021-01-01)
 
 - Android: scoped storage example [#785](https://github.com/mapsforge/vtm/pull/785)
 - Mapsforge: map stream support [#784](https://github.com/mapsforge/vtm/pull/784)
