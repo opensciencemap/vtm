@@ -22,4 +22,4 @@
 | [Walkaholic](https://play.google.com/store/apps/details?id=com.walkaholic.hikeapp) | Hiking app with official routes and online/offline maps | Proprietary/Free (in-app purchases) | Android | Closed |
 | [XCTrack](http://xctrack.org/) | Flight computer for paraglider pilots | Proprietary/Free | Android | Closed |
 
-You know an application that is missing here? Please inform us by sending a message via the [GitHub Discussions](https://github.com/mapsforge/vtm/discussions).
+You know an application that is missing here? Please inform us by sending a message via the [Discussions](https://github.com/mapsforge/vtm/discussions).
