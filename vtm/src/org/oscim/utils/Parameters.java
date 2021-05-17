@@ -90,6 +90,11 @@ public final class Parameters {
      */
     public static boolean THREADED_INIT = false;
 
+    /**
+     * Drawing labels of far plane
+     */
+    public static boolean DISTANCES_LABELS_DRAWING = false;
+
     private Parameters() {
         throw new IllegalStateException();
     }

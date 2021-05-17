@@ -31,6 +31,7 @@ import org.oscim.renderer.bucket.SymbolItem;
 import org.oscim.renderer.bucket.TextItem;
 import org.oscim.theme.styles.TextStyle;
 import org.oscim.utils.FastMath;
+import org.oscim.utils.Parameters;
 import org.oscim.utils.geom.OBB2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,7 @@ public class LabelPlacement {
 
     private static final float MIN_CAPTION_DIST = 5;
     private static final float MIN_WAY_DIST = 3;
+    private static final float DISTANCES_LABELS_COEFFICIENT = 3;
 
     /**
      * thread local pool of for unused label items
@@ -352,9 +354,17 @@ public class LabelPlacement {
         }
 
         /* estimation for visible area to be labeled */
-        int mw = (mMap.getWidth() + Tile.SIZE) / 2;
-        int mh = (mMap.getHeight() + Tile.SIZE) / 2;
-        mSquareRadius = mw * mw + mh * mh;
+        if (Parameters.DISTANCES_LABELS_DRAWING) {
+            float mw = mMap.getWidth();
+            float mh = mMap.getHeight();
+            float k = DISTANCES_LABELS_COEFFICIENT * mMap.getMapPosition().tilt / Viewport.MAX_TILT;
+            if (k < 0.5) k = 0.5F;
+            mSquareRadius = (mw * mw + mh * mh) * k;
+        } else {
+            int mw = (mMap.getWidth() + Tile.SIZE) / 2;
+            int mh = (mMap.getHeight() + Tile.SIZE) / 2;
+            mSquareRadius = mw * mw + mh * mh;
+        }
 
         /* scale of tiles zoom-level relative to current position */
         double scale = pos.scale / (1 << zoom);
